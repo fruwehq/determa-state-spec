@@ -18,7 +18,8 @@ Java/XML+Groovy version); harel replaces XML+Groovy with YAML + CEL.
   open, sandboxed, non-Turing-complete, with Go/C++/Java/Rust/TS/Python runtimes);
   **structured actions** whose argument values are CEL expressions. Host scripting
   languages (Groovy/JS/…) remain pluggable.
-- **Strictly typed** context and event payloads, validated at load and post time
+- **Strictly typed** extended-state variables and event payloads, validated at load
+  and post time; variables are **declared inside states** (not a global blob)
 - **`defer`**, **timers** (via an injected clock), and **`on_error` faults**
 - **Contracts** — a machine can declare it satisfies an interface (required
   signals/states/spawns), checkable statically

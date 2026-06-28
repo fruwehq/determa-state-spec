@@ -2,14 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://harel.dev/schema/machine.schema.json",
   "title": "harel machine definition",
-  "description": "Strict structural schema for a harel statechart definition (SPEC.md §4). Validates one YAML/JSON document. Semantics (RTC, LCA, defer, timers) live in SPEC.md and the conformance suite.",
+  "description": "Strict structural schema for a harel statechart definition (SPEC.md §4). Validates one YAML/JSON document. Semantics (RTC, LCA, scoping, defer, timers) live in SPEC.md and the conformance suite.",
   "type": "object",
-  "required": ["harel", "id", "version", "initial", "states"],
+  "required": ["id", "initial", "states"],
   "additionalProperties": false,
   "properties": {
-    "harel": { "const": 1, "description": "Format version." },
+    "format": { "type": "integer", "minimum": 1, "default": 1, "description": "harel grammar version. Optional; defaults to the current version." },
     "id": { "$ref": "#/$defs/identifier", "description": "Stable definition id." },
-    "version": { "type": "integer", "minimum": 1, "description": "Definition version (migration, SPEC §10)." },
+    "version": { "type": "integer", "minimum": 1, "default": 1, "description": "This definition's version, bumped by the author; drives migration (SPEC §10)." },
     "contracts": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
     "languages": {
       "type": "object",
@@ -19,9 +19,10 @@
         "action": { "type": "string", "default": "harel" }
       }
     },
-    "context": {
+    "data": {
       "type": "object",
-      "additionalProperties": { "$ref": "#/$defs/contextVar" }
+      "description": "Machine-scoped extended-state variables (declared on the root). May also be declared on any state (SPEC §4.2).",
+      "additionalProperties": { "$ref": "#/$defs/dataVar" }
     },
     "signals": {
       "type": "object",
@@ -43,14 +44,15 @@
     "valueType": { "enum": ["string", "int", "float", "bool", "map", "list"] },
     "duration": { "type": "string", "pattern": "^[0-9]+(ms|s|m|h)$" },
 
-    "contextVar": {
+    "dataVar": {
       "type": "object",
       "required": ["type"],
       "additionalProperties": false,
+      "description": "An extended-state variable. Initialized on entry to its declaring state; unset (null) if neither init nor external is given.",
       "properties": {
         "type": { "$ref": "#/$defs/valueType" },
-        "default": { "description": "Initial value; null means unset." },
-        "external": { "type": "boolean", "default": false }
+        "init": { "description": "Initial literal value (must match type). Omit for unset/null. `external` variables take their value from the host/spawn payload instead." },
+        "external": { "type": "boolean", "default": false, "description": "Supplied by the host (settings/secrets) or seeded from a spawn payload; read-only to actions. Top-level only." }
       }
     },
 
@@ -161,6 +163,7 @@
       "additionalProperties": false,
       "properties": {
         "type": { "enum": ["simple", "composite", "orthogonal", "final"], "default": "simple" },
+        "data": { "type": "object", "additionalProperties": { "$ref": "#/$defs/dataVar" } },
         "entry": { "$ref": "#/$defs/actionList" },
         "exit": { "$ref": "#/$defs/actionList" },
         "initial": { "$ref": "#/$defs/identifier" },
@@ -192,7 +195,7 @@
         "to": { "type": "integer", "minimum": 1 },
         "when": { "$ref": "#/$defs/cel" },
         "state_map": { "type": "object", "additionalProperties": { "$ref": "#/$defs/dottedRef" } },
-        "context": { "$ref": "#/$defs/actionList" }
+        "data": { "$ref": "#/$defs/actionList" }
       }
     }
   }
