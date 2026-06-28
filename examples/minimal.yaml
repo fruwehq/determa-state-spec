@@ -1,13 +1,11 @@
-# The smallest valid harel machine: two leaf states and one guarded transition.
-# A provider is `unconfigured` until an api_key (host-supplied) is present.
-harel: 1
-id: provider
-version: 1
-context:
-  api_key: { type: string, default: null, external: true }   # null == unset
-initial: unconfigured
+# The smallest useful harel machine: one guarded transition.
+# An access gate stays `locked` until the host grants access.
+id: gate
+initial: locked
+data:
+  granted: { type: bool, external: true }   # host-supplied; unset until provided
 states:
-  unconfigured:
+  locked:
     on:
-      configure: { target: configured, guard: "api_key != null" }
-  configured: {}
+      enter: { target: open, guard: "granted == true" }
+  open: {}

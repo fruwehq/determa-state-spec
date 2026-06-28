@@ -1,158 +1,138 @@
-# full.yaml — exercises every harel feature (SPEC.md §4-§10).
-# Two definitions separated by `---`: a `provider` (root) and the `instance` it
-# spawns. Demonstrates: typed context + signals, guards (CEL), structured actions,
-# composite + orthogonal states, history, defer, timers (after), on_error/faults,
-# spawn/send/emit/broadcast, contracts, and a version migration.
+# full.yaml — exercises every harel feature (SPEC.md §4-§10) on an intuitive domain:
+# a download manager. The `downloads` machine (root) spawns a `download` active
+# object per file. Demonstrates: machine- and state-scoped data, guards (CEL),
+# structured actions, spawning + messaging, defer, an orthogonal state with deep
+# history, a timer, faults, contracts, and a version migration.
 
-harel: 1
-id: provider
+format: 1
+id: downloads
 version: 2
-contracts: [provider]
+contracts: [download_manager]
 
-languages: { guard: cel, action: harel }
-
-context:
-  api_key:    { type: string, default: null, external: true }   # host-supplied secret
-  region:     { type: string, default: "ewr",  external: true } # host-supplied setting
-  attempts:   { type: int,    default: 0 }
-  last_child: { type: string, default: null }                   # id of last spawned instance
+data:                                   # machine-scoped (declared on the root)
+  max_active: { type: int, init: 3, external: true }   # host setting
+  active:     { type: int, init: 0 }                   # live count
 
 signals:
-  configure: {}
-  probe: {}
-  probe_ok: {}
-  probe_fail: {}
-  create_instance:
-    payload:
-      name:    { type: string, required: true }
-      bundles: { type: list,   default: [] }
-  instance_done:
-    payload: { id: { type: string, required: true } }
-  reset: {}
+  go_online: {}
+  go_offline: {}
+  add:           { payload: { url: { type: string, required: true } } }
+  download_done: { payload: { id:  { type: string, required: true } } }
 
-initial: unconfigured
-
-# Machine-level fault handler: any action error lands here (SPEC §5.9).
-on_error: { target: faulted }
+initial: offline
 
 states:
 
-  unconfigured:
+  offline:
+    # Queue add-requests while offline; replayed on the way into `online`.
+    defer: [add]
     on:
-      configure: { target: configured, guard: "api_key != null" }
+      go_online: { target: online }
 
-  # Composite: provider is "configured" and probes reachability in a sub-region,
-  # while deferring create_instance until it is known reachable.
-  configured:
-    type: composite
-    initial: probing
-    entry:
-      - assign: { attempts: "0" }
+  online:
     on:
-      # Handled by the parent regardless of sub-state.
-      instance_done:
+      go_offline: { target: offline }
+      add:
+        internal: true
+        guard: "active < max_active"
+        action:
+          - spawn: { def: download, payload: { url: "event.payload.url" } }
+          - assign: { active: "active + 1" }
+      download_done:
         internal: true
         action:
-          - assign: { last_child: "null" }
-    states:
+          - assign: { active: "active - 1" }
 
-      probing:
-        # Hold create_instance until we leave `probing` (deferred-set, SPEC §5.7).
-        defer: [create_instance]
-        entry:
-          - post: { signal: probe }
-        # If no probe result within 30s, give up (timer via clock adapter, §5.8).
-        after:
-          - { duration: 30s, target: unreachable }
-        on:
-          probe:
-            internal: true
-            action:
-              - assign: { attempts: "attempts + 1" }
-          probe_ok:   { target: reachable }
-          probe_fail: { target: unreachable, guard: "attempts >= 3" }
-
-      reachable:
-        # Now create_instance is no longer deferred -> queued ones replay here.
-        on:
-          create_instance:
-            internal: true
-            action:
-              - spawn:
-                  def: instance
-                  payload: { name: "event.payload.name", bundles: "event.payload.bundles" }
-                  result: last_child
-
-      unreachable:
-        on:
-          probe: { target: probing }
-
-  # Reached via on_error; operator clears it with `reset`.
-  faulted:
-    on:
-      reset: { target: unconfigured }
-
-# Forward migration from v1: v1 had a flat `ready` state that v2 splits; map it
-# onto the new reachable sub-state, only when the instance is safely quiescent.
+# v1 named these states `up`/`down`; v2 renamed them. Migrate pinned v1 instances
+# forward, but only when quiescent in one of those states (SPEC §10.2).
 migrations:
   - from: 1
     to: 2
-    when: "state == 'ready'"
-    state_map: { ready: configured.reachable }
-    context:
-      - assign: { attempts: "0" }
+    when: "state == 'up' || state == 'down'"
+    state_map: { up: online, down: offline }
 
 ---
 
-# The spawned per-instance machine. Orthogonal: provisioning runs OS bring-up and
-# package install concurrently; history lets a paused install resume where it was.
-harel: 1
-id: instance
+# The spawned per-file machine. `url` is seeded from the spawn payload.
+format: 1
+id: download
 version: 1
-contracts: [instance]
+contracts: [download]
 
-context:
-  name:    { type: string, default: null, external: true }
-  bundles: { type: list,   default: [] }
+data:
+  url:        { type: string }    # seeded from the spawn payload (by name)
+  attempts:   { type: int, init: 0 }
+  bytes_done: { type: int, init: 0 }    # total, persists across pause/resume
 
 signals:
-  os_ready: {}
-  pkg_done: {}
+  connected: {}
+  chunk: { payload: { bytes: { type: int, required: true } } }
+  eof: {}
+  hash_ok: {}
+  hash_mismatch: {}
   pause: {}
   resume: {}
-  teardown: {}
 
-initial: provisioning
+on_error: { target: failed }     # safety net for unexpected action errors (§5.9)
+
+initial: active
 
 states:
 
-  provisioning:
+  # Transfer and integrity-check run concurrently. Deep history lets a paused
+  # download resume both regions where they left off.
+  active:
     type: orthogonal
-    regions:
-      # Region 1: operating-system bring-up.
-      - initial: booting
-        states:
-          booting:
-            on: { os_ready: { target: os_done } }
-          os_done: { type: final }
-      # Region 2: package installation, resumable via deep history.
-      - initial: installing
-        states:
-          installing:
-            history: deep
-            on:
-              pause:    { target: paused }
-              pkg_done: { target: pkg_ok }
-          paused:
-            on: { resume: { target: installing } }   # deep history restores sub-state
-          pkg_ok: { type: final }
+    history: deep
     on:
-      teardown: { target: done }
+      pause:    { target: paused }
+      __done__: { target: done }     # generated when both regions reach final
+    regions:
 
-  # When both regions reach `final`, the orthogonal state completes; we stop and
-  # emit completion to the parent provider.
+      # Region 1 — the byte transfer.
+      - initial: connecting
+        states:
+          connecting:
+            # Retry the connection up to 3 times, 10s apart (timer via clock §5.8).
+            after:
+              - duration: 10s
+                guard: "attempts < 3"
+                target: connecting          # re-enter -> re-arm the timer
+                action: [ { assign: { attempts: "attempts + 1" } } ]
+            on:
+              connected: { target: receiving }
+          receiving:
+            data:
+              session_bytes: { type: int, init: 0 }   # state-scoped: resets each entry
+            on:
+              chunk:
+                internal: true
+                action:
+                  - assign: { session_bytes: "session_bytes + event.payload.bytes" }
+                  - assign: { bytes_done:    "bytes_done + event.payload.bytes" }
+              eof: { target: stored }
+          stored: { type: final }
+
+      # Region 2 — integrity check, concurrent with the transfer.
+      - initial: hashing
+        states:
+          hashing:
+            on:
+              hash_ok:       { target: verified }
+              hash_mismatch: { target: failed }   # exits the orthogonal state entirely
+          verified: { type: final }
+
+  paused:
+    on:
+      resume: { target: active }    # deep history restores both regions
+                                    # (re-entering `receiving` re-inits session_bytes)
+
   done:
     type: final
     entry:
-      - emit: { signal: instance_done, payload: { id: "name" } }
+      - emit: { signal: download_done, payload: { id: "url" } }
+
+  failed:
+    entry:
+      - emit: { signal: download_done, payload: { id: "url" } }
       - stop: {}

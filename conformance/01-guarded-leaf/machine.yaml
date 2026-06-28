@@ -1,14 +1,9 @@
-harel: 1
-id: provider
-version: 1
-context:
-  api_key: { type: string, default: null, external: true }   # null == unset
-languages: { guard: cel, action: harel }
-signals:
-  configure: {}
-initial: unconfigured
+id: gate
+initial: locked
+data:
+  granted: { type: bool, external: true }   # unset until the host supplies it
 states:
-  unconfigured:
+  locked:
     on:
-      configure: { target: configured, guard: "api_key != null" }
-  configured: {}
+      enter: { target: open, guard: "granted == true" }
+  open: {}
