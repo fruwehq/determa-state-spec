@@ -410,6 +410,9 @@ and check expectations. Specifics:
 - A case MAY instead assert **static validation** (with no `steps`):
   `static: { valid: bool, errors?: [str…] }` runs the schema + contract validator (§7)
   and checks the outcome.
+- A **migration** case provides versioned machine files (`v1.yaml`, `v2.yaml`, …)
+  instead of `machine.yaml`; the root starts on the lowest version. An `upgrade: <n>`
+  step makes version `n` available and migrates eligible quiescent instances (§10).
 
 The suite MUST cover: leaf transitions; CEL guards (incl. guarded transition lists,
 first-match-wins); internal/local/external; LCA ordering; `initial` transitions with
