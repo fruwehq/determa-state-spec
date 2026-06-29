@@ -17,12 +17,21 @@ A harness loads the definitions, creates the root instance, and for each step
 posts the event (or advances the virtual clock) and runs **all** instances to
 quiescence before checking `expect`. See `01-guarded-leaf/` for the minimal shape.
 
-The implementing agent should expand this suite to cover everything listed in
-SPEC §9: hierarchy, orthogonal regions + region order + `done`, shallow/deep history,
-`initial` transitions with actions, CEL guards, structured actions, typed-payload
-accept/reject, `esvs` scope/shadow/re-init, `external` esvs + `env`/`refresh`, defer
-(deferred-set + edge-triggered reinsertion, no busy-loop), timers via the virtual
-clock, publish (directed/subscription/scope) + spawn/stop + FIFO, faults (`error`
-handled/absent + dead-letter), termination + child cleanup, contracts, and snapshot
-round-trip + migration. The suite is the deliverable that makes multi-language
-implementations trustworthy.
+This suite covers SPEC §9 end to end — cases `01`–`22` (engine semantics) plus
+`cli/` (the §13.6 CLI surface):
+
+| case | covers |
+|---|---|
+| 01 guarded-leaf · 02 hierarchy-bubbling · 03 initial-action · 04 defer | guards, ancestor handling, initial-transition actions, deferred-set |
+| 05 esvs-scope · 06 payload-typing · 07 internal-external · 08 local-vs-external | scope/shadow/re-init, typed payloads, transition kinds + ordering |
+| 09 orthogonal · 10 history-deep · 11 history-shallow · 12 guarded-list | regions + `done`, history, first-match-wins |
+| 13 spawn-publish · 14 subscription · 15 external-env-refresh | spawn + directed/subscribed publish + scope, `external`/`env`/`refresh` |
+| 16 timer · 17 fault-handled · 18 fault-unhandled · 19/20 contract pass/fail | timers, faults + dead-letter, static contracts |
+| 21 snapshot-roundtrip · 22 migration | snapshot round-trip, safe-point migration |
+| cli/01 turnstile | validate/new/state/send/list + JSON shapes (§13.6) |
+
+Expected outputs are derived from the spec (PSiCC semantics) since no engine exists
+yet; the first implementation co-validates them, and any mismatch is resolved by a PR
+(suite bug or spec ambiguity). Add cases for genuine gaps found during implementation.
+The suite — not any single implementation — is what makes multi-language engines
+trustworthy.
