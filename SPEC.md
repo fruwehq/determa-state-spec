@@ -349,7 +349,7 @@ in-memory default the conformance harness uses**:
   JSON/YAML-representable (portable across language implementations). `status ∈ {active,
   faulted, terminated}`.
 - **Observer** (optional) — a per-step stream `{ instance, transition, entered, exited,
-  published, spawned, faulted }` for UIs/agents.
+  published, spawned, faulted }` for UIs/agents and live visualization (§12).
 
 Adapters are selected by the host; the machine YAML never names a transport.
 
@@ -428,3 +428,50 @@ Definitions are **immutable and versioned** (`version`). A snapshot records
   well-maintained agent state) is a separate product layer.
 - Visual editor, codegen, real-time scheduling beyond §5.9.
 - Cross-instance transactions; instances are independent active objects by design.
+
+## 12. Visualization & export (informative)
+
+A machine — and the live state of an instance — can be rendered for humans. Export is
+**tooling**, not core semantics, but the mapping is defined here so every
+implementation produces the same diagram. Exporters are **pluggable by format**, and
+**Mermaid `stateDiagram-v2`** is the built-in default (renders on GitHub and most doc
+tools, no dependencies, and supports live highlighting). Other targets — PlantUML
+(exact history pseudostates, SVG), SCXML (machine interchange) — MAY be added behind
+the same interface later.
+
+**Interface.** `export(machine, format="mermaid", state_config?) -> string`.
+- Without `state_config`: the **static structure**.
+- With `state_config` (from a snapshot/observer, §8): the same diagram with the active
+  leaves **and their ancestors** marked — i.e. **current-state visualization**. A live
+  view re-exports (or re-emits just the highlight) on each observer step.
+
+**Mermaid mapping (`stateDiagram-v2`):**
+
+| harel | Mermaid |
+|---|---|
+| `top` | the diagram root (its substates emitted at top level) |
+| composite state `S` | `state S { … }` |
+| orthogonal regions | regions inside `state S { … }` separated by `--` |
+| `initial: { transition_to: X }` | `[*] --> X` (any initial `action`/`guard` as the edge label) |
+| `final` state `F` | `F --> [*]` |
+| `on_events: { e: { transition_to: T, guard: g } }` | `S --> T : e [g]` |
+| internal transition (no `transition_to`) | no edge (optionally a note) |
+| `after: { duration: d, … }` | edge labelled `after(d)` |
+| history (`shallow`/`deep`) | annotated (Mermaid has no history pseudostate; PlantUML `[H]`/`[H*]` is exact) |
+
+Edge labels SHOULD read `event [guard] / action-summary`, kept short; the full actions
+live in the YAML.
+
+**Current-state highlight.** Given `state_config`, emit `classDef active <style>` and
+`class <active leaves + their ancestors> active`. Under orthogonal regions several
+leaves are active and all are highlighted.
+
+Example — the turnstile (`examples/minimal.yaml`), currently in `unlocked`:
+```mermaid
+stateDiagram-v2
+  [*] --> locked
+  locked --> unlocked : coin [amount >= fare]
+  unlocked --> locked : push
+  classDef active fill:#9f9,stroke:#3a3
+  class unlocked active
+```
