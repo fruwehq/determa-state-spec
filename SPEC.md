@@ -513,6 +513,8 @@ and check expectations. Specifics:
   (innermost declaration wins, as a guard would read them). Assert other instances with
   `instances: { <id>: { config?, esvs?, status? } }`. `status ∈ {active, faulted,
   terminated}`; a terminated instance is gone from `config`.
+- `enabled` in an `expect` is the addressed instance's §14 `enabled_events` result:
+  the sorted declared event types the current active configuration can handle.
 - `spawned` (defIds) and `published` (event names) are the per-step lists across the
   whole run, in order. `rejected: true` asserts the step's event failed validation.
 - `external: { name: value }` at the top seeds the root's `external` esvs; a step's
@@ -672,6 +674,7 @@ runs **all** instances to quiescence (§5.7), and persists atomically.
 | `mode [auto\|manual]` | show or set the processing mode (§14), persisted in the store. |
 | `inject <instance> <event> [--payload k=v]… [--payload-json <json>]` | validate and **enqueue without processing** (§14); print the (unchanged) state (§13.4). |
 | `step <instance> [--steps N]` | process N (default 1) RTC steps (§14); print the resulting state plus a `steps` list. |
+| `enabled <instance> [--json]` | print the sorted declared event types the current active configuration can handle (§14). |
 | `inspect <instance>` | full internal state for debugging (§14): queue, deferred, timers, history, dead_letter. |
 
 `--payload k=v` is repeatable; values are **coerced to the event's declared payload
@@ -688,7 +691,8 @@ With `--json`, stdout is exactly one of:
 - `mode` → `{ "mode": "auto"|"manual" }`.
 - `inject` → the `state` object for the targeted instance (config unchanged, since it is not processed).
 - `step` → the `state` object for the targeted instance plus `"steps": [ { event, transition, entered[], exited[], published[], spawned[], faulted }, … ]` (one record per RTC step taken, ≤ `--steps`).
-- `inspect` → `{ "instance": str, "status": str, "config": [str…], "esvs": {…}, "queue": [event…], "deferred": [event…], "timers": [timer…], "history": {…}, "dead_letter": [record…]? }`.
+- `enabled` → `{ "instance": str, "enabled": [str…] }` (`enabled` sorted).
+- `inspect` → `{ "instance": str, "status": str, "config": [str…], "esvs": {…}, "enabled": [str…], "queue": [event…], "deferred": [event…], "timers": [timer…], "history": {…}, "dead_letter": [record…]? }`.
 
 Keys and types are part of the standard; implementations MUST match them.
 
@@ -786,7 +790,15 @@ reproducible because nothing runs until asked.
   transition / none taken), the states `entered`/`exited`, and the `published` events,
   `spawned` instances, and `faulted` flag for that step.
 - `run_to_quiescence()` — process until every queue drains (auto semantics, §5.7).
+- `enabled_events(instance)` — return the sorted set of declared event types the
+  instance's current active configuration can handle. An event type is enabled iff
+  some active state declares an `on_events` handler for it, considering each active
+  leaf and its ancestor chain and considering all active orthogonal regions. This is
+  structural and guard-agnostic: payload-dependent guards are evaluated only when an
+  event is delivered. Reserved lifecycle events (`entry`/`exit`/`initial`/`done`/
+  `error`/`env`) are excluded.
 - `inspect(instance)` — the full internal state, beyond `state` (§13.4):
-  `{ status, config[], esvs{}, queue[], deferred[], timers[], history{}, dead_letter? }`.
+  `{ status, config[], esvs{}, enabled[], queue[], deferred[], timers[], history{},
+  dead_letter? }`.
   `queue`/`deferred` are the pending events; `timers` the armed `after` timers;
   `history` the recorded shallow/deep records.
