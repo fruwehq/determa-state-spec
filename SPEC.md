@@ -1,7 +1,7 @@
-# harel — specification
+# Determa State — specification
 
 Status: **draft v2**. Normative unless a section says "informative."
-Spec version: **0.0.3** (see `VERSION`; synchronized across the harel repos).
+Spec version: **0.0.5** (see `VERSION`; synchronized across the Determa State repos).
 Keywords MUST / SHOULD / MAY per RFC 2119.
 
 ## 0. References
@@ -15,7 +15,7 @@ Keywords MUST / SHOULD / MAY per RFC 2119.
 - UML 2.x State Machines (terminology; behavioral semantics where not overridden).
 - CEL — Google Common Expression Language (<https://cel.dev/>), the guard /
   expression language (§6).
-- `cns_statemachine` (prior art: a Ruby HSM with a YAML machine format). harel keeps
+- `cns_statemachine` (prior art: a Ruby HSM with a YAML machine format). Determa State keeps
   its vocabulary — `top`, `esvs`, `on_events`, `transition_to`, `defer`, `publish`,
   `event_types` — and replaces raw Ruby guards/actions with CEL + structured actions.
 
@@ -43,14 +43,14 @@ Keywords MUST / SHOULD / MAY per RFC 2119.
 ## 2. Conformance
 
 An implementation is **conformant** iff it passes every case in the conformance suite
-(§9), which lives in its own repository — **[`fruwehq/harel-conformance`](https://github.com/fruwehq/harel-conformance)**
+(§9), which lives in its own repository — **[`fruwehq/determa-state-conformance`](https://github.com/fruwehq/determa-state-conformance)**
 (this repo holds only the normative text: `SPEC.md`, `schema/`, `examples/`).
 Where prose and the suite disagree, the suite wins and a bug MUST be filed against
 this document. Implementations MAY add guard/action languages and adapters; they MUST
 NOT change core dispatch semantics. Machine YAML MUST validate against
 `schema/machine.schema.json` before execution.
 
-**Parsing.** harel YAML MUST be parsed under the **YAML 1.2 core schema** (only
+**Parsing.** Determa State YAML MUST be parsed under the **YAML 1.2 core schema** (only
 `true`/`false` are booleans). Identifiers (state/event/variable names) MUST match
 `^[A-Za-z_][A-Za-z0-9_]*$`. The names `top`, `id`, `parent`, `event`, and the events
 `initial`, `entry`, `exit`, `env`, `error`, `done` are **reserved** (§3, §5).
@@ -158,7 +158,7 @@ top:                       # THE outermost state (PSiCC "top"); holds machine-wi
 - `events` (map, optional but RECOMMENDED) — typed event types (§4.3). If present, only
   declared events MAY be delivered and payloads MUST validate.
 - `languages` (map, optional) — `{guard, action}` ids; defaults `{guard: cel, action:
-  harel}`.
+  determa}`.
 - `meta` (map, optional) — opaque machine-level annotations for host layers. The engine
   ignores this data (§4.5).
 - `migrations` (list, optional) — forward migrations from older versions (§10).
@@ -407,7 +407,7 @@ intrinsics `id`/`parent`. CEL is side-effect-free, non-Turing-complete, and has
 multi-language runtimes — that is what makes guards portable. Engines MUST provide CEL
 and MAY provide host languages via `lang:` / `languages.guard`.
 
-**Actions = a structured set (id `harel`)**; computed values are CEL over `(esvs,
+**Actions = a structured set (id `determa`)**; computed values are CEL over `(esvs,
 event, id, parent)`:
 
 | action | form | effect |
@@ -477,7 +477,7 @@ semantics never depend on which is used.
 
 ## 9. Conformance test format (normative)
 
-The cases themselves live in **[`fruwehq/harel-conformance`](https://github.com/fruwehq/harel-conformance)**
+The cases themselves live in **[`fruwehq/determa-state-conformance`](https://github.com/fruwehq/determa-state-conformance)**
 (at `conformance/<case>/`); this section defines their normative format. Implementations
 pin that repository to obtain the suite.
 
@@ -599,7 +599,7 @@ the same interface later.
 
 **Mermaid mapping (`stateDiagram-v2`):**
 
-| harel | Mermaid |
+| Determa State | Mermaid |
 |---|---|
 | `top` | the diagram root (its substates emitted at top level) |
 | composite state `S` | `state S { … }` |
@@ -630,7 +630,7 @@ stateDiagram-v2
 
 ## 13. Command-line interface (normative)
 
-Every implementation MUST provide a `harel` CLI with the commands, options, exit
+Every implementation MUST provide a `determa-state` CLI with the commands, options, exit
 codes, and JSON output below, so operators and tests interact with any language's
 engine **identically**. (This CLI is a thin wrapper over the required programmatic
 *library* API of §2; that API stays language-idiomatic, and only the CLI and the
@@ -639,11 +639,11 @@ behavioral parity.)
 
 ### 13.1 The store
 CLI state persists in a **store** selected by `--store <spec>` (default
-`$HAREL_STORE`, else `./.harel`). A `<spec>` carries an optional **scheme prefix**
+`$DETERMA_STORE`, else `./.determa`). A `<spec>` carries an optional **scheme prefix**
 that picks a backend; a bare value with no scheme is equivalent to `file:` for
 back-compat:
 - `file:<dir>` — JSON snapshot files under a directory. **Default** when no scheme
-  is given: a bare `<dir>` (or `./.harel`).
+  is given: a bare `<dir>` (or `./.determa`).
 - `mem:` — in-memory and **ephemeral**. It is only meaningful **within a single
   process** (e.g. one `run` batch/streaming session, §13.7, or a test); state does
   **not** persist across separate CLI invocations.
@@ -708,7 +708,7 @@ real-time clock for daemon/operational use is a future option, §11.)
 
 ### 13.6 CLI conformance
 CLI cases live alongside the engine suite in
-**[`fruwehq/harel-conformance`](https://github.com/fruwehq/harel-conformance)** under
+**[`fruwehq/determa-state-conformance`](https://github.com/fruwehq/determa-state-conformance)** under
 `conformance/cli/<case>/`, each a `cli.yaml` of steps run against a fresh temp store;
 machine files referenced live in the case directory:
 ```yaml
@@ -720,13 +720,13 @@ steps:
       exit: 0
       json: { config: [unlocked], status: active }
 ```
-A harness invokes the implementation's `harel` binary; a case passes iff every step's
+A harness invokes the implementation's `determa-state` binary; a case passes iff every step's
 exit code and stdout match (`json` compared structurally; otherwise `stdout`
 verbatim). This pins cross-language **CLI parity** the way §9 pins engine semantics.
 
-The reference harness is **`conformance/run_cli.py`** (in `fruwehq/harel-conformance`),
-run as `python conformance/run_cli.py --cmd "<invoke your harel>"` (e.g. `--cmd "harel"` or
-`--cmd "python -m harel"`). It is language-agnostic — it executes every case as a
+The reference harness is **`conformance/run_cli.py`** (in `fruwehq/determa-state-conformance`),
+run as `python conformance/run_cli.py --cmd "<invoke your determa-state>"` (e.g. `--cmd "determa-state"` or
+`--cmd "python -m determa.state"`). It is language-agnostic — it executes every case as a
 **subprocess** against the built/installed binary. Conformance MUST be demonstrated this
 way (true black box); an in-process import of the implementation does NOT satisfy §13.6,
 because it cannot catch packaging, entry-point, or I/O regressions an operator would hit.
@@ -750,7 +750,7 @@ steps:
 ### 13.7 Batch / streaming mode (normative)
 For scripting and embedding, an implementation MUST support a streaming mode that drives
 many commands in one process against one store and a single virtual clock:
-- `harel run [-]` reads **stdin** as **NDJSON**: each non-empty line is a JSON array of
+- `determa-state run [-]` reads **stdin** as **NDJSON**: each non-empty line is a JSON array of
   argv tokens for one command — the same commands and options as §13.3, e.g.
   `["send","t1","coin","--payload","amount=100"]`. A bare `-` argument makes stdin
   explicit; blank lines are ignored.

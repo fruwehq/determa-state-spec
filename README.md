@@ -1,10 +1,12 @@
-# harel
+# Determa State
 
-A **language-agnostic statechart engine**. Machines are declared once in YAML and
+**Determa State** is a **language-agnostic statechart engine** — the statechart
+product in the **Determa** family. Machines are declared once in YAML and
 run by an implementation in *any* language; all implementations agree because they
 are validated against a shared, normative **conformance test suite**.
 
-Named for David Harel, who invented statecharts. In the Harel / UML state-machine
+Built on the statechart formalism introduced by David Harel. In the Harel / UML
+state-machine
 lineage, following the run-to-completion and hierarchical-state-machine semantics
 of Miro Samek's *Practical Statecharts in C/C++ — Quantum Programming for Embedded
 Systems* (PSiCC); the outermost state is `top`, per the book. Successor in spirit to
@@ -35,12 +37,12 @@ Status: **specification**. This repository holds **only the normative text**: se
 [`SPEC.md`](SPEC.md), with the JSON Schema for machine YAML in [`schema/`](schema/) and
 worked examples in [`examples/`](examples/). The cross-language **conformance suite**
 (the executable correctness target) lives in its own repository,
-[`fruwehq/harel-conformance`](https://github.com/fruwehq/harel-conformance), which
-implementations pin as a submodule.
+[`fruwehq/determa-state-conformance`](https://github.com/fruwehq/determa-state-conformance),
+which implementations pin as a submodule.
 
 Not coupled to any application; downstream users provide their own bus/queue/clock/
 store adapters (a simple in-memory default ships for tests) and machine YAML. A
 natural downstream use case is **constraining LLM agents** to a well-maintained
 state: the only way to advance is to publish a typed event that passes a guard, so
 an agent cannot reach an invalid configuration or skip a required step. That hosting
-layer is a separate product and out of scope for this engine spec.
+layer is a separate Determa product and out of scope for this engine spec.
