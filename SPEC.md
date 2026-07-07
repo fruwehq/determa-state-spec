@@ -62,8 +62,11 @@ across languages), but MUST at minimum let a host: load and validate a definitio
 register definitions and create a root instance with a given `id` and `external` esvs;
 deliver a typed event and run to quiescence (§5.7); advance the virtual clock (§5.9);
 read an instance's status, active configuration, and esvs; and snapshot/restore an
-instance (§8). The CLI is a thin wrapper over this API; cross-language behavioral parity
-is pinned by the conformance suite (§9), not by the API's shape.
+instance (§8). In addition to serialized text (YAML/JSON), the API SHOULD also let a
+host construct a definition from a **native mapping** (a host-language dict/map/value)
+through the same validation path, so machines can be built in code without serializing.
+The CLI is a thin wrapper over this API; cross-language behavioral parity is pinned by
+the conformance suite (§9), not by the API's shape.
 
 **Static validation.** Beyond the schema and reserved names, a definition is **rejected
 at load** if either check below fails. Both are **conservative** and **guard-agnostic**
