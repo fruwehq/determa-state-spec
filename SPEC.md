@@ -1,7 +1,7 @@
 # Determa State — specification
 
 Status: **draft v2**. Normative unless a section says "informative."
-Spec version: **0.0.5** (see `VERSION`; synchronized across the Determa State repos).
+Spec version: **0.0.6** (see `VERSION`; synchronized across the Determa State repos).
 Keywords MUST / SHOULD / MAY per RFC 2119.
 
 ## 0. References
@@ -688,9 +688,9 @@ payload as one JSON object. `--external k=v` seeds `external` esvs at creation (
 
 ### 13.4 JSON output (normative shapes)
 With `--json`, stdout is exactly one of:
-- `state` / `new` → `{ "instance": str, "def": "id@version", "status": "active|faulted|terminated", "config": [str…], "esvs": {…} }` (`config` sorted).
+- `state` / `new` → `{ "instance": str, "definition": "id@version", "status": "active|faulted|terminated", "config": [str…], "esvs": {…} }` (`config` sorted).
 - `send` → the `state` object for the targeted instance plus `"published": [str…]` (events handed to the bus this run, in order).
-- `list` → `[ { "id": str, "def": "id@version", "parent": str|null, "status": str, "config": [str…] }, … ]` (ordered by id).
+- `list` → `[ { "id": str, "definition": "id@version", "parent": str|null, "status": str, "config": [str…] }, … ]` (ordered by id).
 - `validate` → `{ "valid": bool, "errors": [ { "path": str, "message": str }, … ] }`.
 - `snapshot` → the §8 snapshot object.
 - `mode` → `{ "mode": "auto"|"manual" }`.
