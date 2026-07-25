@@ -945,6 +945,15 @@ engine schemas and cannot be declared by authors. The format-1 `error` name rema
 reserved for compatibility, but alpha engine faults do not synthesize an `error`
 event. Reserved `env` is the built-in host-ingress exception specified in §15.8;
 reserved `done` is the internal lifecycle event specified in §§15.5 and 15.13.
+The remaining fixed schemas are:
+
+- `determa.component_completed` carries exactly
+  `{component_id: identifier_string, component_runtime_id: runtime_id}` (§15.5);
+- `determa.component_failed` and `determa.spawned_instance_failed` carry the exact
+  nominal identities and committed fault-record copies in §15.12.
+
+Reserved engine events are internal and MUST NOT appear in bundle or machine event
+declarations.
 
 #### 15.3.2 Variables
 
@@ -1070,8 +1079,9 @@ MUST preserve the code:
 | `unknown_machine` / `unknown_event` / `unknown_state` | unresolved declaration |
 | `invalid_event_direction` / `invalid_correlation` / `invalid_payload` | event contract failure |
 | `invalid_binding` / `invalid_bind_target` / `binding_not_empty` | creation/reference failure |
-| `invalid_instance_target` | host target is not a live owned instance |
+| `invalid_instance_target` | ordinary target or cancellation target is not eligible under §§15.7, 15.8, and 15.13 |
 | `inactive_component_target` | in-engine placement target is not active |
+| `contained_runtime_fault` | reserved contained-runtime failure notification was unhandled |
 | `time_regression` | supplied `now` precedes aggregate observed time |
 | `guard_fault` / `action_fault` / `type_fault` / `invariant_fault` | engine execution fault |
 | `cascade_fault` | aggregate termination cascade rolled back |
@@ -1140,12 +1150,16 @@ machine instance, whose handler explicitly sends to a placement. Author target
 `{component: fulfillment}` resolves at action execution to:
 
 ```text
-["component", owner_runtime_id, structural_path, activation_sequence]
+["component", owner_runtime_id, structural_path, canonical_decimal(activation_sequence)]
 ```
 
 The envelope stores that exact nominal runtime id. A delayed envelope cannot retarget
-a later activation. Sending to an inactive placement faults the sending RTC with
-`inactive_component_target`.
+a later activation. Only a `pending_initialization` or actively running placement
+accepts a send. Sending to an inactive, pending-completion, completed, stopped, or
+faulted placement faults the sending RTC with `inactive_component_target`. Completed
+and stopped placements are terminal and cannot queue or process further work; their
+retained diagnostic configuration/variables remain inspectable only until the
+containing owner disposes the placement.
 
 When a component first reaches its root final state or executes `stop`, its current RTC
 schedules a pending component-completion control. At its next eligible slot that
@@ -1160,7 +1174,8 @@ same control also enqueues scoped `done` with
 `{kind: "parallel", state_path}`. Completion never mutates the owner configuration
 directly. The notifications use the control cause and ordinals in §15.9. A component
 engine/cascade fault follows §15.12 and enqueues one
-`determa.component_failed`; an unhandled failure faults the owner when processed.
+`determa.component_failed`; an unhandled failure faults the owner with
+`contained_runtime_fault` when processed.
 
 Exiting the parallel state cancels components in reverse declaration order as part of
 the owner's atomic RTC, runs their remaining exit actions, cancels owned descendants,
@@ -1205,8 +1220,10 @@ preserve this boundary and the distinct input/external maps.
 `prior_state` and returned `state` describe exactly one **root ownership aggregate**:
 
 - the root machine runtime;
-- every active component runtime;
-- every live owned spawned descendant and its components, recursively;
+- every structurally retained component runtime, including pending, running, terminal,
+  and faulted placements;
+- every live or retained-faulted owned spawned descendant and its components,
+  recursively;
 - each runtime's configuration, variables, FIFO queue, deferred set, timers, status,
   dead letters, retained external-source map, and pending lifecycle controls;
 - ownership, placement, creation, and activation identities/counters; and
@@ -1234,12 +1251,17 @@ roster, and its next cursor. Only when no round is active does the engine freeze
 deterministic preorder roster using `visit(runtime)`:
 
 1. emit `runtime`;
-2. `visit` each active component in placement declaration order; and
-3. `visit` each live owned child in spawn-creation order.
+2. if `runtime` is faulted or has pending cancellation, natural termination, or
+   component completion, return without visiting its contained subtree;
+3. otherwise, `visit` each structurally retained component in placement declaration
+   order; and
+4. `visit` each live or retained-faulted owned child in spawn-creation order.
 
 The engine calls `visit(root)` once. This recursion also orders children owned by a
-component and components owned by a spawned child. Freezing stores the roster, sets
-the cursor to zero, and marks the round active.
+component and components owned by a spawned child. A retained-faulted runtime remains
+in the roster so an eligible cleanup control can target it, but its frozen descendants
+do not enter a new roster. Freezing stores the roster, sets the cursor to zero, and
+marks the round active.
 
 At each roster slot the engine selects at most one item for that member, in this
 priority order:
@@ -1248,26 +1270,30 @@ priority order:
 2. pending initialization; or
 3. one queued-envelope RTC.
 
-Before selection, if any strict owner ancestor of the roster member has pending
-cancellation, natural termination, or component completion, the member is suppressed
-and its slot is skipped. The lifecycle target itself remains eligible for its
-priority control. Suppression begins in the requesting RTC's committed state, applies
-to the rest of the current frozen roster and every continuation, and ends only when
-the lifecycle control succeeds or faults. Descendant queues remain intact until that
-atomic control disposes or restores them.
+Before selection, if any strict owner ancestor of the roster member is faulted or has
+pending cancellation, natural termination, or component completion, the member is
+suppressed and its slot is skipped. The lifecycle target itself remains eligible for
+its priority control. Fault suppression begins in the fault finalization's committed
+state; lifecycle suppression begins in the requesting RTC's committed state. Either
+applies to the rest of the current frozen roster and every continuation. Descendant
+queues remain intact until an eligible atomic cleanup control disposes the complete
+retained subtree. The owner's failure-notification envelope is queued on the owner,
+which is not a descendant, and remains normally schedulable.
 
 Each selected item is one budgeted atomic step. A removed/terminal member with no
-pending lifecycle control, or any member with no selected item, is skipped without
-consuming budget or a logical-step sequence. A final state with a pending completion
-control is therefore not skipped. After executing or skipping, the cursor advances
-once. At the end of the roster the engine clears the active-round marker, roster, and
-cursor, performs the round-boundary due-timer discovery in §15.11, and—if runnable
-work and budget remain—freezes the next round. Otherwise it returns the appropriate
-status. Sends append in action/target order.
+pending lifecycle control, a retained-faulted member without an eligible cleanup
+control, or any member with no selected item is skipped without consuming budget or a
+logical-step sequence. A final state with a pending completion control is therefore
+not skipped. After executing or skipping, the cursor advances once. At the end of the
+roster the engine clears the active-round marker, roster, and cursor, performs the
+round-boundary due-timer discovery in §15.11, and—if runnable work and budget
+remain—freezes the next round. Otherwise it returns the appropriate status. Sends
+append in action/target order.
 
-Here, **runnable work** means an unsuppressed pending lifecycle control, pending
+Here, **runnable work** means an unsuppressed eligible lifecycle control, pending
 initialization, or queued envelope. Suppressed descendant work does not independently
-keep the aggregate runnable; its ancestor lifecycle control does.
+keep the aggregate runnable. A retained-faulted runtime contributes runnable work only
+when it has an eligible cleanup control; its queued ordinary envelopes never do.
 
 An invocation prelude (§15.11) never replaces an active roster or resets its cursor.
 New accepted ingress and timers append to queues while the roster remains frozen. If
@@ -1282,7 +1308,8 @@ creates a `pending_initialization` runtime atomically. It does not run child ini
 transitions inside the spawning RTC. On the child's first eligible slot in the next
 round, initialization runs as one budgeted atomic step unless a higher-priority
 lifecycle control cancels it first. Already queued work waits for a later slot.
-Initialization effects use the child's runtime identity.
+Initialization uses the child's runtime identity and the persisted initialization
+origin/cause defined in §15.9.
 
 The foreground transform is:
 
@@ -1369,8 +1396,8 @@ All hashes below use:
 where JCS is RFC 8785 canonical JSON.
 
 All sequences are unbounded non-negative mathematical integers; implementations MUST
-reject overflow rather than wrap. A stored counter is always the **next** value to
-allocate. Creation initializes:
+preserve their exact values and MUST NOT wrap or round them. A stored counter is
+always the **next** value to allocate. Creation initializes:
 
 - aggregate `next_logical_step_sequence`, `next_timer_creation_sequence`, and
   `next_output_sequence` to 0;
@@ -1383,14 +1410,27 @@ step. A rolled-back step rolls back every allocation. Counters belonging to exit
 states and inactive component placements remain in their containing runtime so
 re-entry cannot reuse an identity.
 
+The abstract counters remain mathematical integers. To avoid RFC 8785's IEEE-754
+number boundary, define `canonical_decimal(n)` as the shortest ASCII base-10
+representation of a
+non-negative integer: `0` for zero and otherwise digits `1`–`9` followed by zero or
+more digits, with no sign or leading zero. Every integer-valued operand embedded in a
+canonical runtime id or hash input below MUST be a JSON string containing
+`canonical_decimal(n)`, never a JSON number. This rule covers machine versions; step,
+spawn, activation,
+state-activation, timer-creation, and timer-declaration sequences/indexes; ordinals
+and emission indexes; and deadlines. Runtime ordering and counter arithmetic still
+compare the abstract integers numerically. The aggregate output `sequence` is not a
+hash operand; it remains an abstract integer ordered numerically.
+
 Canonical runtime ids are recursive JSON arrays:
 
 ```text
 root      = ["root", root_instance_id]
 spawned   = ["spawn", owner_runtime_id, owner_instance_id,
-             instance_id, spawn_sequence]
+             instance_id, canonical_decimal(spawn_sequence)]
 component = ["component", owner_runtime_id, structural_path,
-             activation_sequence]
+             canonical_decimal(activation_sequence)]
 ```
 
 A component runtime's `structural_path` is the ordered JSON array of component ids
@@ -1408,8 +1448,8 @@ instance_id = hash([
   "2-alpha1",
   root_instance_id,
   owner_runtime_id,
-  q,
-  [namespace, machine_id, machine_version]
+  canonical_decimal(q),
+  [namespace, machine_id, canonical_decimal(machine_version)]
 ])
 ```
 
@@ -1440,11 +1480,11 @@ JSON Pointers into the parsed bundle. Cause tuples use a domain-tagged locator:
 ```text
 source_locator =
   ["document", rfc6901_pointer] |
-  ["system", reserved_event_name]
+  ["system", system_tag]
 ```
 
-Host ingress uses its supplied `event_id` as its cause id. Every internal send, timer,
-lifecycle control, or system envelope has:
+Host ingress uses its supplied `event_id` as its cause id. Every initialization,
+internal send, timer, lifecycle control, or system envelope has:
 
 ```text
 cause_id = hash([
@@ -1453,18 +1493,82 @@ cause_id = hash([
   root_instance_id,
   source_runtime_id,
   target_runtime_id,
-  cause_kind,                 # "send" | "timer" | "control" | "system"
+  cause_kind,                 # "initialization" | "send" | "timer" | "control" | "system"
   parent_cause_id,
-  step_sequence,
+  canonical_decimal(step_sequence),
   source_locator,
-  ordinal
+  canonical_decimal(ordinal)
 ])
 ```
+
+The following fixed vector includes a sequence beyond the interoperable JSON-number
+range and is normative:
+
+```text
+JCS bytes (UTF-8):
+["determa-cause-v1","2-alpha1","order-7",["component",["root","order-7"],["payment"],"3"],["root","order-7"],"send","ingress-42","9007199254740993",["document","/machines/0/root/states/paying/entry/0/send"],"1"]
+
+cause_id:
+sha256:396226fab77df97ed48a64920ac590e459adbd706342150a67f2ec8a12fb930e
+```
+
+Every pending-initialization runtime stores an immutable initialization-origin record
+when it is created:
+
+```text
+{
+  source_runtime_id,
+  target_runtime_id,
+  parent_cause_id,
+  source_locator,
+  ordinal
+}
+```
+
+For the root, first derive:
+
+```text
+root_creation_provenance_id = hash([
+  "determa-root-creation-v1",
+  "2-alpha1",
+  root_instance_id,
+  [namespace, machine_id, canonical_decimal(machine_version)]
+])
+```
+
+The root origin has source and target equal to its root runtime id,
+`parent_cause_id = root_creation_provenance_id`, the selected root's exact
+`["document", "/machines/{machine_index}/root"]` locator, and ordinal 0.
+`machine_index` is the zero-based position of the selected definition rendered as an
+RFC 6901 array index.
+
+A component origin has source equal to its immediate owner runtime, target equal to
+the allocated component runtime, parent equal to the cause id of the owner step that
+entered the parallel placement, the placement object's document locator, and ordinal
+equal to the zero-based placement index. A spawned origin has source equal to the
+spawning runtime, target equal to the allocated child runtime, parent equal to the
+spawning step's cause id, the `spawn` action's document locator, and ordinal 0.
+
+When the scheduler later selects initialization, it allocates that initialization
+step's `step_sequence` and derives `cause_kind: "initialization"` from the stored
+origin plus that sequence. Initial transitions, entry actions, sends, timers, output
+intents, initialization fault records, and any completion control requested during
+initialization all use this cause. A completion control stores it as its parent cause.
+Because the origin is persisted at creation and the initialization sequence is
+allocated only in its frozen-roster slot, retry and budget partitioning cannot change
+the cause.
 
 For `send`, `source_locator` identifies the send action and `ordinal` is the
 zero-based index in `targets` (or 0 for omitted/singular `to`). The same target index
 is `emission_index` if that target is external. A timer uses the pointer to its
 `after` declaration and its zero-based declaration index.
+
+Every internal envelope created by a send fan-out copy, timer discovery, or system
+notification stores `event_id` equal to its derived `cause_id`; there is no separate
+internal envelope identity. Thus its queue entry, deferred/dead-letter record, retry
+observation, and conformance assertion all use that same value. Distinct fan-out
+copies have distinct ordinals and therefore distinct event/cause ids. Initialization
+and lifecycle controls have cause ids but are not envelopes.
 
 A lifecycle control record stores its requesting runtime, target runtime,
 `parent_cause_id`, requesting `step_sequence`, action/state pointer, and action
@@ -1484,24 +1588,31 @@ timer_id = hash([
   root_instance_id,
   runtime_id,
   state_path,
-  state_activation_sequence,
-  timer_declaration_index,
-  timer_creation_sequence,
-  deadline
+  canonical_decimal(state_activation_sequence),
+  canonical_decimal(timer_declaration_index),
+  canonical_decimal(timer_creation_sequence),
+  canonical_decimal(deadline)
 ])
 ```
 
-Its event cause uses the timer id as `parent_cause_id`, `cause_kind: "timer"`, the
-stored arming `step_sequence`, the timer declaration's document locator, and ordinal
-equal to its declaration index. Due-timer discovery itself allocates no logical step.
+Its event cause has source and target both equal to the runtime whose timer was armed,
+uses the timer id as `parent_cause_id`, `cause_kind: "timer"`, the stored arming
+`step_sequence`, the timer declaration's document locator, and ordinal equal to its
+declaration index. Due-timer discovery itself allocates no logical step.
 
 A system cause uses the fault/completion/control cause as parent and
 `["system", reserved_event_name]` as its locator. Ordinals are fixed:
 
-- one component completion/failure notification uses 0;
+- `determa.component_completed` has source equal to the completed component and target
+  equal to its immediate owner, with ordinal 0;
 - if the same component-completion step also completes its parallel state,
-  `determa.component_completed` uses 0 and parallel `done` uses 1;
-- one spawned-instance completion `done` or failure notification uses 0; and
+  parallel `done` also has source equal to that last-completed component and target
+  equal to its immediate owner; `determa.component_completed` uses ordinal 0 and
+  parallel `done` uses 1;
+- spawned-instance completion `done` has source equal to the completed spawned runtime
+  and target equal to its immediate owner, with ordinal 0;
+- component/spawned failure source and target are fixed in §15.12 and use ordinal 0;
+  and
 - no notification is emitted for explicit cancellation or descendant disposal during
   an owner cascade.
 
@@ -1515,13 +1626,13 @@ Every external output is an intent, not proof of an external outcome:
 effect_key = [
   "determa-effect-v1",
   "2-alpha1",
-  [namespace, machine_id, machine_version],
+  [namespace, machine_id, canonical_decimal(machine_version)],
   root_instance_id,
   emitting_runtime_id,
   cause_id,
-  step_sequence,
+  canonical_decimal(step_sequence),
   static_action_path,
-  emission_index
+  canonical_decimal(emission_index)
 ]
 effect_id = hash(effect_key)
 ```
@@ -1612,11 +1723,33 @@ target, invalid spawn/bind, cascade action, or invariant violation), the engine:
    writes, retained external-source updates, transitions, queues/deferred sets/timers,
    sends, spawn/bind/cancel, and output intents;
 2. applies one deterministic system finalization using the failed step's reserved
-   `step_sequence` (§15.9): consume an envelope cause into dead letter, or consume and
-   record the synthetic initialization/control cause; append a fault record containing
-   runtime id, cause id, code, and action path; mark that runtime faulted; and commit
+   `step_sequence` (§15.9): remove a selected envelope from its queue and append its
+   cause to dead letter, or clear the selected `pending_initialization` flag or
+   lifecycle-control record and consume its already-derived cause into the fault
+   record; append the exact committed fault record below; mark that runtime faulted;
+   and commit
    `next_logical_step_sequence = step_sequence + 1`; and
 3. emits no external intent from the failed step.
+
+The committed fault record is exactly:
+
+```text
+{
+  runtime_id: runtime_id,
+  cause_id: non_empty_string,
+  code: alpha_error_code,
+  step_sequence: non_negative_integer,
+  source_locator: source_locator
+}
+```
+
+`cause_id` is the selected host/internal envelope's event/cause id or the derived
+initialization/control cause id. `source_locator` is the exact failing document
+element when one exists. A system-only fault uses `["system", code]`, except for
+unhandled reserved failures as specified below. The record is part of committed
+logical state; diagnostic extensions MAY accompany it but are not part of its
+normative value. A consumed envelope, initialization flag, or lifecycle control is no
+longer selectable and MUST NOT be retried by a later roster.
 
 Earlier completed steps and their intents remain commit-safe. Later accepted ingress
 remains queued. The faulting event is not left at the queue head.
@@ -1625,13 +1758,69 @@ A root fault stops processing and returns `faulted`. The returned state and earl
 intents can be committed atomically. Reprocessing a committed terminal root emits
 nothing; alpha1 has no recovery/reset operation.
 
-A component or spawned-runtime fault uses the same local rollback/dead-letter rule,
-then enqueues exactly one deterministic `determa.component_failed` or
-`determa.spawned_instance_failed` to its owner. The aggregate can continue. An
-unhandled reserved failure faults the owner when processed and can propagate to root.
-If budget expires first, the queued notification yields `continuation_required`.
-An invalid internal send, including an invalid forwarded `env`, faults the runtime
-executing it.
+A component or spawned-runtime fault uses the same local rollback/dead-letter rule.
+Its finalization retains that runtime and its complete owned subtree in a frozen
+faulted state, then enqueues exactly one deterministic
+`determa.component_failed` or `determa.spawned_instance_failed` to its immediate
+owner. Descendants later in the current frozen roster are suppressed immediately, and
+future rosters do not recurse into that subtree (§15.7). The owner notification is
+outside the frozen subtree and queues/runs normally. The aggregate can continue.
+
+The failure notification's system cause has source equal to the failed runtime,
+target equal to its immediate owner, parent equal to the committed fault record's
+`cause_id`, the fault-finalization `step_sequence`,
+`["system", failure_event_name]`, and ordinal 0. Its envelope `event_id` equals that
+system `cause_id` (§15.9). Exactly one notification is created by the successful
+fault finalization, including when the failed cause was initialization or a lifecycle
+control.
+
+`determa.component_failed` carries exactly:
+
+```text
+{
+  component_id: identifier_string,
+  component_runtime_id: runtime_id,
+  structural_path: [identifier_string, ...],
+  activation_sequence: non_negative_integer,
+  namespace: dotted_identifier_string,
+  machine_id: identifier_string,
+  machine_version: positive_integer,
+  fault: fault_record
+}
+```
+
+`determa.spawned_instance_failed` carries exactly:
+
+```text
+{
+  instance: instance_ref,
+  spawned_runtime_id: runtime_id,
+  instance_id: non_empty_string,
+  namespace: dotted_identifier_string,
+  machine_id: identifier_string,
+  machine_version: positive_integer,
+  spawn_sequence: non_negative_integer,
+  fault: fault_record
+}
+```
+
+In either payload, `fault` is a value-copy of the exact committed record above, not a
+pointer to mutable diagnostic state. The other fields are copied from the failed
+placement/runtime identity. A referenced component uses its referenced machine
+identity; an inline component uses its containing machine identity, as in the effect
+identity rule of §15.9.
+
+Reserved failure envelopes cannot be deferred. When one is selected and ordinary
+deterministic event selection finds no enabled handler, the owner RTC faults rather
+than silently discarding it. Its committed record uses code
+`contained_runtime_fault`, cause equal to that failure envelope's `event_id`, the
+consuming RTC's `step_sequence`, and source locator
+`["system", "unhandled/determa.component_failed"]` or
+`["system", "unhandled/determa.spawned_instance_failed"]` respectively. This same
+rule repeats at every non-root owner, making fault propagation deterministic. If
+budget expires before owner handling, the queued notification yields
+`continuation_required`. An invalid internal send, including an invalid forwarded
+`env`, faults the runtime executing it.
 
 Application-declared failure events such as `payment_rejected` are ordinary domain
 behavior. They do not set engine status `faulted` unless their handling itself causes
@@ -1641,18 +1830,34 @@ an engine fault.
 
 An owned child survives exit of the particular state whose action spawned it.
 
-A successful `cancel` action validates a live owned `instance_ref` and appends a
-pending cancellation control carrying the requesting cause/step and cancel action
-path. For targeting purposes, a pending-initialization runtime is live, but a runtime
-with cancellation/termination already pending—or any runtime below such an
-ancestor—is not; duplicate/late cancel, ingress, or send fails with
-`invalid_instance_target`. Reaching a machine runtime's root final state, or
-successfully executing `stop`, appends a pending natural-termination control carrying
-the causal step and final-state/stop-action path and marks that runtime
-`pending_termination`. A runtime has at most one natural-termination control: the
-first `stop` or root-final request in normative action/lifecycle order supplies the
-stored path, and later requests in the same RTC are no-ops. Request creation is part
-of the current RTC; it does not run lifecycle work recursively.
+For ordinary host ingress or internal `send`, a spawned runtime is targetable only
+while `pending_initialization` or actively running. Pending-cancellation,
+pending-termination, terminated, disposed, and faulted runtimes—and every runtime
+inside a faulted or pending-lifecycle ancestor's frozen subtree—are non-targetable;
+attempting to address one fails with `invalid_instance_target`.
+
+A successful `cancel` action normally validates a live owned `instance_ref` and
+appends a pending cancellation control carrying the requesting cause/step and cancel
+action path. There is one cleanup-only exception: the immediate owner runtime MAY
+cancel its directly owned retained-faulted child. That reference remains nominally
+addressable only for this operation; hosts and other runtimes cannot cancel it, and
+no ordinary ingress/send can target or advance it. Committing this owner request
+appends the control to the faulted child and makes that child eligible for a
+deterministic lifecycle-control roster slot. New rosters visit the retained-faulted
+child but not its descendants; an already frozen roster executes the control at the
+child's next unpassed slot or a later round (§15.7).
+
+For targeting purposes, a pending-initialization runtime is live, but a runtime with
+cancellation/termination already pending—or any runtime below such an ancestor or a
+faulted ancestor—is not; duplicate/late cancel, ingress, or send fails with
+`invalid_instance_target`.
+Reaching a machine runtime's root final state, or successfully executing `stop`,
+appends a pending natural-termination control carrying the causal step and
+final-state/stop-action path and marks that runtime `pending_termination`. A runtime
+has at most one natural-termination control: the first `stop` or root-final request
+in normative action/lifecycle order supplies the stored path, and later requests in
+the same RTC are no-ops. Request creation is part of the current RTC; it does not run
+lifecycle work recursively.
 
 The target's next eligible roster slot selects the earliest pending lifecycle control
 before initialization or an ordinary envelope (§15.7). Cancellation and natural
@@ -1670,6 +1875,9 @@ sends/intents; then disposes queues, deferred sets, timers, variables, configura
 external-source maps, and pending controls. Component completion retains only the
 final/empty diagnostic state specified in §15.5. A normalized physical store MUST
 include every affected descendant and outbox row in the same serializable transaction.
+Cleanup of a retained-faulted spawned child, or disposal of a faulted component when
+its containing parallel state exits, includes the complete frozen subtree in this
+same atomic cascade.
 
 Successful explicit cancellation removes the target spawned subtree and emits no
 `done`. Natural completion of an owned spawned runtime removes that subtree and
