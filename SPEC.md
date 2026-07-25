@@ -1337,6 +1337,14 @@ output order when their intent lists are concatenated.
 Call validation and ingress acceptance are atomic. Invalid format, schema, payload,
 instance target, correlation, or time rejects the entire call without changing state.
 
+The root runtime accepts host ingress—including reserved `env`—and an in-engine
+`{self: true}`/omitted target only while `pending_initialization` or actively running.
+Once it is `pending_termination`, faulted, or naturally completed, the root is
+non-targetable. Any host envelope targeting it rejects the complete call atomically
+with `invalid_instance_target`; an in-engine send resolving to it faults the sending
+RTC with the same code. A runtime inside a faulted root's retained diagnostic subtree
+is likewise non-targetable under §15.13.
+
 An ordinary author-defined host envelope MUST name a bundle `input` event. Every
 accepted host envelope requires a stable, non-empty string `event_id`; an input with
 `correlates_to` also requires a non-empty string `correlation_id` matching the
@@ -1756,7 +1764,11 @@ remains queued. The faulting event is not left at the queue head.
 
 A root fault stops processing and returns `faulted`. The returned state and earlier
 intents can be committed atomically. Reprocessing a committed terminal root emits
-nothing; alpha1 has no recovery/reset operation.
+nothing; alpha1 has no recovery/reset operation. A `process` call on that state with
+non-empty ingress is rejected atomically under §15.8. With empty ingress and a
+non-regressing `now`, it returns `faulted`, exactly the same logical state, and
+no new intents/faults; it does not run the invocation prelude or advance time,
+scheduler state, or counters.
 
 A component or spawned-runtime fault uses the same local rollback/dead-letter rule.
 Its finalization retains that runtime and its complete owned subtree in a frozen
@@ -1901,9 +1913,12 @@ owner can inspect the `done` payload and explicitly assign null.
 Natural completion of the root performs the same descendant cascade, retains only
 the root's terminal identity/status/fault-history record with an empty active
 configuration, stops the scheduler, and returns `quiescent`; there is no owner
-notification. For a component, root-final/`stop` completion follows §15.5 rather than
-spawned `done`. Descendant disposal caused by a parent/root/component lifecycle emits
-no nested completion notifications.
+notification. Non-empty ingress is rejected under §15.8. With empty ingress and a
+non-regressing `now`, a later `process` returns `quiescent`, exactly the same
+logical state, and no new intents/faults; it does not run the invocation prelude or
+advance time, scheduler state, or counters. For a component, root-final/`stop`
+completion follows §15.5 rather than spawned `done`. Descendant disposal caused by a
+parent/root/component lifecycle emits no nested completion notifications.
 
 If an explicit-cancellation or non-root natural-termination cascade action faults,
 the engine rolls the complete cascade back, discards its sends/intents, and applies
