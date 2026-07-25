@@ -1,6 +1,7 @@
 # Determa State — specification
 
-Status: **draft v2**. Normative unless a section says "informative."
+Status: **draft**. Covers grammar format 1 and format `2-alpha1`; normative unless a
+section says "informative."
 Spec version: **0.0.6** (see `VERSION`; synchronized across the Determa State repos).
 Keywords MUST / SHOULD / MAY per RFC 2119.
 
@@ -810,3 +811,716 @@ reproducible because nothing runs until asked.
   dead_letter? }`.
   `queue`/`deferred` are the pending events; `timers` the armed `after` timers;
   `history` the recorded shallow/deep records.
+
+## 15. Format `2-alpha1` bundles (normative)
+
+Format `2-alpha1` is an additive, experimental grammar. Sections 0–14 remain the
+normative definition of numeric format 1. This section defines the alpha grammar and
+overrides those sections only where it says so. A format-1 document is not implicitly
+converted to an alpha bundle.
+
+### 15.1 Grammar identity and compatibility
+
+An alpha bundle MUST carry the YAML/JSON **string**:
+
+```yaml
+format: "2-alpha1"
+```
+
+Numeric `format: 1` and an omitted `format` (which defaults to numeric 1) continue to
+select format 1. The string `2-alpha1` is an immutable grammar identifier once
+published. An incompatible revision MUST use another identifier, such as
+`2-alpha2`. A future stable format 2 will use numeric `format: 2`; it MUST NOT
+reinterpret an alpha document.
+
+A loader MUST advertise the exact grammar identifiers it supports. It MUST reject an
+unknown string or number with `unsupported_format` before semantic validation and
+MUST NOT select a nearest version. One document is one bundle under one grammar;
+mixed-format machines or embedded definitions are invalid.
+
+Grammar identifiers are independent of:
+
+1. the synchronized SemVer of the specification, conformance suite, and engines;
+2. the independently versioned umbrella launcher; and
+3. each author's integer machine `version`.
+
+A repository release can add support for an immutable grammar identifier without
+changing that identifier. Adding this draft section does not change `Spec version`
+or `VERSION`; a synchronized release is a later, separately authorized step.
+
+### 15.2 Bundle grammar and vocabulary
+
+An alpha document is a self-contained bundle:
+
+```yaml
+format: "2-alpha1"
+namespace: example.orders
+events:
+  submit:
+    direction: input
+    payload:
+      order_id: { type: string, required: true }
+machines:
+  - machine_id: order
+    version: 1
+    root:
+      type: composite
+      initial: { transition_to: idle }
+      states:
+        idle: {}
+```
+
+See `examples/format-2-alpha1.yaml` for one complete schema-valid bundle.
+
+Top-level fields:
+
+- `format` — required exact string `2-alpha1`.
+- `namespace` — required dotted identifier. Together with `machine_id` and
+  `version`, it forms a machine's logical identity.
+- `events` — shared event declarations visible to every machine in the bundle.
+- `machines` — required non-empty ordered list of machine definitions.
+- `meta` — optional opaque annotations ignored by execution.
+
+Machine fields:
+
+- `machine_id` — required and unique within the bundle.
+- `version` — integer ≥1, optional, default 1; author-controlled machine evolution.
+- `languages` — optional `{guard, action}`, with format-1 defaults.
+- `events` — optional private declarations visible only inside this machine.
+- `meta` — optional opaque annotations.
+- `root` — required outermost `StateNode`; it replaces the context-free format-1
+  name `top`.
+
+Alpha uses `variables` for extended state, `machine_id` for machine references,
+`spawn.machine_id` for owned creation, and `spawn.bind_to` for the nominal reference
+result. It retains `init`, `lang`, `meta`, `config`, `env`, `on_events`, and
+`transition_to`. The `config` name describes active-state configurations in host and
+observer data; it is not a machine field.
+
+All `machine_id` references resolve to the same bundle. Package imports, visibility,
+dependency constraints, resolver precedence, and private transitive dependencies are
+not part of this alpha.
+
+### 15.3 Events, variables, states, and actions
+
+#### 15.3.1 Events
+
+An event declaration has:
+
+```yaml
+event_name:
+  direction: internal        # internal | input | output
+  payload:
+    field: { type: string, required: true }
+  correlates_to: request_event
+```
+
+`direction` defaults to `internal`. `input` can cross from a host into a machine
+instance; `output` can leave the root ownership aggregate as an output intent;
+`internal` cannot cross the host boundary. `payload` has format-1 typed-field
+semantics. `correlates_to` is valid only on an `input` declaration and MUST name an
+`output` declaration in the same bundle. A success, rejection, or failure response
+to an external effect MUST be a separately declared `input` event with
+`correlates_to`.
+
+Public ingress and output envelopes carry `correlation_id` outside the typed payload.
+An output intent and every response that names it MUST use the same correlation id.
+Public `event_id` and `correlation_id` values are non-empty strings.
+Public effect workflows lacking a correlation id are rejected as `invalid_correlation`.
+
+The names `initial`, `entry`, `exit`, `env`, `done`, `error`,
+`determa.component_completed`, `determa.component_failed`, and
+`determa.spawned_instance_failed` are reserved. The `determa.*` events have fixed
+engine schemas and cannot be declared by authors. The format-1 `error` name remains
+reserved for compatibility, but alpha engine faults do not synthesize an `error`
+event.
+
+#### 15.3.2 Variables
+
+Variables are declared on states:
+
+```yaml
+variables:
+  order_id: { type: string, input: true }
+  retries: { type: int, init: 0 }
+  payment_worker:
+    type: instance_ref
+    machine_id: payment_worker
+    nullable: true
+    init: null
+```
+
+Scalar/container types and lexical scope retain format-1 `esvs` semantics.
+`input: true` is valid only on a machine or inline-component root and allows that
+runtime to receive a typed creation binding. An input variable without `init` is
+required; one with `init` uses that literal when the binding is omitted. Bindings for
+variables not marked `input` are invalid. `external: true` retains the format-1
+host-owned-copy, read-only-to-`assign`, `env`/`refresh` behavior. A declaration MUST
+NOT be both `input` and `external`.
+
+`instance_ref` is nominal, not a string. Its abstract value is:
+
+```text
+(root_instance_id, owner_runtime_id, owner_instance_id, instance_id,
+ namespace, machine_id, machine_version, spawn_sequence)
+```
+
+Only the engine can create a non-null reference. Equality compares the complete
+record. Ordering, arithmetic, string coercion, and construction from a user string
+are invalid. Null is permitted only when `nullable: true`; a nullable reference can
+be cleared by assigning null. An existing engine-created reference MAY pass through a
+typed `input` binding, but an `instance_ref` cannot be `external`, and its only
+permitted declaration-time literal is null. A non-nullable reference therefore
+requires a non-null typed creation binding. The concrete snapshot representation is
+deliberately unspecified, but any host persistence layout MUST preserve every
+abstract field.
+
+#### 15.3.3 State nodes and transitions
+
+Alpha state types are `simple` (default), `composite`, `parallel`, and `final`.
+Hierarchy, transition kinds, transition selection, choice pseudostates, and
+entry/exit ordering retain §§4.5–5.5 semantics with `variables` replacing `esvs` and
+`root` replacing `top`.
+
+- A `composite` state requires `initial` and `states`.
+- A `parallel` state requires at least two `components` (§15.5) and cannot also
+  declare `states`, `initial`, or `history`.
+- A `final` state cannot declare active behavior.
+- `choice` remains an ordered transient branch list and is mutually exclusive with
+  active-state fields.
+
+Ordinary composite states retain shallow/deep history. Parallel component runtimes
+are new activations on every entry and never restore prior configurations, queues,
+variables, timers, or history.
+
+#### 15.3.4 Structured actions
+
+Alpha structured actions are:
+
+| action | exact shape | meaning |
+|---|---|---|
+| assign | `{ assign: { variable: CEL, ... } }` | typed writes in the current runtime |
+| send | `{ send: { event, to? | targets?, payload?, correlation_id? } }` | enqueue one or more exact-target envelopes |
+| refresh | `{ refresh: { only?: [name, ...] } }` | retain format-1 `env` adoption |
+| spawn | `{ spawn: { machine_id, payload?, bind_to? } }` | create an owned pending runtime |
+| cancel | `{ cancel: { instance: CEL } }` | cancel a nominal owned instance |
+| stop | `{ stop: {} }` | terminate the current machine runtime |
+
+`to` is one of `{self: true}`, `{owner: true}`, `{component: component_id}`,
+`{instance: CEL}`, or `{external: true}`. `targets` is a non-empty ordered list of
+the same target objects and is mutually exclusive with `to`. Omitting both means
+`self`. Fan-out is defined as one independent envelope per listed target, in list
+order. `payload` and `correlation_id` values are CEL expressions. An external target
+requires a declared `output` event and correlation id. Host ingress requires a
+declared `input` event. `send` replaces format-1 `publish`; there is no implicit
+scope-based broadcast.
+
+`spawn.payload` expressions seed compatible `input: true` variables on the referenced
+machine's `root`. If present, `bind_to` MUST name an in-scope writable
+`instance_ref` whose optional `machine_id` constraint matches. Its current value MUST
+be null. Allocation and binding are one atomic action; overwrite fails with
+`binding_not_empty`.
+
+Load-time semantic validation includes unique machine and component ids; reachable
+states and default-last branches; declared event and state references; same-bundle
+machine references; event direction and `correlates_to` compatibility; complete
+required creation bindings with no extras; binding-expression type compatibility;
+and `bind_to` type/machine compatibility. Runtime validation uses the stable codes in
+§15.3.5.
+
+A machine-local event declaration MUST NOT redeclare a shared bundle event name.
+Shared and machine-local event names MUST each be unique in their declaration map;
+violations are `duplicate_event`.
+
+#### 15.3.5 Alpha error codes
+
+The following codes are normative. An implementation MAY add diagnostic fields but
+MUST preserve the code:
+
+| code | class |
+|---|---|
+| `unsupported_format` | unknown grammar identifier |
+| `invalid_document` | structural/schema failure |
+| `duplicate_machine_id` / `duplicate_component_id` / `duplicate_event` | non-unique bundle identity |
+| `unknown_machine` / `unknown_event` / `unknown_state` | unresolved declaration |
+| `invalid_event_direction` / `invalid_correlation` / `invalid_payload` | event contract failure |
+| `invalid_binding` / `invalid_bind_target` / `binding_not_empty` | creation/reference failure |
+| `invalid_instance_target` | host target is not a live owned instance |
+| `inactive_component_target` | in-engine placement target is not active |
+| `time_regression` | supplied `now` precedes aggregate observed time |
+| `guard_fault` / `action_fault` / `type_fault` / `invariant_fault` | engine execution fault |
+| `cascade_fault` | aggregate termination cascade rolled back |
+
+Budget exhaustion is not an error; it returns `continuation_required`.
+
+### 15.4 Four relationship types
+
+Alpha distinguishes exactly four relationships:
+
+1. **Inline/nested state** — one hierarchy, variable scope, queue, and lifecycle.
+2. **Synchronous reusable component** — a static placement in a parallel state with
+   isolated variables, configuration, FIFO queue, deferred set, timers, and lifecycle.
+3. **Owned spawned instance** — a dynamically created isolated machine runtime owned
+   inside its root aggregate and addressed by `instance_ref`.
+4. **Independent external peer** — outside engine state and lifecycle, communicating
+   only through declared public input/output events.
+
+No relationship permits another runtime to read or write its variables, share its
+queue, or transition directly outside its state boundary.
+
+### 15.5 Parallel components
+
+A parallel state declares reusable placements:
+
+```yaml
+processing:
+  type: parallel
+  components:
+    - component_id: fulfillment
+      machine_id: fulfillment
+      with:
+        order_id: "owner.variables.order_id"
+    - component_id: accounting
+      root:
+        type: composite
+        variables:
+          order_id: { type: string, input: true }
+        initial: { transition_to: pending }
+        states:
+          pending: {}
+      with:
+        order_id: "owner.variables.order_id"
+```
+
+A placement declares exactly one of local `machine_id` or inline `root`.
+`component_id` MUST be unique across every placement in its containing machine, so
+its structural path is unambiguous.
+
+Entering a parallel state is one atomic owner step:
+
+1. Allocate every component activation identity in declaration order.
+2. Run the parallel state's owner entry action.
+3. Evaluate each placement's `with` expressions against the same post-entry owner
+   variables and triggering event.
+4. Seed only declared `input: true` component variables.
+5. Leave every component `pending_initialization`.
+
+Missing, extra, or type-invalid bindings fault and roll back the owner step. Because
+the activation identities exist before the owner entry action, that action can send
+the first event to a component; it queues behind initialization.
+
+Host ingress MUST NOT directly target a component in this alpha. It targets the owner
+machine instance, whose handler explicitly sends to a placement. Author target
+`{component: fulfillment}` resolves at action execution to:
+
+```text
+["component", owner_runtime_id, structural_path, activation_sequence]
+```
+
+The envelope stores that exact nominal runtime id. A delayed envelope cannot retarget
+a later activation. Sending to an inactive placement faults the sending RTC with
+`inactive_component_target`.
+
+When a component first reaches final, the engine enqueues one
+`determa.component_completed` event to its owner with
+`{component_id, component_runtime_id}`. Once every component is final, it enqueues one
+scoped `done` event for the parallel state. Completion never mutates the owner
+configuration directly. A component engine fault follows §15.12 and enqueues one
+`determa.component_failed`; an unhandled failure faults the owner when processed.
+
+Exiting the parallel state cancels components in reverse declaration order, runs
+their exit actions, cancels timers, and disposes their queues, deferred sets,
+variables, and configurations. External intents and owner-targeted envelopes emitted
+by exit actions remain. Re-entry increments activation sequences and creates fresh
+runtimes. Reset-in-place and component history retention are unsupported.
+
+### 15.6 Portable root ownership aggregate
+
+The abstract creation operation is:
+
+```text
+create(bundle, root_machine_id, root_instance_id, bindings) -> prior_state
+```
+
+It selects exactly one bundle machine as the ownership root, validates its root input
+bindings, and returns an aggregate with that root `pending_initialization`, empty
+queues, no timers or children, counters at zero, and no observed time yet. All other
+bundle machines are inactive definitions until placed or spawned. `root_instance_id`
+is a host-supplied stable non-empty string and MUST be unique within the host's
+persistence scope. Creation executes no machine action; the root initialization is
+the first budgeted scheduler step of a later `process` call. Language APIs can name or
+combine creation and processing idiomatically, but MUST preserve this boundary.
+
+`prior_state` and returned `state` describe exactly one **root ownership aggregate**:
+
+- the root machine runtime;
+- every active component runtime;
+- every live owned spawned descendant and its components, recursively;
+- each runtime's configuration, variables, FIFO queue, deferred set, timers, status,
+  and dead letters;
+- ownership, placement, creation, and activation identities/counters; and
+- aggregate observed time, logical-step counter, output-sequence counter, scheduler
+  round roster, and next cursor.
+
+This is one portable transactional state boundary. A host can store it in one
+row/document or normalize/shard it, but every `process` call MUST obtain exclusive or
+serializable ownership of the complete aggregate and atomically commit the
+observably-equivalent aggregate, inbox records, and outbox intents. Advancing parent
+and owned child in separate transactions is non-conforming.
+
+Spawned instances are asynchronous in the statechart sense: they own queues and run
+separate RTC steps without re-entering the spawning RTC. This does not imply an OS
+thread, worker, or independently committed child.
+
+A host targets a live child by supplying its `instance_ref` as the ingress target but
+invokes `process` on the containing root ownership aggregate. The complete aggregate
+scheduler runs. A child cannot be loaded or advanced as detached portable state.
+
+### 15.7 Scheduler, spawn timing, and continuation
+
+At the beginning of a scheduler round, after the timer prelude in §15.11, the engine
+freezes a deterministic preorder roster using `visit(runtime)`:
+
+1. emit `runtime`;
+2. `visit` each active component in placement declaration order; and
+3. `visit` each live owned child in spawn-creation order.
+
+The engine calls `visit(root)` once. This recursion also orders children owned by a
+component and components owned by a spawned child.
+
+Each roster member takes at most one atomic step per round: pending initialization or
+one queued-envelope RTC. Removed members are skipped. New components and spawned
+children join only the next round. Sends append in action/target order. The roster and
+next cursor are aggregate logical state; continuation resumes at the exact next slot.
+
+`spawn` allocates a deterministic child id and reference, seeds inputs, performs
+`bind_to`, and creates a `pending_initialization` runtime atomically. It does not run
+child initial transitions inside the spawning RTC. On the child's first slot in the
+next round, initial transitions and entry actions run as one budgeted atomic
+initialization step. Already queued work waits for later slots. Initialization effects
+use the child's runtime identity.
+
+The foreground transform is:
+
+```text
+process(bundle, prior_state, ingress, now, max_steps)
+  -> { status, state, intents, faults }
+```
+
+`status` is exactly `quiescent`, `continuation_required`, or `faulted`. A positive
+budget counts initialization and envelope RTC steps. Exhaustion with runnable work
+returns commit-safe partial aggregate state and `continuation_required`. Calling again
+with that state, empty ingress, the same `now`, and another positive budget resumes
+deterministically. New accepted ingress MAY append after retained work.
+
+**Budget-partition invariance:** one call with budget N and continuations whose budgets
+sum to N MUST produce identical aggregate state, scheduler position, effect ids, and
+output order when their intent lists are concatenated.
+
+### 15.8 Ingress and exact routing
+
+Call validation and ingress acceptance are atomic. Invalid format, schema, payload,
+instance target, correlation, or time rejects the entire call without changing state.
+
+Accepted public envelopes require a stable, non-empty string `event_id`. Public
+effect workflows also require a non-empty string `correlation_id`. Envelopes append
+in caller order to the exact target machine runtime and become aggregate state.
+Unprocessed accepted ingress remains in returned queues. One envelope has exactly one
+target; fan-out creates distinct derived envelopes. Parent and component handlers
+never compete for the same envelope.
+
+Broker messages remain broker-owned until the host commits business data, durable
+inbox ids, aggregate state, and outbox intents. Broker acknowledgement and remote
+delivery status are not engine state.
+
+### 15.9 Runtime, cause, timer, and effect identities
+
+All hashes below use:
+
+```text
+"sha256:" + lowercase_hex(SHA-256(UTF-8(JCS(value))))
+```
+
+where JCS is RFC 8785 canonical JSON.
+
+Canonical runtime ids are recursive JSON arrays:
+
+```text
+root      = ["root", root_instance_id]
+spawned   = ["spawn", owner_runtime_id, owner_instance_id,
+             instance_id, spawn_sequence]
+component = ["component", owner_runtime_id, structural_path,
+             activation_sequence]
+```
+
+`static_source_path` and `static_action_path` are RFC 6901 JSON Pointers into the
+parsed bundle document. A component runtime's `structural_path` is the ordered JSON
+array of component ids from its containing machine runtime to that placement.
+`owner_instance_id` is the nearest containing root/spawned machine instance when the
+immediate owner runtime is a component.
+
+Host ingress uses its supplied `event_id` as its cause id. Every internal send, timer,
+or system envelope has:
+
+```text
+cause_id = hash([
+  "determa-cause-v1",
+  "2-alpha1",
+  root_instance_id,
+  source_runtime_id,
+  target_runtime_id,
+  cause_kind,                 # "send" | "timer" | "system"
+  parent_cause_id,
+  aggregate_logical_step_sequence,
+  static_source_path,
+  ordinal
+])
+```
+
+`ordinal` is the zero-based action/target emission index for a send, timer declaration
+index for a timer, or fixed zero-based reserved-event emission index for a system
+cause. A timer is armed with:
+
+```text
+timer_id = hash([
+  "determa-timer-v1",
+  "2-alpha1",
+  root_instance_id,
+  runtime_id,
+  state_path,
+  state_activation_sequence,
+  timer_declaration_index,
+  aggregate_timer_creation_sequence,
+  deadline
+])
+```
+
+Its event cause uses the timer id as `parent_cause_id`, `cause_kind: "timer"`, the
+timer's static state/declaration path, and ordinal equal to its declaration index.
+A system cause uses the fault/completion cause as parent, the reserved event name as
+the source path. A single completion/failure notification uses ordinal 0; when one
+component completion also completes its containing parallel state,
+`determa.component_completed` uses ordinal 0 and `done` uses ordinal 1. These tuples
+are the complete derivation; implementations MUST NOT substitute random ids.
+
+Every external output is an intent, not proof of an external outcome:
+
+```text
+effect_key = [
+  "determa-effect-v1",
+  "2-alpha1",
+  [namespace, machine_id, machine_version],
+  root_instance_id,
+  emitting_runtime_id,
+  cause_id,
+  aggregate_logical_step_sequence,
+  static_action_path,
+  emission_index
+]
+effect_id = hash(effect_key)
+```
+
+The intent also carries aggregate monotonic `sequence`, `correlation_id`, event name,
+and typed payload. Including emitting machine/runtime identity prevents collisions
+between reusable placements, activations, and spawned instances. Aggregate counters
+and the persisted scheduler cursor make cause/effect ids invariant across transaction
+retry and budget partitioning.
+
+For a referenced component, the machine identity in `effect_key` is the referenced
+machine's namespace, id, and version. For an inline component root, it is the
+containing machine's namespace, id, and version; `emitting_runtime_id` supplies the
+placement path and activation identity.
+
+### 15.10 ACID and output-intent boundary
+
+A host MAY embed the aggregate in the same database transaction as domain data:
+
+1. Load domain data and aggregate under an appropriate lock/version check.
+2. Insert/check durable inbox ids.
+3. Run the foreground transform.
+4. Persist domain data, returned aggregate state, and ordered outbox intents.
+5. Commit.
+6. Acknowledge broker ingress and deliver outbox rows idempotently by `effect_id`.
+
+Retrying identical uncommitted prior state, ingress, `now`, and budget reproduces the
+same ids and order. Already committed ingress is suppressed by the durable host inbox;
+the engine does not retain an unbounded global dedupe history.
+
+An emitted or delivered output is not a completed effect. Remote success, rejection,
+failure, or no-response handling becomes machine state only through later declared,
+correlated input events. Local database embedding can be ACID-compatible. Distributed
+ACID and distributed exactly-once delivery are explicitly not claimed.
+
+### 15.11 Explicit time and due-timer ordering
+
+`now` is an explicit non-negative integer count of milliseconds in the host's chosen
+timeline. Deadlines are integer milliseconds in the same timeline, calculated by
+adding the normalized duration to `now`. The aggregate stores the greatest accepted
+`observed_time`. A call with `now < observed_time` is rejected atomically with
+`time_regression`; equal time is valid. A failed-transaction retry MUST reuse the same
+`now`; a later value is a new invocation. A virtual host normally starts at 0; a
+wall-clock host SHOULD use Unix epoch milliseconds.
+
+Before freezing a scheduler roster, every invocation performs this atomic prelude:
+
+1. Validate the call and append accepted ingress in caller order.
+2. Advance `observed_time` to `now`.
+3. Discover every armed, not-yet-enqueued timer with `deadline <= now`.
+4. Order them by `(deadline, aggregate_timer_creation_sequence,
+   timer_declaration_index, target_runtime_preorder)`.
+5. Append each derived timer envelope to its target runtime's FIFO tail and mark the
+   timer enqueued/fired.
+6. Freeze the scheduler roster and begin/resume execution.
+
+Existing queued envelopes and newly accepted ingress therefore remain ahead of newly
+due timers in their runtime queue. A continuation at equal time cannot rediscover a
+timer. New runtimes created during the round are absent from the frozen roster.
+
+The engine never wakes itself. A request-driven host supplies time on its next call; a
+real-time host uses an external scheduler to invoke the engine. The alpha guarantees
+deterministic logical time, not hard real-time deadlines.
+
+### 15.12 Atomic faults and commit behavior
+
+Every initialization or envelope RTC step is atomic. On an engine fault (including a
+guard/action/type failure, invalid internal target, invalid spawn/bind, or invariant
+violation), the engine:
+
+1. rolls the step back to its exact pre-step aggregate state, including variable
+   writes, transitions, queues/deferred sets/timers, sends, spawn/bind/cancel, and
+   output intents;
+2. applies one deterministic system finalization: consume the causal envelope into
+   dead letter (or record the synthetic initialization cause), append a fault record
+   containing runtime id, cause id, code, and action path, mark that runtime faulted,
+   and advance the aggregate logical-step counter once; and
+3. emits no external intent from the failed step.
+
+Earlier completed steps and their intents remain commit-safe. Later accepted ingress
+remains queued. The faulting event is not left at the queue head.
+
+A root fault stops processing and returns `faulted`. The returned state and earlier
+intents can be committed atomically. Reprocessing a committed terminal root emits
+nothing; alpha1 has no recovery/reset operation.
+
+A component or spawned-runtime fault uses the same local rollback/dead-letter rule,
+then enqueues exactly one deterministic `determa.component_failed` or
+`determa.spawned_instance_failed` to its owner. The aggregate can continue. An
+unhandled reserved failure faults the owner when processed and can propagate to root.
+If budget expires first, the queued notification yields `continuation_required`.
+An invalid internal send faults the runtime executing it.
+
+Application-declared failure events such as `payment_rejected` are ordinary domain
+behavior. They do not set engine status `faulted` unless their handling itself causes
+an engine fault.
+
+### 15.13 Completion, cancellation, and cascade diagnostics
+
+An owned child survives exit of the particular state whose action spawned it.
+Explicit `cancel` becomes a deterministic control step after the caller's current RTC
+and before the target's next ordinary envelope: exit actions run, then the target's
+queue, deferred set, and timers are disposed.
+
+Owner/root termination cascades deepest-first, siblings in reverse spawn-creation
+order, and components in reverse placement order. The complete cascade—including
+exit actions, owner envelopes/output intents, status changes, and disposal—is one
+aggregate-atomic lifecycle step. A normalized physical store MUST include every
+affected descendant and outbox row in the same serializable transaction.
+
+If any cascade action faults, the engine rolls the complete cascade back, discards all
+of its sends/intents, and then applies root fault finalization with `cascade_fault`.
+The returned aggregate is a **diagnostic terminal aggregate**:
+
+- root and aggregate status are `faulted`, with the causal envelope/action recorded;
+- the scheduler is stopped and cannot be resumed;
+- the complete pre-cascade ownership tree, descendant statuses/configurations,
+  queues, deferred sets, and timers is retained but frozen for inspection; and
+- no failed-cascade output can be dispatched.
+
+Detachment, adoption, orphaning, and separately committed owned-child execution are
+not supported. Model such work as an independent external peer.
+
+### 15.14 Hosting profiles and public effects
+
+The same foreground transform supports:
+
+- main-thread request/response execution with no background worker;
+- one-row or normalized serializable inbox/state/outbox persistence;
+- hibernation until a later request supplies time;
+- externally scheduled real-time invocation;
+- a background-worker host; and
+- an MCP adapter mapping public input schemas to tools and output/state views to
+  results.
+
+Transport adapters, queues, credentials, secrets, execution profiles, MCP
+authentication/tenancy, and deployment bindings are host configuration, not portable
+bundle grammar. Remote provisioning is an output intent plus later declared correlated
+input events; core `spawn` never performs remote I/O.
+
+### 15.15 Format-1 capability disposition
+
+This matrix is exhaustive for the normative format-1 feature families. “Retained”
+means the alpha schema exposes the feature under alpha vocabulary; “changed” means
+this section replaces format-1 semantics; “unsupported” means an alpha bundle MUST
+NOT use it.
+
+| format-1 capability | alpha1 disposition |
+|---|---|
+| Typed event declarations and payload validation | **Retained:** shared bundle declarations plus private machine-local declarations add explicit `direction` and response correlation. |
+| Composite hierarchy and final states | **Retained:** `root`, `states`, `initial`, and `final`. |
+| Simple/internal/local/external transitions and ordered guarded lists | **Retained:** same RTC/LCA semantics and `transition_to`. |
+| Choice pseudostates | **Retained:** ordered branches, default last. |
+| Entry, exit, and initial actions | **Retained:** per-runtime; component allocation/binding adds §15.5 ordering. |
+| Orthogonal `regions` | **Changed:** replaced by isolated `parallel` `components`; no shared queue or implicit broadcast. |
+| Shallow/deep history | **Retained** for ordinary composite state; **unsupported** for parallel/component activation retention. |
+| Timers and virtual/injected clocks | **Changed:** retained per runtime with aggregate time, canonical ids, and §15.11 prelude. |
+| Deferred events and dead letters | **Retained:** isolated per runtime and persisted in the aggregate. |
+| `esvs` and hierarchical variable scope | **Retained as `variables`**, with nominal `instance_ref` added. |
+| External esvs, `env`, and `refresh` | **Retained:** `external: true`, reserved `env`, and `refresh`. |
+| `assign`, `refresh`, and `stop` actions | **Retained** under alpha variable/runtime boundaries. |
+| `publish`, `subscribe`, event scope, and bus broadcast | **Changed:** `send` uses exact targets; public `input` replaces subscription delivery; external sends create intents; implicit scope broadcast is unsupported. |
+| Spawned active objects | **Changed:** `spawn.machine_id`, typed payload, optional `bind_to`, root aggregate scheduler/transaction. |
+| Format-1 submachine states | **Changed:** sequential inline behavior uses nested `states`; reusable isolated behavior uses component placement. The `submachine` keyword is unsupported. |
+| Contracts | **Unsupported** in alpha1; shared typed events provide the local bundle boundary pending package/import design. |
+| Definition migration/hot-swap | **Unsupported** in alpha1; snapshot wire portability and migration are separate work. |
+| Snapshots/restores | **Changed:** abstract aggregate state is normative; concrete alpha snapshot wire shape and cross-engine portability are unsupported. |
+| Action faults and reserved `error` handling | **Changed:** the format-1 reserved `error` event is not synthesized in alpha; engine faults use atomic rollback, dead letter, and owner propagation under §15.12. Application-declared failure events remain ordinary behavior. |
+| Opaque `meta` annotations | **Retained:** ignored by execution at bundle, machine, state, and placement scope. |
+| Programmatic library/native-mapping use | **Changed:** validate a native bundle mapping and invoke the foreground aggregate transform; language-specific API spelling remains non-normative. |
+| Observers, stepping, enabled events, and inspection | **Changed:** apply to the aggregate scheduler/runtime ids; exact alpha CLI/JSON wire shapes are not standardized yet. |
+| Visualization/export | **Retained informatively** for hierarchy; exporters may show components/ownership, but no new normative alpha diagram syntax is defined. |
+| Stores | **Changed:** hosts persist one root aggregate atomically; physical one-row/normalized layouts are equivalent only under §15.6. |
+| Format-1 CLI execution commands and JSON output | **Unsupported for alpha execution** in alpha1; `validate` MAY accept alpha bundles, while the normative alpha surface is the foreground library transform. |
+| Conformance test format | **Retained as the future arbiter:** alpha cases are required before implementation/release but are outside this specification-only change. |
+| CEL guards/computed action values and structured-action sandbox | **Retained:** no host I/O or ambient clock in guards/actions. |
+| Static reachability/dead-branch validation | **Retained and extended:** alpha adds §15.3 reference, direction, and binding checks. |
+
+The alpha JSON Schema and §15.16 unsupported list MUST match this matrix.
+
+### 15.16 Deliberately unsupported and future validation
+
+Format `2-alpha1` deliberately does not support:
+
+- mixed-format documents;
+- package imports, visibility, dependency resolution, or cross-bundle private
+  dependencies;
+- format-1 `regions`, `publish`, event-scope broadcast, `submachine`, contracts, or
+  migrations;
+- concrete alpha snapshot wire portability or hot-swap;
+- shared queues/variables or cross-runtime state transitions;
+- direct host-to-component ingress, component reset, or retained component history;
+- parent/owned-child separate transactions, detached/adopted children, or automatic
+  remote spawning;
+- host I/O, credentials, or ambient clocks inside guards/actions;
+- arbitrary-string instance references;
+- root engine-fault recovery/reset;
+- standardized alpha execution CLI/store JSON shapes;
+- distributed exactly-once delivery or distributed ACID; or
+- hard real-time guarantees.
+
+Before numeric format 2 is considered stable, a separately authorized runnable-example
+repository SHOULD exercise foreground request/response; one-row and normalized
+inbox/outbox ACID; hibernating timers; real-time scheduling; parallel isolated queues,
+bindings, deferral, and re-entry; spawn/target/cancel/cascade; PayPal-like external
+orchestration with success/rejection/silence/retry/duplicates; RabbitMQ
+acknowledgement/redelivery; published-package reuse after import semantics exist; and
+MCP exposure. This section does not create or authorize that repository.

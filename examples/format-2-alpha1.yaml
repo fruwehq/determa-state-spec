@@ -1,0 +1,141 @@
+# A self-contained format 2-alpha1 bundle with isolated parallel components,
+# deterministic owned spawn, nominal instance binding, and a correlated host effect.
+format: "2-alpha1"
+namespace: example.orders
+
+events:
+  submit:
+    direction: input
+  finish_components:
+    direction: input
+  cancel_worker:
+    direction: input
+  begin:
+    direction: internal
+  finish_component:
+    direction: internal
+  payment_requested:
+    direction: output
+    payload:
+      order_id: { type: string, required: true }
+  payment_succeeded:
+    direction: input
+    correlates_to: payment_requested
+    payload:
+      provider_id: { type: string, required: true }
+  payment_rejected:
+    direction: input
+    correlates_to: payment_requested
+    payload:
+      reason: { type: string, required: true }
+
+machines:
+  - machine_id: order
+    version: 1
+    root:
+      type: composite
+      variables:
+        order_id: { type: string, input: true }
+        payment_status: { type: string, init: pending }
+        payment_worker:
+          type: instance_ref
+          machine_id: payment_worker
+          nullable: true
+          init: null
+      initial: { transition_to: idle }
+      states:
+        idle:
+          on_events:
+            submit:
+              transition_to: processing
+              action:
+                - spawn:
+                    machine_id: payment_worker
+                    payload:
+                      order_id: "order_id"
+                    bind_to: payment_worker
+                - send:
+                    event: payment_requested
+                    to: { external: true }
+                    correlation_id: "event.correlation_id"
+                    payload:
+                      order_id: "order_id"
+
+        processing:
+          type: parallel
+          entry:
+            - send:
+                event: begin
+                targets:
+                  - { component: fulfillment }
+                  - { component: accounting }
+          on_events:
+            finish_components:
+              action:
+                - send:
+                    event: finish_component
+                    targets:
+                      - { component: fulfillment }
+                      - { component: accounting }
+            payment_succeeded:
+              action:
+                - assign: { payment_status: "'succeeded'" }
+            payment_rejected:
+              action:
+                - assign: { payment_status: "'rejected'" }
+            cancel_worker:
+              action:
+                - cancel: { instance: "payment_worker" }
+            done:
+              transition_to: complete
+          components:
+            - component_id: fulfillment
+              machine_id: fulfillment
+              with:
+                order_id: "owner.variables.order_id"
+            - component_id: accounting
+              root:
+                type: composite
+                variables:
+                  order_id: { type: string, input: true }
+                initial: { transition_to: waiting }
+                states:
+                  waiting:
+                    on_events:
+                      begin: { transition_to: active }
+                  active:
+                    on_events:
+                      finish_component: { transition_to: complete }
+                  complete: { type: final }
+              with:
+                order_id: "owner.variables.order_id"
+
+        complete:
+          type: final
+
+  - machine_id: fulfillment
+    version: 1
+    root:
+      type: composite
+      variables:
+        order_id: { type: string, input: true }
+      initial: { transition_to: waiting }
+      states:
+        waiting:
+          on_events:
+            begin: { transition_to: active }
+        active:
+          on_events:
+            finish_component: { transition_to: complete }
+        complete:
+          type: final
+
+  - machine_id: payment_worker
+    version: 1
+    root:
+      type: composite
+      variables:
+        order_id: { type: string, input: true }
+      initial: { transition_to: ready }
+      states:
+        ready: {}
