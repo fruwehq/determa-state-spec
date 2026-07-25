@@ -877,7 +877,9 @@ Top-level fields:
 - `format` — required exact string `2-alpha1`.
 - `namespace` — required dotted identifier. Together with `machine_id` and
   `version`, it forms a machine's logical identity.
-- `events` — shared event declarations visible to every machine in the bundle.
+- `events` — shared declarations visible to every machine. Bundle `input` and
+  `output` declarations are the only author-defined host-facing contracts; bundle
+  `internal` declarations are shared but do not cross the host boundary.
 - `machines` — required non-empty ordered list of machine definitions.
 - `meta` — optional opaque annotations ignored by execution.
 
@@ -886,7 +888,8 @@ Machine fields:
 - `machine_id` — required and unique within the bundle.
 - `version` — integer ≥1, optional, default 1; author-controlled machine evolution.
 - `languages` — optional `{guard, action}`, with format-1 defaults.
-- `events` — optional private declarations visible only inside this machine.
+- `events` — optional private declarations visible only inside this machine; every
+  machine-local declaration is `internal`.
 - `meta` — optional opaque annotations.
 - `root` — required outermost `StateNode`; it replaces the context-free format-1
   name `top`.
@@ -909,31 +912,39 @@ An event declaration has:
 
 ```yaml
 event_name:
-  direction: internal        # internal | input | output
+  direction: input           # internal | input | output
   payload:
     field: { type: string, required: true }
   correlates_to: request_event
 ```
 
-`direction` defaults to `internal`. `input` can cross from a host into a machine
-instance; `output` can leave the root ownership aggregate as an output intent;
-`internal` cannot cross the host boundary. `payload` has format-1 typed-field
-semantics. `correlates_to` is valid only on an `input` declaration and MUST name an
-`output` declaration in the same bundle. A success, rejection, or failure response
-to an external effect MUST be a separately declared `input` event with
+`direction` defaults to `internal`. Bundle `input` can cross from a host into a
+machine instance; bundle `output` can leave the root ownership aggregate as an output
+intent; `internal` cannot cross the host boundary. `payload` has format-1 typed-field
+semantics. `correlates_to` is valid only on a bundle `input` declaration and MUST name
+a bundle `output` declaration. A success, rejection, or failure response to an
+external effect MUST be a separately declared bundle `input` event with
 `correlates_to`.
 
-Public ingress and output envelopes carry `correlation_id` outside the typed payload.
-An output intent and every response that names it MUST use the same correlation id.
-Public `event_id` and `correlation_id` values are non-empty strings.
-Public effect workflows lacking a correlation id are rejected as `invalid_correlation`.
+Machine-local declarations are private to that machine and MUST have
+`direction: internal` or omit `direction`; they cannot declare `correlates_to`.
+Shared bundle-internal events are used when several machines need the same internal
+contract. An author-defined host ingress or external output that resolves only to a
+machine-local declaration is `invalid_event_direction`.
+
+External output intents and their correlated response ingress carry `correlation_id`
+outside the typed payload. An output intent and every response that names it MUST use
+the same correlation id. Public ids are non-empty strings; exact ingress requirements
+are in §15.8. Public effect workflows lacking a correlation id are rejected as
+`invalid_correlation`.
 
 The names `initial`, `entry`, `exit`, `env`, `done`, `error`,
 `determa.component_completed`, `determa.component_failed`, and
 `determa.spawned_instance_failed` are reserved. The `determa.*` events have fixed
 engine schemas and cannot be declared by authors. The format-1 `error` name remains
 reserved for compatibility, but alpha engine faults do not synthesize an `error`
-event.
+event. Reserved `env` is the built-in host-ingress exception specified in §15.8;
+reserved `done` is the internal lifecycle event specified in §§15.5 and 15.13.
 
 #### 15.3.2 Variables
 
@@ -952,11 +963,20 @@ variables:
 
 Scalar/container types and lexical scope retain format-1 `esvs` semantics.
 `input: true` is valid only on a machine or inline-component root and allows that
-runtime to receive a typed creation binding. An input variable without `init` is
-required; one with `init` uses that literal when the binding is omitted. Bindings for
-variables not marked `input` are invalid. `external: true` retains the format-1
-host-owned-copy, read-only-to-`assign`, `env`/`refresh` behavior. A declaration MUST
-NOT be both `input` and `external`.
+runtime to receive a typed creation input. An input variable without `init` is
+required; one with `init` uses that literal when omitted. `external: true` retains
+the format-1 host-source-copy behavior: the value is seeded before its declaring
+state's entry, is read-only to `assign`, and changes only by state re-entry or
+`refresh` while handling `env`.
+
+Creation values have two distinct maps, `input` and `external` (§15.6). Every supplied
+name MUST resolve to a declaration marked for that map and match its type; extra names
+are invalid. Every `input` or `external` declaration without `init` is required in its
+respective creation map; a declaration with `init` uses that literal when omitted.
+External variable names MUST be unique across one machine/inline-component state tree
+so its retained external-source map is unambiguous. Root input names and external
+names MUST also be disjoint because `spawn.payload` and component `with` are flat
+creation maps. A declaration MUST NOT be both `input` and `external`.
 
 `instance_ref` is nominal, not a string. Its abstract value is:
 
@@ -985,7 +1005,9 @@ entry/exit ordering retain §§4.5–5.5 semantics with `variables` replacing `e
 - A `composite` state requires `initial` and `states`.
 - A `parallel` state requires at least two `components` (§15.5) and cannot also
   declare `states`, `initial`, or `history`.
-- A `final` state cannot declare active behavior.
+- A `final` state MAY declare only `meta`, `variables`, and `entry`. Its variables
+  initialize and its entry actions run when it is entered; it cannot declare exit,
+  handlers, timers, deferral, hierarchy/components, history, or choice behavior.
 - `choice` remains an ordered transient branch list and is mutually exclusive with
   active-state fields.
 
@@ -1003,20 +1025,23 @@ Alpha structured actions are:
 | send | `{ send: { event, to? | targets?, payload?, correlation_id? } }` | enqueue one or more exact-target envelopes |
 | refresh | `{ refresh: { only?: [name, ...] } }` | retain format-1 `env` adoption |
 | spawn | `{ spawn: { machine_id, payload?, bind_to? } }` | create an owned pending runtime |
-| cancel | `{ cancel: { instance: CEL } }` | cancel a nominal owned instance |
-| stop | `{ stop: {} }` | terminate the current machine runtime |
+| cancel | `{ cancel: { instance: CEL } }` | request cancellation of a nominal owned instance |
+| stop | `{ stop: {} }` | request current-runtime lifecycle completion |
 
 `to` is one of `{self: true}`, `{owner: true}`, `{component: component_id}`,
 `{instance: CEL}`, or `{external: true}`. `targets` is a non-empty ordered list of
 the same target objects and is mutually exclusive with `to`. Omitting both means
 `self`. Fan-out is defined as one independent envelope per listed target, in list
 order. `payload` and `correlation_id` values are CEL expressions. An external target
-requires a declared `output` event and correlation id. Host ingress requires a
-declared `input` event. `send` replaces format-1 `publish`; there is no implicit
-scope-based broadcast.
+requires a bundle `output` event and correlation id. Ordinary host ingress requires a
+bundle `input` event. `send` replaces format-1 `publish`; there is no implicit
+scope-based broadcast. The reserved `env` exception and its explicitly targeted
+forwarding rule are in §15.8.
 
-`spawn.payload` expressions seed compatible `input: true` variables on the referenced
-machine's `root`. If present, `bind_to` MUST name an in-scope writable
+`spawn.payload` expressions provide the referenced machine's flat creation values:
+names marked `input` seed root inputs; names marked `external` seed its retained
+external-source map. Missing required, extra, duplicate-category, or type-invalid
+values fault the spawning RTC. If present, `bind_to` MUST name an in-scope writable
 `instance_ref` whose optional `machine_id` constraint matches. Its current value MUST
 be null. Allocation and binding are one atomic action; overwrite fails with
 `binding_not_empty`.
@@ -1025,8 +1050,8 @@ Load-time semantic validation includes unique machine and component ids; reachab
 states and default-last branches; declared event and state references; same-bundle
 machine references; event direction and `correlates_to` compatibility; complete
 required creation bindings with no extras; binding-expression type compatibility;
-and `bind_to` type/machine compatibility. Runtime validation uses the stable codes in
-§15.3.5.
+external-name uniqueness and creation-map disjointness; and `bind_to`
+type/machine compatibility. Runtime validation uses the stable codes in §15.3.5.
 
 A machine-local event declaration MUST NOT redeclare a shared bundle event name.
 Shared and machine-local event names MUST each be unique in their declaration map;
@@ -1102,7 +1127,8 @@ Entering a parallel state is one atomic owner step:
 2. Run the parallel state's owner entry action.
 3. Evaluate each placement's `with` expressions against the same post-entry owner
    variables and triggering event.
-4. Seed only declared `input: true` component variables.
+4. Partition the resulting flat map into declared root `input` values and retained
+   `external` source values, applying the missing/extra/type rules of §15.3.2.
 5. Leave every component `pending_initialization`.
 
 Missing, extra, or type-invalid bindings fault and roll back the owner step. Because
@@ -1121,35 +1147,60 @@ The envelope stores that exact nominal runtime id. A delayed envelope cannot ret
 a later activation. Sending to an inactive placement faults the sending RTC with
 `inactive_component_target`.
 
-When a component first reaches final, the engine enqueues one
-`determa.component_completed` event to its owner with
-`{component_id, component_runtime_id}`. Once every component is final, it enqueues one
-scoped `done` event for the parallel state. Completion never mutates the owner
-configuration directly. A component engine fault follows §15.12 and enqueues one
+When a component first reaches its root final state or executes `stop`, its current RTC
+schedules a pending component-completion control. At its next eligible slot that
+control consumes one budget unit, cascades any owned descendants, disposes its
+ordinary queue/deferred set/timers, and marks it completed. A root-final component
+retains its final configuration and variables until the containing parallel state
+exits; a stopped component retains an empty configuration.
+
+Successful completion enqueues one `determa.component_completed` event to the owner
+with `{component_id, component_runtime_id}`. Once every component is completed, the
+same control also enqueues scoped `done` with
+`{kind: "parallel", state_path}`. Completion never mutates the owner configuration
+directly. The notifications use the control cause and ordinals in §15.9. A component
+engine/cascade fault follows §15.12 and enqueues one
 `determa.component_failed`; an unhandled failure faults the owner when processed.
 
-Exiting the parallel state cancels components in reverse declaration order, runs
-their exit actions, cancels timers, and disposes their queues, deferred sets,
-variables, and configurations. External intents and owner-targeted envelopes emitted
-by exit actions remain. Re-entry increments activation sequences and creates fresh
-runtimes. Reset-in-place and component history retention are unsupported.
+Exiting the parallel state cancels components in reverse declaration order as part of
+the owner's atomic RTC, runs their remaining exit actions, cancels owned descendants,
+and disposes queues, deferred sets, variables, configurations, source maps, and
+timers. External intents and owner-targeted envelopes emitted by exit actions remain.
+Re-entry allocates new activation sequences and creates fresh runtimes.
+Reset-in-place and component history retention are unsupported.
 
 ### 15.6 Portable root ownership aggregate
 
 The abstract creation operation is:
 
 ```text
-create(bundle, root_machine_id, root_instance_id, bindings) -> prior_state
+create(
+  bundle,
+  root_machine_id,
+  root_instance_id,
+  bindings = {
+    "input": { name: value, ... },
+    "external": { name: value, ... }
+  }
+) -> prior_state
 ```
 
-It selects exactly one bundle machine as the ownership root, validates its root input
-bindings, and returns an aggregate with that root `pending_initialization`, empty
-queues, no timers or children, counters at zero, and no observed time yet. All other
-bundle machines are inactive definitions until placed or spawned. `root_instance_id`
-is a host-supplied stable non-empty string and MUST be unique within the host's
-persistence scope. Creation executes no machine action; the root initialization is
-the first budgeted scheduler step of a later `process` call. Language APIs can name or
-combine creation and processing idiomatically, but MUST preserve this boundary.
+It selects exactly one bundle machine as the ownership root. `bindings.input`
+validates and seeds that machine root's `input: true` variables.
+`bindings.external` validates every external declaration in the selected machine and
+creates the runtime's retained external-source map; the applicable value is copied
+immediately before each declaring state enters. Either map MAY be omitted only when
+none of its required declarations lacks `init`. Missing required, extra, wrong-map,
+or type-invalid names reject creation atomically with `invalid_binding`.
+
+The result has its root `pending_initialization`, empty queues, no timers or children,
+every next-counter initialized as specified in §15.9, and no observed time yet. All
+other bundle machines are inactive definitions until placed or spawned.
+`root_instance_id` is a host-supplied stable non-empty string and MUST be unique
+within the host's persistence scope. Creation executes no machine action; root
+initialization is the first budgeted scheduler step of a later `process` call.
+Language APIs can name or combine creation and processing idiomatically, but MUST
+preserve this boundary and the distinct input/external maps.
 
 `prior_state` and returned `state` describe exactly one **root ownership aggregate**:
 
@@ -1157,7 +1208,7 @@ combine creation and processing idiomatically, but MUST preserve this boundary.
 - every active component runtime;
 - every live owned spawned descendant and its components, recursively;
 - each runtime's configuration, variables, FIFO queue, deferred set, timers, status,
-  and dead letters;
+  dead letters, retained external-source map, and pending lifecycle controls;
 - ownership, placement, creation, and activation identities/counters; and
 - aggregate observed time, logical-step counter, output-sequence counter, scheduler
   round roster, and next cursor.
@@ -1178,27 +1229,60 @@ scheduler runs. A child cannot be loaded or advanced as detached portable state.
 
 ### 15.7 Scheduler, spawn timing, and continuation
 
-At the beginning of a scheduler round, after the timer prelude in §15.11, the engine
-freezes a deterministic preorder roster using `visit(runtime)`:
+The aggregate stores whether a scheduler round is active, that round's immutable
+roster, and its next cursor. Only when no round is active does the engine freeze a new
+deterministic preorder roster using `visit(runtime)`:
 
 1. emit `runtime`;
 2. `visit` each active component in placement declaration order; and
 3. `visit` each live owned child in spawn-creation order.
 
 The engine calls `visit(root)` once. This recursion also orders children owned by a
-component and components owned by a spawned child.
+component and components owned by a spawned child. Freezing stores the roster, sets
+the cursor to zero, and marks the round active.
 
-Each roster member takes at most one atomic step per round: pending initialization or
-one queued-envelope RTC. Removed members are skipped. New components and spawned
-children join only the next round. Sends append in action/target order. The roster and
-next cursor are aggregate logical state; continuation resumes at the exact next slot.
+At each roster slot the engine selects at most one item for that member, in this
+priority order:
 
-`spawn` allocates a deterministic child id and reference, seeds inputs, performs
-`bind_to`, and creates a `pending_initialization` runtime atomically. It does not run
-child initial transitions inside the spawning RTC. On the child's first slot in the
-next round, initial transitions and entry actions run as one budgeted atomic
-initialization step. Already queued work waits for later slots. Initialization effects
-use the child's runtime identity.
+1. the earliest pending lifecycle control under §15.13;
+2. pending initialization; or
+3. one queued-envelope RTC.
+
+Before selection, if any strict owner ancestor of the roster member has pending
+cancellation, natural termination, or component completion, the member is suppressed
+and its slot is skipped. The lifecycle target itself remains eligible for its
+priority control. Suppression begins in the requesting RTC's committed state, applies
+to the rest of the current frozen roster and every continuation, and ends only when
+the lifecycle control succeeds or faults. Descendant queues remain intact until that
+atomic control disposes or restores them.
+
+Each selected item is one budgeted atomic step. A removed/terminal member with no
+pending lifecycle control, or any member with no selected item, is skipped without
+consuming budget or a logical-step sequence. A final state with a pending completion
+control is therefore not skipped. After executing or skipping, the cursor advances
+once. At the end of the roster the engine clears the active-round marker, roster, and
+cursor, performs the round-boundary due-timer discovery in §15.11, and—if runnable
+work and budget remain—freezes the next round. Otherwise it returns the appropriate
+status. Sends append in action/target order.
+
+Here, **runnable work** means an unsuppressed pending lifecycle control, pending
+initialization, or queued envelope. Suppressed descendant work does not independently
+keep the aggregate runnable; its ancestor lifecycle control does.
+
+An invocation prelude (§15.11) never replaces an active roster or resets its cursor.
+New accepted ingress and timers append to queues while the roster remains frozen. If
+the target's slot is still ahead, that work can occupy the target's one slot in the
+current round; if the slot has passed, it waits for the next round. A later `now`
+similarly exposes newly due timers without changing roster membership. A runtime
+created during the round is absent from that roster and joins only after it ends.
+
+`spawn` allocates the exact sequence, child id, and reference defined in §15.9,
+partitions `payload` into creation input/external values, performs `bind_to`, and
+creates a `pending_initialization` runtime atomically. It does not run child initial
+transitions inside the spawning RTC. On the child's first eligible slot in the next
+round, initialization runs as one budgeted atomic step unless a higher-priority
+lifecycle control cancels it first. Already queued work waits for a later slot.
+Initialization effects use the child's runtime identity.
 
 The foreground transform is:
 
@@ -1208,13 +1292,17 @@ process(bundle, prior_state, ingress, now, max_steps)
 ```
 
 `status` is exactly `quiescent`, `continuation_required`, or `faulted`. A positive
-budget counts initialization and envelope RTC steps. Exhaustion with runnable work
-returns commit-safe partial aggregate state and `continuation_required`. Calling again
-with that state, empty ingress, the same `now`, and another positive budget resumes
-deterministically. New accepted ingress MAY append after retained work.
+budget counts initialization, envelope RTC, cancellation, and termination-cascade
+steps. Exhaustion with runnable work returns commit-safe partial aggregate state and
+`continuation_required`; an in-progress roster/cursor is returned unchanged except
+for slots already completed or skipped. Calling again with that state, empty ingress,
+the same `now`, and another positive budget resumes deterministically. New accepted
+ingress and a non-regressing later `now` are permitted on a continuation and follow
+the frozen-roster rule above.
 
 **Budget-partition invariance:** one call with budget N and continuations whose budgets
-sum to N MUST produce identical aggregate state, scheduler position, effect ids, and
+sum to N, use empty continuation ingress, and repeat the same `now` MUST produce
+identical aggregate state, scheduler position, counter values, cause/effect ids, and
 output order when their intent lists are concatenated.
 
 ### 15.8 Ingress and exact routing
@@ -1222,12 +1310,49 @@ output order when their intent lists are concatenated.
 Call validation and ingress acceptance are atomic. Invalid format, schema, payload,
 instance target, correlation, or time rejects the entire call without changing state.
 
-Accepted public envelopes require a stable, non-empty string `event_id`. Public
-effect workflows also require a non-empty string `correlation_id`. Envelopes append
-in caller order to the exact target machine runtime and become aggregate state.
-Unprocessed accepted ingress remains in returned queues. One envelope has exactly one
-target; fan-out creates distinct derived envelopes. Parent and component handlers
-never compete for the same envelope.
+An ordinary author-defined host envelope MUST name a bundle `input` event. Every
+accepted host envelope requires a stable, non-empty string `event_id`; an input with
+`correlates_to` also requires a non-empty string `correlation_id` matching the
+external workflow. Envelopes append in caller order to the exact root or live spawned
+machine runtime and become aggregate state. Unprocessed accepted ingress remains in
+returned queues. One envelope has exactly one target; fan-out creates distinct
+derived envelopes. Parent and component handlers never compete for the same envelope.
+
+Reserved `env` is the sole undeclared host-ingress exception. Its exact envelope is:
+
+```text
+{
+  event: "env",
+  event_id: non_empty_string,
+  target: root | live_instance_ref,
+  payload: { changed: { external_name: typed_value, ... } }
+}
+```
+
+`correlation_id` MUST be absent. `changed` MUST be a non-empty map; every name MUST
+exist in the target runtime definition's unique external declarations and its value
+MUST match that declaration's type. Extra or wrong-typed names reject the complete
+call as `invalid_payload`. Host `env` cannot target a component.
+
+Accepting `env` validates and appends the envelope but does not yet mutate the source
+map or a current variable copy. When that envelope is selected for its RTC, the engine
+first applies `changed` to the retained external-source map, then dispatches the
+handler; that source update is part of the atomic RTC and rolls back if it faults. An
+`env` handler sees `event.payload.changed` normally. `refresh: {}` is valid only while
+handling that envelope and copies every changed name that resolves to an active
+in-scope `external: true` variable; `refresh.only` MUST be a subset of both `changed`
+and those in-scope external names. A mismatch faults the RTC with `action_fault`.
+State entry later in or after a successful RTC seeds its external declaration from
+the retained source map even if no refresh was taken.
+
+To update an isolated component, an owner must explicitly forward `env` with `send`
+to its exact component placement. Such an in-engine `env` send is valid only while
+handling `env`, MUST omit correlation, and MUST forward a non-empty subset of the
+current `changed` map whose names/types are valid for the target. A valid forward
+queues one derived envelope under ordinary send ordering; it waits behind component
+initialization and updates the target source map only when its own RTC begins. This
+exception creates no implicit broadcast and cannot use the `{external: true}` send
+target.
 
 Broker messages remain broker-owned until the host commits business data, durable
 inbox ids, aggregate state, and outbox intents. Broker acknowledgement and remote
@@ -1243,6 +1368,21 @@ All hashes below use:
 
 where JCS is RFC 8785 canonical JSON.
 
+All sequences are unbounded non-negative mathematical integers; implementations MUST
+reject overflow rather than wrap. A stored counter is always the **next** value to
+allocate. Creation initializes:
+
+- aggregate `next_logical_step_sequence`, `next_timer_creation_sequence`, and
+  `next_output_sequence` to 0;
+- each machine/component runtime's `next_spawn_sequence` to 0;
+- each component-placement `next_activation_sequence` to 0; and
+- each runtime/static-state-path `next_state_activation_sequence` to 0.
+
+Allocation takes the current value and increments the next-counter in the same atomic
+step. A rolled-back step rolls back every allocation. Counters belonging to exited
+states and inactive component placements remain in their containing runtime so
+re-entry cannot reuse an identity.
+
 Canonical runtime ids are recursive JSON arrays:
 
 ```text
@@ -1253,14 +1393,58 @@ component = ["component", owner_runtime_id, structural_path,
              activation_sequence]
 ```
 
-`static_source_path` and `static_action_path` are RFC 6901 JSON Pointers into the
-parsed bundle document. A component runtime's `structural_path` is the ordered JSON
-array of component ids from its containing machine runtime to that placement.
-`owner_instance_id` is the nearest containing root/spawned machine instance when the
-immediate owner runtime is a component.
+A component runtime's `structural_path` is the ordered JSON array of component ids
+from its containing machine runtime to that placement. `owner_instance_id` is the
+nearest containing root/spawned machine instance when the immediate owner runtime is
+a component.
+
+For a successful `spawn`, let `q` be the value allocated from the executing owner's
+`next_spawn_sequence`. The child fields are:
+
+```text
+spawn_sequence = q
+instance_id = hash([
+  "determa-instance-v1",
+  "2-alpha1",
+  root_instance_id,
+  owner_runtime_id,
+  q,
+  [namespace, machine_id, machine_version]
+])
+```
+
+For component placement entry, allocate `activation_sequence` from that placement's
+counter in declaration order before the owner entry action. For every state entry,
+allocate `state_activation_sequence` from the runtime/path counter immediately before
+initializing that state's variables and running its entry action. Multiple state
+entries follow the normative outermost-to-innermost entry order.
+
+When the scheduler selects a budgeted item, it allocates
+`step_sequence = next_logical_step_sequence`. Every action, timer, send, effect,
+lifecycle mutation, and system notification performed by that item uses this same
+value. On success, `next_logical_step_sequence` becomes `step_sequence + 1`. On
+fault, the item and tentative increment roll back; fault finalization reuses that
+same `step_sequence` and commits the next value as `step_sequence + 1`. Invocation
+preludes, roster freezes, and skipped slots allocate no step sequence.
+
+When an `after` timer is armed, allocate `timer_creation_sequence` from the aggregate
+counter in declaration order, store the arming step's `step_sequence`, and mark the
+timer ineligible until the active roster reaches its boundary. When an external
+intent is emitted, allocate its public `sequence` from the aggregate output counter in
+action/target order. Both increments are part of the executing step and roll back
+with it.
+
+`static_action_path`, `state_path`, and every document pointer below are RFC 6901
+JSON Pointers into the parsed bundle. Cause tuples use a domain-tagged locator:
+
+```text
+source_locator =
+  ["document", rfc6901_pointer] |
+  ["system", reserved_event_name]
+```
 
 Host ingress uses its supplied `event_id` as its cause id. Every internal send, timer,
-or system envelope has:
+lifecycle control, or system envelope has:
 
 ```text
 cause_id = hash([
@@ -1269,17 +1453,29 @@ cause_id = hash([
   root_instance_id,
   source_runtime_id,
   target_runtime_id,
-  cause_kind,                 # "send" | "timer" | "system"
+  cause_kind,                 # "send" | "timer" | "control" | "system"
   parent_cause_id,
-  aggregate_logical_step_sequence,
-  static_source_path,
+  step_sequence,
+  source_locator,
   ordinal
 ])
 ```
 
-`ordinal` is the zero-based action/target emission index for a send, timer declaration
-index for a timer, or fixed zero-based reserved-event emission index for a system
-cause. A timer is armed with:
+For `send`, `source_locator` identifies the send action and `ordinal` is the
+zero-based index in `targets` (or 0 for omitted/singular `to`). The same target index
+is `emission_index` if that target is external. A timer uses the pointer to its
+`after` declaration and its zero-based declaration index.
+
+A lifecycle control record stores its requesting runtime, target runtime,
+`parent_cause_id`, requesting `step_sequence`, action/state pointer, and action
+ordinal. At the later control step, `cause_kind` is `control`, `step_sequence` is the
+control step's newly allocated value, `source_locator` is the stored document pointer,
+and `ordinal` is 0 for the singular `cancel`/`stop` target or natural final
+completion. Pending controls for one target order by
+`(requesting_step_sequence, source_locator, ordinal, source_runtime_id)`, comparing
+numbers numerically and other fields by the UTF-8 bytes of their JCS encoding.
+
+A timer id is:
 
 ```text
 timer_id = hash([
@@ -1290,18 +1486,28 @@ timer_id = hash([
   state_path,
   state_activation_sequence,
   timer_declaration_index,
-  aggregate_timer_creation_sequence,
+  timer_creation_sequence,
   deadline
 ])
 ```
 
 Its event cause uses the timer id as `parent_cause_id`, `cause_kind: "timer"`, the
-timer's static state/declaration path, and ordinal equal to its declaration index.
-A system cause uses the fault/completion cause as parent, the reserved event name as
-the source path. A single completion/failure notification uses ordinal 0; when one
-component completion also completes its containing parallel state,
-`determa.component_completed` uses ordinal 0 and `done` uses ordinal 1. These tuples
-are the complete derivation; implementations MUST NOT substitute random ids.
+stored arming `step_sequence`, the timer declaration's document locator, and ordinal
+equal to its declaration index. Due-timer discovery itself allocates no logical step.
+
+A system cause uses the fault/completion/control cause as parent and
+`["system", reserved_event_name]` as its locator. Ordinals are fixed:
+
+- one component completion/failure notification uses 0;
+- if the same component-completion step also completes its parallel state,
+  `determa.component_completed` uses 0 and parallel `done` uses 1;
+- one spawned-instance completion `done` or failure notification uses 0; and
+- no notification is emitted for explicit cancellation or descendant disposal during
+  an owner cascade.
+
+Action traversal is state lifecycle order, then action-list order, then target-list
+order. These rules are the complete ordinal/sequence derivation; implementations MUST
+NOT substitute random ids or allocation based on physical storage order.
 
 Every external output is an intent, not proof of an external outcome:
 
@@ -1313,18 +1519,18 @@ effect_key = [
   root_instance_id,
   emitting_runtime_id,
   cause_id,
-  aggregate_logical_step_sequence,
+  step_sequence,
   static_action_path,
   emission_index
 ]
 effect_id = hash(effect_key)
 ```
 
-The intent also carries aggregate monotonic `sequence`, `correlation_id`, event name,
-and typed payload. Including emitting machine/runtime identity prevents collisions
-between reusable placements, activations, and spawned instances. Aggregate counters
-and the persisted scheduler cursor make cause/effect ids invariant across transaction
-retry and budget partitioning.
+The intent also carries the allocated aggregate monotonic `sequence`,
+`correlation_id`, event name, and typed payload. Including emitting machine/runtime
+identity prevents collisions between reusable placements, activations, and spawned
+instances. Exact counter allocation plus the persisted scheduler cursor makes
+cause/effect ids invariant across transaction retry and budget partitioning.
 
 For a referenced component, the machine identity in `effect_key` is the referenced
 machine's namespace, id, and version. For an inline component root, it is the
@@ -1361,20 +1567,36 @@ adding the normalized duration to `now`. The aggregate stores the greatest accep
 `now`; a later value is a new invocation. A virtual host normally starts at 0; a
 wall-clock host SHOULD use Unix epoch milliseconds.
 
-Before freezing a scheduler roster, every invocation performs this atomic prelude:
+Every invocation performs this atomic prelude, whether or not a scheduler round is
+already active:
 
 1. Validate the call and append accepted ingress in caller order.
 2. Advance `observed_time` to `now`.
-3. Discover every armed, not-yet-enqueued timer with `deadline <= now`.
-4. Order them by `(deadline, aggregate_timer_creation_sequence,
+3. Discover every eligible, armed, not-yet-enqueued timer with `deadline <= now`.
+4. Order them by `(deadline, timer_creation_sequence,
    timer_declaration_index, target_runtime_preorder)`.
 5. Append each derived timer envelope to its target runtime's FIFO tail and mark the
    timer enqueued/fired.
-6. Freeze the scheduler roster and begin/resume execution.
+6. If a round is active, preserve its exact roster and cursor. Otherwise, if runnable
+   work exists, freeze a new roster under §15.7.
+
+Steps 3–5 are the **due-timer discovery phase**. A timer armed during an active round
+is ineligible in invocation preludes until that same roster reaches its end. This
+prevents a continuation from inserting the new timer ahead of sends that later roster
+members would produce in an uninterrupted call.
+
+Whenever a roster reaches its end, the engine makes timers armed during that round
+eligible and repeats the discovery phase using the unchanged `observed_time`, before
+it freezes a next round or returns. It does not re-append ingress or advance time at
+that boundary. Thus a newly armed timer with `deadline <= observed_time` is enqueued
+after all queue writes from its arming round and before the next roster; performing
+the same boundary after a budgeted continuation produces identical state.
 
 Existing queued envelopes and newly accepted ingress therefore remain ahead of newly
 due timers in their runtime queue. A continuation at equal time cannot rediscover a
-timer. New runtimes created during the round are absent from the frozen roster.
+timer. During an active round, later ingress/time can change queue contents but not
+membership or slot order; a target whose slot passed waits until the next round. New
+runtimes created during the round remain absent until that round ends.
 
 The engine never wakes itself. A request-driven host supplies time on its next call; a
 real-time host uses an external scheduler to invoke the engine. The alpha guarantees
@@ -1382,17 +1604,18 @@ deterministic logical time, not hard real-time deadlines.
 
 ### 15.12 Atomic faults and commit behavior
 
-Every initialization or envelope RTC step is atomic. On an engine fault (including a
-guard/action/type failure, invalid internal target, invalid spawn/bind, or invariant
-violation), the engine:
+Every initialization, envelope RTC, cancellation, or termination-cascade step is
+atomic. On an engine fault (including a guard/action/type failure, invalid internal
+target, invalid spawn/bind, cascade action, or invariant violation), the engine:
 
 1. rolls the step back to its exact pre-step aggregate state, including variable
-   writes, transitions, queues/deferred sets/timers, sends, spawn/bind/cancel, and
-   output intents;
-2. applies one deterministic system finalization: consume the causal envelope into
-   dead letter (or record the synthetic initialization cause), append a fault record
-   containing runtime id, cause id, code, and action path, mark that runtime faulted,
-   and advance the aggregate logical-step counter once; and
+   writes, retained external-source updates, transitions, queues/deferred sets/timers,
+   sends, spawn/bind/cancel, and output intents;
+2. applies one deterministic system finalization using the failed step's reserved
+   `step_sequence` (§15.9): consume an envelope cause into dead letter, or consume and
+   record the synthetic initialization/control cause; append a fault record containing
+   runtime id, cause id, code, and action path; mark that runtime faulted; and commit
+   `next_logical_step_sequence = step_sequence + 1`; and
 3. emits no external intent from the failed step.
 
 Earlier completed steps and their intents remain commit-safe. Later accepted ingress
@@ -1407,7 +1630,8 @@ then enqueues exactly one deterministic `determa.component_failed` or
 `determa.spawned_instance_failed` to its owner. The aggregate can continue. An
 unhandled reserved failure faults the owner when processed and can propagate to root.
 If budget expires first, the queued notification yields `continuation_required`.
-An invalid internal send faults the runtime executing it.
+An invalid internal send, including an invalid forwarded `env`, faults the runtime
+executing it.
 
 Application-declared failure events such as `payment_rejected` are ordinary domain
 behavior. They do not set engine status `faulted` unless their handling itself causes
@@ -1416,24 +1640,78 @@ an engine fault.
 ### 15.13 Completion, cancellation, and cascade diagnostics
 
 An owned child survives exit of the particular state whose action spawned it.
-Explicit `cancel` becomes a deterministic control step after the caller's current RTC
-and before the target's next ordinary envelope: exit actions run, then the target's
-queue, deferred set, and timers are disposed.
 
-Owner/root termination cascades deepest-first, siblings in reverse spawn-creation
-order, and components in reverse placement order. The complete cascade—including
-exit actions, owner envelopes/output intents, status changes, and disposal—is one
-aggregate-atomic lifecycle step. A normalized physical store MUST include every
-affected descendant and outbox row in the same serializable transaction.
+A successful `cancel` action validates a live owned `instance_ref` and appends a
+pending cancellation control carrying the requesting cause/step and cancel action
+path. For targeting purposes, a pending-initialization runtime is live, but a runtime
+with cancellation/termination already pending—or any runtime below such an
+ancestor—is not; duplicate/late cancel, ingress, or send fails with
+`invalid_instance_target`. Reaching a machine runtime's root final state, or
+successfully executing `stop`, appends a pending natural-termination control carrying
+the causal step and final-state/stop-action path and marks that runtime
+`pending_termination`. A runtime has at most one natural-termination control: the
+first `stop` or root-final request in normative action/lifecycle order supplies the
+stored path, and later requests in the same RTC are no-ops. Request creation is part
+of the current RTC; it does not run lifecycle work recursively.
 
-If any cascade action faults, the engine rolls the complete cascade back, discards all
-of its sends/intents, and then applies root fault finalization with `cascade_fault`.
-The returned aggregate is a **diagnostic terminal aggregate**:
+The target's next eligible roster slot selects the earliest pending lifecycle control
+before initialization or an ordinary envelope (§15.7). Cancellation and natural
+termination each consume one `max_steps` unit, allocate their own logical
+`step_sequence`, and derive a `control` cause under §15.9. If budget ends first, the
+control and current scheduler state—an active roster/cursor if that round has not
+finished—are returned with `continuation_required`. A pending termination runtime
+processes no later ordinary envelope, and §15.7 suppresses all of its descendants
+before they can perform post-request work.
 
-- root and aggregate status are `faulted`, with the causal envelope/action recorded;
+A lifecycle control is one aggregate-atomic step. It visits owned descendants
+deepest-first, siblings in reverse spawn-creation order, and components in reverse
+placement order; runs applicable exit actions; applies deterministically ordered
+sends/intents; then disposes queues, deferred sets, timers, variables, configurations,
+external-source maps, and pending controls. Component completion retains only the
+final/empty diagnostic state specified in §15.5. A normalized physical store MUST
+include every affected descendant and outbox row in the same serializable transaction.
+
+Successful explicit cancellation removes the target spawned subtree and emits no
+`done`. Natural completion of an owned spawned runtime removes that subtree and
+enqueues exactly one reserved internal `done` envelope to its owner:
+
+```text
+{
+  kind: "spawned_instance",
+  instance: completed_instance_ref,
+  machine_id: string,
+  machine_version: integer
+}
+```
+
+The completion notification is part of the termination control step and has system
+ordinal 0. A retained `instance_ref` remains a serializable/equatable nominal value
+but no longer targets a live runtime; using it for ingress, send, or cancel is
+`invalid_instance_target`. `bind_to` variables are not cleared implicitly, so an
+owner can inspect the `done` payload and explicitly assign null.
+
+Natural completion of the root performs the same descendant cascade, retains only
+the root's terminal identity/status/fault-history record with an empty active
+configuration, stops the scheduler, and returns `quiescent`; there is no owner
+notification. For a component, root-final/`stop` completion follows §15.5 rather than
+spawned `done`. Descendant disposal caused by a parent/root/component lifecycle emits
+no nested completion notifications.
+
+If an explicit-cancellation or non-root natural-termination cascade action faults,
+the engine rolls the complete cascade back, discards its sends/intents, and applies
+`cascade_fault` finalization to the target runtime using the lifecycle step's reserved
+sequence. The intact pre-cascade target subtree is retained frozen for diagnosis; a
+component/spawned target sends its one ordinary failure notification under §15.12,
+and the aggregate may continue.
+
+If a root termination cascade action faults, the same rollback instead applies root
+fault finalization. The returned aggregate is a **diagnostic terminal aggregate**:
+
+- root and aggregate status are `faulted`, with the causal control/action recorded;
 - the scheduler is stopped and cannot be resumed;
 - the complete pre-cascade ownership tree, descendant statuses/configurations,
-  queues, deferred sets, and timers is retained but frozen for inspection; and
+  queues, deferred sets, timers, counters, and source maps is retained but frozen for
+  inspection; and
 - no failed-cascade output can be dispatched.
 
 Detachment, adoption, orphaning, and separately committed owned-child execution are
@@ -1465,8 +1743,8 @@ NOT use it.
 
 | format-1 capability | alpha1 disposition |
 |---|---|
-| Typed event declarations and payload validation | **Retained:** shared bundle declarations plus private machine-local declarations add explicit `direction` and response correlation. |
-| Composite hierarchy and final states | **Retained:** `root`, `states`, `initial`, and `final`. |
+| Typed event declarations and payload validation | **Retained:** bundle declarations define shared/public contracts; machine-local declarations are private/internal; host effects add explicit direction and response correlation. |
+| Composite hierarchy and final states | **Retained:** `root`, `states`, `initial`, and `final`; alpha final nodes permit only entry-time variables/actions before lifecycle completion. |
 | Simple/internal/local/external transitions and ordered guarded lists | **Retained:** same RTC/LCA semantics and `transition_to`. |
 | Choice pseudostates | **Retained:** ordered branches, default last. |
 | Entry, exit, and initial actions | **Retained:** per-runtime; component allocation/binding adds §15.5 ordering. |
@@ -1475,10 +1753,10 @@ NOT use it.
 | Timers and virtual/injected clocks | **Changed:** retained per runtime with aggregate time, canonical ids, and §15.11 prelude. |
 | Deferred events and dead letters | **Retained:** isolated per runtime and persisted in the aggregate. |
 | `esvs` and hierarchical variable scope | **Retained as `variables`**, with nominal `instance_ref` added. |
-| External esvs, `env`, and `refresh` | **Retained:** `external: true`, reserved `env`, and `refresh`. |
-| `assign`, `refresh`, and `stop` actions | **Retained** under alpha variable/runtime boundaries. |
+| External esvs, `env`, and `refresh` | **Retained:** distinct creation-source bindings, built-in typed `env`, retained source maps, and event-scoped `refresh`. |
+| `assign`, `refresh`, and `stop` actions | **Retained:** `stop` schedules a budgeted lifecycle control under alpha runtime boundaries. |
 | `publish`, `subscribe`, event scope, and bus broadcast | **Changed:** `send` uses exact targets; public `input` replaces subscription delivery; external sends create intents; implicit scope broadcast is unsupported. |
-| Spawned active objects | **Changed:** `spawn.machine_id`, typed payload, optional `bind_to`, root aggregate scheduler/transaction. |
+| Spawned active objects | **Changed:** `spawn.machine_id`, typed input/external payload, optional `bind_to`, root aggregate scheduler/transaction, and reserved owner `done` on natural completion. |
 | Format-1 submachine states | **Changed:** sequential inline behavior uses nested `states`; reusable isolated behavior uses component placement. The `submachine` keyword is unsupported. |
 | Contracts | **Unsupported** in alpha1; shared typed events provide the local bundle boundary pending package/import design. |
 | Definition migration/hot-swap | **Unsupported** in alpha1; snapshot wire portability and migration are separate work. |
@@ -1507,6 +1785,7 @@ Format `2-alpha1` deliberately does not support:
   migrations;
 - concrete alpha snapshot wire portability or hot-swap;
 - shared queues/variables or cross-runtime state transitions;
+- machine-local public input/output/correlation declarations;
 - direct host-to-component ingress, component reset, or retained component history;
 - parent/owned-child separate transactions, detached/adopted children, or automatic
   remote spawning;

@@ -261,7 +261,7 @@
         "events": {
           "type": "object",
           "propertyNames": { "$ref": "#/$defs/identifier" },
-          "additionalProperties": { "$ref": "#/$defs/alphaEventDecl" }
+          "additionalProperties": { "$ref": "#/$defs/alphaLocalEventDecl" }
         },
         "meta": { "type": "object" },
         "root": { "$ref": "#/$defs/alphaState" }
@@ -304,6 +304,22 @@
         "type": { "$ref": "#/$defs/valueType" },
         "required": { "type": "boolean", "default": false },
         "default": {}
+      }
+    },
+
+    "alphaLocalEventDecl": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "const": "internal",
+          "default": "internal"
+        },
+        "payload": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/identifier" },
+          "additionalProperties": { "$ref": "#/$defs/alphaPayloadField" }
+        }
       }
     },
 

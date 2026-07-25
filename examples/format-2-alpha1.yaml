@@ -1,5 +1,7 @@
 # A self-contained format 2-alpha1 bundle with isolated parallel components,
 # deterministic owned spawn, nominal instance binding, and a correlated host effect.
+# Creating `order` supplies `bindings.input.order_id` and
+# `bindings.external.provider_region`.
 format: "2-alpha1"
 namespace: example.orders
 
@@ -36,6 +38,7 @@ machines:
       type: composite
       variables:
         order_id: { type: string, input: true }
+        provider_region: { type: string, external: true }
         payment_status: { type: string, init: pending }
         payment_worker:
           type: instance_ref
@@ -43,6 +46,10 @@ machines:
           nullable: true
           init: null
       initial: { transition_to: idle }
+      on_events:
+        env:
+          action:
+            - refresh: { only: [provider_region] }
       states:
         idle:
           on_events:
@@ -132,6 +139,9 @@ machines:
 
   - machine_id: payment_worker
     version: 1
+    events:
+      retry_tick:
+        direction: internal
     root:
       type: composite
       variables:
