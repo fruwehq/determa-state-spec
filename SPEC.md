@@ -300,8 +300,8 @@ A transition may contain:
   `{ history: path.to.composite }`; omit for an internal reaction.
 - `guard` — CEL Boolean.
 - `action` — ordered structured actions.
-- `local: true` — preserve a composite source while targeting its strict descendant,
-  as specified in §6.4.
+- `local: true` — for a composite source targeting its strict descendant, preserve the
+  source instead of applying the unmarked transition's source reset (§6.4).
 - `lang` — optional expression-language override.
 
 Absence of `transition_to` is the only legal spelling of an internal transition.
@@ -377,7 +377,7 @@ A bundle is rejected before any runtime is created when it has:
 - `local: true` without a target, with a non-composite source, or with a target that is
   not a strict descendant of its source;
 - a history target naming a non-composite state, a composite whose `history` is `none`,
-  or a composite that contains the transition source;
+  or a composite that strictly contains the transition source;
 - an `assign` whose destination variable belongs to a state exited by that same
   transition (`destroyed_variable_write`);
 - a spawn `bind_to` whose destination reference belongs to a state exited by that same
@@ -526,9 +526,9 @@ Determa deliberately executes a selected external transition in this exact order
 
 1. evaluate the selected guard;
 2. execute transition actions in the source configuration and source variable scope;
-3. exit the active source path from innermost to outermost, stopping below the least
-   common ancestor;
-4. enter the target path from outermost to innermost; and
+3. exit the active source path from innermost to outermost, stopping below the
+   transition boundary defined below;
+4. enter the target path below that boundary, from outermost to innermost; and
 5. restore explicitly targeted history or follow nested initial transitions until a
    stable leaf is active.
 
@@ -552,14 +552,36 @@ or initial descent. No state is exited or entered, including states between the 
 leaf and an ancestor state whose handler was selected; the active configuration is
 identical before and after.
 
-A plain self-transition exits and re-enters its source. `local: true` is valid only
-when the source is composite and the resolved target is its strict descendant. It
-forces the transition's least common ancestor to the source state, after which steps
-3–5 apply unchanged. Consequently, active descendants may exit and a new descendant
-path may enter, while the source's entry/exit actions and variables remain untouched.
+For a transition with a target, the **transition boundary** is computed from the
+resolved source/target relationship:
+
+- A plain self-transition uses the parent of the source as its boundary, so it exits
+  and re-enters the source.
+- When a composite source strictly contains the target, an unmarked transition also
+  uses the parent of the source as its boundary. It exits and re-enters the source,
+  resetting that subtree including the source's variables and lifecycle actions.
+- For that same strict-descendant relationship, `local: true` uses the source as its
+  boundary. It exits and enters only descendants, leaving the source's variables and
+  lifecycle actions untouched.
+- When the target strictly contains the source, the target is the boundary. The active
+  source path exits up to but excluding the target, and the target is not re-entered.
+  External re-entry of a proper ancestor target is not expressible in format 1.
+- For unrelated source and target states, their ordinary least common ancestor is the
+  boundary.
+
+The parent of the root is a virtual machine boundary. Using it resets and re-enters the
+root without completing or replacing the runtime.
+
+For example, let composite `c` contain active leaf `a`, with the handler selected on
+source `c` and target `c.a`:
+
+```text
+unmarked:    exitA, exitC, enterC, enterA
+local: true: exitA, enterA
+```
+
 Local self-transitions, local transitions to ancestors, and local transitions between
-unrelated states are deliberately unsupported. All other configuration changes use
-the ordinary least-common-ancestor rule.
+unrelated states are deliberately unsupported.
 
 ### 6.5 Choice and history
 
@@ -588,6 +610,16 @@ Entry actions run and state-scoped variables are initialized for every restored 
 outermost to innermost. History restores configuration, not destroyed state-scoped
 variable values. A choice branch may select history using the same object form; an
 initial transition cannot target history.
+
+A transition from a composite source to its own history is allowed without
+`local: true`. It uses the plain self-transition boundary: the engine captures the
+pre-exit configuration, exits and re-enters the composite, and restores the same
+descendant configuration. Lifecycle actions rerun and state-scoped variables are
+reinitialized even though the final active leaf is unchanged.
+
+A history target may carry `local: true` when the resolved history composite is a
+strict descendant of the composite source. The local boundary from §6.4 applies, then
+history restoration occurs normally in step 5.
 
 ## 7. Components, spawning, and lifecycle
 
@@ -1232,7 +1264,7 @@ The pre-release format deliberately omits:
 - root engine-fault recovery/reset;
 - distributed transactions, exactly-once delivery, or hard real-time guarantees;
 - local transitions whose target is not a strict descendant of their composite source;
-  and
+- external re-entry of a proper ancestor target; and
 - plugin discovery, installation, manifests, or standardized configuration fields.
 
 These omissions are not reserved implementation hooks. A host may provide them only
@@ -1246,14 +1278,16 @@ be one behavior per fixture and include:
 - document/schema positives and negatives;
 - CEL name/type checking and event visibility;
 - leaf-to-ancestor dispatch and false-guard fallback;
-- internal, self, local, and external transition traces;
+- internal, self, local, and external descendant-reset transition traces;
+- proper-ancestor transition bounds and the absence of external ancestor re-entry;
 - schema rejection of non-canonical internal/local transition shapes;
 - least-common-ancestor exit/entry paths;
 - transition-action-before-exit ordering;
 - load-time rejection of transition writes to destinations that the transition exits;
 - initial descent and ordered choice;
-- explicit history resume/restart, first-entry fallback, capture timing, shallow/deep
-  restoration, and variable reinitialization;
+- explicit history resume/restart, self-history lifecycle replay, first-entry fallback,
+  capture timing, shallow/deep restoration, local history targeting, and variable
+  reinitialization;
 - immutable envelope validation and each disposition;
 - no recursive delivery of internal sends;
 - component creation/routing/completion/disposal;
