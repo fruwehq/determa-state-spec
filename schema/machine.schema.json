@@ -9,6 +9,18 @@
       "type": "string",
       "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
     },
+    "stateIdentifier": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/identifier"
+        },
+        {
+          "not": {
+            "const": "root"
+          }
+        }
+      ]
+    },
     "dottedIdentifier": {
       "type": "string",
       "pattern": "^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*$"
@@ -558,7 +570,7 @@
           "type": "object",
           "minProperties": 1,
           "propertyNames": {
-            "$ref": "#/$defs/identifier"
+            "$ref": "#/$defs/stateIdentifier"
           },
           "additionalProperties": {
             "$ref": "#/$defs/state"

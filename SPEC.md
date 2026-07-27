@@ -289,6 +289,11 @@ Common state fields:
 A choice pseudostate is represented by an ordered `choice` branch list. It is transient
 and mutually exclusive with active-state fields.
 
+State paths are relative to the machine root. The reserved literal path `root`
+identifies the machine root itself; every other path is the dot-separated sequence of
+child-state identifiers below it, without a `root.` prefix. A child state therefore
+cannot be named `root`.
+
 Native time events (`after`), state-level deferral, orthogonal regions with implicit
 broadcast, submachine documents, and completion activities are not part of format 1.
 
@@ -376,18 +381,30 @@ A bundle is rejected before any runtime is created when it has:
 - a send whose target, event direction, or correlation is inconsistent;
 - `local: true` without a target, with a non-composite source, or with a target that is
   not a strict descendant of its source;
+- a transition selected on the machine root whose target is the machine root, or any
+  history target that resolves to the machine root (`root_reentry`);
 - a history target naming a non-composite state, a composite whose `history` is `none`,
   or a composite that strictly contains the transition source;
-- an `assign` whose destination variable belongs to a state exited by that same
-  transition (`destroyed_variable_write`);
+- an `assign` or `refresh` whose destination variable belongs to a state exited by
+  that same transition (`destroyed_variable_write`);
 - a spawn `bind_to` whose destination reference belongs to a state exited by that same
   transition (`destroyed_reference_binding`);
+- a transition that exits the scope of an `instance_reference` used by a reachable
+  spawn `bind_to` while its action list does not first cancel that exact reference
+  (`destroyed_live_instance_reference`);
 - invalid creation bindings or `instance_reference` constraints;
 - an initial/choice cycle that cannot reach a stable state;
 - a transition inside entry, exit, or initial behavior;
 - a `stop` action in exit behavior;
 - a `stop` action that is not last in its action list; or
 - a CEL parsing, name-resolution, or type-checking failure.
+
+For the destroyed-destination rules above, exits performed by root, component, or
+spawned-runtime completion after reaching a final state or executing `stop` belong to
+the same transition or action outcome. “First cancel” means an earlier action in the
+selected transition's ordered action list whose reference expression statically
+resolves to that exact `instance_reference`; assigning `null` or another value to the
+reference does not cancel the owned runtime.
 
 ### 5.2 CEL environments and compile-time types
 
@@ -553,13 +570,18 @@ leaf and an ancestor state whose handler was selected; the active configuration 
 identical before and after.
 
 For a transition with a target, the **transition boundary** is computed from the
-resolved source/target relationship:
+resolved source/target relationship. The root is an invariant boundary: ordinary
+transitions never exit or re-enter it.
 
-- A plain self-transition uses the parent of the source as its boundary, so it exits
-  and re-enters the source.
+- A plain self-transition on a non-root source uses the parent of the source as its
+  boundary, so it exits and re-enters the source. A root self-transition is rejected
+  at load time.
 - When a composite source strictly contains the target, an unmarked transition also
-  uses the parent of the source as its boundary. It exits and re-enters the source,
-  resetting that subtree including the source's variables and lifecycle actions.
+  uses the parent of the source as its boundary, except that a root source uses the
+  root itself. It exits and re-enters a non-root source, resetting that subtree
+  including the source's variables and lifecycle actions. With a root source, only
+  active descendants are exited and entered; root variables and lifecycle actions
+  remain untouched.
 - For that same strict-descendant relationship, `local: true` uses the source as its
   boundary. It exits and enters only descendants, leaving the source's variables and
   lifecycle actions untouched.
@@ -568,9 +590,6 @@ resolved source/target relationship:
   External re-entry of a proper ancestor target is not expressible in format 1.
 - For unrelated source and target states, their ordinary least common ancestor is the
   boundary.
-
-The parent of the root is a virtual machine boundary. Using it resets and re-enters the
-root without completing or replacing the runtime.
 
 For example, let composite `c` contain active leaf `a`, with the handler selected on
 source `c` and target `c.a`:
@@ -611,11 +630,12 @@ outermost to innermost. History restores configuration, not destroyed state-scop
 variable values. A choice branch may select history using the same object form; an
 initial transition cannot target history.
 
-A transition from a composite source to its own history is allowed without
+A transition from a non-root composite source to its own history is allowed without
 `local: true`. It uses the plain self-transition boundary: the engine captures the
 pre-exit configuration, exits and re-enters the composite, and restores the same
 descendant configuration. Lifecycle actions rerun and state-scoped variables are
-reinitialized even though the final active leaf is unchanged.
+reinitialized even though the final active leaf is unchanged. A history target that
+resolves to the machine root is rejected.
 
 A history target may carry `local: true` when the resolved history composite is a
 strict descendant of the composite source. The local boundary from §6.4 applies, then
@@ -726,8 +746,11 @@ stores its nominal `instance_reference` in `bind_to`. Creation and binding are a
 with the parent step. `bind_to` MUST name a compatible nullable `instance_reference`
 whose current value is null; otherwise the step faults with `binding_not_empty`.
 
-An owned child survives exit of the state whose transition spawned it. It is processed
-only when a queue plugin later presents an envelope targeting it.
+Ownership is not tied to the state whose transition spawned the child. A child may
+survive that state's exit when its bound reference remains in scope. §5.1 rejects an
+ordinary transition that could destroy its live-holding reference without first
+cancelling that exact reference. The child is processed only when a queue plugin later
+presents an envelope targeting it.
 
 `cancel` is valid for a running or retained-faulted directly or transitively owned
 instance. It synchronously cancels descendants deepest-first, runs remaining exit
@@ -1208,6 +1231,12 @@ Implementations SHOULD expose read-only inspection of:
 Queue contents, delivery attempts, dead letters, scheduled jobs, and broker
 acknowledgements are inspected through their owning plugins, not the core engine.
 
+Enabled-event inspection is deliberately undefined in format 1. A configuration alone
+can reveal only structurally present handlers: whether a guarded handler is enabled is
+a property of the configuration together with a candidate envelope and current
+variables. Implementations MUST NOT present an implementation-specific enabled-event
+shape as a portable format-1 contract.
+
 Mermaid `stateDiagram-v2` is a useful default exporter:
 
 | Determa | Mermaid |
@@ -1261,7 +1290,9 @@ The pre-release format deliberately omits:
 - machine definition migration or hot-swap;
 - portable snapshot wire format;
 - standardized CLI/store JSON shapes;
+- standardized enabled-event inspection;
 - root engine-fault recovery/reset;
+- reset or re-entry of the machine root by an ordinary transition;
 - distributed transactions, exactly-once delivery, or hard real-time guarantees;
 - local transitions whose target is not a strict descendant of their composite source;
 - external re-entry of a proper ancestor target; and
@@ -1284,6 +1315,8 @@ be one behavior per fixture and include:
 - least-common-ancestor exit/entry paths;
 - transition-action-before-exit ordering;
 - load-time rejection of transition writes to destinations that the transition exits;
+- root-boundary preservation plus root self/history rejection;
+- destroyed `refresh` and live `instance_reference` scope rejection;
 - initial descent and ordered choice;
 - explicit history resume/restart, self-history lifecycle replay, first-entry fallback,
   capture timing, shallow/deep restoration, local history targeting, and variable
