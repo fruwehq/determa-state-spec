@@ -296,12 +296,20 @@ broadcast, submachine documents, and completion activities are not part of forma
 
 A transition may contain:
 
-- `transition_to` — target state path; omit for an internal reaction.
+- `transition_to` — either a target state path or
+  `{ history: path.to.composite }`; omit for an internal reaction.
 - `guard` — CEL Boolean.
 - `action` — ordered structured actions.
-- `internal: true` — actions only; no configuration change.
-- `local: true` — preserve a containing source or target where §6.4 specifies.
+- `local: true` — preserve a composite source while targeting its strict descendant,
+  as specified in §6.4.
 - `lang` — optional expression-language override.
+
+Absence of `transition_to` is the only legal spelling of an internal transition.
+`internal` is not a format-1 field. A plain state path always performs normal target
+entry. The explicit history form requests history restoration. Event transitions and
+choice branches may use either target form; an initial transition MUST use a plain
+state path. When `local` is present its value MUST be the literal `true`; `false` is
+invalid rather than an alias for omission.
 
 An ordered transition list selects the first branch whose guard is true. An
 unguarded default MUST be last.
@@ -366,7 +374,14 @@ A bundle is rejected before any runtime is created when it has:
 - a cycle in state nesting or component placement;
 - an invalid public/private event direction or correlation;
 - a send whose target, event direction, or correlation is inconsistent;
-- `internal: true` with a target or `local: true`, or `local: true` without a target;
+- `local: true` without a target, with a non-composite source, or with a target that is
+  not a strict descendant of its source;
+- a history target naming a non-composite state, a composite whose `history` is `none`,
+  or a composite that contains the transition source;
+- an `assign` whose destination variable belongs to a state exited by that same
+  transition (`destroyed_variable_write`);
+- a spawn `bind_to` whose destination reference belongs to a state exited by that same
+  transition (`destroyed_reference_binding`);
 - invalid creation bindings or `instance_reference` constraints;
 - an initial/choice cycle that cannot reach a stable state;
 - a transition inside entry, exit, or initial behavior;
@@ -493,6 +508,13 @@ The only exception is an unhandled `determa.component_failed` or
 `determa.spawned_instance_failed` envelope, which faults the owner as specified in
 §10.2.
 
+Determa deliberately gives ordered guard branches declaration-order priority: the
+first true branch wins, and guards need not be mutually exclusive. UML state-machine
+models do not assign this priority to competing guarded transitions. Authors porting a
+UML model MUST NOT assume guard-order independence. An unguarded default, when present,
+MUST be last, which keeps the priority unambiguous. Without a default, all-false guards
+continue ancestor search.
+
 An unhandled result is not a core fault. The core stores nothing and changes no logical
 state. The queue plugin decides whether to acknowledge, discard, retry, log, or retain
 the envelope. High-volume irrelevant input, such as pointer movement, can therefore be
@@ -507,7 +529,13 @@ Determa deliberately executes a selected external transition in this exact order
 3. exit the active source path from innermost to outermost, stopping below the least
    common ancestor;
 4. enter the target path from outermost to innermost; and
-5. follow nested initial transitions until a stable leaf is active.
+5. restore explicitly targeted history or follow nested initial transitions until a
+   stable leaf is active.
+
+Because step 2 precedes exit, a write to a variable or `bind_to` reference destroyed by
+step 3 would have no observable result. §5.1 therefore rejects such a transition at
+load time. A write to an ancestor-scoped destination that survives the exit remains
+valid. For a choice chain, every possible selected branch must satisfy this rule.
 
 This differs from canonical UML ordering, which treats the transition effect as behavior
 of the edge after source exit and before target entry. Determa instead keeps the source
@@ -515,14 +543,23 @@ context intact while the transition action runs. Authors familiar with UML MUST 
 the order above for Determa definitions.
 
 Entry and exit actions belong to states. Entry initializes the state's variables, runs
-its entry actions, then follows its initial transition. Exit runs its exit actions, then
+its entry actions, then follows its initial transition unless explicit history
+restoration supplies the descendant configuration. Exit runs its exit actions, then
 destroys its variables.
 
-An internal transition executes actions without exit, entry, or initial descent. A
-self-transition exits and re-enters its source. A local transition preserves its
-containing source when entering a substate and does not re-enter a containing target
-when moving to a superstate. All other configuration changes use the least common
-ancestor rule above.
+An internal transition has no `transition_to` and executes actions without exit, entry,
+or initial descent. No state is exited or entered, including states between the active
+leaf and an ancestor state whose handler was selected; the active configuration is
+identical before and after.
+
+A plain self-transition exits and re-enters its source. `local: true` is valid only
+when the source is composite and the resolved target is its strict descendant. It
+forces the transition's least common ancestor to the source state, after which steps
+3–5 apply unchanged. Consequently, active descendants may exit and a new descendant
+path may enter, while the source's entry/exit actions and variables remain untouched.
+Local self-transitions, local transitions to ancestors, and local transitions between
+unrelated states are deliberately unsupported. All other configuration changes use
+the ordinary least-common-ancestor rule.
 
 ### 6.5 Choice and history
 
@@ -530,9 +567,27 @@ A choice is transient. Prior transition actions run first; choice guards then ev
 against the resulting variables, and the first true branch is taken. The final branch
 MUST be unguarded.
 
-Shallow history remembers the most recent direct substate. Deep history remembers the
-full nested configuration. Every history entry requires a first-entry fallback. History
-restores configuration, not destroyed state-scoped variable values.
+Each composite whose `history` is `shallow` or `deep` maintains an optional history
+record. When an RTC exits that composite, the engine copies its pre-exit active
+descendant configuration immediately before the first exit action in the composite's
+subtree. The copy becomes the new history record only if the RTC commits. A transition
+that passes through or changes descendants without exiting the composite does not
+update its record.
+
+Shallow history records only the active direct substate. Deep history records the full
+active descendant configuration. A plain `transition_to: path.to.composite` always
+restarts that composite through its `initial` transition, even when a history record
+exists. `transition_to: { history: path.to.composite }` enters the composite and:
+
+- restores the recorded direct substate for shallow history, then follows that
+  substate's normal initial descent;
+- restores the recorded descendant path for deep history; or
+- follows the composite's `initial` transition when no record exists.
+
+Entry actions run and state-scoped variables are initialized for every restored state,
+outermost to innermost. History restores configuration, not destroyed state-scoped
+variable values. A choice branch may select history using the same object form; an
+initial transition cannot target history.
 
 ## 7. Components, spawning, and lifecycle
 
@@ -1061,6 +1116,10 @@ Core determinism means that the same valid prior state and same envelope produce
 same result. It does not mean that different queue plugins produce the same delivery
 trace.
 
+A bundle whose correctness depends on deferral is not self-contained or portable in
+format 1. Its behavior depends on host/plugin configuration outside the document, so
+core conformance cannot guarantee equivalent behavior across hosts.
+
 ### 11.2 Timer extensions
 
 Time is modeled through external event-producing extensions, never through core clock
@@ -1143,7 +1202,7 @@ is a completeness boundary, not a compatibility promise for earlier drafts.
 | hierarchy and final states | retained with `root`, composite states, and final states |
 | transitions and choices | retained; transition actions run before source exit |
 | entry and exit | retained; the triggering `event` is not visible |
-| shallow/deep history | retained for composite configuration only |
+| shallow/deep history | retained through explicit history targets; plain composite targets restart |
 | parallel behavior | changed to isolated lifecycle-bound components; no regions or implicit broadcast |
 | variables and external refresh | retained as typed root inputs/external values plus `env`/`refresh` |
 | actions and publication | retained as structured actions; publication is explicit `send` |
@@ -1171,7 +1230,9 @@ The pre-release format deliberately omits:
 - portable snapshot wire format;
 - standardized CLI/store JSON shapes;
 - root engine-fault recovery/reset;
-- distributed transactions, exactly-once delivery, or hard real-time guarantees; and
+- distributed transactions, exactly-once delivery, or hard real-time guarantees;
+- local transitions whose target is not a strict descendant of their composite source;
+  and
 - plugin discovery, installation, manifests, or standardized configuration fields.
 
 These omissions are not reserved implementation hooks. A host may provide them only
@@ -1186,9 +1247,13 @@ be one behavior per fixture and include:
 - CEL name/type checking and event visibility;
 - leaf-to-ancestor dispatch and false-guard fallback;
 - internal, self, local, and external transition traces;
+- schema rejection of non-canonical internal/local transition shapes;
 - least-common-ancestor exit/entry paths;
 - transition-action-before-exit ordering;
-- initial descent, choice, and history;
+- load-time rejection of transition writes to destinations that the transition exits;
+- initial descent and ordered choice;
+- explicit history resume/restart, first-entry fallback, capture timing, shallow/deep
+  restoration, and variable reinitialization;
 - immutable envelope validation and each disposition;
 - no recursive delivery of internal sends;
 - component creation/routing/completion/disposal;

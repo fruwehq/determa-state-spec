@@ -2,6 +2,7 @@
 # - public input/output contracts and correlation;
 # - source-context transition actions;
 # - host-supplied input and external variables;
+# - explicit deep-history resume versus plain-path restart;
 # - isolated lifecycle-bound components;
 # - owned spawn with a nominal instance reference; and
 # - an external scheduling request rather than a core timer.
@@ -149,6 +150,15 @@ machines:
 
   - machine_id: fulfillment
     version: 1
+    events:
+      advance_fulfillment:
+        direction: internal
+      pause_fulfillment:
+        direction: internal
+      resume_fulfillment:
+        direction: internal
+      restart_fulfillment:
+        direction: internal
     root:
       type: composite
       variables:
@@ -159,8 +169,23 @@ machines:
           on_events:
             begin: { transition_to: active }
         active:
+          type: composite
+          history: deep
+          initial: { transition_to: phase_one }
           on_events:
+            pause_fulfillment: { transition_to: paused }
             finish_component: { transition_to: complete }
+          states:
+            phase_one:
+              on_events:
+                advance_fulfillment: { transition_to: phase_two }
+            phase_two: {}
+        paused:
+          on_events:
+            resume_fulfillment:
+              transition_to: { history: active }
+            restart_fulfillment:
+              transition_to: active
         complete: { type: final }
 
   - machine_id: payment_worker

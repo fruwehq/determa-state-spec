@@ -395,12 +395,32 @@
         "$ref": "#/$defs/action"
       }
     },
+    "historyTarget": {
+      "type": "object",
+      "required": ["history"],
+      "additionalProperties": false,
+      "properties": {
+        "history": {
+          "$ref": "#/$defs/dottedIdentifier"
+        }
+      }
+    },
+    "transitionTarget": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/dottedIdentifier"
+        },
+        {
+          "$ref": "#/$defs/historyTarget"
+        }
+      ]
+    },
     "transition": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "transition_to": {
-          "$ref": "#/$defs/dottedIdentifier"
+          "$ref": "#/$defs/transitionTarget"
         },
         "guard": {
           "$ref": "#/$defs/expression"
@@ -411,13 +431,20 @@
         "action": {
           "$ref": "#/$defs/actionList"
         },
-        "internal": {
-          "type": "boolean"
-        },
         "local": {
-          "type": "boolean"
+          "const": true
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["local"]
+          },
+          "then": {
+            "required": ["transition_to"]
+          }
+        }
+      ]
     },
     "transitionOrList": {
       "oneOf": [
@@ -452,7 +479,7 @@
       "additionalProperties": false,
       "properties": {
         "transition_to": {
-          "$ref": "#/$defs/dottedIdentifier"
+          "$ref": "#/$defs/transitionTarget"
         },
         "guard": {
           "$ref": "#/$defs/expression"
