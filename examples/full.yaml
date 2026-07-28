@@ -80,13 +80,13 @@ machines:
                 - send:
                     event: payment_requested
                     to: { external: true }
-                    correlation_id: "event.event_id"
+                    correlation_id: "order_id"
                     payload:
                       order_id: "order_id"
                 - send:
                     event: reminder_requested
                     to: { external: true }
-                    correlation_id: "event.event_id"
+                    correlation_id: "order_id"
                     payload:
                       order_id: "order_id"
                       delay_seconds: "900"
