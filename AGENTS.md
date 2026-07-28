@@ -43,4 +43,6 @@ against one shared conformance suite. Guards and computed action values are writ
 ## Pointers
 - Prose spec: `SPEC.md` (§2 format identity, §4 grammar, §5 CEL, §6 transitions,
   §10 faults, §11 plugin boundary).
+- Non-normative rationale and review guidance: `DECISIONS.md`. It never overrides
+  `SPEC.md`, the schema, or conformance.
 - Schema: `schema/machine.schema.json`. Examples: `examples/`.
