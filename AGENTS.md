@@ -6,8 +6,10 @@ Guidance for AI/coding agents working in this repository. (Tool-agnostic; not sp
 The **normative specification** for Determa State. Text only: `SPEC.md` (the prose spec),
 `schema/machine.schema.json` (structural JSON Schema for a machine), `examples/`, and
 `VERSION`. **No implementation code, no tests, no CI here.** The executable correctness
-target lives in `determa-state-conformance`; where prose and the suite disagree, **the
-suite wins** (SPEC §2) and a bug is filed against this document.
+target lives in `determa-state-conformance`. Applicable normative core cases are
+authoritative when they conflict with prose; profiles bind only implementations that
+declare them, and harness mechanics bind no public implementation interface, as recorded
+in `DECISIONS.md`.
 
 ## Determa in one paragraph
 **Determa** is a family of tools for defining and running well-specified, verifiable
@@ -22,7 +24,7 @@ against one shared conformance suite. Guards and computed action values are writ
 | Repo / folder | Role |
 |---|---|
 | **determa-state-spec** (this) | normative spec — `SPEC.md`, `schema/`, `examples/`, `VERSION`. No CI. |
-| determa-state-conformance | the language-agnostic conformance suite (the arbiter of correctness). No CI. |
+| determa-state-conformance | language-agnostic conformance suite + source/schema consistency CI. |
 | determa-state-python | Python reference impl — dist `determa-state`, import `determa.state`. |
 | determa-state-rust | Rust impl — crate `determa-state`, module `determa_state`. |
 | determa | umbrella launcher monorepo — `python/` (PyPI), `rust/` (crates.io), `node/` (npm). |
