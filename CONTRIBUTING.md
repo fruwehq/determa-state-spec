@@ -11,7 +11,7 @@ and the Python reference implementation in [`fruwehq/determa-state-python`](http
 | repository | holds | CI |
 |---|---|---|
 | `determa-state-spec` (this one) | `SPEC.md`, `schema/`, `examples/` — the prose normative text | none |
-| [`determa-state-conformance`](https://github.com/fruwehq/determa-state-conformance) | the language-agnostic suite: engine cases (`conformance/01..NN`) and the black-box CLI runner (`conformance/cli/*`, `conformance/run_cli.py`) | none |
+| [`determa-state-conformance`](https://github.com/fruwehq/determa-state-conformance) | core engine cases (`conformance/core/*`) plus explicitly non-core profiles and harnesses (`conformance/profiles/*`) | none |
 | [`determa-state-python`](https://github.com/fruwehq/determa-state-python) | the Python reference implementation; correct iff it passes the conformance suite | `test (ubuntu-24.04)`, required |
 
 A behavior change usually spans all three: normative text here, the matching
@@ -32,7 +32,7 @@ Open one PR **per repo** (one issue → one PR). Where prose and the suite disag
 
 ## Versioning
 
-This repository carries the synchronized version in `VERSION` (currently `0.0.5`) and a
+This repository carries the synchronized version in `VERSION` (currently `0.0.6`) and a
 matching line at the top of `SPEC.md`.
 
 > determa-state-spec, determa-state-conformance, and the implementations share one
