@@ -333,7 +333,7 @@ that lexical scope.
 | send | `{ send: { event, to? \| targets?, payload?, correlation_id? } }` | ordered immutable emissions |
 | refresh | `{ refresh: { only?: [name, ...] } }` | adopt validated `env` values |
 | spawn | `{ spawn: { machine_id, bindings?, bind_to? } }` | create an owned runtime |
-| cancel | `{ cancel: { instance: CEL } }` | synchronously cancel an owned runtime; null is a no-op |
+| cancel | `{ cancel: { instance: CEL } }` | cancel an addressed owned runtime; null or non-targetable is a no-op |
 | stop | `{ stop: {} }` | complete the executing runtime |
 
 `stop` MUST be the final action in its list and is invalid in exit behavior. Once it
@@ -759,16 +759,21 @@ Ownership is not otherwise tied to the transition that spawned the child. An unb
 child or a child whose holding reference remains in scope is processed only when a
 queue plugin later presents an envelope targeting it.
 
-`cancel` is valid for a running or retained-faulted directly or transitively owned
-instance. It synchronously cancels descendants deepest-first, runs remaining exit
-actions, disposes logical child state, and invalidates the reference as a target. A
-retained reference remains serializable and comparable but no longer addresses a live
-runtime. Faulted instances accept cancellation only for this cleanup; they reject
-ordinary events and sends. Cancellation of a retained-faulted instance skips its author
-exit actions and disposes the frozen subtree deepest-first. If the cancellation
-expression evaluates to a null `instance_reference`, the action succeeds as a no-op and
-the action itself changes no ownership or counters and produces no fault or emission;
-the surrounding RTC step continues normally.
+After its expression type-checks as `instance_reference`, `cancel` is always
+well-formed. If the expression currently addresses a running or retained-faulted
+directly or transitively owned instance, it synchronously cancels descendants
+deepest-first, runs remaining exit actions, disposes logical child state, and
+invalidates the reference as a target. A retained reference remains serializable and
+comparable but no longer addresses a live runtime. Faulted instances accept
+cancellation only for this cleanup; they reject ordinary events and sends. Cancellation
+of a retained-faulted instance skips its author exit actions and disposes the frozen
+subtree deepest-first. Every other resolved value succeeds without effect as described
+below.
+
+If the cancellation expression evaluates to null, or does not currently address a
+running or retained-faulted directly or transitively owned instance, the action succeeds
+as a no-op. The action itself changes no ownership or counters and produces no fault or
+emission; the surrounding RTC step continues normally.
 
 Natural child completion performs the same descendant cleanup and emits one reserved
 `done` envelope to its immediate owner:
@@ -1068,10 +1073,11 @@ Engine faults include:
 There is no runtime `type_fault`; statically checkable types are load-time validation.
 `invalid_instance_target` and `inactive_component_target` may also be pre-step
 rejection codes. They are engine faults only when an already accepted RTC action
-attempts an invalid send/cancel target.
+attempts an invalid send target.
 
-A `cancel` action whose expression evaluates to a null `instance_reference` is the
-successful no-op defined by §7.2 and is never `invalid_instance_target`.
+A `cancel` action whose expression evaluates to null, or does not currently address a
+running or retained-faulted directly or transitively owned instance, is the successful
+no-op defined by §7.2 and is never `invalid_instance_target`.
 
 On an engine fault, the core:
 
@@ -1337,7 +1343,8 @@ be one behavior per fixture and include:
 - immutable envelope validation and each disposition;
 - no recursive delivery of internal sends;
 - component creation/routing/completion/disposal;
-- spawn, nominal reference, completion, cancel, and cascade;
+- spawn, nominal reference, completion, cancel and cascade, including no-op
+  cancellation of null and disposed references;
 - deterministic event/effect identity vectors across languages;
 - full RTC rollback and contained-runtime failure propagation;
 - queue-independent behavior for a fixed delivery trace; and
