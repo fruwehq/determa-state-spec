@@ -9,6 +9,42 @@
       "type": "string",
       "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
     },
+    "celVisibleIdentifier": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/identifier"
+        },
+        {
+          "not": {
+            "enum": [
+              "event",
+              "owner",
+              "false",
+              "in",
+              "null",
+              "true",
+              "as",
+              "break",
+              "const",
+              "continue",
+              "else",
+              "for",
+              "function",
+              "if",
+              "import",
+              "let",
+              "loop",
+              "package",
+              "namespace",
+              "return",
+              "var",
+              "void",
+              "while"
+            ]
+          }
+        }
+      ]
+    },
     "stateIdentifier": {
       "allOf": [
         {
@@ -75,12 +111,130 @@
           "default": false
         },
         "default": {}
-      }
+      },
+      "allOf": [
+        {
+          "not": {
+            "properties": {
+              "required": {
+                "const": true
+              }
+            },
+            "required": ["required", "default"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "string"
+              }
+            },
+            "required": ["type", "default"]
+          },
+          "then": {
+            "properties": {
+              "default": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "int"
+              }
+            },
+            "required": ["type", "default"]
+          },
+          "then": {
+            "properties": {
+              "default": {
+                "type": "integer",
+                "minimum": -9223372036854775808,
+                "maximum": 9223372036854775807
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "float"
+              }
+            },
+            "required": ["type", "default"]
+          },
+          "then": {
+            "properties": {
+              "default": {
+                "type": "number",
+                "minimum": -1.7976931348623157e308,
+                "maximum": 1.7976931348623157e308
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "bool"
+              }
+            },
+            "required": ["type", "default"]
+          },
+          "then": {
+            "properties": {
+              "default": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "map"
+              }
+            },
+            "required": ["type", "default"]
+          },
+          "then": {
+            "properties": {
+              "default": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "list"
+              }
+            },
+            "required": ["type", "default"]
+          },
+          "then": {
+            "properties": {
+              "default": {
+                "type": "array"
+              }
+            }
+          }
+        }
+      ]
     },
     "payloadDeclaration": {
       "type": "object",
       "propertyNames": {
-        "$ref": "#/$defs/identifier"
+        "$ref": "#/$defs/celVisibleIdentifier"
       },
       "additionalProperties": {
         "$ref": "#/$defs/payloadField"
@@ -148,8 +302,7 @@
           "default": false
         },
         "nullable": {
-          "type": "boolean",
-          "default": false
+          "type": "boolean"
         },
         "machine_id": {
           "$ref": "#/$defs/identifier"
@@ -171,6 +324,33 @@
         },
         {
           "if": {
+            "not": {
+              "anyOf": [
+                {
+                  "properties": {
+                    "input": {
+                      "const": true
+                    }
+                  },
+                  "required": ["input"]
+                },
+                {
+                  "properties": {
+                    "external": {
+                      "const": true
+                    }
+                  },
+                  "required": ["external"]
+                }
+              ]
+            }
+          },
+          "then": {
+            "required": ["init"]
+          }
+        },
+        {
+          "if": {
             "properties": {
               "type": {
                 "const": "instance_reference"
@@ -179,29 +359,21 @@
             "required": ["type"]
           },
           "then": {
+            "required": ["init", "nullable"],
             "properties": {
               "init": {
                 "type": "null"
               },
+              "input": {
+                "const": false
+              },
               "external": {
                 "const": false
+              },
+              "nullable": {
+                "const": true
               }
-            },
-            "allOf": [
-              {
-                "if": {
-                  "required": ["init"]
-                },
-                "then": {
-                  "required": ["nullable"],
-                  "properties": {
-                    "nullable": {
-                      "const": true
-                    }
-                  }
-                }
-              }
-            ]
+            }
           },
           "else": {
             "not": {
@@ -213,6 +385,112 @@
                   "required": ["machine_id"]
                 }
               ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "string"
+              }
+            },
+            "required": ["type", "init"]
+          },
+          "then": {
+            "properties": {
+              "init": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "int"
+              }
+            },
+            "required": ["type", "init"]
+          },
+          "then": {
+            "properties": {
+              "init": {
+                "type": "integer",
+                "minimum": -9223372036854775808,
+                "maximum": 9223372036854775807
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "float"
+              }
+            },
+            "required": ["type", "init"]
+          },
+          "then": {
+            "properties": {
+              "init": {
+                "type": "number",
+                "minimum": -1.7976931348623157e308,
+                "maximum": 1.7976931348623157e308
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "bool"
+              }
+            },
+            "required": ["type", "init"]
+          },
+          "then": {
+            "properties": {
+              "init": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "map"
+              }
+            },
+            "required": ["type", "init"]
+          },
+          "then": {
+            "properties": {
+              "init": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "list"
+              }
+            },
+            "required": ["type", "init"]
+          },
+          "then": {
+            "properties": {
+              "init": {
+                "type": "array"
+              }
             }
           }
         }
@@ -293,7 +571,7 @@
         "payload": {
           "type": "object",
           "propertyNames": {
-            "$ref": "#/$defs/identifier"
+            "$ref": "#/$defs/celVisibleIdentifier"
           },
           "additionalProperties": {
             "$ref": "#/$defs/expression"
@@ -314,7 +592,7 @@
         "input": {
           "type": "object",
           "propertyNames": {
-            "$ref": "#/$defs/identifier"
+            "$ref": "#/$defs/celVisibleIdentifier"
           },
           "additionalProperties": {
             "$ref": "#/$defs/expression"
@@ -323,7 +601,7 @@
         "external": {
           "type": "object",
           "propertyNames": {
-            "$ref": "#/$defs/identifier"
+            "$ref": "#/$defs/celVisibleIdentifier"
           },
           "additionalProperties": {
             "$ref": "#/$defs/expression"
@@ -343,7 +621,7 @@
           "$ref": "#/$defs/bindingExpressions"
         },
         "bind_to": {
-          "$ref": "#/$defs/identifier"
+          "$ref": "#/$defs/celVisibleIdentifier"
         }
       }
     },
@@ -366,8 +644,9 @@
         "assign": {
           "type": "object",
           "minProperties": 1,
+          "maxProperties": 1,
           "propertyNames": {
-            "$ref": "#/$defs/identifier"
+            "$ref": "#/$defs/celVisibleIdentifier"
           },
           "additionalProperties": {
             "$ref": "#/$defs/expression"
@@ -384,7 +663,7 @@
               "type": "array",
               "minItems": 1,
               "items": {
-                "$ref": "#/$defs/identifier"
+                "$ref": "#/$defs/celVisibleIdentifier"
               }
             }
           }
@@ -405,6 +684,31 @@
       "type": "array",
       "items": {
         "$ref": "#/$defs/action"
+      }
+    },
+    "exitAction": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/action"
+        },
+        {
+          "not": {
+            "anyOf": [
+              {
+                "required": ["spawn"]
+              },
+              {
+                "required": ["stop"]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "exitActionList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/exitAction"
       }
     },
     "historyTarget": {
@@ -501,6 +805,18 @@
         }
       }
     },
+    "activeState": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/state"
+        },
+        {
+          "not": {
+            "required": ["choice"]
+          }
+        }
+      ]
+    },
     "component": {
       "type": "object",
       "required": ["component_id"],
@@ -513,7 +829,7 @@
           "$ref": "#/$defs/identifier"
         },
         "root": {
-          "$ref": "#/$defs/state"
+          "$ref": "#/$defs/activeState"
         },
         "with": {
           "$ref": "#/$defs/bindingExpressions"
@@ -551,7 +867,7 @@
         "variables": {
           "type": "object",
           "propertyNames": {
-            "$ref": "#/$defs/identifier"
+            "$ref": "#/$defs/celVisibleIdentifier"
           },
           "additionalProperties": {
             "$ref": "#/$defs/variable"
@@ -561,7 +877,7 @@
           "$ref": "#/$defs/actionList"
         },
         "exit": {
-          "$ref": "#/$defs/actionList"
+          "$ref": "#/$defs/exitActionList"
         },
         "initial": {
           "$ref": "#/$defs/initialTransition"
@@ -754,6 +1070,9 @@
                 },
                 {
                   "required": ["history"]
+                },
+                {
+                  "required": ["type"]
                 }
               ]
             }
@@ -772,6 +1091,7 @@
         "version": {
           "type": "integer",
           "minimum": 1,
+          "maximum": 9223372036854775807,
           "default": 1
         },
         "languages": {
@@ -787,7 +1107,7 @@
           }
         },
         "root": {
-          "$ref": "#/$defs/state"
+          "$ref": "#/$defs/activeState"
         },
         "meta": {
           "type": "object"

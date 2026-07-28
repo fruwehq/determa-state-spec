@@ -60,6 +60,65 @@ MUST be filed and resolved; implementations MUST NOT choose their preferred resu
 Machine documents MUST be parsed with the YAML 1.2 core schema and validated against
 `schema/machine.schema.json` before semantic validation.
 
+The accepted parsed value model is deliberately narrower than general YAML:
+
+- a source contains exactly one document;
+- every mapping key is a string and occurs exactly once;
+- duplicate JSON object names and duplicate YAML mapping keys are rejected before
+  schema validation;
+- YAML anchors, aliases, merge keys, and explicit tags are unsupported;
+- the expanded value is an acyclic JSON-compatible tree of maps, lists, strings,
+  Booleans, nulls, and numeric values; and
+- every numeric leaf satisfies §5.2, including leaves nested inside `map`, `list`, or
+  `meta`.
+
+Loaders MUST detect source-level duplicates before constructing an ordinary host
+map; “last value wins” and “first value wins” are nonconformant. The exact pre-schema
+load codes are `duplicate_key`, `non_string_map_key`, `unsupported_yaml_feature`,
+`non_json_value`, `invalid_unicode`, `invalid_numeric_syntax`, and
+`numeric_value_out_of_range`. A later JSON Schema or semantic failure uses that layer's
+code instead.
+
+Every string in a bundle, binding, envelope, or logical state MUST be a sequence of
+Unicode scalar values. Unpaired UTF-16 surrogates are `invalid_unicode`, including when
+introduced through an escaped JSON/YAML string. Code points are preserved exactly:
+the core performs no NFC, NFD, case, or newline normalization. String equality compares
+code-point sequences. Every specified byte ordering and every hash encodes those code
+points as strict UTF-8.
+
+For a machine source, invalid Unicode is the pre-schema `invalid_unicode` load error.
+Programmatic values crossing `create` or `dispatch` are checked recursively before CEL,
+state mutation, or identity hashing:
+
+- invalid `root_instance_id` or `creation_id` rejects creation with
+  `invalid_creation_request`;
+- an invalid creation-binding map key or nested string value rejects creation with
+  `invalid_binding`;
+- an invalid envelope event name or `event_id` rejects with `invalid_event`;
+- an invalid `correlation_id` rejects with `invalid_correlation`;
+- an invalid target identity/reference string rejects with `invalid_instance_target`;
+- an invalid payload key or nested string value, including reserved `env.changed`,
+  rejects with `invalid_payload`; and
+- an invalid string anywhere in supplied prior state rejects with
+  `invalid_prior_state`.
+
+These are pre-step rejections with no counter, state, fault, or emission change.
+Author CEL literals are bundle source and must also pass CEL parsing; every runtime
+CEL string value is restricted to the same scalar-value domain.
+
+Portable YAML numeric scalars use exactly this JSON number grammar:
+
+```text
+-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?
+```
+
+The `+` metacharacters above denote repetition in grammar notation; a leading plus sign
+is not an accepted numeric sign. Hexadecimal, octal, underscores, leading `+`, leading/trailing decimal
+points, `.inf`, and `.nan` are `invalid_numeric_syntax`, even when a YAML library would
+assign them a numeric core tag. A quoted token is a string. An accepted token without a
+fraction/exponent is an `int`; a token with either is a `double`. Thus `-0` is integer
+zero, `1e0` is double `1.0`, and `-0.0` normalizes to positive double zero under §5.2.
+
 Every document MUST carry the YAML/JSON integer:
 
 ```yaml
@@ -167,7 +226,7 @@ See `examples/minimal.yaml` and `examples/full.yaml`.
 ### 4.3 Machine fields
 
 - `machine_id` — required and unique within the bundle.
-- `version` — positive integer, optional, default `1`.
+- `version` — positive signed-64-bit integer, optional, default `1`.
 - `languages` — optional `{guard, action}` language identifiers.
 - `events` — optional private event declarations; every machine-local event is
   `internal`.
@@ -205,9 +264,22 @@ payment_succeeded:
 - Bundle `internal` events are shared contracts but cannot cross the host boundary.
 - Machine-local events are private and MUST be `internal`.
 
-Payload fields use `string`, `int`, `float`, `bool`, `map`, or `list`. A required field
-must be present; an optional field may declare a literal `default`. Extra fields are
-invalid.
+Payload fields use `string`, `int`, `float`, `bool`, `map`, or `list`. A field with
+`required: true` must be present and cannot also declare `default`. An optional field
+may declare a correctly typed literal `default`; an optional field without a default
+remains absent when omitted. Extra fields are invalid.
+
+Payload validation materializes defaults into the normalized immutable envelope before
+any guard, handler action, capture, or delivery can observe it. For a host envelope,
+normalization occurs after structural/type validation and before handler search. For an
+author `send`, payload expressions are evaluated first and defaults are then
+materialized before the immutable emission and its target are recorded. A declared
+default is type-checked at bundle load. Rejected host input remains the caller's
+unchanged original value.
+
+Numeric payload values and defaults use the single portable normalization rule in
+§5.2. In particular, a `float` field deliberately accepts either an integer or
+floating-point numeric value and exposes one normalized CEL `double`.
 
 `correlates_to` is valid only on a bundle `input` event and MUST name a bundle `output`
 event. Success, rejection, failure, cancellation, or no-response outcomes from an
@@ -216,6 +288,62 @@ external effect become machine behavior only through later declared input events
 The names `env`, `done`, `determa.component_completed`,
 `determa.component_failed`, and `determa.spawned_instance_failed` are reserved and
 cannot be author declarations.
+
+These names have closed built-in payload declarations available to the CEL checker:
+
+```text
+env:
+  changed: {
+    each_root_external_variable?: its_declared_type
+  }
+
+done:
+  relationship: string
+  state_path?: string
+  owner_runtime_id?: string
+  instance?: instance_reference
+  instance_id?: string
+  machine_id?: string
+  machine_version?: int
+
+determa.component_completed:
+  component_id: string
+  component_runtime_id: string
+
+public_fault_record:
+  runtime_id: string
+  cause_id: string
+  code: string
+  step_sequence: string
+  source_locator: string
+
+determa.component_failed:
+  component_id: string
+  component_runtime_id: string
+  fault: public_fault_record
+
+determa.spawned_instance_failed:
+  instance: instance_reference
+  instance_id: string
+  machine_id: string
+  machine_version: int
+  fault: public_fault_record
+```
+
+The `env.changed` record is specialized per target machine: every root external
+variable is a declared optional field and no other field exists. Runtime validation
+requires at least one field. The `done.relationship` value is exactly `parallel` or
+`spawned_instance`. A parallel payload materializes exactly `relationship`,
+`state_path`, and `owner_runtime_id`; the spawned-instance payload materializes exactly
+`relationship`, `instance`, `instance_id`, `machine_id`, and `machine_version`. All
+other optional fields remain absent. This single typed record lets a guard select the
+relationship before an action reads a relationship-specific field.
+
+All fields without `?` are required and present. Built-in payloads use the same
+field-presence semantics as author payloads. In `public_fault_record`,
+`step_sequence` is the `canonical_decimal` string projection of the aggregate's
+unbounded mathematical counter; the retained logical-state fault record keeps the
+counter as a mathematical integer.
 
 ### 4.5 Variables
 
@@ -236,17 +364,39 @@ variables:
 Variable fields:
 
 - `type` — required scalar/container type or `instance_reference`.
-- `init` — optional literal value used on entry.
-- `input: true` — permits a typed value when creating this runtime.
+- `init` — typed literal used on entry or as a missing creation-binding default.
+- `input: true` — permits a typed creation binding.
 - `external: true` — declares a host-source value copied into machine state.
-- `nullable: true` — permits null.
+- `nullable: true` — permits null for an `instance_reference`; it is invalid on every
+  other type.
 - `machine_id` — optional nominal constraint for `instance_reference`.
 
 A declaration cannot be both `input` and `external`. Both flags are valid only on root
-variables, which makes creation and refresh bindings unambiguous. External variables
-are read-only to `assign`; they change only through a successful `env`/`refresh` step.
-An `instance_reference` cannot be external and cannot be constructed from an arbitrary
-string.
+variables, which makes creation and refresh bindings unambiguous.
+
+Variable names and declared payload-field names enter typed CEL records and MUST be
+CEL-visible identifiers. They cannot be either Determa activation name `event` or
+`owner`, any CEL keyword `false`, `in`, `null`, or `true`, or any CEL v0.25.2 reserved
+identifier `as`, `break`, `const`, `continue`, `else`, `for`, `function`, `if`,
+`import`, `let`, `loop`, `package`, `namespace`, `return`, `var`, `void`, or `while`.
+The schema rejects these names wherever a variable or declared payload field is named,
+including corresponding assign, refresh, send-payload, and binding keys. This
+restriction does not apply to machine, state, component, event, or metadata keys
+because those names do not themselves become CEL identifiers or typed record fields.
+
+- An ordinary variable, with neither flag, MUST declare a correctly typed `init`.
+- A root `input` or `external` variable without `init` requires a creation binding.
+- A root `input` or `external` variable with `init` uses the supplied binding when
+  present and otherwise uses `init`.
+- Missing, extra, or wrongly typed host creation bindings reject `create` with
+  `invalid_binding`. The equivalent component/spawn author-binding mismatch rejects the
+  bundle at load with `invalid_binding`.
+
+External variables are read-only to `assign`; they change only through a successful
+`env`/`refresh` step. An `instance_reference` cannot be `input` or `external`, cannot be
+constructed from an arbitrary string, and in format 1 MUST be declared
+`nullable: true` with `init: null`. Non-null initial instance references are therefore
+unsupported; only the engine writes a non-null value through `spawn.bind_to`.
 
 At the logical-state boundary, a non-null `instance_reference` serializes as exactly:
 
@@ -266,7 +416,10 @@ Variable scope begins when the declaring state is entered and ends after its exi
 action. Inner declarations shadow outer declarations. A transition action runs before
 source exit (§6.4), so source-scoped variables remain available to it. Entry and exit
 actions cannot access the current envelope; a transition action must copy required
-event data into a variable whose scope survives the transition.
+event data into a variable whose scope survives the transition. Lifecycle entry and
+exit actions may update any lexically visible variable that is still live at that
+action. Later actions and outer exit actions observe that tentative value until its
+declaring scope is actually destroyed.
 
 ### 4.6 State nodes
 
@@ -286,8 +439,11 @@ Common state fields:
 - `history` — `none`, `shallow`, or `deep`, valid only on composite states.
 - `meta` — opaque annotation.
 
-A choice pseudostate is represented by an ordered `choice` branch list. It is transient
-and mutually exclusive with active-state fields.
+A choice pseudostate is represented by an ordered `choice` branch list. Its object may
+contain only `choice` and optional `meta`; it cannot declare `type` or any active-state
+field. A choice may appear only as a named child in an active state's `states` map and
+must be reached by a compound transition. A bundle machine `root` and an inline
+component `root` MUST be active states; they cannot be choice pseudostates.
 
 State paths are relative to the machine root. The reserved literal path `root`
 identifies the machine root itself; every other path is the dot-separated sequence of
@@ -305,8 +461,9 @@ A transition may contain:
   `{ history: path.to.composite }`; omit for an internal reaction.
 - `guard` — CEL Boolean.
 - `action` — ordered structured actions.
-- `local: true` — for a composite source targeting its strict descendant, preserve the
-  source instead of applying the unmarked transition's source reset (§6.4).
+- `local: true` — for a non-root composite source targeting its strict descendant,
+  preserve the source instead of applying the unmarked transition's source reset
+  (§6.4).
 - `lang` — optional expression-language override.
 
 Absence of `transition_to` is the only legal spelling of an internal transition.
@@ -329,7 +486,7 @@ that lexical scope.
 
 | action | shape | result |
 |---|---|---|
-| assign | `{ assign: { variable: CEL, ... } }` | typed writes in the executing runtime |
+| assign | `{ assign: { variable: CEL } }` | one typed write in the executing runtime |
 | send | `{ send: { event, to? \| targets?, payload?, correlation_id? } }` | ordered immutable emissions |
 | refresh | `{ refresh: { only?: [name, ...] } }` | adopt validated `env` values |
 | spawn | `{ spawn: { machine_id, bindings?, bind_to? } }` | create an owned runtime |
@@ -339,6 +496,37 @@ that lexical scope.
 `stop` MUST be the final action in its list and is invalid in exit behavior. Once it
 executes, any transition target is abandoned and deterministic runtime completion
 replaces normal target entry.
+
+`spawn` is invalid in exit behavior. Runtime termination performs owned-descendant
+cleanup before author exit actions; permitting a later spawn would orphan the new
+child.
+
+Each `assign` action contains exactly one destination. Ordered action lists provide
+sequential writes, and a later action observes every earlier tentative write in the
+same RTC.
+
+The remaining expression maps never use document member order. One `send` action takes
+one state snapshot before evaluating anything, then uses this total order:
+
+1. supplied payload expressions by ascending identifier UTF-8 byte order;
+2. `correlation_id`, when present;
+3. dynamic `{instance: CEL}` target expressions in target-list order (`to` is a
+   one-element list);
+4. payload default materialization and numeric normalization;
+5. target resolution and eligibility checks in target-list order; and
+6. only after every prior operation succeeds, identity/output-counter allocation and
+   immutable emission construction in target-list order.
+
+The first expression or eligibility check that fails determines the fault and exact
+locator. No later operation runs; the action allocates no identity, counter, or partial
+emission. Static targets do not add an expression-evaluation slot.
+
+A component or spawn binding evaluates the `input` map first and the `external` map
+second, each by ascending identifier UTF-8 byte order, against one owner-state snapshot
+taken before any binding expression in that placement or action. Computed map members
+cannot observe one another. The first expression that fails in this order determines
+the `action_fault` and its exact pointer; no later expression is evaluated. Target-root
+defaults are materialized only after every supplied expression succeeds.
 
 A send target is one of:
 
@@ -360,11 +548,39 @@ order, and a queue plugin may later present them as new input envelopes.
 An internal send to `self`, `owner`, `component`, or `instance` MUST name a bundle or
 machine-local `internal` event. A send to `external` MUST name a bundle `output` event
 and include `correlation_id`. Input events cannot be sent by author actions. These
-direction/target rules are checked at load time.
+event-direction and static target-shape rules are checked at load time.
+
+There is one reserved-event exception: an owner may explicitly forward `env` to one
+statically named component placement. That send MUST use exactly
+`to: { component: component_id }`, MUST omit `targets` and `correlation_id`, and MUST
+have exactly one payload member, `changed`. The `changed` expression MUST be a
+non-empty CEL map literal whose keys are literal external-variable names declared by
+the target component root. Its values are type-checked against those declarations and
+normalized by §5.2. The committed emission carries the target component's specialized
+fixed `env` payload from §4.4 and is later delivered explicitly in `internal` mode.
+No other reserved event may be sent by author behavior. Dynamic, self, owner, spawned,
+external, or multi-target `env` sends are invalid at load. This is explicit forwarding,
+not broadcast, and does not permit direct host-to-component ingress.
+
+Target existence is checked when the action executes. `{owner: true}` is valid syntax
+in every machine because that machine may run as a contained runtime. If it executes in
+an aggregate root, no owner exists and the accepted RTC step faults with
+`invalid_instance_target`. An exit action runs after automatic component and
+owned-instance cleanup; a send from that exit action to a component or instance already
+disposed by the cleanup faults deterministically with `inactive_component_target` or
+`invalid_instance_target`, respectively. Such sends are not cleanup no-ops.
 
 ## 5. Static validation and CEL
 
 ### 5.1 Load-time validation
+
+After the §2 source checks and JSON Schema validation succeed, semantic validation
+returns one exact load code. A rejection below that names a code in parentheses uses
+that named code. An unavailable CEL-profile symbol or overload uses
+`cel_profile_error`. Every other rejection in this section, including CEL
+parse/name/type errors, uses the generic `semantic_validation` code.
+`structural_validation` is conformance-harness notation for rejection by JSON Schema;
+it is not an engine/spec error code.
 
 A bundle is rejected before any runtime is created when it has:
 
@@ -375,36 +591,78 @@ A bundle is rejected before any runtime is created when it has:
 - a reachable composite without an initial transition;
 - a guard or trigger on an initial transition;
 - an `input` or `external` variable outside a machine root;
+- a variable declaration that cannot obtain a value under §4.5;
+- a fraction/exponent-form `double` source value where an `int` is required, including
+  machine `version`, variable `init`, and payload `default`;
 - an unguarded branch before a later branch;
 - a cycle in state nesting or component placement;
+- a cycle in the complete synchronous-initialization dependency graph. Its nodes are
+  machine definitions and inline component-root definitions. It has an edge for every
+  referenced or inline component placement, plus every `spawn` that can execute during
+  initialization through an entry action, initial-transition action, or any reachable
+  initialization choice branch. All possible guarded choice branches contribute
+  edges. Event-handler spawns do not add an edge from the handler's machine, but every
+  possible spawn target's own initialization graph must still be acyclic;
 - an invalid public/private event direction or correlation;
 - a send whose target, event direction, or correlation is inconsistent;
 - `local: true` without a target, with a non-composite source, or with a target that is
   not a strict descendant of its source;
+- `local: true` on a transition selected on the machine root
+  (`root_local_transition`);
 - a transition selected on the machine root whose target is the machine root, or any
   history target that resolves to the machine root (`root_reentry`);
 - a history target naming a non-composite state, a composite whose `history` is `none`,
   or a composite that strictly contains the transition source;
-- an `assign` or `refresh` whose destination variable belongs to a state exited by
-  that same transition (`destroyed_variable_write`);
-- a spawn `bind_to` whose destination reference belongs to a state exited by that same
-  transition (`destroyed_reference_binding`);
-- invalid creation bindings or `instance_reference` constraints;
+- an `assign` or `refresh` in an originating event/initial/choice transition action
+  whose destination variable belongs to a state exited by that selected outcome
+  (`destroyed_variable_write`);
+- a spawn `bind_to` in an originating event/initial/choice transition action whose
+  destination reference belongs to a state exited by that selected outcome
+  (`destroyed_reference_binding`);
+- a component/spawn binding with a missing or extra name, or whose inferred expression
+  type cannot satisfy the target root declaration (`invalid_binding`);
+- invalid `instance_reference` constraints;
 - an initial/choice cycle that cannot reach a stable state;
 - a transition inside entry, exit, or initial behavior;
+- a `spawn` action in exit behavior;
 - a `stop` action in exit behavior;
 - a `stop` action that is not last in its action list; or
 - a CEL parsing, name-resolution, or type-checking failure.
 
 For the destroyed-destination rules above, exits performed by root, component, or
 spawned-runtime completion after reaching a final state or executing `stop` belong to
-the same transition or action outcome.
+the same originating transition/action outcome. Lifecycle entry and exit action lists
+are deliberately different: they may update still-live lexical variables for later
+lifecycle actions or outer exits before actual destruction. A `stop` reached from an
+entry action follows this lifecycle rule.
 
 ### 5.2 CEL environments and compile-time types
 
 Every CEL expression MUST be parsed and type-checked at bundle load with the exact
 variables, current event schema, owner binding environment, and expected result type
 for its location.
+
+The activation environment is closed:
+
+- Bare identifiers are exactly the variables lexically visible from the expression's
+  source state, with the nearest declaration winning under §4.5 shadowing. They expose
+  the tentative values as of that action or guard's defined snapshot.
+- `event` exists only in the two §5.3 locations. It is a record with exactly one field,
+  `payload`, whose typed fields are the materialized immutable payload declaration.
+  Event name, `event_id`, target, correlation id, and transport metadata are not
+  author-visible.
+- `owner` exists only while evaluating a component placement's `with` bindings. It has
+  exactly one field, `variables`. That field is a typed record of the variables
+  lexically visible from the containing parallel state after its variables and entry
+  actions have run, with nearest-declaration shadowing and the one-snapshot behavior
+  from §4.8.
+- Component `with` expressions do not also receive bare owner-variable names or
+  `event`. Spawn bindings use the ordinary bare lexical variables of the executing
+  action and do not receive `owner`.
+
+No other activation name or record field exists. In particular, engine state,
+configuration, runtime identities, counters, host data, and plugin objects cannot leak
+through a CEL library's ambient activation.
 
 - A guard must infer `bool`.
 - An `assign` expression must be assignable to the destination variable.
@@ -415,6 +673,91 @@ for its location.
 - Instance targets and cancellation expressions must infer `instance_reference`.
 - A dynamic value cannot flow into a concrete destination without an explicit checked
   conversion.
+
+Portable numeric types are exact:
+
+- `int` is a signed 64-bit mathematical integer. A literal or host value outside
+  `-9223372036854775808` through `9223372036854775807` is invalid.
+- `float` is a finite IEEE 754 binary64 value exposed to CEL as `double`. A document
+  literal declared for a `float` may use integer, fractional, or exponent form and is
+  converted from its exact mathematical lexical value. A runtime value supplied to a
+  `float` destination may be a signed-64-bit CEL/host integer or a finite binary64
+  value. Conversion uses round-to-nearest, ties-to-even; negative zero is normalized
+  to positive zero. A literal that overflows binary64, NaN, and infinities are invalid.
+
+This is the only implicit numeric widening: `int` never accepts a `float`. The rule is
+applied before a value becomes observable for variable `init`, payload `default`, root
+creation, component/spawn bindings, `env` changed values, author `assign`, and
+host/authored payloads. Send and binding expressions may therefore infer `int` for a
+declared `float` destination; the resulting value is normalized before it enters state
+or an immutable envelope.
+
+Within a `map` or `list`, a YAML/JSON integer-form numeric literal is a signed-64-bit
+CEL `int`, while a fractional or exponent-form literal is a finite normalized CEL
+`double`. Implementations MUST preserve that distinction while parsing. Every nested
+numeric leaf must satisfy the domains above, but map/list members do not receive
+destination-free integer-to-double coercion.
+
+#### Portable CEL profile
+
+Format 1 pins parsing, checking, and base evaluation to
+[CEL specification v0.25.2](https://github.com/google/cel-spec/tree/v0.25.2), narrowed
+by the deterministic profile below. An implementation's library version is irrelevant;
+the accepted program and result MUST match this profile.
+
+The profile contains only:
+
+- `null`, `bool`, signed-64-bit `int`, binary64 `double`, Unicode `string`,
+  `list(dyn)`, `map(string, dyn)`, typed event/owner records, and nominal
+  `instance_reference`;
+- literals, field/map selection, list/map indexing, `?:`, `!`, `&&`, `||`, `in`,
+  same-type equality/comparison, checked numeric `+ - * / %`, string/list `+`,
+  `size(value)`, `has(map.field)`, and `has(event.payload.declared_field)`;
+- `double(int)`, `int(double)`, and `string(bool|int|double|string)` conversions; and
+- equality/inequality between compatible `instance_reference` values or with null.
+
+No other function, macro, receiver method, protobuf/object construction, `uint`, bytes,
+timestamp, duration, optional type, regex, comprehension, iteration, random/time/I/O
+function, host callback, or implementation extension is available. An unavailable
+symbol or overload is `cel_profile_error` at bundle load. `instance_reference` cannot
+be constructed, inspected by field, ordered, or converted to string.
+
+Evaluation is exact:
+
+- `&&` and `||` use CEL's commutative, error-absorbing result semantics. Either operand
+  may be evaluated first because profile expressions are pure. For `&&`, `false`
+  absorbs an error from the other operand; for `||`, `true` absorbs an error from the
+  other operand. An error is returned when the other operand does not uniquely
+  determine the Boolean result. Consequently `false && error` and `error && false`
+  are `false`, while `true && error` and `error && true` are errors; `true || error`
+  and `error || true` are `true`, while `false || error` and `error || false` are
+  errors;
+- `condition ? selected : unselected` evaluates the condition and exactly one selected
+  branch; the unselected branch is not evaluated;
+- signed-integer overflow is an evaluation error; integer division truncates toward
+  zero, remainder has the dividend's sign, and division by zero is an error;
+- double operations use binary64 round-to-nearest, ties-to-even, and any non-finite
+  result is an evaluation error;
+- mixed `int`/`double` operators are rejected at load; destination widening under the
+  earlier rule occurs only after expression evaluation;
+- `int(double)` truncates toward zero and errors outside signed-64-bit range;
+  `double(int)` uses §5.2 rounding; `string` produces `true`/`false`, canonical decimal
+  integer text, or the RFC 8785 finite-number spelling with negative zero already
+  normalized;
+- list equality is ordered and recursive; map equality ignores member order and
+  compares the exact string-key/value set recursively; dynamic numeric members remain
+  type-sensitive;
+- a negative/out-of-range list index or missing map key is an evaluation error;
+  `has(map.field)` tests exact string-key presence without reading an absent value;
+  `has(event.payload.field)` is false only when that declared optional field has
+  neither a supplied value nor a default, and true when it was supplied or materialized
+  from a default. A required payload field is always present after envelope validation.
+  Selecting an absent optional payload field without first taking a branch that proves
+  its presence is an evaluation error. No other typed-record presence macro is
+  available; and
+- string size counts Unicode scalar values, string equality performs no
+  normalization, and string relational operators compare lexicographically by Unicode
+  scalar value.
 
 An incompatible expression is an invalid document, not a runtime `type_fault`. A valid
 bundle plus a valid input envelope MUST NOT discover an ordinary assignment or payload
@@ -448,35 +791,68 @@ identity, but lifecycle CEL cannot inspect the triggering envelope or its payloa
 
 ### 6.1 Input envelope
 
-An input envelope is:
+An envelope is:
 
 ```text
 {
   event: event_name,
   event_id: non_empty_string,
-  target: root | live_instance_reference,
+  target:
+    { root: {
+        root_instance_id: non_empty_string,
+        root_runtime_id: non_empty_string
+    }}
+    | { spawned_instance: instance_reference }
+    | { component: {
+        root_instance_id: non_empty_string,
+        owner_runtime_id: non_empty_string,
+        component_id: identifier,
+        component_runtime_id: non_empty_string,
+        activation_sequence: non_negative_integer
+    }},
   payload: typed_map,
   correlation_id?: non_empty_string
 }
 ```
 
-The caller owns the envelope. The core neither enqueues nor stores it. Before starting a
-step, the core atomically validates event declaration, direction, payload, correlation,
+This tagged union is the normalized immutable target. Author target shorthands from
+§4.8 resolve to one union member when an emission is created; the resulting envelope
+stores the complete member and never resolves it again. A component target therefore
+names one activation incarnation, not merely a reusable `component_id`.
+
+The caller owns the envelope. The core neither enqueues nor stores it. A processing
+call carries the explicit delivery mode from §8. Before starting a step, the core
+atomically validates that mode, event declaration, direction, payload, correlation,
 and target eligibility. Rejection returns the prior state unchanged and allocates no
 logical identity.
 
-An ordinary host envelope MUST name a bundle `input` event and may target only a
-running root or running spawned runtime. If the declaration has `correlates_to`, the
-envelope MUST carry a non-empty `correlation_id`. An internal emission later presented
-by a queue plugin may name a bundle or machine-local `internal` event and may target a
-running root, spawned runtime, or component.
+`input` mode MUST name a bundle `input` event and may supply only the `root` or
+`spawned_instance` target member for a running runtime. Direct use of the `component`
+member rejects with `invalid_instance_target`. If the declaration has `correlates_to`,
+the envelope MUST carry a non-empty `correlation_id`. Reserved `env` is the exception
+below.
 
-A completed, faulted, or pending-completion root/spawned runtime rejects ordinary input
-with `invalid_instance_target`. A pending-completion, completed, or faulted component
-rejects an internal send with `inactive_component_target`; it cannot accumulate work
-that will never run. Rejection is atomic. Calling `dispatch` with no envelope is not a
-processing operation; read-only inspection of a terminal aggregate returns its existing
-status and no emissions.
+`internal` mode MUST name a bundle or machine-local `internal` event, one fixed
+reserved lifecycle event, or the statically targeted component `env` emission defined
+by §4.8, and may carry any eligible target member. The core does not
+authenticate how the caller obtained an envelope; the host/queue adapter is responsible
+for using `internal` mode only for an immutable core emission it is delivering.
+Using an input event in `internal` mode, an internal/reserved event in `input` mode, or
+an output event in either mode rejects with `invalid_event`.
+
+A completed or faulted root, and a faulted spawned runtime, reject delivery with
+`invalid_instance_target`. A completed or faulted component rejects internal delivery
+with `inactive_component_target`; it cannot accumulate work that will never run.
+Rejection is atomic. Calling `dispatch` with null delivery is not a processing
+operation; read-only inspection of a terminal aggregate returns its existing status
+and no emissions.
+
+Aggregate-root fault terminality overrides descendant status. Once the aggregate root
+is faulted, every non-empty dispatch targeting the root, a component, or a spawned
+descendant is rejected atomically with `invalid_instance_target`, even when the
+descendant's retained diagnostic status was running. The aggregate, counters, and
+emissions remain unchanged. A null-delivery read-only inspection returns that exact
+faulted aggregate and no emissions.
 
 Reserved `env` is the only undeclared host-input exception:
 
@@ -484,7 +860,12 @@ Reserved `env` is the only undeclared host-input exception:
 {
   event: "env",
   event_id: non_empty_string,
-  target: root | live_instance_reference,
+  target:
+    { root: {
+        root_instance_id: non_empty_string,
+        root_runtime_id: non_empty_string
+    }}
+    | { spawned_instance: instance_reference },
   payload: { changed: { external_name: typed_value, ... } }
 }
 ```
@@ -492,8 +873,25 @@ Reserved `env` is the only undeclared host-input exception:
 It has no correlation id. `changed` is non-empty and every field must match a declared
 root external variable on the targeted runtime. A `refresh` action is valid only in the
 selected `env` handler and copies the requested changed values into those root
-variables atomically. Changed fields not selected by `refresh` are not retained by the
-core.
+variables atomically. `refresh: {}` selects every field in the current `changed` map;
+`refresh.only` selects exactly its named subset and every name MUST occur in that map.
+If a selected `refresh.only` name is absent from the accepted `changed` record, the
+action raises `action_fault` at the exact absolute pointer formed by appending
+`/refresh/only/<index>` to the action's pointer in the validated bundle.
+The ordinary RTC fault rule rolls back every write, emission, counter allocation, and
+other tentative change from the step. This is not a pre-step rejection: the envelope
+is structurally and semantically valid, and the failure depends on the selected
+handler and action. The first absent item in ascending list-index order determines the
+fault. An omitted `only` never has this failure because it selects exactly the names
+present in `changed`.
+Changed fields not selected by a committed `refresh` are not retained by the core.
+There is no external-source map in logical state: the normalized `env` envelope is the
+only source value visible during that RTC step.
+
+For an aggregate root or spawned runtime, `env` arrives only through the `input` mode
+exception above. For a component, it arrives only through the owner-to-static-component
+forwarding form in §4.8 and subsequent explicit `internal` delivery. Direct host input
+to a component remains invalid.
 
 ### 6.2 Run to completion
 
@@ -536,7 +934,9 @@ discarded without accumulating core state.
 Determa deliberately executes a selected external transition in this exact order:
 
 1. evaluate the selected guard;
-2. execute transition actions in the source configuration and source variable scope;
+2. execute the originating transition actions in the source configuration and source
+   variable scope, then completely resolve any targeted choice chain as described
+   below;
 3. exit the active source path from innermost to outermost, stopping below the
    transition boundary defined below;
 4. enter the target path below that boundary, from outermost to innermost; and
@@ -547,11 +947,36 @@ Because step 2 precedes exit, a write to a variable or `bind_to` reference destr
 step 3 would have no observable result. §5.1 therefore rejects such a transition at
 load time. A write to an ancestor-scoped destination that survives the exit remains
 valid. For a choice chain, every possible selected branch must satisfy this rule.
+Entry/exit actions invoked by steps 3–5 instead use the lifecycle rule in §4.5.
 
 This differs from canonical UML ordering, which treats the transition effect as behavior
 of the edge after source exit and before target entry. Determa instead keeps the source
 context intact while the transition action runs. Authors familiar with UML MUST rely on
 the order above for Determa definitions.
+
+A transition whose target is a choice forms one **compound transition**:
+
+1. the event or initial transition that first targets a choice is the originating
+   transition;
+2. after its actions, evaluate that choice's branches in order and select the first
+   true guard or final unguarded branch;
+3. execute the selected branch actions immediately, before any state exit;
+4. if its target is another choice, repeat steps 2–3; otherwise that target is the
+   compound transition's final target; and
+5. compute one transition boundary from the originating source and final target, then
+   perform one exit/entry sequence.
+
+Choice guards and actions use the originating transition's lexical variable scope after
+all preceding actions in the chain. They never receive the `event` binding. Every
+possible incoming origin/choice path MUST therefore parse, name-resolve, and type-check
+in that origin's scope. A guard or action fault rolls back the whole RTC before any
+state exit.
+
+For an event transition, the originating source is the state whose handler was
+selected. For an initial transition, it is the already-entered containing composite:
+the initial and selected choice actions run in that composite's scope, the full chain
+resolves before any descendant entry, and no state is exited. Choice-to-choice paths
+never enter or exit the transient choice objects themselves.
 
 Entry and exit actions belong to states. Entry initializes the state's variables, runs
 its entry actions, then follows its initial transition unless explicit history
@@ -579,7 +1004,8 @@ transitions never exit or re-enter it.
   remain untouched.
 - For that same strict-descendant relationship, `local: true` uses the source as its
   boundary. It exits and enters only descendants, leaving the source's variables and
-  lifecycle actions untouched.
+  lifecycle actions untouched. A machine-root source cannot carry `local: true`;
+  root invariance would make it a noncanonical no-op.
 - When the target strictly contains the source, the target is the boundary. The active
   source path exits up to but excluding the target, and the target is not re-entered.
   External re-entry of a proper ancestor target is not expressible in format 1.
@@ -599,9 +1025,8 @@ unrelated states are deliberately unsupported.
 
 ### 6.5 Choice and history
 
-A choice is transient. Prior transition actions run first; choice guards then evaluate
-against the resulting variables, and the first true branch is taken. The final branch
-MUST be unguarded.
+A choice is transient and follows the compound-transition algorithm in §6.4. The first
+true branch is selected and the final branch MUST be unguarded.
 
 Each composite whose `history` is `shallow` or `deep` maintains an optional history
 record. When an RTC exits that composite, the engine copies its pre-exit active
@@ -636,7 +1061,75 @@ A history target may carry `local: true` when the resolved history composite is 
 strict descendant of the composite source. The local boundary from §6.4 applies, then
 history restoration occurs normally in step 5.
 
+### 6.6 Stop interruption
+
+`stop` is an immediate interruption point for the runtime executing it:
+
+- in a transition or choice action, it abandons the transition/choice target and skips
+  the remaining choice chain;
+- in an entry action, it skips the rest of that runtime's entry/initial descent;
+- in an initial-transition action, it abandons the initial target; and
+- during component or spawned initialization, it completes that contained runtime,
+  not its owner.
+
+Actions and emissions performed before `stop` remain tentative results of the RTC.
+When `stop` occurs in lifecycle entry behavior, preceding entry writes and later exit
+writes to still-live variables use §4.5 and may feed subsequent exit behavior before
+destruction.
+The engine then performs that runtime's ordinary completion: cancel retained
+descendants, dispose allocated-but-not-initialized component placements without running
+their author behavior or emitting component notifications, exit the currently entered
+partial configuration deepest-first, and finalize completion. Identity/counter
+allocations made before `stop` remain consumed if the RTC commits.
+
+If a parallel owner's entry action stops its runtime, component identities allocated
+before entry are disposed and no component binding or initialization runs. If a
+component stops during its own initialization, it emits its normal component-completed
+notification and later placements continue in declaration order. If a spawned child
+stops during its initialization, it emits normal spawned-instance `done`, is disposed,
+and any `bind_to` value remains the resulting non-targetable nominal reference; later
+owner actions continue.
+
+Any cleanup or exit fault rolls the enclosing RTC back and uses the normal
+fault-finalization rules. Thus retry starts from the same pre-step state, and no skipped
+initialization or emission leaks from the failed attempt.
+
 ## 7. Components, spawning, and lifecycle
+
+Every lifecycle cascade uses one recursive postorder algorithm:
+
+1. At a runtime, direct retained component children are visited first in descending
+   order of `(owning_state_document_pointer UTF-8 bytes,
+   state_activation_sequence, component_declaration_index,
+   component_activation_sequence)`.
+2. Direct retained spawned children are then visited in ascending order of
+   `(holder_rank, holder_declaration_pointer UTF-8 bytes,
+   holder_state_activation_sequence, spawn_sequence)`. A bound child has
+   `holder_rank = 0` and uses the exact RFC 6901 variable-declaration pointer plus the
+   activation sequence of that declaring state. An unbound child has
+   `holder_rank = 1`, empty holder pointer, and holder activation sequence zero.
+3. Each selected child recursively visits its children by the same rules before that
+   child is finalized. A running child then executes active exits innermost through its
+   root; a completed child has no active configuration; a retained-faulted or
+   root-frozen subtree skips all author exit behavior. The finalized subtree is
+   disposed before the next sibling is visited.
+
+The component tuple's declaration index is its zero-based index in `components`; its
+state pointer/activation distinguishes repeated or nested placements. A runtime's
+spawn sequence is unique and therefore breaks any remaining spawned-child tie. Already
+disposed children are absent. Emissions append exactly when their exit action runs, so
+the traversal above is also the total cascade-emission order.
+
+State-scope cleanup selects only children bound to variable declarations whose
+currently active state scopes are exiting; unbound children and children held by
+surviving scopes are not selected. Runtime completion, `stop`, and root termination
+select every direct component and spawned child, including unbound children. Explicit
+`cancel` selects its addressed spawned subtree. Parallel-state exit selects every
+placement of that parallel state. Natural component/spawned completion applies the
+same traversal to that runtime's descendants. These selection rules plus the traversal
+are reused without variation for explicit cancel, holder cleanup, component disposal,
+natural completion, `stop`, and root cascade. A fault rolls the entire enclosing
+cascade back atomically.
 
 ### 7.1 Lifecycle-bound components
 
@@ -661,13 +1154,29 @@ processing:
 A placement declares exactly one of `machine_id` or inline `root`. `component_id` is
 unique across the containing machine.
 
+An inline `root` uses the containing machine's `(namespace, machine_id,
+machine_version)` as its definition identity. Its exact component placement pointer is
+the additional inline-definition discriminator used by §9. Nested inline placements use
+their own full document pointers, so neither runtime nor effect identities can collide
+with a sibling placement.
+
 Entering a parallel state is part of the owner step:
 
-1. allocate component runtime identities in declaration order;
+1. allocate component runtime identities in declaration order and mark each placement
+   pending-initialization;
 2. initialize the parallel state's variables and run its entry actions;
-3. evaluate `with` using owner variables only;
+3. evaluate the statically validated `with.input` and `with.external` expressions in
+   the order and snapshot defined by §4.8, using owner variables only, then apply
+   target-root `init` defaults;
 4. create and initialize each component in declaration order; and
 5. reach a stable configuration in every component before the owner step commits.
+
+`pending-initialization` and `pending-completion` are tentative intra-RTC phases, not
+logical-state statuses. They never appear in committed state, results, read-only
+inspection, or the input to a later call. Stable committed root statuses are exactly
+`running`, `completed`, and `faulted`; stable retained component statuses are exactly
+`running`, `completed`, and `faulted`; stable retained spawned statuses are exactly
+`running` and `faulted`, because completed spawned runtimes are disposed before commit.
 
 The triggering event is unavailable to entry actions and `with`. A transition action
 must first copy required payload into an owner variable.
@@ -676,21 +1185,31 @@ Components have isolated configurations and variables. They do not share an even
 because queues are outside core. An event reaches a component only through an explicit
 emission targeting its nominal component runtime identity.
 
-The `{component: component_id}` syntax resolves at emission time to the currently
-running placement identity, including its activation sequence. The immutable envelope
-stores that resolved runtime identity. Delayed delivery to a disposed placement
-therefore cannot accidentally reach a later re-entry incarnation with the same
-`component_id`.
+The `{component: component_id}` syntax resolves at emission time to the allocated
+pending-initialization or running placement identity, including its activation
+sequence. This permits the parallel owner's entry action to address identities allocated
+in step 1. The immutable envelope stores the complete component target from §6.1.
+Delayed delivery to a disposed placement therefore cannot accidentally reach a later
+re-entry incarnation with the same `component_id`.
+
+An emission to a pending-initialization placement is tentative and cannot be delivered
+before the enclosing owner step commits. If initialization succeeds, later delivery may
+target the running component. If the component initializes and immediately completes,
+or initialization commits as an isolated component fault under §10.2, the earlier
+emission remains in the committed owner result with its exact target, but later delivery
+rejects it with `inactive_component_target`. If the enclosing owner step faults, both
+the placement and tentative emission roll back.
 
 A component reaching its root final state or executing `stop` becomes completed and
-emits one `determa.component_completed` envelope to its owner:
+emits one `determa.component_completed` envelope to its owner using the fixed payload
+from §4.4:
 
 ```text
 { component_id, component_runtime_id }
 ```
 
 When every component placement is complete, the same successful step also emits the
-reserved `done` event to the owner with:
+parallel branch of the fixed reserved `done` payload from §4.4:
 
 ```text
 {
@@ -707,15 +1226,14 @@ For `determa.component_completed`, source is the component runtime and target is
 owner runtime. For the all-components-complete `done`, source and target are both the
 owner runtime. Both retain the completing component step's cause.
 
-Pending-completion, completed, and faulted component runtimes remain inspectable until
-their parallel owner exits, but are terminal and non-targetable. Only pending-
-initialization and running components accept internal sends.
+Completed and faulted component runtimes remain inspectable until their parallel owner
+exits, but are terminal and non-targetable. Running components accept internal
+delivery. During one tentative owner RTC, an entry action may resolve and emit to an
+already allocated pending-initialization identity as defined above; this is not
+delivery to a committed pending runtime.
 
-Exiting the parallel state synchronously cancels its retained component runtimes in
-reverse declaration order, performs deepest-first owned-child cleanup, runs exit
-actions for running components, and disposes their logical state atomically with the
-owner transition. Cleanup of a retained-faulted component skips its author exit actions
-and disposes the frozen subtree deepest-first.
+Exiting the parallel state synchronously cleans and disposes its retained component
+runtimes with the canonical cascade above, atomically with the owner transition.
 
 Reset-in-place, component history retention, shared variables, implicit broadcast, and
 direct host-to-component ingress are unsupported.
@@ -735,20 +1253,23 @@ direct host-to-component ingress are unsupported.
     bind_to: payment_worker
 ```
 
-The action allocates a deterministic child identity, validates and copies root input
-and external bindings, initializes the child to a stable configuration, and optionally
-stores its nominal `instance_reference` in `bind_to`. Creation and binding are atomic
-with the parent step. `bind_to` MUST name a compatible nullable `instance_reference`
-whose current value is null; otherwise the step faults with `binding_not_empty`.
+The action allocates a deterministic child identity, evaluates its statically validated
+root input and external bindings in the order and snapshot defined by §4.8, applies
+target-root `init` defaults, optionally stores its nominal `instance_reference` in
+`bind_to`, and initializes the child to a stable configuration. A binding-expression
+evaluation error is `action_fault`; missing/extra names and incompatible inferred types
+were already rejected at load with `invalid_binding`. Creation and binding are atomic
+with the parent step. `bind_to` MUST name a compatible nullable
+`instance_reference` whose current value is null; otherwise the step faults with
+`binding_not_empty`.
 
 The declaring scope of the `instance_reference` used by `bind_to` defines the bound
 child's maximum lifetime. Binding records that declaration as the child's lifetime
 holder; copying or later replacing the nominal reference value neither transfers nor
 erases that association. When the holder's state exits, every running or
 retained-faulted associated child is synchronously cancelled and disposed before the
-declaring state's exit actions run. The engine orders holders by ascending identifier
-byte order and children of one holder by ascending spawn sequence, then cancels each
-descendant subtree deepest-first. The cleanup is atomic with the owner transition.
+declaring state's exit actions run in the canonical cascade order above. The cleanup
+is atomic with the owner transition.
 Emissions from child exit actions are returned in that cancellation order as part of
 the owner RTC step. A holder with no live or retained-faulted associated child requires
 no cleanup. A cleanup failure rolls the owner RTC step back and finalizes
@@ -761,22 +1282,23 @@ queue plugin later presents an envelope targeting it.
 
 After its expression type-checks as `instance_reference`, `cancel` is always
 well-formed. If the expression currently addresses a running or retained-faulted
-directly or transitively owned instance, it synchronously cancels descendants
-deepest-first, runs remaining exit actions, disposes logical child state, and
+directly or transitively owned instance, it synchronously cancels descendants with the
+canonical cascade, runs remaining eligible exit actions, disposes logical child state,
+and
 invalidates the reference as a target. A retained reference remains serializable and
 comparable but no longer addresses a live runtime. Faulted instances accept
 cancellation only for this cleanup; they reject ordinary events and sends. Cancellation
-of a retained-faulted instance skips its author exit actions and disposes the frozen
-subtree deepest-first. Every other resolved value succeeds without effect as described
-below.
+of a retained-faulted instance follows the frozen-subtree rule in the canonical
+cascade. Every other resolved value succeeds without effect as described below.
 
 If the cancellation expression evaluates to null, or does not currently address a
 running or retained-faulted directly or transitively owned instance, the action succeeds
 as a no-op. The action itself changes no ownership or counters and produces no fault or
 emission; the surrounding RTC step continues normally.
 
-Natural child completion performs the same descendant cleanup and emits one reserved
-`done` envelope to its immediate owner:
+Natural child completion performs the same descendant cleanup and emits the
+spawned-instance branch of the fixed reserved `done` payload from §4.4 to its immediate
+owner:
 
 ```text
 {
@@ -791,9 +1313,6 @@ Natural child completion performs the same descendant cleanup and emits one rese
 For this `done`, source is the completed child runtime and target is its immediate owner
 runtime. It retains the child's completing cause.
 
-The `parallel` and `spawned_instance` maps above are the complete tagged-union payload
-schema for reserved `done`.
-
 The completed child subtree is then disposed and its `instance_reference` becomes
 non-targetable. The completion envelope retains the nominal identity needed by the
 owner. A faulted child subtree is instead retained for diagnostics and may be disposed
@@ -805,12 +1324,32 @@ output intent and receives declared correlated input events from a host extensio
 ### 7.3 Runtime and aggregate-root completion
 
 When any runtime reaches its root final state or executes `stop`, it synchronously
-cancels all retained owned descendants, runs its active exit actions deepest-first, and
-becomes completed before the RTC commits. Component and spawned-runtime retention and
-notifications then follow §7.1 and §7.2.
+cancels all retained owned descendants with the canonical cascade, runs its active exit
+actions deepest-first, and becomes completed before the RTC commits. Component and
+spawned-runtime retention and notifications then follow §7.1 and §7.2.
 
-For the aggregate root, the engine retains terminal identity/status and fault-history
-diagnostics and returns `completed`. No new ordinary envelope may target it.
+The resulting emission order is exact:
+
+1. author emissions produced before the completion trigger, including final-state
+   entry actions or actions preceding `stop`;
+2. descendant cancellation/cleanup emissions in the deterministic cascade order;
+3. active-state exit-action emissions, innermost through the runtime root; and
+4. after every exit succeeds, the runtime's reserved completion notification.
+
+For a component, step 4 emits `determa.component_completed` and then, when it completes
+the containing parallel placement set, the parallel `done`. For a spawned runtime,
+step 4 emits spawned-instance `done`. The aggregate root has no reserved completion
+notification. Any fault rolls back every emission in this sequence.
+
+Completion exits the runtime root as well as its active descendants. After its root
+exit action, every state-scoped variable is destroyed and the completed runtime has an
+empty configuration and variable map. A retained completed component therefore exposes
+identity, status, history, counters, and prior fault diagnostics but no active
+configuration/variables. A completed spawned runtime is disposed as defined by §7.2.
+
+For the aggregate root, the engine retains terminal identity/status, history, counters,
+and fault-history diagnostics and returns `completed`; it retains no component or
+spawned descendant. No new ordinary envelope may target it.
 
 ## 8. Pure foreground interface and logical state
 
@@ -819,15 +1358,43 @@ equivalent to:
 
 ```text
 create(bundle, machine_id, root_instance_id, creation_id, bindings)
-  -> { status, state, emissions, faults }
+  -> { status, state, emissions, fault, rejection }
 
-dispatch(bundle, prior_state, envelope)
-  -> { status, disposition, state, emissions, faults }
+dispatch(bundle, prior_state, delivery?)
+  -> { status, disposition, state, emissions, fault, rejection }
+
+delivery =
+  { input: envelope }
+  | { internal: envelope }
+  | null
 ```
+
+The two delivery members are a closed tagged union. `input` applies the public-ingress
+rules in §6.1; `internal` applies the internal-delivery rules. A non-null delivery has
+exactly one member. Null is the read-only inspection call.
 
 `status` is `running`, `completed`, or `faulted` for an existing aggregate. A creation
 rejected before an aggregate exists returns `status: rejected` and `state: null`.
 Dispatch rejection or an unhandled envelope preserves the prior aggregate status.
+
+Every named result field is present. `emissions` is the ordered list returned by this
+call. `rejection` is null except on pre-step rejection, where it is exactly
+`{ code: rejection_code }`. `fault` is:
+
+- the aggregate root's committed fault record when the aggregate root is faulted;
+- otherwise the target runtime fault newly committed by a `faulted` dispatch; or
+- null.
+
+A contained fault committed inside an otherwise successful owner RTC appears only in
+the contained-runtime state and its reserved failure emission; it does not populate the
+top-level `fault`. There is no plural `faults` result field.
+
+Creation rejection codes are exactly `invalid_creation_request`,
+`invalid_machine_target`, and `invalid_binding`. Dispatch rejection codes are exactly
+`invalid_event`, `invalid_payload`, `invalid_correlation`,
+`invalid_instance_target`, `inactive_component_target`, `invalid_prior_state`, and
+`incompatible_bundle`. Bundle parsing, schema, and semantic load failures happen before
+these calls and use §2/§5 codes. A rejection commits no fault record.
 
 `disposition` is exactly:
 
@@ -836,18 +1403,136 @@ Dispatch rejection or an unhandled envelope preserves the prior aggregate status
 - `rejected` — validation failed before an RTC step; or
 - `faulted` — an engine fault occurred during the RTC step.
 
+For the null-delivery read-only call defined by §6.1, `disposition` is null. It returns
+the unchanged state, current `status` and `fault`, empty `emissions`, and null
+`rejection`.
+
 The root ownership aggregate contains:
 
 - the root runtime;
 - every retained component runtime;
-- every live or retained-faulted owned spawned descendant;
+- every non-disposed owned spawned descendant, including running, retained-faulted, or
+  root-frozen diagnostic descendants;
 - each runtime's definition identity, configuration, variables, history, lifecycle
-  status, source maps, and fault records;
+  status, and fault records;
 - ownership and `bind_to` lifetime-holder associations, plus placement, activation,
-  state-entry, spawn, logical-step, and output identity counters.
+  state-entry, spawn, logical-step, and output identity counters; and
+- the `validated_bundle_fingerprint` defined below.
 
 It contains no event queue, deferred queue, dead-letter collection, timer, broker
 acknowledgement, transport receipt, or plugin configuration.
+
+Before creation, the engine creates one normalized bundle tree. Default
+materialization is closed and context-sensitive:
+
+| source context | omitted source member | normalized member |
+|---|---|---|
+| machine | `version` | `version: 1` |
+| machine | `languages` or either child | complete `{ guard: cel, action: determa }` |
+| bundle or machine event | `direction` | `direction: internal` |
+| payload field | `required` | `required: false` |
+| every non-reference variable | omitted `input` / `external` flag | insert that flag as `false` |
+| active state | `type` | `type: simple` |
+| composite state | `history` | `history: none` |
+| event transition in `on_events` | `lang` | `lang: cel` |
+| `send` action | both `to` and `targets` | `to: { self: true }` |
+
+Before this table is applied, every typed literal is normalized under §5.2. Thus an
+integer-form `init` or payload `default` for a declared `float` becomes a binary64
+value in the normalized tree; destination-free numeric values such as `meta` leaves
+retain their parsed `int`/`double` distinction.
+
+An `instance_reference` must explicitly declare `nullable: true`; non-reference
+variables cannot declare `nullable`, so no normalized `nullable: false` is inserted.
+Initial transitions and choice branches have no `lang` member and use their fixed
+language semantics without inserting one. An explicitly present value is retained
+after §5.2 numeric normalization.
+
+Every other optional member remains absent. In particular, absent `events`,
+`variables`, `payload`, `entry`, `exit`, `on_events`, `states`, `components`, `meta`,
+binding, correlation, action, guard, `init`, payload `default`, `local`, and
+`correlates_to` members are not replaced with empty maps, empty lists, null, or false.
+Choice pseudostates do not receive `type`. The normalizer recursively visits inline
+component roots and every structured action location. JSON Schema `default`
+annotations are informative only; this table is the normative algorithm.
+
+The engine then computes:
+
+```text
+validated_bundle_fingerprint = hash([
+  "determa-validated-bundle-fingerprint-1",
+  typed_bundle_tree
+])
+```
+
+`typed_bundle_tree` recursively encodes null as `["null"]`, Boolean as
+`["boolean", value]`, string as `["string", value]`, integer as
+`["integer", canonical_decimal(value)]`, binary64 as
+`["float", sixteen_lowercase_hex_bits]`, list as `["list", encoded_items]`, and map as
+`["map", [[key, encoded_value], ...]]` with entries sorted by key UTF-8 bytes. Binary64
+bits use network byte order after negative-zero normalization. This typed projection
+prevents JCS from collapsing `int`/`double` or rounding a signed-64-bit integer. It
+includes `meta` and every other validated field.
+
+Normative fingerprint vector for this default-materialized bundle:
+
+```yaml
+format: 1
+namespace: example.turnstile
+events:
+  tick:
+    payload:
+      amount: { type: float, default: 1 }
+meta:
+  large_integer: 9007199254740993
+  integer_one: 1
+  floating_one: 1.0
+machines:
+  - machine_id: turnstile
+    events:
+      local_notice:
+        payload:
+          value: { type: int, required: true }
+    root:
+      type: composite
+      variables:
+        attempts: { type: int, init: 0 }
+      initial: { transition_to: locked }
+      states:
+        locked:
+          type: parallel
+          components:
+            - component_id: left
+              root: {}
+            - component_id: right
+              root: {}
+          on_events:
+            tick:
+              transition_to: unlocked
+              action:
+                - send:
+                    event: local_notice
+                    payload: { value: "1" }
+        unlocked: {}
+```
+
+```text
+JCS:
+["determa-validated-bundle-fingerprint-1",["map",[["events",["map",[["tick",["map",[["direction",["string","internal"]],["payload",["map",[["amount",["map",[["default",["float","3ff0000000000000"]],["required",["boolean",false]],["type",["string","float"]]]]]]]]]]]]]],["format",["integer","1"]],["machines",["list",[["map",[["events",["map",[["local_notice",["map",[["direction",["string","internal"]],["payload",["map",[["value",["map",[["required",["boolean",true]],["type",["string","int"]]]]]]]]]]]]]],["languages",["map",[["action",["string","determa"]],["guard",["string","cel"]]]]],["machine_id",["string","turnstile"]],["root",["map",[["history",["string","none"]],["initial",["map",[["transition_to",["string","locked"]]]]],["states",["map",[["locked",["map",[["components",["list",[["map",[["component_id",["string","left"]],["root",["map",[["type",["string","simple"]]]]]]],["map",[["component_id",["string","right"]],["root",["map",[["type",["string","simple"]]]]]]]]]],["on_events",["map",[["tick",["map",[["action",["list",[["map",[["send",["map",[["event",["string","local_notice"]],["payload",["map",[["value",["string","1"]]]]],["to",["map",[["self",["boolean",true]]]]]]]]]]]]],["lang",["string","cel"]],["transition_to",["string","unlocked"]]]]]]]],["type",["string","parallel"]]]]],["unlocked",["map",[["type",["string","simple"]]]]]]]],["type",["string","composite"]],["variables",["map",[["attempts",["map",[["external",["boolean",false]],["init",["integer","0"]],["input",["boolean",false]],["type",["string","int"]]]]]]]]]]],["version",["integer","1"]]]]]]],["meta",["map",[["floating_one",["float","3ff0000000000000"]],["integer_one",["integer","1"]],["large_integer",["integer","9007199254740993"]]]]],["namespace",["string","example.turnstile"]]]]]
+
+hash:
+sha256:7e48ad82ea5305c24b7730f4fd24c36ec196a0875c982b85eba5b3a5ddcbb92f
+```
+
+Creation stores this fingerprint. Every dispatch, including read-only inspection,
+first validates the abstract prior-state shape and all retained definition/path
+references, then compares its stored fingerprint with the supplied validated bundle.
+Malformed or internally inconsistent prior state rejects with `invalid_prior_state`;
+a fingerprint mismatch rejects with `incompatible_bundle`. Both return the exact prior
+state with no counter/state/emission change. This check precedes envelope validation.
+A different document reusing the same namespace/machine/version triple can therefore
+never reinterpret existing state. This is an abstract-state invariant and does not
+define a portable snapshot wire format.
 
 The host may store one aggregate in one row/document or normalize it, provided every
 dispatch sees serializable prior state and commits an observably equivalent result.
@@ -855,12 +1540,20 @@ The core itself performs no persistence.
 
 Creation initializes the aggregate and every root initial/entry action atomically.
 Creation bindings contain separate `input` and `external` maps. Missing required,
-extra, or wrongly typed values reject creation without state or emissions.
+extra, or wrongly typed values reject creation with `invalid_binding`, no state, and no
+emissions. Omitted declarations use `init` only where §4.5 permits a default.
 
-A value-dependent root initialization fault rolls author behavior back, commits only
-the deterministic root fault record in a terminal faulted aggregate, and returns no
-author emission. A contained component initialization fault follows §10.2 and may
-commit a running owner aggregate with the contained fault and its one failure emission.
+A value-dependent root initialization fault rolls author behavior back and commits a
+terminal diagnostic aggregate containing only the validated-bundle fingerprint, root
+runtime/definition/creation identity, aggregate counters, `faulted` status, and fault
+record. Its configuration, variables, history, components, and owned spawned instances
+are empty. Root-local spawn/state/component activation counters are reset to their
+pre-author-initialization values: spawn sequence zero and empty state/component counter
+maps. Creation used logical step zero, so `next_logical_step_sequence` is one;
+`next_output_sequence` is zero because every author output rolled back. The result
+contains no emission and null rejection. Contained component and spawned initialization
+faults follow the mandatory isolated behavior in §10.2; they are not implementation
+choices.
 
 ## 9. Deterministic identities and emissions
 
@@ -884,8 +1577,9 @@ The root runtime identity is:
 
 ```text
 hash([
-  "determa-root-runtime-identity-1",
+  "determa-root-runtime-identity-2",
   "1",
+  validated_bundle_fingerprint,
   namespace,
   machine_id,
   canonical_decimal(machine_version),
@@ -897,11 +1591,17 @@ Normative root-identity vector:
 
 ```text
 JCS:
-["determa-root-runtime-identity-1","1","example.turnstile","turnstile","1","turnstile-42"]
+["determa-root-runtime-identity-2","1","sha256:7e48ad82ea5305c24b7730f4fd24c36ec196a0875c982b85eba5b3a5ddcbb92f","example.turnstile","turnstile","1","turnstile-42"]
 
 hash:
-sha256:c5d32baf8704e310e39e65536c84cbf1d5d33ce8276f4aaaf9878e5b5590fd58
+sha256:72dca6d0b2b3690ae28bda2f17a461179b18fbf11daad7a12709d9384a500c64
 ```
+
+Including the validated bundle fingerprint prevents a changed same-version definition
+from reusing a prior root runtime or effect identity. Component and spawned identities
+include an owner runtime identity, and every effect includes its emitting runtime
+identity, so the distinction propagates through the complete ownership tree and
+outbox.
 
 A component runtime identity is:
 
@@ -917,6 +1617,23 @@ hash([
   machine_id,
   canonical_decimal(machine_version)
 ])
+```
+
+For a `machine_id` placement, the final three operands are the referenced machine's
+definition identity. For an inline `root`, they are the containing machine's
+definition identity and `component_definition_pointer` is the inline placement's full
+RFC 6901 pointer. The pointer and `owner_runtime_id` distinguish nested and sibling
+inline placements; `activation_sequence` distinguishes re-entry incarnations.
+
+The first inline placement in the same normative bundle above is reached during root
+initialization. With activation sequence zero, its normative identity vector is:
+
+```text
+JCS:
+["determa-component-runtime-identity-1","1","turnstile-42","sha256:72dca6d0b2b3690ae28bda2f17a461179b18fbf11daad7a12709d9384a500c64","/machines/0/root/states/locked/components/0","0","example.turnstile","turnstile","1"]
+
+hash:
+sha256:43db74b6a8d6f31543f7d142fb5e25a49e33eb3bf548e7bfd20d59513778cbc3
 ```
 
 A spawned `instance_id`, which is also its runtime identity, is:
@@ -996,10 +1713,10 @@ initialization vector is:
 
 ```text
 JCS:
-["determa-cause-identity-1","1","root_initialization","turnstile-42","sha256:c5d32baf8704e310e39e65536c84cbf1d5d33ce8276f4aaaf9878e5b5590fd58","sha256:c5d32baf8704e310e39e65536c84cbf1d5d33ce8276f4aaaf9878e5b5590fd58","create-7","0","/machines/0/root","0"]
+["determa-cause-identity-1","1","root_initialization","turnstile-42","sha256:72dca6d0b2b3690ae28bda2f17a461179b18fbf11daad7a12709d9384a500c64","sha256:72dca6d0b2b3690ae28bda2f17a461179b18fbf11daad7a12709d9384a500c64","create-7","0","/machines/0/root","0"]
 
 hash:
-sha256:063ca0e80bec3ffc23fc8754de4275f64dfc3fa5c14ae1cf24eaabc99fb62889
+sha256:c9e8e89a01362f40e9a74c01392d09abe2323f31c8f14f22e05bfcaf6dfac0ab
 ```
 
 An internal emission derives:
@@ -1044,6 +1761,11 @@ effect_id = hash([
 ])
 ```
 
+For effects emitted by an inline component, the definition triple is the containing
+machine identity above. `emitting_runtime_id` already contains the full placement
+pointer and activation sequence, so identical actions in sibling, nested, or later
+inline placements cannot collide.
+
 `emission_index` is the zero-based external-intent ordinal within that executing
 action. The intent also carries the allocated aggregate-monotonic output `sequence`,
 event name, typed payload, and correlation id. Retrying the same uncommitted prior
@@ -1064,7 +1786,6 @@ Engine faults include:
 - `action_fault`;
 - `invalid_instance_target`;
 - `inactive_component_target`;
-- `invalid_binding`;
 - `binding_not_empty`;
 - `contained_runtime_fault`;
 - `invariant_fault`; and
@@ -1087,6 +1808,14 @@ On an engine fault, the core:
 3. records the fault and marks the executing runtime faulted; and
 4. returns no emission from the rolled-back author actions.
 
+When the executing runtime is the aggregate root, that fault finalization is terminal
+for the entire ownership aggregate. The engine preserves the rolled-back diagnostic
+tree exactly: retained component and spawned descendants keep their pre-step
+configuration, variables, individual status, and fault records, but are frozen and
+non-targetable. It runs no descendant exit/cancellation behavior and emits no contained
+failure notification for this freeze. The aggregate status is `faulted`; all later
+processing and read-only behavior follows the aggregate-terminal rule in §6.1.
+
 The committed fault record is:
 
 ```text
@@ -1098,6 +1827,27 @@ The committed fault record is:
   source_locator
 }
 ```
+
+`source_locator` uses a closed vocabulary. A value beginning `/` is the exact RFC 6901
+pointer into the validated bundle; a value beginning `system:` is one of the fixed
+locators below. Engines MUST use this mapping:
+
+| fault code | exact `source_locator` |
+|---|---|
+| `guard_fault` | pointer to the failing event-transition or choice `guard` value |
+| `action_fault` | pointer to the failing CEL expression value inside the action, entry, exit, initial transition, choice branch, component binding, or spawn binding; for an absent `refresh.only` field, the pointer to the first absent list item |
+| `invalid_instance_target` | pointer to the executing send action's `to`/`targets` member or, for a dynamic instance expression, that exact expression value |
+| `inactive_component_target` | pointer to the executing send action's `to`/`targets` member that names the component |
+| `binding_not_empty` | pointer to the executing spawn action's `bind_to` value |
+| `contained_runtime_fault` | exactly `system:unhandled_contained_failure` |
+| `cascade_fault` | exactly `system:cascade_cleanup` |
+| `invariant_fault` | exactly `system:invariant` |
+
+For a `targets` list, the pointer includes the failing zero-based list index. A
+contained failure notification embeds the §4.4 public projection of the child fault
+record; if its delivery later faults the owner, the owner receives a separate retained
+record with the system locator above. Rejected pre-step envelopes and rejected creation
+have no committed fault record and therefore no `source_locator`.
 
 The core does not remove, acknowledge, retry, retain, or dead-letter the input envelope.
 The caller still owns the exact envelope and receives `disposition: faulted`. Its queue
@@ -1114,7 +1864,7 @@ then returns one deterministic internal failure emission to the immediate owner:
   {
     component_id: identifier,
     component_runtime_id: non_empty_string,
-    fault: fault_record
+    fault: public_fault_record
   }
   ```
 
@@ -1126,19 +1876,58 @@ then returns one deterministic internal failure emission to the immediate owner:
     instance_id: non_empty_string,
     machine_id: identifier,
     machine_version: positive_integer,
-    fault: fault_record
+    fault: public_fault_record
   }
   ```
 
-The `fault` field is a value-copy of the committed record above. Each failed runtime
-emits its notification once. Source is the failed runtime; target is its immediate
-owner; the emission retains the faulting cause and uses the corresponding system
-locator from §9.
+The `fault` field is the fixed `public_fault_record` projection from §4.4. It copies
+`runtime_id`, `cause_id`, `code`, and `source_locator` unchanged and encodes the
+retained mathematical `step_sequence` as its `canonical_decimal` string. Each failed
+runtime emits its notification once. Source is the failed runtime; target is its
+immediate owner; the emission retains the faulting cause and uses the corresponding
+system locator from §9.
+
+Initialization faults are isolated contained-runtime faults with mandatory behavior:
+
+- A component whose initialization faults rolls back only its tentative author
+  initialization state and emissions, commits the diagnostic projection below as a
+  retained-faulted placement, and contributes exactly one
+  `determa.component_failed` emission. Later component placements continue
+  initialization in declaration order.
+- A spawned child whose initialization faults rolls back only its tentative author
+  initialization state and emissions, commits the diagnostic projection below as a
+  retained-faulted child, leaves `bind_to` set to that nominal child reference, and
+  contributes exactly one `determa.spawned_instance_failed` emission. Later actions in
+  the owner's ordered action list continue.
+
+The retained diagnostic projection is exact: runtime and definition identity,
+component-placement or spawned ownership/lifetime-holder identity, allocated component
+activation or owner spawn sequence, `faulted` status, and the committed fault record.
+Its configuration, variables, history, components, owned spawned descendants, and
+author emissions are empty. Supplied root input/external values and root `init` values
+are not retained. Its child-local next spawn sequence is zero and its state/component
+activation-counter maps are empty; no author-initialization allocation survives.
+The containing owner's already allocated placement activation or spawn counter remains
+consumed, and a spawned parent's `bind_to` value remains set as specified above.
+
+The failure emission occupies the point at which that contained initialization faults:
+component failures follow placement declaration order; spawned failures follow their
+spawn action's position relative to other owner emissions. Earlier tentative owner
+emissions targeting a now-faulted pending component remain in the result as specified
+by §7.1. No author emission from the failed initialization survives.
+
+All of these retained faults, bindings, counters, later component/action work, and
+failure emissions remain tentative until the enclosing owner RTC commits. If any later
+work faults that owner step, the owner rollback removes the newly created contained
+runtimes, bindings, contained fault records, and failure emissions and restores every
+counter. If the owner step commits, the owner remains running and the retained-faulted
+child is inspectable and cleanup-cancellable but cannot process ordinary delivery.
 
 A reserved failure event that reaches its owner unhandled faults the owner with
-`contained_runtime_fault`; its source locator is the owner's selected handler-search
-path and its cause id is the failure envelope's `event_id`. A queue plugin can discard
-or delay the notification; the core does not claim otherwise.
+`contained_runtime_fault`; its source locator is exactly
+`system:unhandled_contained_failure` and its cause id is the failure envelope's
+`event_id`. A queue plugin can discard or delay the notification; the core does not
+claim otherwise.
 
 The immediate owner may cancel a retained-faulted spawned child for cleanup. Ordinary
 input cannot advance a faulted runtime.
@@ -1326,7 +2115,15 @@ Format-1 conformance MUST be added before engine implementation or release. Case
 be one behavior per fixture and include:
 
 - document/schema positives and negatives;
-- CEL name/type checking and event visibility;
+- variable initialization/default requirements and creation/component/spawn binding
+  rejection;
+- payload-default materialization and optional-field absence;
+- integer bounds and integer-to-binary64 normalization at every typed boundary;
+- strict parsed-value, Unicode-scalar, and JSON-number-source validation;
+- CEL profile name/type checking, event visibility, numeric faults, selected conditional
+  branches, commutative error absorption for `&&`/`||`, and Unicode string ordering;
+- one-snapshot send-expression evaluation and deterministic payload/correlation/target
+  fault precedence;
 - leaf-to-ancestor dispatch and false-guard fallback;
 - internal, self, local, and external descendant-reset transition traces;
 - proper-ancestor transition bounds and the absence of external ancestor re-entry;
@@ -1335,18 +2132,37 @@ be one behavior per fixture and include:
 - transition-action-before-exit ordering;
 - load-time rejection of transition writes to destinations that the transition exits;
 - root-boundary preservation plus root self/history rejection;
-- destroyed `refresh` rejection and owned-child cancellation on reference scope exit;
+- root-local rejection and terminal aggregate-root fault behavior across descendants;
+- destroyed `refresh` rejection, missing-`refresh.only` rollback, and owned-child
+  cancellation on reference scope exit;
 - initial descent and ordered choice;
+- compound event/initial/choice-chain actions resolved before one lifecycle transition;
 - explicit history resume/restart, self-history lifecycle replay, first-entry fallback,
   capture timing, shallow/deep restoration, local history targeting, and variable
   reinitialization;
 - immutable envelope validation and each disposition;
+- explicit owner-to-component `env` forwarding, typed component refresh, and rejection
+  of every broader reserved-event send form;
 - no recursive delivery of internal sends;
-- component creation/routing/completion/disposal;
+- exact immutable root/spawned/component targets and stale component-incarnation
+  rejection;
+- component creation/routing/completion/disposal, including pending-initialization
+  addressing and inline identity vectors;
 - spawn, nominal reference, completion, cancel and cascade, including no-op
   cancellation of null and disposed references;
-- deterministic event/effect identity vectors across languages;
+- completion and `stop` output ordering across author behavior, descendant cleanup,
+  active exits, and reserved owner notifications;
+- isolated component/spawn initialization faults and enclosing-owner rollback;
+- root execution of `{owner: true}`, exit-time spawn rejection, and deterministic
+  exit-time sends to disposed targets;
+- omitted `refresh.only` and absence of retained external-source maps;
+- coherent validated-bundle-fingerprint, root-runtime, initialization-cause,
+  event/effect, and inline-component identity vectors across languages;
+- prior-state shape and supplied-bundle compatibility rejection, including changed
+  metadata and same-version definitions;
 - full RTC rollback and contained-runtime failure propagation;
+- exact document/system fault locators;
+- completed runtime empty configuration/variables and retained terminal diagnostics;
 - queue-independent behavior for a fixed delivery trace; and
 - explicit absence of timer, queue, and dead-letter fields from core state.
 
