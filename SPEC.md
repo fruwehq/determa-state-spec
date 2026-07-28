@@ -333,7 +333,7 @@ that lexical scope.
 | send | `{ send: { event, to? \| targets?, payload?, correlation_id? } }` | ordered immutable emissions |
 | refresh | `{ refresh: { only?: [name, ...] } }` | adopt validated `env` values |
 | spawn | `{ spawn: { machine_id, bindings?, bind_to? } }` | create an owned runtime |
-| cancel | `{ cancel: { instance: CEL } }` | synchronously cancel an owned runtime |
+| cancel | `{ cancel: { instance: CEL } }` | synchronously cancel an owned runtime; null is a no-op |
 | stop | `{ stop: {} }` | complete the executing runtime |
 
 `stop` MUST be the final action in its list and is invalid in exit behavior. Once it
@@ -389,9 +389,6 @@ A bundle is rejected before any runtime is created when it has:
   that same transition (`destroyed_variable_write`);
 - a spawn `bind_to` whose destination reference belongs to a state exited by that same
   transition (`destroyed_reference_binding`);
-- a transition that exits the scope of an `instance_reference` used by a reachable
-  spawn `bind_to` while its action list does not first cancel that exact reference
-  (`destroyed_live_instance_reference`);
 - invalid creation bindings or `instance_reference` constraints;
 - an initial/choice cycle that cannot reach a stable state;
 - a transition inside entry, exit, or initial behavior;
@@ -401,10 +398,7 @@ A bundle is rejected before any runtime is created when it has:
 
 For the destroyed-destination rules above, exits performed by root, component, or
 spawned-runtime completion after reaching a final state or executing `stop` belong to
-the same transition or action outcome. “First cancel” means an earlier action in the
-selected transition's ordered action list whose reference expression statically
-resolves to that exact `instance_reference`; assigning `null` or another value to the
-reference does not cancel the owned runtime.
+the same transition or action outcome.
 
 ### 5.2 CEL environments and compile-time types
 
@@ -561,8 +555,9 @@ the order above for Determa definitions.
 
 Entry and exit actions belong to states. Entry initializes the state's variables, runs
 its entry actions, then follows its initial transition unless explicit history
-restoration supplies the descendant configuration. Exit runs its exit actions, then
-destroys its variables.
+restoration supplies the descendant configuration. When a state exits, the engine first
+performs the automatic owned-child cleanup defined by §7.2, then runs the state's exit
+actions, then destroys its variables.
 
 An internal transition has no `transition_to` and executes actions without exit, entry,
 or initial descent. No state is exited or entered, including states between the active
@@ -746,11 +741,23 @@ stores its nominal `instance_reference` in `bind_to`. Creation and binding are a
 with the parent step. `bind_to` MUST name a compatible nullable `instance_reference`
 whose current value is null; otherwise the step faults with `binding_not_empty`.
 
-Ownership is not tied to the state whose transition spawned the child. A child may
-survive that state's exit when its bound reference remains in scope. §5.1 rejects an
-ordinary transition that could destroy its live-holding reference without first
-cancelling that exact reference. The child is processed only when a queue plugin later
-presents an envelope targeting it.
+The declaring scope of the `instance_reference` used by `bind_to` defines the bound
+child's maximum lifetime. Binding records that declaration as the child's lifetime
+holder; copying or later replacing the nominal reference value neither transfers nor
+erases that association. When the holder's state exits, every running or
+retained-faulted associated child is synchronously cancelled and disposed before the
+declaring state's exit actions run. The engine orders holders by ascending identifier
+byte order and children of one holder by ascending spawn sequence, then cancels each
+descendant subtree deepest-first. The cleanup is atomic with the owner transition.
+Emissions from child exit actions are returned in that cancellation order as part of
+the owner RTC step. A holder with no live or retained-faulted associated child requires
+no cleanup. A cleanup failure rolls the owner RTC step back and finalizes
+`cascade_fault` under §10.1. A root-scoped holder therefore lets its child survive every
+ordinary transition; a state-scoped holder ties its child to that state's lifetime.
+
+Ownership is not otherwise tied to the transition that spawned the child. An unbound
+child or a child whose holding reference remains in scope is processed only when a
+queue plugin later presents an envelope targeting it.
 
 `cancel` is valid for a running or retained-faulted directly or transitively owned
 instance. It synchronously cancels descendants deepest-first, runs remaining exit
@@ -758,7 +765,10 @@ actions, disposes logical child state, and invalidates the reference as a target
 retained reference remains serializable and comparable but no longer addresses a live
 runtime. Faulted instances accept cancellation only for this cleanup; they reject
 ordinary events and sends. Cancellation of a retained-faulted instance skips its author
-exit actions and disposes the frozen subtree deepest-first.
+exit actions and disposes the frozen subtree deepest-first. If the cancellation
+expression evaluates to a null `instance_reference`, the action succeeds as a no-op and
+the action itself changes no ownership or counters and produces no fault or emission;
+the surrounding RTC step continues normally.
 
 Natural child completion performs the same descendant cleanup and emits one reserved
 `done` envelope to its immediate owner:
@@ -828,8 +838,8 @@ The root ownership aggregate contains:
 - every live or retained-faulted owned spawned descendant;
 - each runtime's definition identity, configuration, variables, history, lifecycle
   status, source maps, and fault records;
-- ownership, placement, activation, state-entry, spawn, logical-step, and output
-  identity counters.
+- ownership and `bind_to` lifetime-holder associations, plus placement, activation,
+  state-entry, spawn, logical-step, and output identity counters.
 
 It contains no event queue, deferred queue, dead-letter collection, timer, broker
 acknowledgement, transport receipt, or plugin configuration.
@@ -1059,6 +1069,9 @@ There is no runtime `type_fault`; statically checkable types are load-time valid
 `invalid_instance_target` and `inactive_component_target` may also be pre-step
 rejection codes. They are engine faults only when an already accepted RTC action
 attempts an invalid send/cancel target.
+
+A `cancel` action whose expression evaluates to a null `instance_reference` is the
+successful no-op defined by §7.2 and is never `invalid_instance_target`.
 
 On an engine fault, the core:
 
@@ -1316,7 +1329,7 @@ be one behavior per fixture and include:
 - transition-action-before-exit ordering;
 - load-time rejection of transition writes to destinations that the transition exits;
 - root-boundary preservation plus root self/history rejection;
-- destroyed `refresh` and live `instance_reference` scope rejection;
+- destroyed `refresh` rejection and owned-child cancellation on reference scope exit;
 - initial descent and ordered choice;
 - explicit history resume/restart, self-history lifecycle replay, first-entry fallback,
   capture timing, shallow/deep restoration, local history targeting, and variable
