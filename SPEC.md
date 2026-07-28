@@ -75,9 +75,9 @@ The accepted parsed value model is deliberately narrower than general YAML:
 Loaders MUST detect source-level duplicates before constructing an ordinary host
 map; “last value wins” and “first value wins” are nonconformant. The exact pre-schema
 load codes are `duplicate_key`, `non_string_map_key`, `unsupported_yaml_feature`,
-`non_json_value`, `invalid_unicode`, `invalid_numeric_syntax`, and
-`numeric_value_out_of_range`. A later JSON Schema or semantic failure uses that layer's
-code instead.
+`non_json_value`, `invalid_unicode`, `invalid_numeric_syntax`,
+`invalid_boolean_syntax`, `invalid_null_syntax`, and `numeric_value_out_of_range`.
+A later JSON Schema or semantic failure uses that layer's code instead.
 
 Every string in a bundle, binding, envelope, or logical state MUST be a sequence of
 Unicode scalar values. Unpaired UTF-16 surrogates are `invalid_unicode`, including when
@@ -118,6 +118,29 @@ points, `.inf`, and `.nan` are `invalid_numeric_syntax`, even when a YAML librar
 assign them a numeric core tag. A quoted token is a string. An accepted token without a
 fraction/exponent is an `int`; a token with either is a `double`. Thus `-0` is integer
 zero, `1e0` is double `1.0`, and `-0.0` normalizes to positive double zero under §5.2.
+
+Number, Boolean, and null resolution is one pre-schema pass over the source spelling
+of every plain scalar token, including an empty mapping or sequence value position.
+This pass MUST occur before library tag coercion can erase the original spelling. The
+portable resolution is exact:
+
+- plain `true` and `false` are Booleans;
+- plain `True`, `TRUE`, `False`, and `FALSE` are `invalid_boolean_syntax`;
+- plain `null` is null;
+- plain `Null`, `NULL`, `~`, and an empty scalar are `invalid_null_syntax`;
+- plain `yes`, `no`, `on`, `off`, `y`, and `n`, including their ASCII case variants,
+  are strings and remain valid identifiers where an identifier is allowed;
+- plain `1` and `0` are integers under the numeric grammar above; and
+- every quoted form is a string, including quoted Boolean-like, null-like, and numeric
+  tokens.
+
+A loader MUST apply these source-token rules directly rather than accepting its YAML
+library's implicit scalar tags and attempting to reconstruct spelling afterward.
+
+> **Non-normative authoring note:** Quote YAML-1.1 Boolean-like identifiers such as
+> `yes`, `no`, `on`, and `off` when a bundle may pass through YAML 1.1 tooling. This
+> improves interoperability with nonconforming intermediary tools; it is not an
+> additional §5.1 identifier restriction.
 
 Every document MUST carry the YAML/JSON integer:
 
@@ -2119,7 +2142,8 @@ be one behavior per fixture and include:
   rejection;
 - payload-default materialization and optional-field absence;
 - integer bounds and integer-to-binary64 normalization at every typed boundary;
-- strict parsed-value, Unicode-scalar, and JSON-number-source validation;
+- strict parsed-value and Unicode-scalar validation plus portable numeric, Boolean,
+  and null source-token resolution;
 - CEL profile name/type checking, event visibility, numeric faults, selected conditional
   branches, commutative error absorption for `&&`/`||`, and Unicode string ordering;
 - one-snapshot send-expression evaluation and deterministic payload/correlation/target
