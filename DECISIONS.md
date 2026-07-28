@@ -174,3 +174,94 @@ otherwise behavior. A missing otherwise rule is a latent defect, especially for
 lifecycle states, reference states, source/target relationships, and parser token
 classes. Write the failing fixture first, then close the prose, schema, and assertion
 contract around that exhaustive domain.
+
+## Portable state references content-addressed definitions
+
+Relevant specification: [§16.3](SPEC.md#163-complete-root-ownership-aggregate) and
+[§16.5](SPEC.md#165-content-addressed-definition-registry).
+
+**Decision.** An ordinary aggregate envelope stores the exact validated-bundle
+fingerprint. The normalized definition is stored once in a content-addressed registry.
+A separate package can carry verified definitions for transfer or recovery.
+
+**Rejected alternative.** Embed the complete normalized definition in every aggregate
+row.
+
+**Reason.** Long-lived dormant aggregates need enough old declarative definition data
+to validate and migrate, but duplicating it per row makes every deployment and backup
+needlessly expensive. Content addressing preserves integrity and allows lazy migration
+without retaining old host executable logic.
+
+## Migration preserves target identity
+
+Relevant specification: [§16.4](SPEC.md#164-immutable-identity-and-mutable-definition-binding).
+
+**Decision.** Runtime identity origin and target identity are immutable. Migration
+updates only the current definition and relation pointers.
+
+**Rejected alternative.** Recompute component and spawned identities from the target
+definition.
+
+**Reason.** Already-created envelopes, outbox rows, nominal references, and external
+correlation may contain the old target. Rekeying would silently invalidate committed
+work unless every external reference were transactionally rewritten, which is outside
+the root aggregate.
+
+## Migration is declarative and action-free
+
+Relevant specification: [§16.7](SPEC.md#167-immutable-declarative-migration-descriptors)
+and [§16.9](SPEC.md#169-total-transform-matrix).
+
+**Decision.** Descriptors are immutable data with a bounded closed CEL value profile.
+Migration never executes machine actions, lifecycle behavior, arbitrary code, host
+callbacks, or I/O.
+
+**Rejected alternative.** Run entry/exit/transition code or an implementation-language
+migration callback.
+
+**Reason.** Portable migration must be retry-identical across languages and safe inside
+one host transaction. Author behavior can emit effects or depend on runtime facilities,
+and arbitrary callbacks cannot be independently validated by the conformance suite.
+
+## Migration routes are exact and pinned
+
+Relevant specification: [§16.8](SPEC.md#168-exact-route-and-migration-algorithm).
+
+**Decision.** Deployment supplies one exact ordered list of trusted descriptor digests.
+The engine never searches a migration graph.
+
+**Rejected alternative.** Select the shortest or latest available path at runtime.
+
+**Reason.** Registry contents and path-selection algorithms are host-dependent. Two
+available valid paths must not make aggregate results nondeterministic.
+
+## Incompatible state quarantines instead of guessing
+
+Relevant specification: [§16.9](SPEC.md#169-total-transform-matrix) and
+[§16.12](SPEC.md#1612-failure-rollback-quarantine-and-audit).
+
+**Decision.** Deleted or incompatible active state requires a complete explicit
+mapping. Otherwise the original aggregate is retained and quarantined. Version 1 has
+no destructive reset migration.
+
+**Rejected alternative.** Match by name, choose a surviving ancestor/initial state, or
+restart the aggregate automatically.
+
+**Reason.** Each fallback can discard business state or rerun side effects while
+appearing to be a routine definition upgrade. Quarantine makes the unresolved case
+observable and auditable without corrupting the committed source.
+
+## Lazy migration shares the dispatch transaction
+
+Relevant specification: [§16.11](SPEC.md#1611-lazy-transactional-host-ordering).
+
+**Decision.** The complete route, optional dispatch, aggregate replacement, inbox
+result, outbox emissions, and audit commit atomically under one aggregate lock.
+Artifacts are resolved before the transaction.
+
+**Rejected alternative.** Commit migration first and dispatch later, or process owned
+children in separate transactions.
+
+**Reason.** A committed definition advance with a rolled-back core result violates
+fault and retry semantics. The root ownership aggregate remains one transactional
+state boundary.

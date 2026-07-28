@@ -43,7 +43,9 @@ become invalid while the model is being designed.
 - isolated lifecycle-bound components and owned spawned runtimes;
 - one-envelope atomic run-to-completion processing;
 - deterministic event/effect identities and fault rollback; and
-- host-facing typed input/output contracts with explicit correlation.
+- host-facing typed input/output contracts with explicit correlation;
+- canonical portable aggregate-state serialization; and
+- explicit deterministic lazy migration between validated definitions.
 
 Determa transition actions run while the source state and its variables are still
 active, before source exit. The triggering event is visible to the selected handler,
@@ -70,7 +72,13 @@ This repository holds only the specification:
 
 - [`SPEC.md`](SPEC.md) — normative semantics;
 - [`schema/machine.schema.json`](schema/machine.schema.json) — structural JSON Schema;
-- [`examples/`](examples/) — schema-valid documents; and
+- [`schema/aggregate-state.schema.json`](schema/aggregate-state.schema.json) — portable
+  aggregate-state envelope;
+- [`schema/migration-descriptor.schema.json`](schema/migration-descriptor.schema.json)
+  — declarative definition migration;
+- [`schema/aggregate-state-package.schema.json`](schema/aggregate-state-package.schema.json)
+  — self-contained transfer package;
+- [`examples/`](examples/) — schema-valid machine documents and normative vectors; and
 - [`VERSION`](VERSION) — synchronized specification/package SemVer.
 
 The executable correctness target lives in

@@ -1547,15 +1547,19 @@ hash:
 sha256:7e48ad82ea5305c24b7730f4fd24c36ec196a0875c982b85eba5b3a5ddcbb92f
 ```
 
-Creation stores this fingerprint. Every dispatch, including read-only inspection,
-first validates the abstract prior-state shape and all retained definition/path
-references, then compares its stored fingerprint with the supplied validated bundle.
-Malformed or internally inconsistent prior state rejects with `invalid_prior_state`;
-a fingerprint mismatch rejects with `incompatible_bundle`. Both return the exact prior
-state with no counter/state/emission change. This check precedes envelope validation.
-A different document reusing the same namespace/machine/version triple can therefore
-never reinterpret existing state. This is an abstract-state invariant and does not
-define a portable snapshot wire format.
+Creation stores this fingerprint. Every ordinary dispatch, including read-only
+inspection, first validates the abstract prior-state shape and all retained
+definition/path references, then compares its stored fingerprint with the supplied
+validated bundle. Malformed or internally inconsistent prior state rejects with
+`invalid_prior_state`; a fingerprint mismatch rejects with `incompatible_bundle`.
+Both return the exact prior state with no counter/state/emission change. This check
+precedes envelope validation. A different document reusing the same
+namespace/machine/version triple can therefore never reinterpret existing state.
+
+The portable aggregate-state and explicit definition-migration operations in §16 are
+separate operations around this dispatch boundary. A host may decode an aggregate
+under its exact source definition and explicitly migrate it before dispatch. Ordinary
+dispatch itself never chooses, discovers, or applies a migration.
 
 The host may store one aggregate in one row/document or normalize it, provided every
 dispatch sees serializable prior state and commits an observably equivalent result.
@@ -2103,9 +2107,9 @@ is a completeness boundary, not a compatibility promise for earlier drafts.
 | deferral and dead letters | queue-plugin policy only; no portable machine fields or core storage |
 | owned spawning | retained for same-bundle machines with nominal `instance_reference` values |
 | submachines and package imports | unsupported |
-| definition migration/hot-swap | unsupported |
+| definition migration/hot-swap | explicit portable aggregate migration under §16; never implicit in ordinary dispatch |
 | observers and export | read-only inspection and visualization are recommended, not executable core behavior |
-| snapshots | no portable wire format in this alpha |
+| snapshots | closed portable aggregate-state envelope and package under §16 |
 | stores and CLI protocols | host/implementation concerns, not bundle grammar |
 
 The pre-release format deliberately omits:
@@ -2118,8 +2122,10 @@ The pre-release format deliberately omits:
 - cross-runtime transitions;
 - remote or detached core `spawn`;
 - package imports and dependency/version resolution;
-- machine definition migration or hot-swap;
-- portable snapshot wire format;
+- live definition replacement without the explicit §16 migration operation;
+- identity rekeying during migration;
+- destructive reset as a migration fallback;
+- arbitrary executable migration code or author behavior during migration;
 - standardized CLI/store JSON shapes;
 - standardized enabled-event inspection;
 - root engine-fault recovery/reset;
@@ -2190,12 +2196,48 @@ be one behavior per fixture and include:
 - queue-independent behavior for a fixed delivery trace; and
 - explicit absence of timer, queue, and dead-letter fields from core state.
 
+Persistence and migration conformance additionally requires:
+
+- canonical aggregate encoding, decoding, digest verification, and byte-stable
+  round trips, including exact no-trailing-newline RFC 8785 byte vectors;
+- strict rejection of unknown artifact fields, formats, schema versions, invalid
+  typed values, invalid relations, and inconsistent source definitions;
+- exact root, four-field spawned-reference, and five-field component target shapes,
+  with rejection of every extra/missing format-1 target member;
+- complete faulted-aggregate round trips including fault `step_sequence` and historical
+  definition anchor;
+- content-addressed definition and descriptor resolution, including missing,
+  untrusted, and hash-mismatched artifacts;
+- package attachment equivalence with the definition-registry contract;
+- unchanged-definition resume through encode/decode;
+- aggregate-shape-compatible migration with no logical-state transform;
+- exact per-descriptor `migration_applied` audit records and empty equal-fingerprint
+  route no-op results;
+- total active-state, variable, history, component, owned-runtime, lifetime-holder,
+  counter, and fault-anchor transforms;
+- repeated-runtime/activation transform scoping with no cross-runtime value mixing;
+- explicit deleted-state quarantine with no name, ancestor, initial, history, or reset
+  guess;
+- exact pinned multi-hop routes, adjacency checks, and cycle/alternate-route rejection;
+- immutable runtime, target, nominal-reference, activation, spawn, logical-step, and
+  output identities across migration;
+- retry-identical success or failure, complete rollback, and no counter consumption;
+- migration followed by handled, unhandled, rejected, and faulted dispatch in one
+  host transaction;
+- terminal completed/faulted maintenance migration without reactivation or emission;
+- exact terminal maintenance/policy failures and definition/descriptor authorization
+  failures; and
+- descriptor-declared and cumulative resource-limit accounting.
+
+Transaction crash points, inbox idempotency, outbox uniqueness, quarantine storage,
+and local-cache behavior belong to a separately declared persistence hosting profile.
+
 Golden-trace cases SHOULD make every action emit a trace token so ordering is directly
 reviewable.
 
 ## 15. Future example repositories
 
-After conformance and engine support, runnable examples should validate:
+After conformance and engine support, a separate examples repository should validate:
 
 - local foreground processing;
 - database/ACID embedding with queue plugins;
@@ -2207,7 +2249,686 @@ After conformance and engine support, runnable examples should validate:
 - broker retry/dead-letter policies;
 - package reuse after import semantics exist;
 - MCP exposure; and
-- real-time-oriented hosting.
+- real-time-oriented hosting;
+- portable aggregate-state round trips; and
+- one-row and normalized database persistence with lazy migration, transactional
+  inbox/outbox/audit, rollback injection, and quarantine recovery.
 
 Those examples are empirical design validation. They are not part of this
 specification-only change.
+
+## 16. Portable persistence and definition migration
+
+### 16.1 Independent artifact identities
+
+Machine documents remain numeric `format: 1`. Persistence introduces three independent
+closed JSON artifacts:
+
+| artifact | exact format field | exact schema-version field |
+|---|---|---|
+| aggregate-state envelope | `aggregate_state_format: "determa.aggregate_state"` | `aggregate_state_schema_version: 1` |
+| migration descriptor | `migration_descriptor_format: "determa.aggregate_migration"` | `migration_descriptor_schema_version: 1` |
+| transport package | `aggregate_state_package_format: "determa.aggregate_state_package"` | `aggregate_state_package_schema_version: 1` |
+
+These wire schema versions, machine format, repository/package SemVer, launcher
+SemVer, and author-controlled machine `version` are independent version domains.
+Unknown artifact formats or schema versions are rejected before semantic validation;
+there is no nearest-version parsing, implicit conversion, or best-effort field
+retention.
+
+The artifacts MUST be JSON encoded as strict UTF-8. Their parsers apply the §2
+source-level duplicate-name, acyclic JSON-value, Unicode-scalar, Boolean, null, and
+finite-number requirements before the applicable schema. YAML is not a portable
+encoding for these artifacts. Every schema is closed: an unknown member is invalid.
+The exact structural schemas are:
+
+- `schema/aggregate-state.schema.json`;
+- `schema/migration-descriptor.schema.json`; and
+- `schema/aggregate-state-package.schema.json`.
+
+Structural validity is necessary but not sufficient. The semantic invariants in this
+section are mandatory even where JSON Schema cannot express ordering, cross-reference,
+digest, type, or totality constraints.
+
+The portable core operations are behaviorally equivalent to:
+
+```text
+encode_aggregate(source_bundle, abstract_aggregate) -> canonical_json_bytes
+decode_aggregate(canonical_or_whitespace_json_bytes, definition_resolver)
+  -> abstract_aggregate
+migrate_aggregate(
+  aggregate_envelope,
+  target_validated_bundle_fingerprint,
+  ordered_descriptor_digests,
+  artifact_resolver,
+  resource_limits,
+  maintenance_mode
+) -> { aggregate_envelope, audit_records } | migration_failure
+```
+
+Language APIs may use idiomatic names. These are pure operations; they do not define a
+database API, registry transport, queue, transaction manager, or bulk migration job.
+
+### 16.2 Canonical values and aggregate encoding
+
+Artifact-owned counters and machine versions use canonical decimal strings: `0`, or a
+non-zero digit followed by zero or more digits. Signed typed integer values use `0` or
+an optional `-` followed by a non-zero digit and zero or more digits. Bounds that are
+semantic rather than structural are checked after schema validation.
+
+The one exception is `target_identity`: it embeds the exact normalized format-1 §6.1
+target object so an already-created target is never rewritten by persistence or
+migration. Its `machine_version` and component `activation_sequence` therefore retain
+the format-1 positive/non-negative JSON integer representation. Origin, current
+relation, and counter records use the artifact-owned decimal strings and may carry the
+additional migration data that is deliberately absent from the target.
+
+Every stored Determa value uses exactly one typed projection:
+
+```text
+["null"]
+["boolean", boolean]
+["string", unicode_scalar_string]
+["integer", signed_64_bit_canonical_decimal]
+["float", sixteen_lowercase_binary64_hex_bits]
+["list", [typed_value, ...]]
+["map", [[string_key, typed_value], ...]]
+```
+
+Map entries are strictly increasing by key UTF-8 bytes and contain no duplicate key.
+Negative binary64 zero is encoded as positive zero. Non-finite binary64 values are
+invalid. Lists preserve order. This is the same value distinction used by the §8
+validated-bundle fingerprint; a declared `instance_reference` value is encoded through
+its exact §4.5 map projection and is retyped from its declaration on decode.
+
+All arrays representing sets or maps have one canonical order:
+
+- `runtimes`: `runtime_id` UTF-8 bytes;
+- active leaf pointers, history pointers, and definition-pointer counter domains:
+  pointer UTF-8 bytes;
+- state activations: pointer, then numeric activation sequence;
+- variables: declaration pointer, then numeric declaring-state activation sequence.
+
+Any duplicate canonical key or noncanonical order is `invalid_aggregate_state`; a
+decoder never silently sorts an accepted envelope. Serialization emits RFC 8785 JCS
+bytes of the complete envelope with no byte-order mark, leading/trailing whitespace,
+or trailing newline. A parser may accept insignificant JSON whitespace and then verify
+that the semantic data is canonical.
+
+The human-readable `aggregate-state.json`, `migrated-aggregate-state.json`, and
+`faulted-aggregate-state.json` fixtures are pretty representations, not canonical
+serialized bytes. `aggregate-state.canonical.json` and
+`migrated-aggregate-state.canonical.json` are the exact byte goldens; their complete
+file bytes MUST equal RFC 8785 serialization of the corresponding pretty fixture.
+
+The digest is:
+
+```text
+aggregate_state_digest = hash([
+  "determa-aggregate-state-digest-1",
+  envelope_without_aggregate_state_digest
+])
+```
+
+`hash` is the §9 SHA-256/JCS construction. A mismatch is
+`aggregate_state_digest_mismatch`. The digest does not include database metadata,
+quarantine state, queue state, or package attachments.
+
+### 16.3 Complete root ownership aggregate
+
+One envelope represents exactly one §3 root ownership aggregate. It contains:
+
+- the current validated-bundle fingerprint, namespace, root machine identity, machine
+  format, root/creation/runtime identities, and migration sequence;
+- aggregate next logical-step and output sequences;
+- every retained root, component, and owned spawned runtime;
+- each runtime's immutable identity origin and immutable target identity;
+- each runtime's current definition binding and current relationship;
+- lifecycle status, active leaves and state activations, live variables, history,
+  spawn/state/component counters, lifetime-holder association, and retained fault;
+  and
+- no plugin-owned queue, deferred event, timer, broker receipt, acknowledgement,
+  dead-letter, credential, or transport configuration.
+
+The root runtime occurs exactly once and matches every top-level root identity field.
+Every other runtime has exactly one retained owner. The ownership graph is acyclic and
+reachable from the root. Runtime identifiers are unique. Component placement and
+owned-child relation data agree with the immutable target identity and with the
+current target definition. Every active pointer, variable declaration, history slot,
+component placement, spawn action, and counter domain resolves against the runtime's
+current definition.
+
+The envelope uses declaration pointers plus declaring-state activation sequences for
+live variables, so shadowed names remain lossless. History records contain null or the
+exact recorded target-pointer set. A wire fault record is exactly the five committed
+format-1 fields `runtime_id`, `cause_id`, `code`, `step_sequence`, and
+`source_locator`, plus required `definition_fingerprint`. `step_sequence` uses the
+artifact canonical-decimal projection. The definition fingerprint anchors the
+historical locator; migration never reinterprets that locator against a later
+definition. `examples/persistence/faulted-aggregate-state.json` is the normative
+faulted round-trip vector.
+
+Encoding first validates the implementation's abstract aggregate under the supplied
+source bundle. Decoding verifies structure, canonical form, digest, definition
+availability and fingerprint, all relationships, all typed values, and the complete
+§8 abstract-state invariants before returning state. An implementation-specific
+dictionary, object graph, compiled machine, callback, or pointer is never portable
+state.
+
+### 16.4 Immutable identity and mutable definition binding
+
+Migration separates three concepts for every existing runtime:
+
+1. `identity_origin`: the definition, owner, placement/action pointer, and allocation
+   sequence from which the runtime identity was originally derived;
+2. `target_identity`: the immutable value accepted by already-created envelopes and
+   nominal references; and
+3. `current_definition` and `relation`: the definition and current placement/action
+   against which future behavior resolves.
+
+`target_identity` is exactly one normalized §6.1 target:
+
+```text
+{ root: { root_instance_id, root_runtime_id } }
+{ spawned_instance: {
+    root_instance_id, instance_id, machine_id, machine_version
+} }
+{ component: {
+    root_instance_id, owner_runtime_id, component_id,
+    component_runtime_id, activation_sequence
+} }
+```
+
+It has no `kind`, namespace, owner/spawn metadata inside a spawned reference, or
+definition/placement pointer inside a component target. Those facts belong to
+`identity_origin` or `relation`. The four-field spawned reference is exactly §4.5, and
+the component target is exactly §6.1.
+
+`runtime_id`, `identity_origin`, and the complete normalized `target_identity` bytes
+are invariant across every version-1 descriptor. Root identity, component runtime
+identity, component activation sequence, spawned instance reference, spawned instance
+id, spawn sequence, and existing lifetime-holder activation identity are never
+rederived.
+
+For a migrated component, author syntax using the target definition's current
+`component_id` resolves through the current relation to its preserved target identity.
+For a migrated spawned runtime, its existing `instance_reference` remains byte-for-byte
+stable while `current_definition` changes. New components and spawned instances use
+the target definition normally. Identity rekeying, external-reference rewriting, and
+detached child migration are unsupported in schema version 1.
+
+### 16.5 Content-addressed definition registry
+
+An aggregate references its current definition by the exact §8
+`validated_bundle_fingerprint`. A conforming resolver stores the canonical typed
+normalized bundle tree once under that key:
+
+- put-if-absent is idempotent;
+- the same key with different canonical bytes is an integrity failure;
+- bytes are rehashed and semantically revalidated before admission to a trusted local
+  cache;
+- source and target definitions remain available while any aggregate, descriptor, or
+  audit record references them; and
+- garbage collection is reference-aware, never age-only.
+
+Content addressing proves integrity, not authority. A deployment separately
+allowlists or verifies a signed release manifest containing trusted definition,
+descriptor, and route digests. Signature algorithms, key management, and registry
+transport belong to the host.
+
+An ordinary aggregate row does not embed its definition. This avoids copying old
+definitions into every dormant row while still permitting lazy migration. Retaining
+old normalized declarative definitions centrally does not retain old host executable
+logic.
+
+### 16.6 Aggregate-shape fingerprint
+
+The aggregate-shape fingerprint proves only that existing logical state can be bound
+to another definition without transformation. It does not claim behavioral
+equivalence.
+
+Starting from the §8 normalized bundle, implementations construct this exact plain
+JSON projection before applying the §8 typed-value projection:
+
+```text
+state_bearing_tree = {
+  format: 1,
+  namespace,
+  machines: [machine_projection, ...]
+}
+
+machine_projection = {
+  machine_id,
+  version,
+  root: state_projection
+}
+
+state_projection = {
+  definition_pointer,
+  type,
+  history?,
+  variables?: [variable_projection, ...],
+  states?: [state_projection, ...],
+  components?: [component_projection, ...],
+  spawn_sites?: [spawn_site_projection, ...]
+}
+
+variable_projection = {
+  declaration_pointer,
+  type,
+  nullable,
+  input,
+  external,
+  machine_id?
+}
+
+component_projection = {
+  declaration_pointer,
+  declaration_index,
+  component_id,
+  machine_id?
+  inline_root?
+}
+
+spawn_site_projection = {
+  action_pointer,
+  machine_id,
+  holder_variable_declaration_pointer
+}
+```
+
+Machines retain bundle array order. Child states are sorted by state identifier UTF-8
+bytes. Variables are sorted by declaration pointer UTF-8 bytes. Components retain
+declaration order. Spawn sites are sorted by action-pointer UTF-8 bytes after
+recursively visiting entry, exit, handler, choice, and nested action lists.
+
+Every state has `definition_pointer` and normalized `type`. `history` is included only
+for a composite state and contains its normalized mode. Empty `variables`, `states`,
+`components`, and `spawn_sites` arrays are omitted. Variable `nullable` is `true` only
+for an `instance_reference` declaration and otherwise `false`; normalized `input` and
+`external` are always included. Variable `machine_id` is included only when declared.
+A component includes exactly one of `machine_id` or recursive `inline_root`.
+`declaration_index` is its zero-based array index. A spawn site's holder pointer is the
+resolved `bind_to` declaration pointer or null.
+
+This recursive tree therefore contains every state, placement, spawn, holder, and
+declaration-pointer domain from which a retained path, relationship, or counter key can
+be drawn. Object keys are encoded with the §8 typed-tree map ordering. Metadata, event
+declarations and payload defaults, guards, ordinary action expressions, transition
+targets, entry/exit behavior other than spawn-site shape, and component `with`
+expressions are excluded because they cannot make an existing logical-state field
+structurally invalid.
+
+```text
+aggregate_shape_fingerprint = hash([
+  "determa-aggregate-shape-fingerprint-1",
+  typed_state_bearing_tree
+])
+```
+
+A `compatible` descriptor is valid only when independently recomputed source and
+target shape fingerprints are equal and every mapping array is empty. It changes only
+the aggregate and runtime current definition references and increments
+`migration_sequence`; every other field is byte-for-byte preserved before digest
+recomputation. A machine-version change, path change, rename, or any other
+state-bearing projection difference requires `transform` mode.
+
+### 16.7 Immutable declarative migration descriptors
+
+A migration descriptor names exactly one source and one target machine format,
+validated-bundle fingerprint, and independently recomputed aggregate-shape
+fingerprint. Schema version 1 requires both machine formats to be numeric `1`. Its
+digest is:
+
+```text
+migration_descriptor_digest = hash([
+  "determa-migration-descriptor-1",
+  descriptor_without_migration_descriptor_digest
+])
+```
+
+Changing any descriptor member creates a different descriptor. A digest match does
+not make it trusted. The deployment must authorize the exact digest.
+
+`transform` descriptors contain closed rules for machine/root bindings, active-state
+materialization, variables, history, components, owned runtimes, lifetime holders, and
+counter domains. Descriptors are immutable pure data. They cannot execute Python,
+Rust, JavaScript, WASM, shell code, author actions, entry/exit behavior, transitions,
+choice selection, component/spawn initialization, host callbacks, plugins, network or
+filesystem I/O, clocks, randomness, environment reads, credentials, or secrets.
+Migration itself emits no author, lifecycle, internal, or external event.
+
+Variable `transform` and `initialize` rules use a closed migration CEL profile. It is
+the §5.2 portable profile restricted to null, Boolean, signed-64-bit integer,
+binary64, string, list, and string-keyed map values and their already enumerated pure
+operators/functions. It excludes `event`, `owner`, runtime inspection,
+`instance_reference`, `has(event...)`, comprehension, iteration, and every extension.
+For a transform, the descriptor's `source_declaration_pointers` order binds exact
+symbols `source_0`, `source_1`, and so on. An initialize expression has no symbols.
+Each expression is parsed and statically checked against source declaration types and
+the single target declaration type before migration. Identity and nominal-reference
+mappings are descriptor operations, never CEL values.
+
+### 16.8 Exact route and migration algorithm
+
+A route is the exact ordered array of trusted descriptor digests supplied by deployment
+configuration or a trusted release manifest. The engine never searches a registry
+graph or selects a shortest, newest, cheapest, or otherwise preferred path.
+
+Before transformation:
+
+- the first descriptor source equals the stored aggregate fingerprint;
+- each descriptor target equals the next descriptor source;
+- the final target equals the requested target fingerprint;
+- no descriptor digest repeats and no source/target cycle occurs;
+- every definition and descriptor is present, hash-valid, semantically valid, trusted,
+  and within declared resource requirements; and
+- the route's first source still equals the locked aggregate when execution begins.
+
+An empty route with equal stored/requested fingerprints succeeds as a strict no-op: it
+returns the exact input aggregate envelope bytes and `audit_records: []`, performs no
+artifact lookup beyond the already required source-definition integrity and
+authorization checks, does not recompute the digest, and does not require terminal
+maintenance mode. An empty route with unequal fingerprints fails with
+`migration_route_missing`. Multiple available routes are irrelevant; only the pinned
+ordered array is evaluated. All intermediate states remain in memory and only the
+final aggregate is committed.
+
+For each descriptor, migration:
+
+1. validates the complete source candidate against the exact source definition;
+2. reserves no logical-step, output, spawn, state, or component sequence;
+3. applies each mapping to an isolated candidate;
+4. increments `migration_sequence` exactly once;
+5. validates every field and relationship against the target definition;
+6. computes the target canonical envelope and digest; and
+7. either makes that candidate the next source or discards it completely.
+
+The same canonical source bytes, exact route, trusted artifacts, and limits reproduce
+the same success bytes and audit records or the same deterministic failure.
+
+### 16.9 Total transform matrix
+
+The descriptor validator and migration operation jointly enforce:
+
+| aggregate field | required result |
+|---|---|
+| wire format/schema | exact supported version |
+| current definition | exact source match and target assignment |
+| root/creation identity | preserve |
+| runtime id and identity origin | preserve |
+| immutable root/component/spawn target | preserve |
+| runtime current machine/root binding | preserve in compatible mode or map exactly once |
+| lifecycle status | preserve |
+| active leaves | every source leaf maps exactly once to a complete valid target leaf set |
+| active ancestors/activations | map by state pointer with coherent ancestry and preserved activation values |
+| live variables | each source is copied, transformed, or explicitly dropped; every required target live declaration receives exactly one typed value |
+| shadowed variables | match by declaration pointer and activation, never bare name |
+| history | each source slot maps or explicitly drops; each new target slot is explicitly null or mapped |
+| component placement | every retained placement maps to one compatible target placement |
+| owned spawned runtime | every retained child maps to one target current definition/action binding |
+| lifetime holder | maps to one surviving compatible declaration with the same active holder activation |
+| nominal references | preserve exact immutable value and validate holder association |
+| fault diagnostics | preserve record and source-definition anchor |
+| aggregate logical/output counters | preserve and never decrease/reset |
+| runtime spawn counter | preserve |
+| state/component counter domains | one-to-one map, explicit zero initialization, or explicit maximum merge |
+| active/relationship allocations | preserve; mapped next counter remains strictly greater |
+| migration sequence | increment once per successful descriptor |
+
+After every descriptor, no source field or required target field may remain
+unaccounted for. Duplicate source consumption, duplicate target production, ambiguous
+mapping, invalid target type, incompatible relation, stale current pointer, and
+counter inconsistency are `migration_totality_failure`.
+
+Mapping rules are definition rules, not single aggregate occurrences. A rule applies
+independently to every retained runtime whose current source binding resolves the
+rule's source machine/root. State, history, component, owned-runtime, holder, and
+counter mappings operate on each occurrence in that runtime while preserving that
+occurrence's runtime and activation identity.
+
+Variable occurrence identity is exactly:
+
+```text
+(runtime_id, variable_declaration_pointer, declaring_state_activation_sequence)
+```
+
+For each target runtime whose mapped active configuration makes a target declaration
+live, one `copy`, `transform`, or `initialize` rule must produce that target occurrence.
+A `copy` consumes the unique live source occurrence with the mapped declaration pointer
+in the same source runtime. A `transform` resolves every
+`source_declaration_pointers[i]` to the unique live occurrence in that same runtime and
+binds only its value as `source_i`. An `initialize` has no source occurrence. A `drop`
+consumes each matching live source occurrence independently.
+
+All inputs come from one immutable pre-descriptor snapshot. Rules cannot observe
+another rule's output. Rules that consume one source occurrence twice, produce one
+target occurrence twice, reference declarations outside the applicable source/target
+runtime bindings, or could combine values from different runtimes are
+`invalid_migration_descriptor`. If a statically valid required source occurrence is
+not live for an applicable target occurrence, is multiply live, or a required target
+occurrence remains unproduced, the result is `migration_totality_failure`. Runtime
+iteration uses canonical `runtime_id` order only for resource accounting; because
+occurrences are isolated and rule domains cannot overlap, result bytes never depend on
+host map or iteration order.
+
+When an active state is deleted or incompatible, version 1 permits only:
+
+- an exact source-leaf to target-leaf mapping;
+- an explicit ancestor mapping accompanied by the complete resulting target leaf set;
+- a declared target initial/history selection only when it resolves without any guard
+  or author action and the descriptor still provides the final leaf set and every new
+  live value; or
+- deterministic failure and quarantine.
+
+The engine never guesses by equal name, nearest surviving ancestor, initial state,
+history, or root reset. Removed variables require an explicit destructive `drop` with
+an operator-facing reason. Type changes require a statically checked transform.
+Removed live components, incompatible owned runtimes, missing holders, or ambiguous
+identity mappings fail in schema version 1 rather than being silently disposed.
+
+### 16.10 Terminal aggregates
+
+Completed and faulted aggregates remain terminal. An ordinary non-null dispatch is
+rejected under the stored source definition before automatic host migration begins.
+Null inspection may continue using the source definition without migration.
+
+`maintenance_mode` is a required Boolean migration-request member. Omission or a
+non-Boolean value is `invalid_migration_request`. An explicit migration may advance a
+terminal aggregate only when `maintenance_mode` is true and every descriptor's matching
+terminal policy is `preserve`. A non-empty route against a terminal aggregate with
+`maintenance_mode: false` is `terminal_migration_requires_maintenance`; a matching
+policy of `reject` is `terminal_migration_rejected`. These failures preserve the exact
+source envelope and produce no audit record. A completed migration preserves root
+identity, completed status, counters, history, and diagnostics and creates no runtime
+or emission. A faulted migration preserves the root fault including
+`step_sequence`, the frozen diagnostic tree, every retained child status/value,
+counters, and historical fault-definition anchors; it cannot reactivate any runtime.
+
+If no allowed route exists, retaining the terminal source aggregate is valid while its
+source definition remains registered. A host requiring a uniform target may quarantine
+it. Version 1 has no recovery, restart, or destructive reset policy.
+
+### 16.11 Lazy transactional host ordering
+
+A persistence host supporting lazy migration follows this ordering:
+
+1. Resolve and cryptographically verify the target definition, exact route, all
+   descriptors, trust metadata, and resource requirements into a local immutable cache
+   before taking the aggregate lock.
+2. Begin a serializable transaction or acquire an observably equivalent aggregate
+   compare-and-swap guard.
+3. Lock/read the aggregate and the inbox receipt for the presented envelope.
+4. If that idempotency key is already committed, return its recorded outcome without
+   migration or dispatch.
+5. Parse and verify the aggregate, resolve its source definition from the local cache,
+   validate source state, and recheck route source.
+6. Apply the complete route to an in-memory copy, validating every intermediate.
+7. If the resulting aggregate is running and a delivery was supplied, invoke ordinary
+   target-definition dispatch exactly once.
+8. Build deterministic migration audit records and normal core result records.
+9. Atomically replace aggregate bytes, record inbox disposition, insert ordered
+   internal/external emissions in the outbox under their existing unique identities,
+   and append audit rows.
+10. Commit once, then acknowledge broker ingress or dispatch outbox work.
+
+`handled`, `unhandled`, `rejected`, and `faulted` are core outcomes, not storage
+failures. If the host contract commits an outcome, migration and that outcome commit
+together. In particular, target-definition fault finalization cannot commit while its
+preceding migration rolls back.
+
+Definition/descriptor resolution, signature verification, and remote registry calls
+MUST NOT occur inside the database transaction. A transaction conflict retries from
+the newly committed row. Parent and owned-child state remains one aggregate transaction
+boundary.
+
+### 16.12 Failure, rollback, quarantine, and audit
+
+The closed deterministic migration failure codes are:
+
+- `invalid_aggregate_state`;
+- `invalid_aggregate_state_package`;
+- `aggregate_state_digest_mismatch`;
+- `invalid_migration_request`;
+- `source_definition_unavailable`;
+- `target_definition_unavailable`;
+- `definition_untrusted`;
+- `definition_fingerprint_mismatch`;
+- `migration_descriptor_untrusted`;
+- `invalid_migration_descriptor`;
+- `migration_route_missing`;
+- `migration_route_mismatch`;
+- `migration_transform_fault`;
+- `migration_totality_failure`;
+- `target_state_validation_failure`;
+- `migration_resource_limit_exceeded`;
+- `terminal_migration_requires_maintenance`; and
+- `terminal_migration_rejected`.
+
+The pure failure value is exactly `{ code: migration_failure_code }`; it has no
+aggregate candidate or audit-record member. The caller retains the exact supplied
+envelope. A successful result is exactly `{ aggregate_envelope, audit_records }`.
+
+Artifact format/schema rejection occurs before this operation and uses
+`unsupported_aggregate_state_format`,
+`unsupported_aggregate_state_schema_version`,
+`unsupported_migration_descriptor_format`,
+`unsupported_migration_descriptor_schema_version`,
+`unsupported_aggregate_state_package_format`, or
+`unsupported_aggregate_state_package_schema_version`.
+After a recognized package format/version, structural, attachment-uniqueness, or
+cross-reference failure is `invalid_aggregate_state_package`. A recognized aggregate
+or descriptor that fails its closed schema is respectively `invalid_aggregate_state`
+or `invalid_migration_descriptor`.
+
+`source_definition_unavailable` means the definition named by the stored aggregate
+cannot be resolved. `target_definition_unavailable` means the requested target or an
+intermediate non-source definition cannot be resolved. A definition whose bytes
+reproduce its digest but whose digest is absent from the deployment allowlist/signed
+manifest fails with `definition_untrusted`; it is never treated as unavailable or
+implicitly trusted. A descriptor has the parallel
+`migration_descriptor_untrusted` result.
+
+Registry/cache unavailability, transaction conflict, and temporary storage failure are
+transient host failures. Digest mismatch, unauthorized/invalid artifacts, invalid
+request/route, transform/type/totality/target validation failure, terminal-policy
+failure, and deterministic resource-limit failure are permanent for the same state,
+request, and route.
+
+Any descriptor failure discards every intermediate candidate. It writes no aggregate,
+inbox success, outbox intent, successful audit, logical counter, or migration sequence.
+For a permanent failure, a host atomically retains the exact original aggregate bytes,
+records a quarantine marker and failure audit, and keeps the triggering inbox item
+blocked. Quarantine is host metadata, not an aggregate lifecycle status and not a core
+dead-letter collection. Resolution installs a new trusted route, restores an artifact,
+or explicitly releases the blocked item.
+
+Each successful descriptor returns exactly one closed audit record in route order:
+
+```text
+{
+  migration_audit_record_schema_version: 1,
+  root_instance_id: non_empty_string,
+  root_runtime_id: non_empty_string,
+  migration_sequence: canonical_decimal,
+  source_validated_bundle_fingerprint: sha256_string,
+  target_validated_bundle_fingerprint: sha256_string,
+  migration_descriptor_digest: sha256_string,
+  source_aggregate_state_digest: sha256_string,
+  target_aggregate_state_digest: sha256_string,
+  result_code: "migration_applied"
+}
+```
+
+No other member is present. `migration_sequence` is the post-descriptor sequence.
+Source/target state digests are the exact candidate digests immediately before and
+after that descriptor. `examples/persistence/compatible-migration-audit.json` is the
+normative one-hop result. Conformance compares the complete ordered record list.
+Host observation time, worker identity, database transaction id, and operator metadata
+may be stored alongside but outside this deterministic record. Success and quarantine
+audit rows are append-only and transactional with the state they describe.
+
+### 16.13 Package transport
+
+A package contains exactly one aggregate, zero or more normalized definitions, zero or
+more descriptors, and the exact route digest array. It is a transfer/archive artifact,
+not the ordinary row format.
+
+Every normalized definition attachment must reproduce its declared
+validated-bundle fingerprint. Every descriptor must reproduce its declared descriptor
+digest. Duplicate attachment digests are invalid. The route obeys §16.8 and every
+artifact needed to decode the aggregate and execute that route must be available either
+in the package or the receiving trusted registry. Package attachments seed the same
+put-if-absent resolver contract; they never override a registry entry and are excluded
+from the aggregate-state digest.
+
+`examples/persistence/aggregate-state-package.json` is a normative one-hop vector. Its
+source and target bundle fingerprints, shared shape fingerprint, aggregate digest,
+descriptor digest, and canonical attachment trees are fixed by the accompanying
+fixtures.
+
+### 16.14 Security and resource limits
+
+Digest verification is mandatory at every package/registry/cache boundary. Deployment
+pins an allowed target and route, preventing silent downgrade or alternate-path
+selection. Definitions and descriptors are immutable after trust admission. Source
+definitions and historical fault definitions are retained while referenced.
+
+Implementations expose configurable limits, but core conformance defines a minimum
+supported floor for aggregate, definition, descriptor and transformed-output bytes;
+JSON nesting; runtimes; active states; variables; map/list members; string bytes;
+migration-chain length; descriptor rules; migration CEL expression length, AST nodes
+and evaluation steps; and cumulative chain work.
+
+The four descriptor `resource_requirements` members are non-negative
+canonical-decimal upper bounds for one descriptor application:
+
+- `maximum_transformed_output_bytes`: cumulative UTF-8 byte length of RFC 8785
+  serialization of every typed value produced by `transform` and `initialize` rule
+  occurrences; copied values and the surrounding aggregate envelope are not counted;
+- `maximum_cel_expression_length`: cumulative UTF-8 source bytes of all distinct CEL
+  expressions declared by the descriptor, counted once each;
+- `maximum_cel_ast_nodes`: cumulative checked CEL abstract-syntax nodes across those
+  distinct expressions, counted once each; and
+- `maximum_cel_evaluation_steps`: cumulative evaluator steps across every expression
+  occurrence, including repeated applicable runtimes/activations.
+
+Static expression length/node requirements are checked before evaluation. Dynamic
+evaluation-step and transformed-output counters start at zero for each descriptor,
+advance in canonical runtime/rule occurrence order, and may not exceed either the
+descriptor declaration or the implementation's configured limit. A descriptor that
+understates actual use fails with `migration_resource_limit_exceeded`; the field is a
+limit, not permission to truncate work.
+
+A `compatible` descriptor has no CEL expressions and produces no transformed/initialized
+typed values, so all four requirements MUST be `"0"`. Structural definition-binding
+updates and final aggregate serialization are deliberately not transformed-output
+bytes. A transform descriptor with only pointer/identity mappings may also use zero.
+Cycles are forbidden. Exceeding any deterministic per-descriptor or cumulative route
+limit fails closed with `migration_resource_limit_exceeded`.
+
+This section does not standardize a production database schema, object-relational
+mapper, registry transport, queue plugin, distributed transaction, exactly-once
+external delivery, package import, or bulk row rewrite. A later runnable database
+example belongs in the separate examples repository after conformance and both engines
+implement this contract.
