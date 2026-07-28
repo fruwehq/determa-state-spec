@@ -4,8 +4,9 @@ Guidance for AI/coding agents working in this repository. (Tool-agnostic; not sp
 
 ## What this repo is
 The **normative specification** for Determa State. Text only: `SPEC.md` (the prose spec),
-`schema/machine.schema.json` (structural JSON Schema for a machine), `examples/`, and
-`VERSION`. **No implementation code, no tests, no CI here.** The executable correctness
+strict schemas under `schema/`, normative vectors under `examples/`, and `VERSION`.
+Portable persistence vectors live under `examples/persistence/`. **No implementation
+code, no tests, no CI here.** The executable correctness
 target lives in `determa-state-conformance`. Applicable normative core cases are
 authoritative when they conflict with prose; profiles bind only implementations that
 declare them, and harness mechanics bind no public implementation interface, as recorded
@@ -44,7 +45,9 @@ against one shared conformance suite. Guards and computed action values are writ
 
 ## Pointers
 - Prose spec: `SPEC.md` (§2 format identity, §4 grammar, §5 CEL, §6 transitions,
-  §10 faults, §11 plugin boundary).
+  §10 faults, §11 plugin boundary, §16 portable persistence/migration).
 - Non-normative rationale and review guidance: `DECISIONS.md`. It never overrides
   `SPEC.md`, the schema, or conformance.
-- Schema: `schema/machine.schema.json`. Examples: `examples/`.
+- Schemas: `schema/machine.schema.json`, `schema/aggregate-state.schema.json`,
+  `schema/migration-descriptor.schema.json`, and
+  `schema/aggregate-state-package.schema.json`. Examples: `examples/`.
