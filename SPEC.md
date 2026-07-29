@@ -2316,11 +2316,15 @@ non-zero digit followed by zero or more digits. Signed typed integer values use 
 an optional `-` followed by a non-zero digit and zero or more digits. Bounds that are
 semantic rather than structural are checked after schema validation.
 
-The one exception is `target_identity`: it embeds the exact normalized format-1 §6.1
-target object so an already-created target is never rewritten by persistence or
-migration. Its `machine_version` and component `activation_sequence` therefore retain
-the format-1 positive/non-negative JSON integer representation. Origin, current
-relation, and counter records use the artifact-owned decimal strings and may carry the
+`target_identity` embeds the exact normalized format-1 §6.1 mathematical target value
+but uses artifact-owned decimal-string projections for its integer-valued members.
+A spawned target's `machine_version` is a positive signed-64-bit canonical decimal
+string. A component target's `activation_sequence` is an unbounded non-negative
+canonical decimal string. Numeric JSON forms are invalid even when their values would
+be exactly representable. Decoding reconstructs the mathematical integers before
+target equality, reference equality, routing, or dispatch; the decimal-string
+projection is not a change to format-1 identity semantics. Origin, current relation,
+and counter records use the same artifact-owned decimal strings and may carry the
 additional migration data that is deliberately absent from the target.
 
 Every stored Determa value uses exactly one typed projection:
@@ -2442,7 +2446,10 @@ Migration separates three concepts for every existing runtime:
 It has no `kind`, namespace, owner/spawn metadata inside a spawned reference, or
 definition/placement pointer inside a component target. Those facts belong to
 `identity_origin` or `relation`. The four-field spawned reference is exactly §4.5, and
-the component target is exactly §6.1.
+the component target is exactly §6.1. On the wire, spawned `machine_version` and
+component `activation_sequence` use the §16.2 decimal-string projections. A decoder
+MUST reconstruct their mathematical integer values before comparing them with
+in-memory references or targets and before using them for routing or dispatch.
 
 `runtime_id`, `identity_origin`, and the complete normalized `target_identity` bytes
 are invariant across every version-1 descriptor. Root identity, component runtime
@@ -2800,7 +2807,6 @@ The closed deterministic migration failure codes are:
 - `migration_route_mismatch`;
 - `migration_transform_fault`;
 - `migration_totality_failure`;
-- `target_state_validation_failure`;
 - `migration_resource_limit_exceeded`;
 - `terminal_migration_requires_maintenance`; and
 - `terminal_migration_rejected`.
@@ -2808,6 +2814,12 @@ The closed deterministic migration failure codes are:
 The pure failure value is exactly `{ code: migration_failure_code }`; it has no
 aggregate candidate or audit-record member. The caller retains the exact supplied
 envelope. A successful result is exactly `{ aggregate_envelope, audit_records }`.
+
+Failure to produce a complete state valid under the target definition, including an
+invalid target type, relationship, pointer, configuration, or required value, is
+`migration_totality_failure`. A CEL evaluation or other runtime failure while
+executing a statically valid transform is `migration_transform_fault`. There is no
+separate target-state-validation result code.
 
 Artifact format/schema rejection occurs before this operation and uses
 `unsupported_aggregate_state_format`,
@@ -2897,8 +2909,13 @@ definitions and historical fault definitions are retained while referenced.
 Implementations expose configurable limits, but core conformance defines a minimum
 supported floor for aggregate, definition, descriptor and transformed-output bytes;
 JSON nesting; runtimes; active states; variables; map/list members; string bytes;
-migration-chain length; descriptor rules; migration CEL expression length, AST nodes
-and evaluation steps; and cumulative chain work.
+migration-chain length; descriptor rules; and migration CEL expression length, AST
+nodes, and evaluation steps.
+
+Migration-chain length is exactly the number of descriptor digests in the requested
+route. Before applying any descriptor, the operation compares that count with the
+implementation's configured migration-chain-length limit. Exceeding it fails with
+`migration_resource_limit_exceeded`. The empty route has length zero.
 
 The four descriptor `resource_requirements` members are non-negative
 canonical-decimal upper bounds for one descriptor application:
@@ -2924,8 +2941,12 @@ A `compatible` descriptor has no CEL expressions and produces no transformed/ini
 typed values, so all four requirements MUST be `"0"`. Structural definition-binding
 updates and final aggregate serialization are deliberately not transformed-output
 bytes. A transform descriptor with only pointer/identity mappings may also use zero.
-Cycles are forbidden. Exceeding any deterministic per-descriptor or cumulative route
-limit fails closed with `migration_resource_limit_exceeded`.
+Cycles are forbidden. Each descriptor is checked independently against its declared
+four bounds and the corresponding configured per-descriptor limits. A route is bounded
+by its exact descriptor count plus those independent per-descriptor checks; schema
+version 1 defines no mixed-unit cumulative-chain-work counter and does not sum resource
+dimensions across descriptors. Exceeding the chain-length limit or any deterministic
+per-descriptor limit fails closed with `migration_resource_limit_exceeded`.
 
 This section does not standardize a production database schema, object-relational
 mapper, registry transport, queue plugin, distributed transaction, exactly-once

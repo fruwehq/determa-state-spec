@@ -25,14 +25,6 @@
       "type": "string",
       "pattern": "^[1-9][0-9]*$"
     },
-    "nonNegativeInteger": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "positiveInteger": {
-      "type": "integer",
-      "minimum": 1
-    },
     "signedCanonicalDecimal": {
       "type": "string",
       "pattern": "^(0|-?[1-9][0-9]*)$"
@@ -311,7 +303,7 @@
           "$ref": "#/$defs/identifier"
         },
         "machine_version": {
-          "$ref": "#/$defs/positiveInteger"
+          "$ref": "#/$defs/positiveCanonicalDecimal"
         }
       }
     },
@@ -373,7 +365,7 @@
                   "$ref": "#/$defs/nonEmptyString"
                 },
                 "activation_sequence": {
-                  "$ref": "#/$defs/nonNegativeInteger"
+                  "$ref": "#/$defs/canonicalDecimal"
                 }
               }
             }
