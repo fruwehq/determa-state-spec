@@ -32,7 +32,7 @@ Open one PR **per repo** (one issue → one PR). Where prose and the suite disag
 
 ## Versioning
 
-This repository carries the synchronized version in `VERSION` (currently `0.0.7`) and a
+This repository carries the synchronized version in `VERSION` (currently `0.1.0`) and a
 matching line at the top of `SPEC.md`.
 
 > determa-state-spec, determa-state-conformance, and the implementations share one

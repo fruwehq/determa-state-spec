@@ -2,7 +2,7 @@
 
 Status: **pre-release alpha**. Normative unless a section says informative.
 Document format: **1**.
-Spec version: **0.0.7** (see `VERSION`; synchronized across the Determa State
+Spec version: **0.1.0** (see `VERSION`; synchronized across the Determa State
 repositories).
 Keywords MUST / SHOULD / MAY are interpreted as in RFC 2119.
 

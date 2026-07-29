@@ -34,7 +34,7 @@ against one shared conformance suite. Guards and computed action values are writ
 - **One issue → one PR.** Branch → PR → **squash-merge**. Linear history. Resolve all review threads. Never push to `main` directly (`main` is protected).
 - **No AI/assistant attribution anywhere** — no `Co-Authored-By`, no "Generated with…", in commits, PR bodies, comments, or docs. Everything reads as the author's own work.
 - **Conformance-first** for behavior changes: land the spec text here, then the matching case in `determa-state-conformance`, then the implementations.
-- **Synchronized SemVer** across spec + conformance + both engines — currently **0.0.7**. (The `determa` launcher versions independently — currently 0.2.0.)
+- **Synchronized SemVer** across spec + conformance + both engines — currently **0.1.0**. (The `determa` launcher versions independently — currently 0.2.0.)
 - **No new abbreviations** in JSON fields / public identifiers. The current grammar
   deliberately retains `init`, `lang`, `meta`, `on_events`, and
   `transition_to`.
