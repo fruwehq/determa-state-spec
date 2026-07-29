@@ -17,8 +17,11 @@ These files are compact normative vectors for [SPEC §16](../../SPEC.md#16-porta
   record.
 - `faulted-aggregate-state.json` proves that the complete format-1 fault record,
   including `step_sequence`, survives the wire.
-- `target-identity-cases.json` fixes the three exact format-1 target shapes and five
-  rejected extra/missing-field regressions.
+- `target-identity-cases.json` fixes the three exact format-1 target shapes while using
+  decimal-string wire projections for spawned machine versions and component
+  activation sequences. It covers the JavaScript safe-integer boundary, values beyond
+  it, the signed-64 machine-version maximum, unbounded component activations, rejected
+  numeric wire forms, malformed decimals, bounds, and extra/missing-field regressions.
 - `aggregate-state-package.json` carries the aggregate, both normalized definitions,
   the descriptor, and the exact one-hop route.
 
