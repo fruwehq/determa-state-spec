@@ -1,6 +1,8 @@
 # Portable persistence vectors
 
-These files are compact normative vectors for [SPEC §16](../../SPEC.md#16-portable-persistence-and-definition-migration).
+These files are compact normative vectors for
+[SPEC §16](../../SPEC.md#16-portable-persistence-and-definition-migration) and
+[SPEC §17](../../SPEC.md#17-portable-execution-checkpoints-and-hosting-adapters).
 
 - `source.yaml` and `target.yaml` have the same aggregate shape; the target changes
   only `meta`.
@@ -24,6 +26,15 @@ These files are compact normative vectors for [SPEC §16](../../SPEC.md#16-porta
   numeric wire forms, malformed decimals, bounds, and extra/missing-field regressions.
 - `aggregate-state-package.json` carries the aggregate, both normalized definitions,
   the descriptor, and the exact one-hop route.
+- `execution-checkpoint.json` is the human-readable durable-host checkpoint wrapping
+  one aggregate with permanent replay, creation/delivery receipts, and one accepted
+  host input pending later processing;
+  `execution-checkpoint.canonical.json` contains its exact RFC 8785 bytes with no
+  trailing newline.
+- `execution-checkpoint-state-cases.json` fixes every checkpoint delivery-origin,
+  pre-acceptance failure, delivery-outcome/root-fault, creation-fault,
+  emission-reference, replay-retention, root/effect tombstone, pending/terminal outbox,
+  and maintenance-result union, including their otherwise-cases.
 
 The source and target validated-bundle fingerprints are respectively
 `sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413`
