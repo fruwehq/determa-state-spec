@@ -45,6 +45,7 @@ become invalid while the model is being designed.
 - deterministic event/effect identities and fault rollback; and
 - host-facing typed input/output contracts with explicit correlation;
 - canonical portable aggregate-state serialization; and
+- portable durable execution checkpoints with capability-checked adapters; and
 - explicit deterministic lazy migration between validated definitions.
 
 Determa transition actions run while the source state and its variables are still
@@ -62,6 +63,13 @@ in-memory delivery, Redis, GCP Pub/Sub, or a transactional database inbox/outbox
 plugins own ordering, retries, acknowledgements, discard, capacity, and dead-letter
 policy. Unhandled events do not accumulate in core state.
 
+The optional execution-checkpoint profile standardizes the durable transaction boundary
+around one root aggregate: accepted host/internal deliveries, operation receipts,
+pending/terminal/compact outbox work, replay retention, root tombstones, migration
+audit, and revision. Built-in and third-party execution stores use the same registration
+path and advertise only capabilities their configured instance can prove; broker
+integration is a composed host profile, not a storage capability.
+
 Time-based behavior uses an external event-producing extension. A machine emits a
 declared scheduling request and may later receive a declared correlated event. The
 extension determines its clock, durability, delivery, cancellation, and credentials.
@@ -78,6 +86,8 @@ This repository holds only the specification:
   — declarative definition migration;
 - [`schema/aggregate-state-package.schema.json`](schema/aggregate-state-package.schema.json)
   — self-contained transfer package;
+- [`schema/execution-checkpoint.schema.json`](schema/execution-checkpoint.schema.json)
+  — portable durable-host checkpoint;
 - [`examples/`](examples/) — schema-valid machine documents and normative vectors; and
 - [`VERSION`](VERSION) — synchronized specification/package SemVer.
 

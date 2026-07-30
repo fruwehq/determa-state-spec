@@ -1,0 +1,599 @@
+{
+  "positive": {
+    "delivery_origins": [
+      {
+        "kind": "host_input"
+      },
+      {
+        "kind": "internal_emission",
+        "producing_receipt_sequence": "3",
+        "emission_index": "0"
+      }
+    ],
+    "delivery_outcomes": [
+      {
+        "status": "running",
+        "disposition": "handled",
+        "fault": null,
+        "rejection": null
+      },
+      {
+        "status": "running",
+        "disposition": "unhandled",
+        "fault": null,
+        "rejection": null
+      },
+      {
+        "status": "running",
+        "disposition": "rejected",
+        "fault": null,
+        "rejection": {
+          "code": "invalid_event"
+        }
+      },
+      {
+        "status": "completed",
+        "disposition": "rejected",
+        "fault": null,
+        "rejection": {
+          "code": "invalid_instance_target"
+        }
+      },
+      {
+        "status": "faulted",
+        "disposition": "rejected",
+        "fault": {
+          "definition_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+          "runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "cause_id": "existing-root-fault",
+          "code": "invariant_fault",
+          "step_sequence": "1",
+          "source_locator": "system:invariant"
+        },
+        "rejection": {
+          "code": "invalid_instance_target"
+        }
+      },
+      {
+        "status": "faulted",
+        "disposition": "faulted",
+        "fault": {
+          "definition_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+          "runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "cause_id": "event-fault-1",
+          "code": "invariant_fault",
+          "step_sequence": "1",
+          "source_locator": "system:invariant"
+        },
+        "rejection": null
+      }
+    ],
+    "pre_acceptance_results": [
+      {
+        "result": "not_accepted",
+        "failure": {
+          "code": "malformed_delivery"
+        }
+      },
+      {
+        "result": "not_accepted",
+        "failure": {
+          "code": "wrong_root"
+        }
+      },
+      {
+        "result": "not_accepted",
+        "failure": {
+          "code": "invalid_delivery_mode"
+        }
+      },
+      {
+        "result": "not_accepted",
+        "failure": {
+          "code": "invalid_delivery_origin"
+        }
+      },
+      {
+        "result": "not_accepted",
+        "failure": {
+          "code": "delivery_digest_mismatch"
+        }
+      },
+      {
+        "result": "not_accepted",
+        "failure": {
+          "code": "event_id_conflict"
+        }
+      },
+      {
+        "result": "not_accepted",
+        "failure": {
+          "code": "tombstoned_root"
+        }
+      }
+    ],
+    "creation_receipts": [
+      {
+        "operation_kind": "creation",
+        "receipt_sequence": "0",
+        "creation_id": "create-running",
+        "request_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "committed_revision": "0",
+        "resulting_aggregate_state_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+        "status": "running",
+        "fault": null,
+        "emission_references": []
+      },
+      {
+        "operation_kind": "creation",
+        "receipt_sequence": "0",
+        "creation_id": "create-faulted",
+        "request_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "committed_revision": "0",
+        "resulting_aggregate_state_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+        "status": "faulted",
+        "fault": {
+          "definition_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+          "runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "cause_id": "creation-fault-1",
+          "code": "invariant_fault",
+          "step_sequence": "0",
+          "source_locator": "system:invariant"
+        },
+        "emission_references": []
+      }
+    ],
+    "emission_references": [
+      {
+        "kind": "internal_delivery",
+        "emission_index": "0",
+        "event_id": "internal-1",
+        "delivery_sequence": "7"
+      },
+      {
+        "kind": "external_outbox",
+        "emission_index": "1",
+        "effect_id": "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+      }
+    ],
+    "replay_retention": [
+      {
+        "mode": "permanent",
+        "permanent_replay_eligible": true,
+        "pruned_through_receipt_sequence": null,
+        "policy_identifier": null
+      },
+      {
+        "mode": "bounded",
+        "permanent_replay_eligible": false,
+        "pruned_through_receipt_sequence": "20",
+        "policy_identifier": "retain_last_10000_receipts"
+      }
+    ],
+    "root_tombstone": {
+      "status": "tombstone",
+      "root_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+      "creation_id": "create-1",
+      "terminal_status": "faulted",
+      "final_aggregate_state_digest": "sha256:1e4f5fcfdf2107082855656fc88af8ed4f3bb6769cbfe3032825524e20ebfc36",
+      "tombstone_operation_id": "tombstone-1"
+    },
+    "pending_outbox_states": [
+      {
+        "status": "not_attempted"
+      },
+      {
+        "status": "retryable_failure",
+        "reason_code": "temporary_unavailable"
+      },
+      {
+        "status": "ambiguous",
+        "reason_code": "confirmation_lost"
+      }
+    ],
+    "pending_outbox_records": [
+      {
+        "intent": {
+          "effect_id": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+          "sequence": "0",
+          "event": "notice",
+          "payload": [
+            "map",
+            []
+          ],
+          "correlation_id": "correlation-1"
+        },
+        "state_revision": "7",
+        "delivery_state": {
+          "status": "retryable_failure",
+          "reason_code": "temporary_unavailable"
+        }
+      }
+    ],
+    "pending_outbox_update_results": [
+      {
+        "result": "committed",
+        "record": {
+          "intent": {
+            "effect_id": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+            "sequence": "0",
+            "event": "notice",
+            "payload": [
+              "map",
+              []
+            ],
+            "correlation_id": "correlation-1"
+          },
+          "state_revision": "7",
+          "delivery_state": {
+            "status": "ambiguous",
+            "reason_code": "confirmation_lost"
+          }
+        }
+      }
+    ],
+    "terminal_outbox_outcomes": [
+      {
+        "status": "confirmed"
+      },
+      {
+        "status": "permanently_rejected",
+        "reason_code": "destination_rejected"
+      },
+      {
+        "status": "operator_cancelled",
+        "reason_code": "business_cancelled"
+      },
+      {
+        "status": "discarded",
+        "reason_code": "declared_policy"
+      },
+      {
+        "status": "dead_lettered",
+        "reason_code": "retry_limit"
+      }
+    ],
+    "outbox_effect_tombstones": [
+      {
+        "terminal_sequence": "3",
+        "effect_id": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "intent_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+        "committed_revision": "8",
+        "outcome": {
+          "status": "confirmed"
+        }
+      },
+      {
+        "terminal_sequence": "4",
+        "effect_id": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "intent_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+        "committed_revision": "9",
+        "outcome": {
+          "status": "dead_lettered",
+          "reason_code": "retry_limit"
+        }
+      }
+    ],
+    "maintenance_receipts": [
+      {
+        "operation_kind": "maintenance_migration",
+        "receipt_sequence": "4",
+        "operation_id": "migration-1",
+        "request_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "committed_revision": "9",
+        "source_aggregate_state_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "resulting_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "migration_sequences": [
+          "1"
+        ],
+        "result_code": "migration_applied"
+      },
+      {
+        "operation_kind": "maintenance_migration",
+        "receipt_sequence": "5",
+        "operation_id": "migration-no-operation-1",
+        "request_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "committed_revision": "10",
+        "source_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "resulting_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "migration_sequences": [],
+        "result_code": "migration_no_operation"
+      }
+    ]
+  },
+  "negative": {
+    "delivery_origins": [
+      {
+        "kind": "host_input",
+        "producing_receipt_sequence": "0"
+      },
+      {
+        "kind": "internal_emission",
+        "emission_index": "0"
+      },
+      {
+        "kind": "broker"
+      }
+    ],
+    "delivery_outcomes": [
+      {
+        "status": "completed",
+        "disposition": "unhandled",
+        "fault": null,
+        "rejection": null
+      },
+      {
+        "status": "running",
+        "disposition": "rejected",
+        "fault": null,
+        "rejection": null
+      },
+      {
+        "status": "faulted",
+        "disposition": "rejected",
+        "fault": null,
+        "rejection": {
+          "code": "invalid_instance_target"
+        }
+      },
+      {
+        "status": "running",
+        "disposition": "rejected",
+        "fault": {
+          "definition_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+          "runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "cause_id": "impossible-root-fault",
+          "code": "invariant_fault",
+          "step_sequence": "1",
+          "source_locator": "system:invariant"
+        },
+        "rejection": {
+          "code": "invalid_instance_target"
+        }
+      },
+      {
+        "status": "faulted",
+        "disposition": "faulted",
+        "fault": null,
+        "rejection": null
+      },
+      {
+        "status": "running",
+        "disposition": "ignored",
+        "fault": null,
+        "rejection": null
+      }
+    ],
+    "pre_acceptance_results": [
+      {
+        "result": "not_accepted",
+        "failure": {
+          "code": "unknown"
+        }
+      },
+      {
+        "result": "not_accepted",
+        "failure": {
+          "code": "wrong_root",
+          "detail": "not closed"
+        }
+      },
+      {
+        "result": "rejected",
+        "failure": {
+          "code": "tombstoned_root"
+        }
+      }
+    ],
+    "creation_receipts": [
+      {
+        "operation_kind": "creation",
+        "receipt_sequence": "0",
+        "creation_id": "create-running-with-fault",
+        "request_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "committed_revision": "0",
+        "resulting_aggregate_state_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+        "status": "running",
+        "fault": {
+          "definition_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+          "runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "cause_id": "creation-fault-1",
+          "code": "invariant_fault",
+          "step_sequence": "0",
+          "source_locator": "system:invariant"
+        },
+        "emission_references": []
+      },
+      {
+        "operation_kind": "creation",
+        "receipt_sequence": "0",
+        "creation_id": "create-faulted-without-fault",
+        "request_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "committed_revision": "0",
+        "resulting_aggregate_state_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+        "status": "faulted",
+        "fault": null,
+        "emission_references": []
+      },
+      {
+        "operation_kind": "creation",
+        "receipt_sequence": "1",
+        "creation_id": "create-not-first",
+        "request_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "committed_revision": "0",
+        "resulting_aggregate_state_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+        "status": "running",
+        "fault": null,
+        "emission_references": []
+      },
+      {
+        "operation_kind": "creation",
+        "receipt_sequence": "0",
+        "creation_id": "create-wrong-revision",
+        "request_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "committed_revision": "1",
+        "resulting_aggregate_state_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+        "status": "running",
+        "fault": null,
+        "emission_references": []
+      }
+    ],
+    "emission_references": [
+      {
+        "kind": "internal_delivery",
+        "emission_index": "0",
+        "event_id": "internal-1"
+      },
+      {
+        "kind": "external_outbox",
+        "emission_index": "1",
+        "effect_id": "not-a-digest"
+      },
+      {
+        "kind": "unknown",
+        "emission_index": "0"
+      }
+    ],
+    "replay_retention": [
+      {
+        "mode": "permanent",
+        "permanent_replay_eligible": false,
+        "pruned_through_receipt_sequence": "1",
+        "policy_identifier": "changed_back"
+      },
+      {
+        "mode": "bounded",
+        "permanent_replay_eligible": true,
+        "pruned_through_receipt_sequence": null,
+        "policy_identifier": "retain_last_10000_receipts"
+      },
+      {
+        "mode": "bounded",
+        "permanent_replay_eligible": false,
+        "pruned_through_receipt_sequence": "0",
+        "policy_identifier": "creation_is_never_pruned"
+      }
+    ],
+    "root_tombstones": [
+      {
+        "status": "tombstone",
+        "root_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+        "creation_id": "create-1",
+        "terminal_status": "running",
+        "final_aggregate_state_digest": "sha256:abfa6ba834d72e1e0e3c559071aab5e735584a0b7c22c68bc0de18ff505d4beb",
+        "tombstone_operation_id": "tombstone-1"
+      }
+    ],
+    "pending_outbox_states": [
+      {
+        "status": "confirmed"
+      },
+      {
+        "status": "retryable_failure"
+      },
+      {
+        "status": "discarded",
+        "reason_code": "not_pending"
+      }
+    ],
+    "pending_outbox_records": [
+      {
+        "intent": {
+          "effect_id": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+          "sequence": "0",
+          "event": "notice",
+          "payload": [
+            "map",
+            []
+          ],
+          "correlation_id": "correlation-1"
+        },
+        "delivery_state": {
+          "status": "not_attempted"
+        }
+      }
+    ],
+    "pending_outbox_update_results": [
+      {
+        "result": "updated",
+        "record": {
+          "intent": {
+            "effect_id": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+            "sequence": "0",
+            "event": "notice",
+            "payload": [
+              "map",
+              []
+            ],
+            "correlation_id": "correlation-1"
+          },
+          "state_revision": "7",
+          "delivery_state": {
+            "status": "ambiguous",
+            "reason_code": "confirmation_lost"
+          }
+        }
+      }
+    ],
+    "terminal_outbox_outcomes": [
+      {
+        "status": "ambiguous",
+        "reason_code": "still_pending"
+      },
+      {
+        "status": "permanently_rejected"
+      },
+      {
+        "status": "unknown",
+        "reason_code": "not_declared"
+      }
+    ],
+    "outbox_effect_tombstones": [
+      {
+        "terminal_sequence": "3",
+        "effect_id": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "intent_digest": "not-a-digest",
+        "committed_revision": "8",
+        "outcome": {
+          "status": "confirmed"
+        }
+      },
+      {
+        "terminal_sequence": "4",
+        "effect_id": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "intent_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+        "committed_revision": "9",
+        "outcome": {
+          "status": "ambiguous",
+          "reason_code": "not_terminal"
+        }
+      }
+    ],
+    "maintenance_receipts": [
+      {
+        "operation_kind": "maintenance_migration",
+        "receipt_sequence": "4",
+        "operation_id": "migration-empty-applied",
+        "request_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "committed_revision": "9",
+        "source_aggregate_state_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "resulting_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "migration_sequences": [],
+        "result_code": "migration_applied"
+      },
+      {
+        "operation_kind": "maintenance_migration",
+        "receipt_sequence": "5",
+        "operation_id": "migration-nonempty-no-operation",
+        "request_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "committed_revision": "10",
+        "source_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "resulting_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "migration_sequences": [
+          "2"
+        ],
+        "result_code": "migration_no_operation"
+      }
+    ]
+  }
+}
