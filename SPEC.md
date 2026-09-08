@@ -2351,6 +2351,8 @@ MUST be rejected before schema or semantic validation with the decoder's exact c
 format code:
 
 - aggregate-state decoding uses `unsupported_aggregate_state_format` (§16.12);
+- migration-descriptor decoding uses `unsupported_migration_descriptor_format`
+  (§16.12);
 - aggregate-state-package decoding, when that decoder was selected, uses
   `unsupported_aggregate_state_package_format` (§16.12); and
 - execution-checkpoint restoration uses `unsupported_execution_checkpoint_format`
