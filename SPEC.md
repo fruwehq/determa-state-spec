@@ -1623,16 +1623,6 @@ digits, with no sign or leading zero.
 `root_instance_id` identifies the aggregate. `creation_id` identifies one logical
 creation request and MUST be reused when retrying that request.
 
-The identities and digests in this specification are portable values and intentionally
-contain no host owner, deployment, tenant, security-principal, endpoint, credential, or
-authorization-policy identity. Their no-reuse, conflict, replay, and deduplication
-guarantees are evaluated only within the selected logical execution-store scope defined
-in §17.1. Two independent scopes given byte-identical portable inputs MAY therefore
-produce byte-identical root/runtime/event/effect identities and content digests without
-violating this specification. A portable identity or digest MUST NOT be treated as
-globally unique or as proof that an artifact belongs to a particular host scope. A host
-MUST NOT add its outer scope identity to a portable hash input or portable artifact.
-
 The root runtime identity is:
 
 ```text
@@ -3069,82 +3059,42 @@ memory. A host MAY embed this contract directly in an application process; no da
 socket, broker, database server, background thread, or subprocess plugin protocol is
 required.
 
-An `ExecutionStore` is a logical store scope. The host assigns each logical store scope
-one stable opaque identity when that scope is first created. That stable identity is
-never reused, is preserved for the complete logical-scope lifetime including authorized
-backup/restore or rebinding, and is the scope's external-effect delivery namespace. It
-is host metadata, not a portable Determa identifier or a public tenant field.
+Every `ExecutionStore` is one logical store scope. The host assigns it one opaque scope
+identity and binds it to exactly one owning party or deployment trust domain. Mutually
+untrusted parties or deployment trust domains MUST NOT share a logical store scope.
+Multiple authenticated users or service principals MAY operate within one such trust
+domain; principal authentication, authorization, approvals, and audit remain host
+policy and do not require a separate store per principal.
 
-Every configured store instance or injected store handle MUST be bound to exactly one
-stable logical-store-scope identity and its current owner/deployment trust domain.
-Mutually untrusted owners, tenants, parties, or deployment trust domains MUST NOT share
-one logical store scope. Root identity retention, root no-reuse, operation and event
-replay, effect conflict/deduplication, checkpoint revision, digest comparison, locks,
-and capability guarantees are all scoped to that logical store and have no cross-scope
-meaning.
+Within the execution-checkpoint profile, root, creation, operation, event, and effect
+identities; checkpoint revisions and digests; receipts and tombstones; and replay,
+conflict, no-reuse, and deduplication guarantees are unique or evaluated only within
+the selected logical store scope. Equal portable identities and bytes MAY coexist in
+independent scopes. A portable identity or digest is not globally unique and is not
+evidence that an artifact belongs to a host scope.
 
-The owning trust domain is an isolation boundary, not an authenticated-principal
-identity. Multiple authenticated users, service identities, or other principals acting
-inside one owning tenant or deployment trust domain MAY use the same logical store. A
-host MAY require an operation to be authorized by a particular principal, by two named
-and distinct principals, or by another quorum or separation-of-duties policy without
-creating a store per principal. Principal authentication, authorization, approval
-evidence, revocation, and audit are host policy. They remain outside portable bundles,
-checkpoints, identities, and hash inputs and MUST be evaluated before the core call.
+A physical backend MAY contain multiple logical store scopes only when a mandatory
+external isolation key participates in every lookup, mutation, uniqueness constraint,
+transaction or compare-and-swap guard, lock, replay check, receipt, tombstone, and
+outbox operation. Before any such operation, the host MUST select and authorize exactly
+one scope. Missing, ambiguous, mismatched, or unauthorized selection MUST fail closed
+without a core call, checkpoint mutation, outbox delivery, broker acknowledgement,
+fallback, probing, or access to another scope.
 
-A process, file hierarchy, database, database cluster, or adapter connection pool MAY
-hold multiple logical stores only when the host applies a physical isolation key to
-every record lookup and mutation, uniqueness constraint, transaction or compare-and-swap
-guard, lock, replay check, outbox delivery/deduplication record, backup member, and
-restore operation. The stable logical-store-scope identity, current authorization
-owner/deployment binding, and physical isolation key are three distinct host values.
-The latter two MAY change during an authorized relocation or rebind; the stable identity
-MUST NOT change. Their mapping MUST change atomically and MUST never make two live stores
-authoritative for the same stable identity.
+The scope identity, ownership binding, principal policy, and physical isolation key are
+host metadata outside portable Determa State bytes and semantics. They MUST NOT be added
+to a machine document, aggregate state, migration descriptor, aggregate-state package,
+execution checkpoint, event, effect intent, or portable digest input. Machine
+namespaces and portable identities do not select or authorize a scope. The portable
+engine, bundle, checkpoint, and hash bytes remain tenant-agnostic; credentials,
+endpoints, tenant identifiers, and SaaS policy fields remain host configuration.
 
-All three values and their associations are host metadata outside portable Determa
-State bytes and semantics. They MUST NOT be fields in a machine document, aggregate
-state, migration descriptor, aggregate-state package, execution checkpoint, event,
-effect intent, or portable digest input. Machine namespaces and `root_instance_id`
-values do not provide this isolation. The portable engine and bundle remain
-tenant-agnostic.
-Credentials, service endpoints, infrastructure tenant/deployment identifiers, and
-SaaS authorization-policy data are also host configuration and MUST NOT be introduced
-as execution-store control fields in portable machine definitions or checkpoints. Any
-similarly named author-defined business value is ordinary machine data, provides no
-store isolation or authorization, and cannot satisfy this requirement.
-
-Before a host exposes or processes any stored artifact, it MUST select exactly one
-logical store scope from trusted host configuration and, when applicable, authenticated
-and authorized request context. If that selection is absent or ambiguous, conflicts
-with the configured store, or cannot establish that a record belongs to the selected
-scope, the host MUST fail closed without creation, migration, dispatch, replay, outbox
-delivery, broker acknowledgement, or portable-state mutation. It MUST NOT probe,
-fallback to, merge with, or reinterpret a different scope. This is a host authorization
-or configuration failure; its external error shape is outside the portable core and
-checkpoint error-code sets.
-
-The machine, aggregate-state, migration-descriptor, aggregate-state-package, and
-execution-checkpoint schemas remain unchanged because logical-store scope is
-deliberately host metadata. The execution-checkpoint conformance profile MUST add host
-adapter cases covering every normative branch introduced here:
-
-- byte-identical portable identities coexist independently in distinct logical stores;
-- absent, mismatched, or unauthorized scope selection invokes no core `create`,
-  `dispatch`, or migration operation and leaves every checkpoint unchanged;
-- every scope in a multi-scope export/import collection is authorized independently,
-  and partial collection results report succeeded, failed, and unattempted scopes;
-- import requires a new or empty destination and every failed import leaves it
-  byte-for-byte unchanged;
-- an equal import-receipt retry replays exactly, while a conflicting or ambiguous retry
-  fails without mutation;
-- a concurrent destination change fails without publishing any imported state; and
-- permitted rebind preserves the stable logical-store-scope delivery namespace for
-  not-attempted, retryable, ambiguous, terminal, and tombstoned effects while preventing
-  two active delivery owners or terminal redelivery.
-
-These are host-profile assertions, not portable core or schema fields. This section
-requires the conformance follow-up but does not add its artifacts here.
+The schemas remain unchanged because scope selection is deliberately external host
+metadata. The execution-checkpoint conformance profile MUST add host-adapter cases
+proving that equal portable identities coexist independently in two logical scopes and
+that missing, mismatched, or unauthorized scope selection makes no core `create`,
+`dispatch`, or migration call and leaves checkpoint bytes unchanged. Those artifacts
+are follow-up work and are not added here.
 
 The checkpoint artifact is strict UTF-8 JSON and obeys the parsing and closed-schema
 rules of §16.1. Unknown formats and versions fail respectively with
@@ -3871,18 +3821,18 @@ unsupported in checkpoint schema version 1. Bounded mode may prune only the
 dependency-safe receipt/audit/effect history defined above; it never prunes creation
 receipt `"0"`, the retained terminal aggregate/root tombstone, or root identity.
 
-A complete backup of one logical store scope MUST retain every checkpoint in that
-scope, including every bounded or permanent terminal checkpoint/root tombstone. A
-restore that omits one loses root identity, creation-conflict, and no-reuse evidence
-and is not a conforming restore of this checkpoint profile. Bounded restores retain
-their recorded horizon and cannot be upgraded to permanent replay. Permanent restores
-may advertise permanent replay only when the selected scope's collection is complete.
+A complete backup MUST retain every checkpoint, including every bounded or permanent
+terminal checkpoint/root tombstone. A restore that omits one loses root identity,
+creation-conflict, and no-reuse evidence and is not a conforming restore of this
+checkpoint profile. Bounded restores retain their recorded horizon and cannot be
+upgraded to permanent replay. Permanent restores may advertise permanent replay only
+when the collection is complete.
 
 ### 17.9 Transaction and concurrency ordering
 
 A durable host processes one presented delivery in this exact order:
 
-1. Resolve the request to exactly one §17.1 execution-store scope, then resolve, verify,
+1. Select and authorize exactly one §17.1 logical store scope, then resolve, verify,
    authorize, and locally cache all required definitions, migration descriptors, route
    metadata, adapter configuration, and capability declarations.
 2. Begin one transaction with exclusive ownership of the root checkpoint, or an
@@ -3929,14 +3879,6 @@ registry whose registration operation associates:
 - capability evaluation for the resulting configured instance;
 - health operations; and
 - optional adapter-storage schema migration operations.
-
-Whether injected directly or created through a factory, the resulting configured
-store handle represents exactly one §17.1 stable logical-store-scope identity, current
-owner/deployment binding, and physical isolation mapping. Adapter registration
-identifies implementation behavior; it does not select, authorize, or merge logical
-scopes. These host values are validated as adapter/host configuration and are not
-inferred from a URI scheme, machine namespace, portable root identity, checkpoint, or
-capability name.
 
 URI parsing extracts the scheme generically and asks that registry to resolve it. Core,
 host, and command-line code MUST NOT branch on a particular adapter identifier.
@@ -4043,30 +3985,16 @@ idempotency for effectively-once behavior. Hosts MUST state their selected durab
 retention, queue-ordering, broker, and external-idempotency profiles without attributing
 stronger guarantees to the pure core.
 
-Every external delivery and reconciliation operation MUST use a composite idempotency
-key containing the stable logical-store-scope identity from §17.1 and the portable
-`effect_id`. Its transport encoding is host/destination policy, but both values and
-their boundaries MUST be unambiguous. Portable `effect_id` alone, a mutable
-owner/deployment identifier, or a physical isolation key is insufficient.
-
-The same composite key MUST be used for the first attempt, every retry, ambiguous-result
-reconciliation, and terminal evidence. Authorized relocation, restore, or rebinding of
-the logical scope preserves that delivery namespace. Imported `not_attempted` and
-`retryable_failure` work continues under the same key. Imported `ambiguous` work is
-retried or reconciled exactly as §17.6 requires under that same key; it MUST NOT be
-treated as not attempted. Imported terminal records and effect tombstones remain
-terminal/deduplication evidence and MUST NOT be redelivered. If the stable scope
-identity or authoritative delivery ownership cannot be established unambiguously, the
-host MUST fail closed before publishing the imported scope or delivering any effect.
-The stable identity remains host transport metadata and MUST NOT alter the portable
-intent.
+Every store operation and every outbox routing, retry, reconciliation, and idempotency
+record MUST retain the selected logical store scope. External effect idempotency MUST
+use the host-owned scope identity together with the portable `effect_id`; `effect_id`
+alone is not globally unique. This host metadata MUST NOT alter the portable intent.
 
 ### 17.13 Cluster checkpoint composition
 
-One execution checkpoint never represents a complete logical store scope or an
-independently committed owned child: every owned child remains inside its root
-aggregate. A complete backup of one logical store scope is a consistent collection
-containing:
+One execution checkpoint never represents a complete deployment or an independently
+committed owned child: every owned child remains inside its root aggregate. A complete
+deployment backup is a consistent collection containing:
 
 - one valid checkpoint for every created root identity, with either a retained
   aggregate or root tombstone in its `root_record`;
@@ -4076,99 +4004,26 @@ containing:
 - adapter metadata needed to restore pending broker ownership without treating an
   uncommitted message as accepted;
 - relevant application data; and
-- a host-level manifest that records the stable logical-store-scope identity, export
-  authorization/provenance, exact member bytes, and consistency point chosen by the
-  host.
+- a manifest that identifies the exact member bytes and the consistency point chosen
+  by the host.
 
-The checkpoint schema does not define that scope manifest or require a global
-transaction across unrelated roots. A scope backup is valid only if the storage and
+The checkpoint schema does not define that cluster manifest or require a global
+transaction across unrelated roots. A cluster backup is valid only if the storage and
 broker-specific procedure supplies an application-appropriate consistency point and
 does not omit committed checkpoints/tombstones, operation receipts, pending deliveries,
 pending/terminal/tombstoned outbox records, retention history, application response
 data needed by its API, or referenced trusted artifacts. A restore that omits any
-created root's checkpoint/tombstone from the selected source scope is nonconforming in
-either retention mode. A restored logical store may claim permanent replay only when
-that scope's collection is complete and every checkpoint remains permanently eligible.
-Restoring one checkpoint requires no other root checkpoint, but application-level
-cross-root invariants may require coordinated backup and restore.
+created root's checkpoint/tombstone is nonconforming in either retention mode. A
+restored deployment may claim permanent replay only when the collection is complete
+and every checkpoint remains permanently eligible. Restoring one checkpoint requires
+no other root checkpoint, but application-level cross-root invariants may require
+coordinated backup and restore.
 
-Every operation against a live `ExecutionStore` selects and authorizes exactly one
-logical store scope under §17.1. A per-scope export reads one selected source scope. A
-per-scope import writes one selected unbound destination provisioning allocation and
-consumes one subarchive whose source-scope association was independently authorized for
-export and is verified for import. A multi-scope archive is only a host-level collection
-of those independently authorized per-scope operations. Its outer manifest MUST
-preserve each subarchive's stable opaque source-scope identity and exact byte identity.
-Selecting or authorizing one scope MUST NOT authorize, read, export, import, or rebind
-another scope.
-
-A per-scope export either produces one complete subarchive for its declared consistency
-point or fails without producing a successful result; it does not mutate the source.
-If a multi-scope export partly fails, completed subarchives MAY be retained, but the
-outer result and manifest MUST identify every succeeded, failed, and unattempted scope
-and MUST NOT claim that the collection is complete. This specification provides no
-cross-scope export snapshot or atomicity guarantee.
-
-Each per-scope import is one independently authorized, all-or-nothing replacement of a
-new or empty destination. Before examining destination content, the host checks a
-durable host-level import receipt. That receipt binds one host import operation identity
-to the source stable logical-store-scope identity, destination placement and resulting
-owner/deployment binding, exact scope-manifest and subarchive byte identities,
-authority/fencing generation, and committed result. If a receipt with that operation
-identity exists and every bound value is equal, the host returns the original result
-without mutation. If any bound value differs, it fails closed without mutation. If no
-receipt exists, the import continues below and commits its receipt atomically with its
-first successful import.
-
-A destination is empty for import only when it is unpublished, is not bound to any
-stable logical-store-scope identity, and contains no checkpoint, root identity marker
-or tombstone, creation/operation/delivery receipt, pending delivery,
-pending/terminal/tombstoned effect evidence, or prior import receipt. The destination
-MUST remain exclusively locked and unpublishable from that emptiness check through
-commit. A destination that is non-empty or already bound to any logical scope MUST fail
-closed without mutation, even when all portable identifiers are disjoint or its bound
-stable scope identity equals the archive's. Restore/rebind import never merges,
-synchronizes, or overlays destination state.
-
-An unbound destination is a host provisioning allocation, not yet a configured
-`ExecutionStore`; it accepts no ordinary store operation before successful publication.
-
-The host validates the complete source archive, preserved stable scope identity,
-authorization/provenance, outbox evidence, and destination emptiness before mutation.
-The empty destination adopts the source's stable logical-store-scope identity; import
-MUST NOT allocate a replacement identity or publish a clone. Archive validation,
-destination binding, checkpoint/outbox installation, import receipt, current
-owner/deployment binding, physical isolation mapping, and publication MUST commit in
-one serializable transaction or observably equivalent exclusive operation. A concurrent
-destination change, archive/identity mismatch, authorization or provenance failure, or
-inability to provide that atomic boundary fails closed and leaves the destination empty
-and unpublished.
-
-Before publication, the host MUST prove through its external authority/fencing state
-that no other live store or outbox worker remains authoritative for the preserved stable
-scope identity. Authority transfer and destination publication are one atomic control
-decision. A missing, stale, or ambiguous fence fails closed; importing the archive as a
-second live copy is forbidden. Every effect attempt at the source consistency point
-MUST either have durable terminal evidence or be retained as `not_attempted`,
-`retryable_failure`, or `ambiguous`. An untracked in-flight attempt makes the archive
-invalid for import. A failure before publication leaves the external authoritative
-owner unchanged. A lost response after publication is resolved only through the exact
-import receipt above.
-
-An explicitly authorized administrative restore/replacement/rebind therefore moves one
-complete logical scope into one empty destination while preserving its stable scope and
-delivery identity. It MAY change the current owner/deployment authorization binding and
-physical isolation key, but MUST NOT rewrite portable checkpoint bytes or combine
-source scopes. Import or incremental synchronization into a non-empty destination,
-including one already associated with the same stable identity, is not defined by this
-profile. Any future synchronization operation requires its own provenance, causality,
-conflict, retry, and concurrency contract and cannot claim these restore semantics.
-
-For a multi-scope import, each permitted empty-destination commit remains atomic but the
-collection is not: if a later scope fails, earlier committed scopes remain committed and
-failed or unattempted scopes remain unchanged. The outer result MUST report each status
-and MUST NOT claim global atomicity or completeness. Retrying a scope follows only the
-exact-retry rule above; this specification defines no cross-scope rollback.
+This section defines only checkpoint-collection completeness. Backup and restore
+operation protocols, cloning, transfer or rebinding, multi-scope archives, relocation,
+and fencing are not defined by this profile. Portable checkpoint bytes, identities, or
+digests MUST NOT authorize access to or movement across logical store scopes. A future
+host-profile contract is required before any such operation can claim conformance.
 
 ### 17.14 Future timer durability
 
