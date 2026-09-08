@@ -34,6 +34,11 @@ machines:
 Format 1 is intentionally not compatibility-stable yet. Earlier draft documents may
 become invalid while the model is being designed.
 
+The 0.0.x grammar and snapshot format are frozen legacy artifacts. They cannot be
+converted to format 1: rewrite definitions as format-1 bundles, and do not carry
+0.0.x snapshots forward. Loaders never guess or silently reinterpret a legacy artifact
+as format 1. See [SPEC.md §2](SPEC.md#2-conformance-parsing-and-format-identity).
+
 ## Core model
 
 - hierarchical states, entry/exit behavior, choices, and shallow/deep history;

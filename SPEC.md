@@ -158,6 +158,19 @@ the format is being designed. There are no legacy aliases, implicit conversions,
 dual parsers in this alpha. Compatibility rules begin only when a format is explicitly
 published as stable.
 
+The 0.0.x machine grammar and its snapshot format are frozen legacy artifacts. They
+are not format-1 machine documents, aggregate-state envelopes, migration descriptors,
+transport packages, or execution checkpoints. A format-1 machine loader presented with
+a 0.0.x definition MUST reject it with `unsupported_format`; it MUST NOT recognize its
+field shape, supply omitted fields, or otherwise guess an interpretation as format 1.
+A format-1 portable-artifact decoder presented with a 0.0.x snapshot MUST reject it at
+the applicable artifact-format boundary; it MUST NOT treat it as aggregate state or an
+execution checkpoint. There is no 0.0.x-to-format-1 definition converter or
+snapshot-to-format-1 state import in this specification. Users migrating from 0.0.x
+MUST author a new format-1 bundle and MUST NOT carry a 0.0.x snapshot forward. The
+definition migration rules in §16 apply only between recognized format-1 bundles and
+their format-1 portable artifacts.
+
 The document `format` is independent of:
 
 - repository/package SemVer (`VERSION`);
@@ -2319,6 +2332,11 @@ SemVer, and author-controlled machine `version` are independent version domains.
 Unknown artifact formats or schema versions are rejected before semantic validation;
 there is no nearest-version parsing, implicit conversion, or best-effort field
 retention.
+
+In particular, the frozen 0.0.x snapshot format is not an aggregate-state envelope,
+migration descriptor, transport package, or execution checkpoint. A decoder MUST
+reject it with the applicable artifact-format rejection before semantic validation;
+it MUST NOT infer a format-1 artifact from its field shape or attempt a migration.
 
 The artifacts MUST be JSON encoded as strict UTF-8. Their parsers apply the §2
 source-level duplicate-name, acyclic JSON-value, Unicode-scalar, Boolean, null, and
