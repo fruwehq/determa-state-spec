@@ -34,6 +34,13 @@ machines:
 Format 1 is intentionally not compatibility-stable yet. Earlier draft documents may
 become invalid while the model is being designed.
 
+Releases 0.0.1 through 0.0.6 used a frozen legacy grammar and snapshot format. They
+cannot be converted to format 1: rewrite definitions as format-1 bundles, and do not
+carry legacy snapshots forward. Release 0.0.7 introduced format 1, and its definitions
+remain subject to ordinary current validation. Repository/package versions and machine
+formats are separate; loaders never guess either from document shape. See
+[SPEC.md §2](SPEC.md#2-conformance-parsing-and-format-identity).
+
 ## Core model
 
 - hierarchical states, entry/exit behavior, choices, and shallow/deep history;

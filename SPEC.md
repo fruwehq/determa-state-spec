@@ -158,6 +158,29 @@ the format is being designed. There are no legacy aliases, implicit conversions,
 dual parsers in this alpha. Compatibility rules begin only when a format is explicitly
 published as stable.
 
+Determa State repository/package releases 0.0.1 through 0.0.6 emitted a legacy machine
+grammar and snapshot format. Those artifacts are frozen legacy artifacts and MUST NOT
+be migrated into format 1. Release 0.0.7 introduced format 1; format-1 definitions
+produced by 0.0.7 remain ordinary format-1 inputs and are accepted or rejected by the
+current §2 source checks, schema, and §5 semantic validation. These historical release
+numbers describe the support policy only. Repository/package SemVer remains distinct
+from the machine `format` discriminator and is never inferred from document shape.
+
+A machine loader applies the format check above without release-provenance or shape
+detection. A definition produced by releases 0.0.1 through 0.0.6 with a missing
+discriminator or a discriminator other than the YAML/JSON integer `1` fails
+`unsupported_format`. If a legacy-shaped document explicitly carries `format: 1`, the
+discriminator succeeds and the loader proceeds to the current schema; the legacy
+structure MUST be rejected by JSON Schema (`structural_validation` in §5.1
+conformance-harness notation) before §5 semantic validation. The loader MUST NOT
+identify a legacy document by its other fields, supply omitted fields, select a legacy
+parser, or silently reinterpret it as format 1.
+
+There is no 0.0.1-through-0.0.6 definition converter or legacy-snapshot import in this
+specification. Users migrating from those releases MUST author a new format-1 bundle
+and MUST NOT carry a legacy snapshot forward. The definition migration rules in §16
+apply only between recognized format-1 bundles and their format-1 portable artifacts.
+
 The document `format` is independent of:
 
 - repository/package SemVer (`VERSION`);
@@ -2319,6 +2342,24 @@ SemVer, and author-controlled machine `version` are independent version domains.
 Unknown artifact formats or schema versions are rejected before semantic validation;
 there is no nearest-version parsing, implicit conversion, or best-effort field
 retention.
+
+In particular, snapshots produced by releases 0.0.1 through 0.0.6 are not modern
+portable artifacts. The caller or host MUST select one modern decoder before decoding;
+the selected decoder MUST NOT probe other artifact kinds or infer one from field shape.
+A legacy snapshot, including one with the selected decoder's discriminator absent,
+MUST be rejected before schema or semantic validation with the decoder's exact closed
+format code:
+
+- aggregate-state decoding uses `unsupported_aggregate_state_format` (§16.12);
+- migration-descriptor decoding uses `unsupported_migration_descriptor_format`
+  (§16.12);
+- aggregate-state-package decoding, when that decoder was selected, uses
+  `unsupported_aggregate_state_package_format` (§16.12); and
+- execution-checkpoint restoration uses `unsupported_execution_checkpoint_format`
+  (§17.1).
+
+A decoder MUST NOT fall through to another decoder, treat a legacy snapshot as a
+format-1 artifact, or attempt a migration.
 
 The artifacts MUST be JSON encoded as strict UTF-8. Their parsers apply the §2
 source-level duplicate-name, acyclic JSON-value, Unicode-scalar, Boolean, null, and
