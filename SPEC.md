@@ -3091,10 +3091,12 @@ endpoints, tenant identifiers, and SaaS policy fields remain host configuration.
 
 The schemas remain unchanged because scope selection is deliberately external host
 metadata. The execution-checkpoint conformance profile MUST add host-adapter cases
-proving that equal portable identities coexist independently in two logical scopes and
-that missing, mismatched, or unauthorized scope selection makes no core `create`,
-`dispatch`, or migration call and leaves checkpoint bytes unchanged. Those artifacts
-are follow-up work and are not added here.
+proving that equal portable identities coexist independently in two logical scopes;
+that equal portable `effect_id` values route, retry, reconcile, and deduplicate
+independently in those scopes; and that missing, ambiguous, mismatched, or unauthorized
+scope selection makes no core `create`, `dispatch`, or migration call, leaves checkpoint
+bytes unchanged, and performs no outbox mutation, delivery, or broker acknowledgement.
+Those artifacts are follow-up work and are not added here.
 
 The checkpoint artifact is strict UTF-8 JSON and obeys the parsing and closed-schema
 rules of §16.1. Unknown formats and versions fail respectively with
