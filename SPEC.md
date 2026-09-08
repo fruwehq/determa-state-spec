@@ -158,18 +158,28 @@ the format is being designed. There are no legacy aliases, implicit conversions,
 dual parsers in this alpha. Compatibility rules begin only when a format is explicitly
 published as stable.
 
-The 0.0.x machine grammar and its snapshot format are frozen legacy artifacts. They
-are not format-1 machine documents, aggregate-state envelopes, migration descriptors,
-transport packages, or execution checkpoints. A format-1 machine loader presented with
-a 0.0.x definition MUST reject it with `unsupported_format`; it MUST NOT recognize its
-field shape, supply omitted fields, or otherwise guess an interpretation as format 1.
-A format-1 portable-artifact decoder presented with a 0.0.x snapshot MUST reject it at
-the applicable artifact-format boundary; it MUST NOT treat it as aggregate state or an
-execution checkpoint. There is no 0.0.x-to-format-1 definition converter or
-snapshot-to-format-1 state import in this specification. Users migrating from 0.0.x
-MUST author a new format-1 bundle and MUST NOT carry a 0.0.x snapshot forward. The
-definition migration rules in §16 apply only between recognized format-1 bundles and
-their format-1 portable artifacts.
+Determa State repository/package releases 0.0.1 through 0.0.6 emitted a legacy machine
+grammar and snapshot format. Those artifacts are frozen legacy artifacts and MUST NOT
+be migrated into format 1. Release 0.0.7 introduced format 1; format-1 definitions
+produced by 0.0.7 remain ordinary format-1 inputs and are accepted or rejected by the
+current §2 source checks, schema, and §5 semantic validation. These historical release
+numbers describe the support policy only. Repository/package SemVer remains distinct
+from the machine `format` discriminator and is never inferred from document shape.
+
+A machine loader applies the format check above without release-provenance or shape
+detection. A definition produced by releases 0.0.1 through 0.0.6 with a missing
+discriminator or a discriminator other than the YAML/JSON integer `1` fails
+`unsupported_format`. If a legacy-shaped document explicitly carries `format: 1`, the
+discriminator succeeds and the loader proceeds to the current schema; the legacy
+structure MUST be rejected by JSON Schema (`structural_validation` in §5.1
+conformance-harness notation) before §5 semantic validation. The loader MUST NOT
+identify a legacy document by its other fields, supply omitted fields, select a legacy
+parser, or silently reinterpret it as format 1.
+
+There is no 0.0.1-through-0.0.6 definition converter or legacy-snapshot import in this
+specification. Users migrating from those releases MUST author a new format-1 bundle
+and MUST NOT carry a legacy snapshot forward. The definition migration rules in §16
+apply only between recognized format-1 bundles and their format-1 portable artifacts.
 
 The document `format` is independent of:
 
@@ -2333,10 +2343,21 @@ Unknown artifact formats or schema versions are rejected before semantic validat
 there is no nearest-version parsing, implicit conversion, or best-effort field
 retention.
 
-In particular, the frozen 0.0.x snapshot format is not an aggregate-state envelope,
-migration descriptor, transport package, or execution checkpoint. A decoder MUST
-reject it with the applicable artifact-format rejection before semantic validation;
-it MUST NOT infer a format-1 artifact from its field shape or attempt a migration.
+In particular, snapshots produced by releases 0.0.1 through 0.0.6 are not modern
+portable artifacts. The caller or host MUST select one modern decoder before decoding;
+the selected decoder MUST NOT probe other artifact kinds or infer one from field shape.
+A legacy snapshot, including one with the selected decoder's discriminator absent,
+MUST be rejected before schema or semantic validation with the decoder's exact closed
+format code:
+
+- aggregate-state decoding uses `unsupported_aggregate_state_format` (§16.12);
+- aggregate-state-package decoding, when that decoder was selected, uses
+  `unsupported_aggregate_state_package_format` (§16.12); and
+- execution-checkpoint restoration uses `unsupported_execution_checkpoint_format`
+  (§17.1).
+
+A decoder MUST NOT fall through to another decoder, treat a legacy snapshot as a
+format-1 artifact, or attempt a migration.
 
 The artifacts MUST be JSON encoded as strict UTF-8. Their parsers apply the §2
 source-level duplicate-name, acyclic JSON-value, Unicode-scalar, Boolean, null, and
