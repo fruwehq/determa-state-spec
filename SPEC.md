@@ -1623,6 +1623,16 @@ digits, with no sign or leading zero.
 `root_instance_id` identifies the aggregate. `creation_id` identifies one logical
 creation request and MUST be reused when retrying that request.
 
+The identities and digests in this specification are portable values and intentionally
+contain no host owner, deployment, tenant, security-principal, endpoint, credential, or
+authorization-policy identity. Their no-reuse, conflict, replay, and deduplication
+guarantees are evaluated only within the selected logical execution-store scope defined
+in §17.1. Two independent scopes given byte-identical portable inputs MAY therefore
+produce byte-identical root/runtime/event/effect identities and content digests without
+violating this specification. A portable identity or digest MUST NOT be treated as
+globally unique or as proof that an artifact belongs to a particular host scope. A host
+MUST NOT add its outer scope identity to a portable hash input or portable artifact.
+
 The root runtime identity is:
 
 ```text
@@ -3059,6 +3069,40 @@ memory. A host MAY embed this contract directly in an application process; no da
 socket, broker, database server, background thread, or subprocess plugin protocol is
 required.
 
+An `ExecutionStore` is a logical store scope. Every configured store instance or
+injected store handle MUST be bound to exactly one owner/deployment trust domain.
+Mutually untrusted owners, tenants, parties, or deployment trust domains MUST NOT share
+one logical store scope. Root identity retention, root no-reuse, operation and event
+replay, effect conflict/deduplication, checkpoint revision, digest comparison, locks,
+and capability guarantees are all scoped to that logical store and have no cross-scope
+meaning.
+
+A process, file hierarchy, database, database cluster, or adapter connection pool MAY
+hold multiple logical stores only when the host applies an immutable host-level
+isolation key to every record lookup and mutation, uniqueness constraint, transaction
+or compare-and-swap guard, lock, replay check, outbox delivery/deduplication record,
+backup member, and restore operation. That isolation key and its association with the
+owning trust domain are host metadata outside all portable Determa State bytes and
+semantics. They MUST NOT be fields in a machine document, aggregate state, migration
+descriptor, aggregate-state package, execution checkpoint, event, effect intent, or
+portable digest input. Machine namespaces and `root_instance_id` values do not provide
+this isolation. The portable engine and bundle remain tenant-agnostic.
+Credentials, service endpoints, infrastructure tenant/deployment identifiers, and
+SaaS authorization-policy data are also host configuration and MUST NOT be introduced
+as execution-store control fields in portable machine definitions or checkpoints. Any
+similarly named author-defined business value is ordinary machine data, provides no
+store isolation or authorization, and cannot satisfy this requirement.
+
+Before a host exposes or processes any stored artifact, it MUST select exactly one
+logical store scope from trusted host configuration and, when applicable, authenticated
+and authorized request context. If that selection is absent or ambiguous, conflicts
+with the configured store, or cannot establish that a record belongs to the selected
+scope, the host MUST fail closed without creation, migration, dispatch, replay, outbox
+delivery, broker acknowledgement, or portable-state mutation. It MUST NOT probe,
+fallback to, merge with, or reinterpret a different scope. This is a host authorization
+or configuration failure; its external error shape is outside the portable core and
+checkpoint error-code sets.
+
 The checkpoint artifact is strict UTF-8 JSON and obeys the parsing and closed-schema
 rules of §16.1. Unknown formats and versions fail respectively with
 `unsupported_execution_checkpoint_format` and
@@ -3795,8 +3839,9 @@ when the collection is complete.
 
 A durable host processes one presented delivery in this exact order:
 
-1. Resolve, verify, authorize, and locally cache all required definitions, migration
-   descriptors, route metadata, adapter configuration, and capability declarations.
+1. Resolve the request to exactly one §17.1 execution-store scope, then resolve, verify,
+   authorize, and locally cache all required definitions, migration descriptors, route
+   metadata, adapter configuration, and capability declarations.
 2. Begin one transaction with exclusive ownership of the root checkpoint, or an
    observably equivalent compare-and-swap guard over its exact revision and digest.
 3. Read and validate the checkpoint, pending identity, and retained operation receipts.
@@ -3841,6 +3886,13 @@ registry whose registration operation associates:
 - capability evaluation for the resulting configured instance;
 - health operations; and
 - optional adapter-storage schema migration operations.
+
+Whether injected directly or created through a factory, the resulting configured
+store handle represents exactly one §17.1 logical store scope. Adapter registration
+identifies implementation behavior; it does not select, authorize, or merge store
+scopes. Any host-level isolation key is validated as adapter/host configuration and is
+not inferred from a URI scheme, machine namespace, portable root identity, checkpoint,
+or capability name.
 
 URI parsing extracts the scheme generically and asks that registry to resolve it. Core,
 host, and command-line code MUST NOT branch on a particular adapter identifier.
@@ -3931,7 +3983,8 @@ not infer it from the storage scheme.
 ### 17.12 Exact guarantee boundary
 
 For every identity still covered by the checkpoint's replay-retention guarantee, the
-checkpoint contract provides exactly-once **committed processing**:
+checkpoint contract provides exactly-once **committed processing** within one selected
+§17.1 logical store scope:
 
 - at most one aggregate replacement is committed for that identity;
 - every retry with equal content returns the first durable host receipt;
@@ -3945,6 +3998,12 @@ acknowledgement. External effects are at least once and require destination
 idempotency for effectively-once behavior. Hosts MUST state their selected durability,
 retention, queue-ordering, broker, and external-idempotency profiles without attributing
 stronger guarantees to the pure core.
+
+When one destination receives effects from multiple logical store scopes, the host or
+adapter MUST preserve independent destination namespaces or use a composite external
+idempotency key containing the host-level scope identity and portable `effect_id`.
+Portable `effect_id` alone is insufficient for cross-scope deduplication. The outer
+scope component remains transport metadata and MUST NOT alter the portable intent.
 
 ### 17.13 Cluster checkpoint composition
 
@@ -3974,6 +4033,14 @@ restored deployment may claim permanent replay only when the collection is compl
 and every checkpoint remains permanently eligible. Restoring one checkpoint requires
 no other root checkpoint, but application-level cross-root invariants may require
 coordinated backup and restore.
+
+A backup MAY contain members from multiple logical store scopes, but its host-level
+manifest MUST preserve each member's immutable scope association and restore MUST keep
+those scopes isolated. Collapsing mutually untrusted scopes, or restoring a member when
+its scope association cannot be established, is nonconforming. An explicitly
+authorized administrative restore into a replacement owner/deployment trust domain MAY
+rebind that external association, but it does not rewrite portable checkpoint bytes or
+combine source scopes.
 
 ### 17.14 Future timer durability
 
