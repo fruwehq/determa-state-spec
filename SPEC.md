@@ -3077,6 +3077,15 @@ replay, effect conflict/deduplication, checkpoint revision, digest comparison, l
 and capability guarantees are all scoped to that logical store and have no cross-scope
 meaning.
 
+The owning trust domain is an isolation boundary, not an authenticated-principal
+identity. Multiple authenticated users, service identities, or other principals acting
+inside one owning tenant or deployment trust domain MAY use the same logical store. A
+host MAY require an operation to be authorized by a particular principal, by two named
+and distinct principals, or by another quorum or separation-of-duties policy without
+creating a store per principal. Principal authentication, authorization, approval
+evidence, revocation, and audit are host policy. They remain outside portable bundles,
+checkpoints, identities, and hash inputs and MUST be evaluated before the core call.
+
 A process, file hierarchy, database, database cluster, or adapter connection pool MAY
 hold multiple logical stores only when the host applies an immutable host-level
 isolation key to every record lookup and mutation, uniqueness constraint, transaction
@@ -3102,6 +3111,15 @@ delivery, broker acknowledgement, or portable-state mutation. It MUST NOT probe,
 fallback to, merge with, or reinterpret a different scope. This is a host authorization
 or configuration failure; its external error shape is outside the portable core and
 checkpoint error-code sets.
+
+The machine, aggregate-state, migration-descriptor, aggregate-state-package, and
+execution-checkpoint schemas remain unchanged because logical-store scope is
+deliberately host metadata. The execution-checkpoint conformance profile MUST add host
+adapter cases proving both that byte-identical portable identities can coexist in two
+distinct logical stores and that absent, mismatched, or unauthorized scope selection
+invokes no core `create`, `dispatch`, or migration operation and leaves every checkpoint
+byte-for-byte unchanged. These are host-profile assertions, not portable core or schema
+fields.
 
 The checkpoint artifact is strict UTF-8 JSON and obeys the parsing and closed-schema
 rules of §16.1. Unknown formats and versions fail respectively with
@@ -3828,12 +3846,12 @@ unsupported in checkpoint schema version 1. Bounded mode may prune only the
 dependency-safe receipt/audit/effect history defined above; it never prunes creation
 receipt `"0"`, the retained terminal aggregate/root tombstone, or root identity.
 
-A complete backup MUST retain every checkpoint, including every bounded or permanent
-terminal checkpoint/root tombstone. A restore that omits one loses root identity,
-creation-conflict, and no-reuse evidence and is not a conforming restore of this
-checkpoint profile. Bounded restores retain their recorded horizon and cannot be
-upgraded to permanent replay. Permanent restores may advertise permanent replay only
-when the collection is complete.
+A complete backup of one logical store scope MUST retain every checkpoint in that
+scope, including every bounded or permanent terminal checkpoint/root tombstone. A
+restore that omits one loses root identity, creation-conflict, and no-reuse evidence
+and is not a conforming restore of this checkpoint profile. Bounded restores retain
+their recorded horizon and cannot be upgraded to permanent replay. Permanent restores
+may advertise permanent replay only when the selected scope's collection is complete.
 
 ### 17.9 Transaction and concurrency ordering
 
@@ -4007,9 +4025,10 @@ scope component remains transport metadata and MUST NOT alter the portable inten
 
 ### 17.13 Cluster checkpoint composition
 
-One execution checkpoint never represents a complete deployment or an independently
-committed owned child: every owned child remains inside its root aggregate. A complete
-deployment backup is a consistent collection containing:
+One execution checkpoint never represents a complete logical store scope or an
+independently committed owned child: every owned child remains inside its root
+aggregate. A complete backup of one logical store scope is a consistent collection
+containing:
 
 - one valid checkpoint for every created root identity, with either a retained
   aggregate or root tombstone in its `root_record`;
@@ -4022,25 +4041,75 @@ deployment backup is a consistent collection containing:
 - a manifest that identifies the exact member bytes and the consistency point chosen
   by the host.
 
-The checkpoint schema does not define that cluster manifest or require a global
-transaction across unrelated roots. A cluster backup is valid only if the storage and
+The checkpoint schema does not define that scope manifest or require a global
+transaction across unrelated roots. A scope backup is valid only if the storage and
 broker-specific procedure supplies an application-appropriate consistency point and
 does not omit committed checkpoints/tombstones, operation receipts, pending deliveries,
 pending/terminal/tombstoned outbox records, retention history, application response
 data needed by its API, or referenced trusted artifacts. A restore that omits any
-created root's checkpoint/tombstone is nonconforming in either retention mode. A
-restored deployment may claim permanent replay only when the collection is complete
-and every checkpoint remains permanently eligible. Restoring one checkpoint requires
-no other root checkpoint, but application-level cross-root invariants may require
-coordinated backup and restore.
+created root's checkpoint/tombstone from the selected source scope is nonconforming in
+either retention mode. A restored logical store may claim permanent replay only when
+that scope's collection is complete and every checkpoint remains permanently eligible.
+Restoring one checkpoint requires no other root checkpoint, but application-level
+cross-root invariants may require coordinated backup and restore.
 
-A backup MAY contain members from multiple logical store scopes, but its host-level
-manifest MUST preserve each member's immutable scope association and restore MUST keep
-those scopes isolated. Collapsing mutually untrusted scopes, or restoring a member when
-its scope association cannot be established, is nonconforming. An explicitly
-authorized administrative restore into a replacement owner/deployment trust domain MAY
-rebind that external association, but it does not rewrite portable checkpoint bytes or
-combine source scopes.
+Every operation against a live `ExecutionStore` selects and authorizes exactly one
+logical store scope under §17.1. A per-scope export reads one selected source scope. A
+per-scope import writes one selected destination scope and consumes one subarchive whose
+source-scope association was independently authorized for export and is verified for
+import. A multi-scope archive is only a host-level collection of those independently
+authorized per-scope operations. Its outer manifest MUST preserve each subarchive's
+opaque source-scope association and exact byte identity. Selecting or authorizing one
+scope MUST NOT authorize, read, export, import, or rebind another scope.
+
+A per-scope export either produces one complete subarchive for its declared consistency
+point or fails without producing a successful result; it does not mutate the source.
+If a multi-scope export partly fails, completed subarchives MAY be retained, but the
+outer result and manifest MUST identify every succeeded, failed, and unattempted scope
+and MUST NOT claim that the collection is complete. This specification provides no
+cross-scope export snapshot or atomicity guarantee.
+
+Each per-scope import is one independently authorized, all-or-nothing destination-scope
+operation. Before examining destination content, the host checks a durable host-level
+import receipt. That receipt binds one host import operation identity to the destination
+scope, source-scope association, exact scope-manifest and subarchive byte identities,
+and committed result. If a receipt with that operation identity exists and every bound
+value is equal, the host returns the original result without mutation. If any bound
+value differs, it fails closed without mutation. If no receipt exists, the import
+continues below and commits its receipt atomically with its first successful import.
+
+A destination is empty for import only when it contains no checkpoint, root identity
+marker or tombstone, creation/operation/delivery receipt, pending delivery,
+pending/terminal/tombstoned effect evidence, or prior import receipt. An import into a
+new or empty destination scope MUST keep the scope unpublished or exclusively locked
+from its emptiness check through atomic commit. An import into an existing destination
+scope MUST perform a scope-wide preflight and commit under one serializable transaction
+or observably equivalent exclusive guard.
+
+The preflight compares every imported root, creation, operation, event, and effect
+identity and every checkpoint, root/effect tombstone, and operation/delivery receipt
+against all corresponding retained destination evidence. It uses each identity's
+existing normative root/context comparison domain and does not make equal raw strings
+globally conflicting where this specification already permits them in different roots
+or contexts. Because no matching import receipt exists on this path, any destination
+overlap is an ambiguous retry and MUST fail even when the overlapping portable bytes
+are equal. Any actual identity collision, inconsistent retained evidence, or concurrent
+change likewise fails closed with no destination mutation. A store that cannot provide
+this atomic boundary MUST NOT import into that destination. These rules preserve
+imported root tombstones and receipts as no-reuse evidence; an exact retry never
+recreates or reserves an identity again. Any per-scope import failure before commit
+leaves the destination scope byte-for-byte unchanged; a lost response after commit is
+resolved only by the durable import receipt.
+
+An explicitly authorized administrative rebind imports one complete source-scope
+subarchive into one replacement destination trust domain under the rules above. It
+changes only the external scope association and MUST NOT rewrite portable checkpoint
+bytes or combine source scopes. For a multi-scope import, each per-scope commit remains
+atomic but the collection is not: if a later scope fails, earlier committed scopes
+remain committed and failed or unattempted scopes remain unchanged. The outer result
+MUST report each status and MUST NOT claim global atomicity or completeness. Retrying a
+scope follows only the exact-retry rule above; this specification defines no
+cross-scope rollback.
 
 ### 17.14 Future timer durability
 
