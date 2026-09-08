@@ -3059,6 +3059,45 @@ memory. A host MAY embed this contract directly in an application process; no da
 socket, broker, database server, background thread, or subprocess plugin protocol is
 required.
 
+Every `ExecutionStore` is one logical store scope. The host assigns it one opaque scope
+identity and binds it to exactly one owning party or deployment trust domain. Mutually
+untrusted parties or deployment trust domains MUST NOT share a logical store scope.
+Multiple authenticated users or service principals MAY operate within one such trust
+domain; principal authentication, authorization, approvals, and audit remain host
+policy and do not require a separate store per principal.
+
+Within the execution-checkpoint profile, root, creation, operation, event, and effect
+identities; checkpoint revisions and digests; receipts and tombstones; and replay,
+conflict, no-reuse, and deduplication guarantees are unique or evaluated only within
+the selected logical store scope. Equal portable identities and bytes MAY coexist in
+independent scopes. A portable identity or digest is not globally unique and is not
+evidence that an artifact belongs to a host scope.
+
+A physical backend MAY contain multiple logical store scopes only when a mandatory
+external isolation key participates in every lookup, mutation, uniqueness constraint,
+transaction or compare-and-swap guard, lock, replay check, receipt, tombstone, and
+outbox operation. Before any such operation, the host MUST select and authorize exactly
+one scope. Missing, ambiguous, mismatched, or unauthorized selection MUST fail closed
+without a core call, checkpoint mutation, outbox delivery, broker acknowledgement,
+fallback, probing, or access to another scope.
+
+The scope identity, ownership binding, principal policy, and physical isolation key are
+host metadata outside portable Determa State bytes and semantics. They MUST NOT be added
+to a machine document, aggregate state, migration descriptor, aggregate-state package,
+execution checkpoint, event, effect intent, or portable digest input. Machine
+namespaces and portable identities do not select or authorize a scope. The portable
+engine, bundle, checkpoint, and hash bytes remain tenant-agnostic; credentials,
+endpoints, tenant identifiers, and SaaS policy fields remain host configuration.
+
+The schemas remain unchanged because scope selection is deliberately external host
+metadata. The execution-checkpoint conformance profile MUST add host-adapter cases
+proving that equal portable identities coexist independently in two logical scopes;
+that equal portable `effect_id` values route, retry, reconcile, and deduplicate
+independently in those scopes; and that missing, ambiguous, mismatched, or unauthorized
+scope selection makes no core `create`, `dispatch`, or migration call, leaves checkpoint
+bytes unchanged, and performs no outbox mutation, delivery, or broker acknowledgement.
+Those artifacts are follow-up work and are not added here.
+
 The checkpoint artifact is strict UTF-8 JSON and obeys the parsing and closed-schema
 rules of §16.1. Unknown formats and versions fail respectively with
 `unsupported_execution_checkpoint_format` and
@@ -3795,8 +3834,9 @@ when the collection is complete.
 
 A durable host processes one presented delivery in this exact order:
 
-1. Resolve, verify, authorize, and locally cache all required definitions, migration
-   descriptors, route metadata, adapter configuration, and capability declarations.
+1. Select and authorize exactly one §17.1 logical store scope, then resolve, verify,
+   authorize, and locally cache all required definitions, migration descriptors, route
+   metadata, adapter configuration, and capability declarations.
 2. Begin one transaction with exclusive ownership of the root checkpoint, or an
    observably equivalent compare-and-swap guard over its exact revision and digest.
 3. Read and validate the checkpoint, pending identity, and retained operation receipts.
@@ -3931,7 +3971,8 @@ not infer it from the storage scheme.
 ### 17.12 Exact guarantee boundary
 
 For every identity still covered by the checkpoint's replay-retention guarantee, the
-checkpoint contract provides exactly-once **committed processing**:
+checkpoint contract provides exactly-once **committed processing** within one selected
+§17.1 logical store scope:
 
 - at most one aggregate replacement is committed for that identity;
 - every retry with equal content returns the first durable host receipt;
@@ -3945,6 +3986,11 @@ acknowledgement. External effects are at least once and require destination
 idempotency for effectively-once behavior. Hosts MUST state their selected durability,
 retention, queue-ordering, broker, and external-idempotency profiles without attributing
 stronger guarantees to the pure core.
+
+Every store operation and every outbox routing, retry, reconciliation, and idempotency
+record MUST retain the selected logical store scope. External effect idempotency MUST
+use the host-owned scope identity together with the portable `effect_id`; `effect_id`
+alone is not globally unique. This host metadata MUST NOT alter the portable intent.
 
 ### 17.13 Cluster checkpoint composition
 
@@ -3974,6 +4020,12 @@ restored deployment may claim permanent replay only when the collection is compl
 and every checkpoint remains permanently eligible. Restoring one checkpoint requires
 no other root checkpoint, but application-level cross-root invariants may require
 coordinated backup and restore.
+
+This section defines only checkpoint-collection completeness. Backup and restore
+operation protocols, cloning, transfer or rebinding, multi-scope archives, relocation,
+and fencing are not defined by this profile. Portable checkpoint bytes, identities, or
+digests MUST NOT authorize access to or movement across logical store scopes. A future
+host-profile contract is required before any such operation can claim conformance.
 
 ### 17.14 Future timer durability
 
