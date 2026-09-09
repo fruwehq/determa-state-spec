@@ -32,11 +32,11 @@ Open one PR **per repo** (one issue → one PR). Where prose and the suite disag
 
 ## Versioning
 
-This repository carries the synchronized version in `VERSION` (currently `0.1.0`) and a
+This repository carries the synchronized version in `VERSION` (currently `0.2.0`) and a
 matching line at the top of `SPEC.md`.
 
 > determa-state-spec, determa-state-conformance, and the implementations share one
-> synchronized SemVer version (currently pre-1.0 `0.0.x`). A release tags all repos
+> synchronized SemVer version (currently pre-1.0 `0.2.0`). A release tags all repos
 > `vX.Y.Z` in lockstep; an implementation declares "implements Determa State spec
 > vX.Y.Z" and pins the conformance suite at that tag.
 
