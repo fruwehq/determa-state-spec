@@ -1,0 +1,138 @@
+{
+  "aggregate_state_format": "determa.aggregate_state",
+  "aggregate_state_schema_version": 2,
+  "machine_format": 1,
+  "validated_bundle_fingerprint": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "namespace": "example.transaction_server",
+  "root_machine_id": "transaction_server",
+  "root_machine_version": "1",
+  "root_instance_id": "server-1",
+  "creation_id": "create-server-1",
+  "root_runtime_id": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "migration_sequence": "0",
+  "next_logical_step_sequence": "1",
+  "next_output_sequence": "0",
+  "next_acceptance_sequence": "2",
+  "next_queue_sequence": "4",
+  "runtimes": [
+    {
+      "runtime_id": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "identity_origin": {
+        "kind": "root",
+        "definition": {
+          "validated_bundle_fingerprint": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "machine": {
+            "namespace": "example.transaction_server",
+            "machine_id": "transaction_server",
+            "machine_version": "1",
+            "root_definition_pointer": "/machines/0/root"
+          }
+        },
+        "root_instance_id": "server-1"
+      },
+      "target_identity": {
+        "root": {
+          "root_instance_id": "server-1",
+          "root_runtime_id": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        }
+      },
+      "current_definition": {
+        "validated_bundle_fingerprint": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "machine": {
+          "namespace": "example.transaction_server",
+          "machine_id": "transaction_server",
+          "machine_version": "1",
+          "root_definition_pointer": "/machines/0/root"
+        }
+      },
+      "relation": {
+        "kind": "root"
+      },
+      "status": "running",
+      "active_leaf_state_definition_pointers": [
+        "/machines/0/root/states/busy/states/receiving"
+      ],
+      "active_state_activations": [
+        {
+          "state_definition_pointer": "/machines/0/root",
+          "activation_sequence": "0"
+        },
+        {
+          "state_definition_pointer": "/machines/0/root/states/busy",
+          "activation_sequence": "0"
+        },
+        {
+          "state_definition_pointer": "/machines/0/root/states/busy/states/receiving",
+          "activation_sequence": "0"
+        }
+      ],
+      "variables": [],
+      "history": [],
+      "next_spawn_sequence": "0",
+      "next_state_activation_sequences": [
+        {
+          "definition_pointer": "/machines/0/root",
+          "next_sequence": "1"
+        },
+        {
+          "definition_pointer": "/machines/0/root/states/busy",
+          "next_sequence": "1"
+        },
+        {
+          "definition_pointer": "/machines/0/root/states/busy/states/receiving",
+          "next_sequence": "1"
+        }
+      ],
+      "next_component_activation_sequences": [],
+      "ready_mailbox": [
+        {
+          "acceptance_sequence": "1",
+          "queue_sequence": "3",
+          "delivery_mode": "input",
+          "envelope": {
+            "event": "received",
+            "event_id": "received-1",
+            "cause_id": "received-1",
+            "source": { "host": true },
+            "target": {
+              "root": {
+                "root_instance_id": "server-1",
+                "root_runtime_id": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+              }
+            },
+            "payload": ["map", []]
+          },
+          "envelope_digest": "sha256:88389f14feed9b45c9bdb9f63f685e8e6fc2939e58f114f744e1980e202cd52c",
+          "deferral_count": "0"
+        }
+      ],
+      "deferred_mailbox": [
+        {
+          "acceptance_sequence": "0",
+          "queue_sequence": "2",
+          "delivery_mode": "input",
+          "envelope": {
+            "event": "new_request",
+            "event_id": "request-2",
+            "cause_id": "request-2",
+            "source": { "host": true },
+            "target": {
+              "root": {
+                "root_instance_id": "server-1",
+                "root_runtime_id": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+              }
+            },
+            "payload": [
+              "map",
+              [["transaction_id", ["string", "transaction-2"]]]
+            ]
+          },
+          "envelope_digest": "sha256:0955e768a9437c6bcfa9b8e7a5d17ab9a0a179ed68d1110df0068fdfec965e39",
+          "deferral_count": "1"
+        }
+      ],
+      "fault": null
+    }
+  ],
+  "aggregate_state_digest": "sha256:b6811bf1eff5f30864d18b396dfe24ac6920b902d0de2b0c84a6b927fb22aa98"
+}

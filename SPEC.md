@@ -30,20 +30,23 @@ Determa State defines portable, deterministic statechart behavior:
 4. typed state-scoped variables and pure CEL expressions;
 5. structured actions that update logical state or emit immutable intents;
 6. isolated reusable components and owned spawned runtimes; and
-7. deterministic identities, lifecycle, rollback, and fault results.
+7. deterministic identities, lifecycle, rollback, and fault results; and
+8. runtime-local ready and deferred mailboxes for lossless continuation.
 
 The core deliberately does **not** provide:
 
-- an event queue, delivery worker, scheduler, or background thread;
+- an external transport queue, delivery worker, scheduler, or background thread;
 - dead-letter storage or a dead-letter policy;
 - a clock, timer, delay, sleep, or time-event implementation;
 - transport, broker, retry, acknowledgement, or delivery guarantees;
 - a state store, transaction manager, credentials, or external I/O; or
 - plugin discovery, installation, configuration schemas, or package resolution.
 
-Those are host or plugin responsibilities (§11). The core receives one envelope,
-processes it atomically, and returns state plus ordered emissions. It never calls a
-queue, timer, broker, database, or remote service from a guard or action.
+Those are host or plugin responsibilities (§11). The core can admit an envelope to an
+isolated runtime mailbox or receive one envelope for immediate foreground processing,
+processes at most one targeted RTC step at a time, and returns state plus ordered
+emissions. It never calls an external queue, timer, broker, database, or remote service
+from a guard or action.
 
 This boundary permits an in-memory foreground host, a database-backed request/response
 host, a durable worker, or a distributed broker without changing statechart semantics.
@@ -482,6 +485,11 @@ Common state fields:
 - `variables` — state-scoped declarations.
 - `entry`, `exit` — ordered structured action lists.
 - `on_events` — event name to transition or ordered transition list.
+- `deferred_events` — optional non-empty unique list of declared events that this state
+  defers under §6.7 when no enabled handler exists in the active hierarchy.
+- `deferred_event_capacity` — optional non-negative signed-64-bit capacity for the
+  runtime-local deferred mailbox; valid only on a machine root or inline-component
+  root. Omission means logically unbounded.
 - `history` — `none`, `shallow`, or `deep`, valid only on composite states.
 - `meta` — opaque annotation.
 
@@ -496,8 +504,8 @@ identifies the machine root itself; every other path is the dot-separated sequen
 child-state identifiers below it, without a `root.` prefix. A child state therefore
 cannot be named `root`.
 
-Native time events (`after`), state-level deferral, orthogonal regions with implicit
-broadcast, submachine documents, and completion activities are not part of format 1.
+Native time events (`after`), orthogonal regions with implicit broadcast, submachine
+documents, and completion activities are not part of format 1.
 
 ### 4.7 Transitions
 
@@ -588,8 +596,9 @@ A send target is one of:
 both means `self`. One target produces one independent emission. There is no implicit
 broadcast.
 
-Internal sends do not recursively dispatch. They are returned to the host in emission
-order, and a queue plugin may later present them as new input envelopes.
+Internal sends do not recursively dispatch. Version-1 direct dispatch returns them to
+the host in emission order. Version-2 processing appends them to exact target runtime
+ready mailboxes in that same order as part of the producing RTC commit.
 
 An internal send to `self`, `owner`, `component`, or `instance` MUST name a bundle or
 machine-local `internal` event. A send to `external` MUST name a bundle `output` event
@@ -650,6 +659,10 @@ A bundle is rejected before any runtime is created when it has:
   edges. Event-handler spawns do not add an edge from the handler's machine, but every
   possible spawn target's own initialization graph must still be acyclic;
 - an invalid public/private event direction or correlation;
+- a `deferred_events` name that is undeclared, is an output event, or is one of the
+  reserved lifecycle/control events `done`, `determa.component_completed`,
+  `determa.component_failed`, or `determa.spawned_instance_failed`, or a
+  `deferred_event_capacity` outside a runtime root;
 - a send whose target, event direction, or correlation is inconsistent;
 - `local: true` without a target, with a non-composite source, or with a target that is
   not a strict descendant of its source;
@@ -866,11 +879,20 @@ This tagged union is the normalized immutable target. Author target shorthands f
 stores the complete member and never resolves it again. A component target therefore
 names one activation incarnation, not merely a reusable `component_id`.
 
-The caller owns the envelope. The core neither enqueues nor stores it. A processing
-call carries the explicit delivery mode from §8. Before starting a step, the core
-atomically validates that mode, event declaration, direction, payload, correlation,
-and target eligibility. Rejection returns the prior state unchanged and allocates no
-logical identity.
+A queue-bearing version-2 mailbox envelope additionally stores required `cause_id` and
+`source`. Host input uses `cause_id: event_id` and `source: { host: true }`. Internal
+emissions preserve their existing deterministic cause and use
+`source: { runtime: target_identity_of_emitter }`; system emissions use their exact
+`system:` source locator. These fields make the already defined logical provenance
+portable; they do not change version-1 envelope bytes.
+
+The caller owns an envelope until a foreground dispatch accepts it or a mailbox
+admission commits. Before either boundary, the core atomically validates the delivery
+mode, event declaration, direction, payload, correlation, exact target incarnation, and
+target eligibility. Rejection returns the prior state unchanged, allocates no logical
+identity, and leaves the envelope caller-owned. After acceptance the envelope exists in
+exactly one engine-owned lifecycle location: one runtime's ready mailbox, that same
+runtime's deferred mailbox, or a terminal/disposal receipt under §17.15.
 
 `input` mode MUST name a bundle `input` event and may supply only the `root` or
 `spawned_instance` target member for a running runtime. Direct use of the `component`
@@ -941,9 +963,12 @@ to a component remains invalid.
 
 ### 6.2 Run to completion
 
-One `dispatch` call processes at most one accepted envelope for one runtime. The step is
-non-reentrant and atomic. Emissions are accumulated but are invisible to every runtime
-until the step commits and the host submits them to a queue or external adapter.
+One `dispatch` or mailbox `step` call processes at most one accepted envelope for one
+explicitly addressed runtime. The step is non-reentrant and atomic. Internal emissions
+append to exact target runtime ready mailboxes only if the operation uses queue-bearing
+aggregate-state version 2; direct aggregate-state version 1 dispatch continues to
+return them to its caller. External emissions remain output intents. No operation
+chooses another runtime, drains an aggregate, or introduces a round-robin scheduler.
 
 Other runtimes may be processed concurrently only when the host's persistence layout
 provides serializable ownership of any aggregate state they might share. Two calls MUST
@@ -952,12 +977,15 @@ NOT concurrently mutate the same root ownership aggregate.
 ### 6.3 Hierarchical dispatch
 
 The envelope is offered to the deepest active state. If no enabled handler is selected,
-it is offered to that state's parent, recursively.
+it is offered to that state's parent, recursively. This complete deepest-to-root search
+finishes before deferral is considered.
 
 - A false guard does not consume the envelope; ancestor search continues.
 - A guard evaluation error faults the step.
 - The first true branch in an ordered list wins.
-- If no state handles the envelope, the result disposition is `unhandled`.
+- If no state handles the envelope and any state in that addressed runtime's active
+  hierarchy declares the event in `deferred_events`, the disposition is `deferred`.
+- If no state handles or defers the envelope, the disposition is `unhandled`.
 
 The only exception is an unhandled `determa.component_failed` or
 `determa.spawned_instance_failed` envelope, which faults the owner as specified in
@@ -970,10 +998,26 @@ UML model MUST NOT assume guard-order independence. An unguarded default, when p
 MUST be last, which keeps the priority unambiguous. Without a default, all-false guards
 continue ancestor search.
 
-An unhandled result is not a core fault. The core stores nothing and changes no logical
-state. The queue plugin decides whether to acknowledge, discard, retry, log, or retain
-the envelope. High-volume irrelevant input, such as pointer movement, can therefore be
-discarded without accumulating core state.
+The closed precedence table is:
+
+| deepest-to-root search result | active deferral declaration | result |
+|---|---|---|
+| first unguarded or true-guard handler | absent or present on same state, descendant, or ancestor | `handled`; the handler wins |
+| every reachable handler guard is false | present anywhere in the active hierarchy | `deferred` |
+| no handler declaration | present anywhere in the active hierarchy | `deferred` |
+| no enabled handler | absent | `unhandled` |
+| any evaluated guard faults | either | atomic engine fault; deferral is not consulted |
+
+Thus a child handler overrides an ancestor deferral and an ancestor handler overrides a
+child deferral. An all-false ordered handler permits deferral only after ancestor search
+also completes. The rule considers only the addressed runtime's ordinary state
+hierarchy; components and owned spawned runtimes have isolated configurations and
+mailboxes. Explicit fan-out creates independent envelopes that are classified
+independently.
+
+An unhandled result is not a core fault. The accepted envelope is consumed and is not
+retained in logical state. A host may separately audit or dead-letter that terminal
+disposition, but no transport plugin may reinterpret it as machine deferral.
 
 ### 6.4 Transition execution order
 
@@ -1140,6 +1184,52 @@ Any cleanup or exit fault rolls the enclosing RTC back and uses the normal
 fault-finalization rules. Thus retry starts from the same pre-step state, and no skipped
 initialization or emission leaks from the failed attempt.
 
+### 6.7 Deferred mailboxes and automatic recall
+
+Each runtime has one FIFO ready mailbox and one FIFO deferred mailbox. They are isolated
+from every other runtime even when the runtimes share one ownership aggregate. A
+`deferred` result atomically removes the selected ready entry, increments its
+`deferral_count`, allocates a new `queue_sequence`, and appends it to that runtime's
+deferred tail. The immutable `acceptance_sequence` and the complete normalized envelope,
+including `event_id`, `cause_id`, source, exact target incarnation, payload, and optional
+`correlation_id`, do not change. Deferral never creates an emission or a second event.
+
+After every successful RTC step has completed all transition actions, choice resolution,
+exit/entry behavior, initial descent, completion behavior, and lifecycle cleanup, the
+engine performs one automatic recall phase against the resulting stable configuration.
+It scans that runtime's deferred mailbox in existing `queue_sequence` order. For each
+entry it applies the §6.3 handler/deferral classification without executing actions. An
+entry whose classification is still `deferred` remains in place. Every other entry is
+removed, assigned a fresh `queue_sequence`, and appended to the ready tail in the same
+relative order. Existing ready entries and entries emitted by the just-completed RTC
+remain ahead of recalled entries. Recall does not dispatch recursively and consumes no
+logical-step sequence.
+
+Guard evaluation during recall uses the same pure CEL values and ordered search as
+ordinary classification. A guard fault makes the enclosing RTC step fault and rolls
+back both that step and its recall phase. When a recalled entry later reaches the ready
+head, classification is performed again because earlier ready work may have changed the
+configuration; it may therefore be handled, become unhandled, fault, or be deferred
+again. This repeated movement preserves envelope and acceptance identity while each
+queue placement receives a new scheduling identity.
+
+`deferred_event_capacity` limits the number of entries in that runtime's deferred
+mailbox after the attempted append. Omission is logically unbounded; `0` forbids every
+deferral. An overflow rolls back the attempted RTC/classification, consumes the causal
+entry into a terminal `faulted` receipt with code `deferred_event_capacity_exceeded`,
+and applies the normal root or contained-runtime fault rule. The event is never dropped,
+left at the ready head for an infinite retry, or delegated to a plugin overflow policy.
+
+Deferred events do not expire. A successful runtime cancellation, natural completion,
+or aggregate completion disposes every remaining ready and deferred entry in canonical
+queue order and creates one terminal `disposed` receipt per entry with respectively
+`runtime_cancelled`, `runtime_completed`, or `aggregate_completed`. Those receipts are
+part of the same atomic lifecycle commit. A cleanup fault rolls back all disposal
+records and mailbox removal; fault-frozen diagnostic runtimes retain their mailboxes
+unchanged until a later successful owner cancellation disposes them. Reserved completion
+and contained-failure events cannot be declared deferred, so machine behavior cannot
+hold them indefinitely.
+
 ## 7. Components, spawning, and lifecycle
 
 Every lifecycle cascade uses one recursive postorder algorithm:
@@ -1227,9 +1317,10 @@ inspection, or the input to a later call. Stable committed root statuses are exa
 The triggering event is unavailable to entry actions and `with`. A transition action
 must first copy required payload into an owner variable.
 
-Components have isolated configurations and variables. They do not share an event queue
-because queues are outside core. An event reaches a component only through an explicit
-emission targeting its nominal component runtime identity.
+Components have isolated configurations, variables, and ready/deferred mailboxes. An
+event reaches a component only through an explicit emission targeting its nominal
+component runtime identity. No parent, sibling, or owned child participates in its
+deferral decision.
 
 The `{component: component_id}` syntax resolves at emission time to the allocated
 pending-initialization or running placement identity, including its activation
@@ -1265,8 +1356,10 @@ parallel branch of the fixed reserved `done` payload from §4.4:
 }
 ```
 
-Delivery and ordering relative to unrelated envelopes are queue-plugin behavior.
-Within the committed core result, `determa.component_completed` precedes `done`.
+Under aggregate-state version 2, both notifications append to the owner ready mailbox in
+the committed emission order, after work already there; under version 1 direct dispatch
+they remain returned emissions. In either representation,
+`determa.component_completed` precedes `done`.
 
 For `determa.component_completed`, source is the component runtime and target is its
 owner runtime. For the all-components-complete `done`, source and target are both the
@@ -1323,8 +1416,9 @@ no cleanup. A cleanup failure rolls the owner RTC step back and finalizes
 ordinary transition; a state-scoped holder ties its child to that state's lifetime.
 
 Ownership is not otherwise tied to the transition that spawned the child. An unbound
-child or a child whose holding reference remains in scope is processed only when a
-queue plugin later presents an envelope targeting it.
+child or a child whose holding reference remains in scope is processed only when an
+explicit envelope targets it and the host invokes direct dispatch or a mailbox `step`
+for that exact runtime.
 
 After its expression type-checks as `instance_reference`, `cancel` is always
 well-formed. If the expression currently addresses a running or retained-faulted
@@ -1409,6 +1503,12 @@ create(bundle, machine_id, root_instance_id, creation_id, bindings)
 dispatch(bundle, prior_state, delivery?)
   -> { status, disposition, state, emissions, fault, rejection }
 
+admit(bundle, prior_state_v2, ordered_deliveries)
+  -> { status, accepted, state, rejection }
+
+step(bundle, prior_state_v2, target_runtime_id)
+  -> { status, disposition, state, emissions, fault, rejection }
+
 delivery =
   { input: envelope }
   | { internal: envelope }
@@ -1419,12 +1519,22 @@ The two delivery members are a closed tagged union. `input` applies the public-i
 rules in §6.1; `internal` applies the internal-delivery rules. A non-null delivery has
 exactly one member. Null is the read-only inspection call.
 
+`admit` validates its complete ordered batch before mutation, then appends each envelope
+to its exact target runtime's ready tail in caller order. It allocates immutable
+aggregate-wide `acceptance_sequence` and mutable `queue_sequence` values independently.
+If any member is invalid, the entire batch is rejected byte-for-byte. `step` names one
+exact running runtime and processes only its ready head; an empty ready mailbox returns
+`not_runnable` without mutation. Neither operation selects or advances another runtime.
+
 `status` is `running`, `completed`, or `faulted` for an existing aggregate. A creation
 rejected before an aggregate exists returns `status: rejected` and `state: null`.
 Dispatch rejection or an unhandled envelope preserves the prior aggregate status.
 
-Every named result field is present. `emissions` is the ordered list returned by this
-call. `rejection` is null except on pre-step rejection, where it is exactly
+Every named result field is present. For version-1 direct dispatch, `emissions` is the
+ordered immutable emission list returned by the call. For version-2 operations it
+contains full external intents and internal-mailbox references only; an internal
+envelope's deliverable copy exists solely in its target mailbox. `rejection` is null
+except on pre-step rejection, where it is exactly
 `{ code: rejection_code }`. `fault` is:
 
 - the aggregate root's committed fault record when the aggregate root is faulted;
@@ -1445,7 +1555,9 @@ these calls and use §2/§5 codes. A rejection commits no fault record.
 `disposition` is exactly:
 
 - `handled` — the accepted envelope completed a successful RTC step;
-- `unhandled` — no enabled handler existed;
+- `deferred` — no enabled handler existed and the active hierarchy deferred the event;
+- `unhandled` — no enabled handler or active deferral declaration existed;
+- `not_runnable` — a mailbox `step` named a running runtime with an empty ready mailbox;
 - `rejected` — validation failed before an RTC step; or
 - `faulted` — an engine fault occurred during the RTC step.
 
@@ -1463,10 +1575,15 @@ The root ownership aggregate contains:
   status, and fault records;
 - ownership and `bind_to` lifetime-holder associations, plus placement, activation,
   state-entry, spawn, logical-step, and output identity counters; and
+- for the queue-bearing abstract aggregate, every runtime's isolated ready and deferred
+  mailboxes plus aggregate acceptance and queue-placement counters; and
 - the `validated_bundle_fingerprint` defined below.
 
-It contains no event queue, deferred queue, dead-letter collection, timer, broker
-acknowledgement, transport receipt, or plugin configuration.
+It contains no external broker backlog, dead-letter collection, timer, broker
+acknowledgement token, credential, transport receipt, or plugin configuration.
+Aggregate-state schema version 1 can encode only an abstract aggregate whose runtime
+mailboxes are empty; schema version 2 is required whenever accepted work is ready or
+deferred. This restriction does not reinterpret any version-1 byte.
 
 Before creation, the engine creates one normalized bundle tree. Default
 materialization is closed and context-sensitive:
@@ -1899,9 +2016,13 @@ record; if its delivery later faults the owner, the owner receives a separate re
 record with the system locator above. Rejected pre-step envelopes and rejected creation
 have no committed fault record and therefore no `source_locator`.
 
-The core does not remove, acknowledge, retry, retain, or dead-letter the input envelope.
-The caller still owns the exact envelope and receives `disposition: faulted`. Its queue
-plugin decides what to do with it.
+For direct version-1 dispatch, the caller still owns a faulting envelope and receives
+`disposition: faulted`, preserving the established version-1 boundary. For a previously
+accepted version-2 mailbox entry, fault finalization removes that entry and creates its
+terminal `faulted` receipt in the same commit. Other ready/deferred entries remain in
+their exact locations; a root fault freezes them, while a contained fault freezes only
+that runtime subtree as §6.7 defines. A transport plugin cannot retry or discard an
+engine-owned mailbox entry independently.
 
 ### 10.2 Contained runtime faults
 
@@ -1993,7 +2114,7 @@ unless their own handling violates the engine contract.
 The specification defines no `dead_letter`, `dead_letters`, or `dead_letter_policy`
 field and no dead-letter storage shape.
 
-A queue plugin may:
+A transport or audit plugin may:
 
 - discard unhandled or faulting envelopes without retaining anything;
 - retain complete envelopes and fault metadata;
@@ -2002,9 +2123,10 @@ A queue plugin may:
 - forward to a broker-native dead-letter facility; or
 - expose any other explicitly configured policy.
 
-Its property names, configuration schema, capacity, retention, privacy, and operational
-guarantees belong entirely to that plugin. Machine definitions cannot inspect or depend
-on them.
+Its property names, configuration schema, retention, privacy, and operational guarantees
+belong entirely to that plugin. These policies apply only after terminal machine
+disposition or before Determa acceptance; they cannot replace, reorder, expire, or cap a
+runtime's normative ready/deferred mailboxes.
 
 ## 11. Plugins and hosting
 
@@ -2012,12 +2134,12 @@ This section defines the core boundary. The optional portable execution-checkpoi
 hosting contract, adapter registration behavior, and durability capabilities are
 defined in §17. Neither section defines a cross-language plugin ABI.
 
-### 11.1 Queue plugins
+### 11.1 Transport queue plugins
 
-A queue plugin is given ordered emissions after any committed core result and later
-presents envelopes to `dispatch`. The core does not standardize a concrete plugin API,
-but the host must preserve each presented envelope's immutable value and identity for
-the duration of its RTC step.
+A transport queue plugin owns external backlog until a host commits admission into a
+Determa aggregate. It may later receive external output intents. The core does not
+standardize a concrete plugin API, but acceptance must preserve each envelope's
+immutable value and identity and transfer ownership exactly once.
 
 Plugins may differ in:
 
@@ -2025,17 +2147,14 @@ Plugins may differ in:
 - in-memory or durable storage;
 - delivery attempts and acknowledgements;
 - duplicate delivery and deduplication;
-- retry, delay, deferral, and dead-letter behavior;
+- retry, delay, and dead-letter behavior outside the accepted machine mailbox;
 - transactional integration with aggregate persistence; and
 - capacity, overflow, backpressure, and availability.
 
-Core determinism means that the same valid prior state and same envelope produce the
-same result. It does not mean that different queue plugins produce the same delivery
-trace.
-
-A bundle whose correctness depends on deferral is not self-contained or portable in
-format 1. Its behavior depends on host/plugin configuration outside the document, so
-core conformance cannot guarantee equivalent behavior across hosts.
+Core determinism means that the same valid prior state and same accepted sequence
+produce the same mailbox state and result. Different transport plugins may produce
+different admission traces, but after acceptance they cannot alter §6.7 deferral,
+recall, ordering, capacity, or disposition semantics.
 
 ### 11.2 Timer extensions
 
@@ -2090,8 +2209,9 @@ Implementations SHOULD expose read-only inspection of:
 - history; and
 - deterministic emissions returned by the last call.
 
-Queue contents, delivery attempts, dead letters, scheduled jobs, and broker
-acknowledgements are inspected through their owning plugins, not the core engine.
+Runtime-local ready/deferred mailbox contents and their portable ordering identities are
+core state and SHOULD be inspectable. External broker backlog, delivery attempts, dead
+letters, scheduled jobs, and broker acknowledgements remain plugin-owned.
 
 Enabled-event inspection is deliberately undefined in format 1. A configuration alone
 can reveal only structurally present handlers: whether a guarded handler is enabled is
@@ -2131,7 +2251,7 @@ is a completeness boundary, not a compatibility promise for earlier drafts.
 | actions and publication | retained as structured actions; publication is explicit `send` |
 | shared contracts | represented by bundle public event declarations; separate named contracts are unsupported |
 | timers | external scheduling/event extensions only |
-| deferral and dead letters | queue-plugin policy only; no portable machine fields or core storage |
+| deferral and dead letters | UML-style runtime-local deferral is portable; dead-letter storage remains host policy |
 | owned spawning | retained for same-bundle machines with nominal `instance_reference` values |
 | submachines and package imports | unsupported |
 | definition migration/hot-swap | explicit portable aggregate migration under §16; never implicit in ordinary dispatch |
@@ -2142,7 +2262,7 @@ is a completeness boundary, not a compatibility promise for earlier drafts.
 The pre-release format deliberately omits:
 
 - native timers, clocks, `after`, sleeps, and time-triggered transitions;
-- native queues, retries, acknowledgement, deferral, or dead letters;
+- external transport queues, retries, acknowledgement, or dead-letter storage;
 - orthogonal regions with implicit event broadcast;
 - shared mutable variables or shared queue state across runtimes;
 - direct host-to-component delivery;
@@ -2182,6 +2302,10 @@ be one behavior per fixture and include:
 - one-snapshot send-expression evaluation and deterministic payload/correlation/target
   fault precedence;
 - leaf-to-ancestor dispatch and false-guard fallback;
+- same-state and ancestor/descendant handler-versus-deferral precedence, including
+  true, false, all-false, and faulting guards;
+- repeated deferral, selective FIFO recall after stable RTC, reclassification at the
+  ready head, capacity overflow, and exact envelope-identity preservation;
 - internal, self, local, and external descendant-reset transition traces;
 - proper-ancestor transition bounds and the absence of external ancestor re-entry;
 - schema rejection of non-canonical internal/local transition shapes;
@@ -2220,8 +2344,9 @@ be one behavior per fixture and include:
 - full RTC rollback and contained-runtime failure propagation;
 - exact document/system fault locators;
 - completed runtime empty configuration/variables and retained terminal diagnostics;
-- queue-independent behavior for a fixed delivery trace; and
-- explicit absence of timer, queue, and dead-letter fields from core state.
+- runtime-local mailbox isolation across root, component, and spawned targets; and
+- explicit absence of timers, external transport queues, and dead-letter fields from
+  core state.
 
 Persistence and migration conformance additionally requires:
 
@@ -2248,6 +2373,8 @@ Persistence and migration conformance additionally requires:
 - exact pinned multi-hop routes, adjacency checks, and cycle/alternate-route rejection;
 - immutable runtime, target, nominal-reference, activation, spawn, logical-step, and
   output identities across migration;
+- queue-bearing aggregate/checkpoint version-2 round trips, version-1 immutability,
+  event acceptance/terminal receipt separation, and ready/deferred migration totality;
 - retry-identical success or failure, complete rollback, and no counter consumption;
 - migration followed by handled, unhandled, rejected, and faulted dispatch in one
   host transaction;
@@ -2337,6 +2464,11 @@ closed JSON artifacts:
 | transport package | `aggregate_state_package_format: "determa.aggregate_state_package"` | `aggregate_state_package_schema_version: 1` |
 | execution checkpoint | `execution_checkpoint_format: "determa.execution_checkpoint"` | `execution_checkpoint_schema_version: 1` |
 
+Queue-bearing continuation adds aggregate-state, migration-descriptor,
+aggregate-state-package, and execution-checkpoint schema version `2` under the same
+respective format discriminators. Version 1 of every artifact above remains immutable;
+version 2 is selected explicitly and is never inferred from fields.
+
 These wire schema versions, machine format, repository/package SemVer, launcher
 SemVer, and author-controlled machine `version` are independent version domains.
 Unknown artifact formats or schema versions are rejected before semantic validation;
@@ -2371,6 +2503,11 @@ The exact structural schemas are:
 - `schema/migration-descriptor.schema.json`; and
 - `schema/aggregate-state-package.schema.json`; and
 - `schema/execution-checkpoint.schema.json`.
+
+The corresponding version-2 schemas are `schema/aggregate-state-v2.schema.json`,
+`schema/migration-descriptor-v2.schema.json`,
+`schema/aggregate-state-package-v2.schema.json`, and
+`schema/execution-checkpoint-v2.schema.json`.
 
 Structural validity is necessary but not sufficient. The semantic invariants in this
 section are mandatory even where JSON Schema cannot express ordering, cross-reference,
@@ -3040,15 +3177,87 @@ external delivery, package import, or bulk row rewrite. A later runnable databas
 example belongs in the separate examples repository after conformance and both engines
 implement this contract.
 
+### 16.15 Queue-bearing artifact version 2
+
+Aggregate-state schema version 2 preserves every version-1 field and adds exactly
+aggregate `next_acceptance_sequence` and `next_queue_sequence`, plus each runtime's
+`ready_mailbox` and `deferred_mailbox`. Each mailbox entry contains immutable
+`acceptance_sequence`, current `queue_sequence`, delivery mode, complete normalized
+envelope, envelope digest, and `deferral_count`. Entries in each mailbox are strictly
+increasing by mathematical `queue_sequence`; acceptance sequences and event ids are
+unique across all runtime mailboxes. Both next counters exceed every allocated value and
+are never reduced or reused. One entry occurs in exactly one mailbox.
+
+Each mailbox entry's envelope digest is:
+
+```text
+envelope_digest = hash([
+  "determa-inbox-envelope-digest-2",
+  "2",
+  root_instance_id,
+  delivery_mode,
+  envelope
+])
+```
+
+The digest is also the acceptance receipt's `request_digest` and the eventual terminal
+event receipt's `request_digest`.
+
+Version-2 aggregate serialization uses the §16.2 canonical rules and:
+
+```text
+aggregate_state_digest = hash([
+  "determa-aggregate-state-digest-2",
+  envelope_without_aggregate_state_digest
+])
+```
+
+The complete logical checkpoint is the configuration, variables, identities,
+ready/deferred entries, counters, receipts, and participating output state. A host may
+store those records in one document or physically separate tables/objects, but one read
+must reconstruct one schema-valid revision and one commit must replace it atomically or
+with observably equivalent serializable compare-and-swap behavior. An enum or relational
+projection that cannot preserve or exactly reconstruct every required member MUST reject
+before any application row, mailbox, receipt, or outbox mutation; it never drops an
+unrepresented field. Ephemeral in-memory ownership is conforming when no durability is
+claimed.
+
+Aggregate-state version 1 decodes exactly as before and has no mailboxes. Explicit
+upgrade `1 -> 2` is permitted only by copying every version-1 logical field, inserting
+zero next acceptance/queue counters and empty mailboxes, setting schema version 2, and
+recomputing the version-2 digest. Downgrade `2 -> 1` is permitted only when both counters
+are zero and every mailbox is empty; otherwise it fails `migration_totality_failure`.
+No decoder performs either conversion implicitly.
+
+Migration-descriptor schema version 2 contains one complete version-1 base descriptor
+plus a total `queued_event_rules` array. For every distinct event name present in any
+source ready/deferred mailbox there MUST be exactly one rule. `preserve` keeps the exact
+envelope, acceptance identity, current queue identity, location, and deferral count and
+is valid only when the mapped target incarnation still exists and the target definition
+accepts the exact event direction, correlation contract, and normalized payload without
+coercion. `dispose` removes every matching entry and creates a terminal `disposed`
+receipt carrying the required non-empty operator reason. A missing, duplicate, or
+inapplicable rule, removed/replaced target, incompatible payload contract, or unaccounted
+entry is `migration_totality_failure`; the source remains byte-for-byte unchanged.
+
+After every successful descriptor, preserved deferred entries are reclassified against
+the mapped stable configuration. Entries still deferred remain in relative order;
+newly eligible entries move to the ready tail in prior deferred order with fresh queue
+sequences. Changing only a deferral declaration is therefore explicit and deterministic,
+not silent event loss. Migration executes no handler action and emits no event.
+Package schema version 2 carries exactly one aggregate-state version-2 envelope and only
+version-2 migration descriptors. Version mixing inside one package is invalid.
+
 ## 17. Portable execution checkpoints and hosting adapters
 
 ### 17.1 Scope and compatibility
 
-The optional execution-checkpoint hosting contract wraps, but does not alter, the pure
-§8 `create` and `dispatch` operations. The core still processes one explicitly supplied
-delivery, owns no queue or database, performs no I/O, and returns the same aggregate
-state and ordered emissions. Aggregate-state schema version 1 remains immutable and
-continues to exclude queues, inboxes, outboxes, timers, and plugin configuration.
+Sections 17.2 through 17.14 define execution-checkpoint schema version 1, which wraps but
+does not alter the original pure §8 `create` and `dispatch` operations. Under that
+immutable version the core processes one explicitly supplied delivery, owns no queue or
+database, and aggregate-state version 1 excludes queues, inboxes, outboxes, timers, and
+plugin configuration. Section 17.15 separately defines queue-bearing checkpoint schema
+version 2; no version-1 field or byte receives a new meaning.
 
 An execution checkpoint is the portable durable-host state for exactly one root
 ownership aggregate transaction boundary. It combines the current aggregate-state
@@ -4040,3 +4249,105 @@ recovery boundary is stated explicitly.
 Adding non-empty timer state to this artifact requires a later checkpoint schema
 version or a separately identified durable timer artifact. It does not silently add a
 field to schema version 1 and does not change aggregate-state schema version 1.
+
+### 17.15 Queue-bearing checkpoint version 2
+
+Execution-checkpoint schema version 2 is the single durable continuation boundary for
+an aggregate-state version-2 envelope. Its closed schema is
+`schema/execution-checkpoint-v2.schema.json`. It preserves version-1 root, replay,
+outbox, audit, and revision concepts, but removes `next_delivery_sequence` and
+`pending_deliveries`: accepted envelopes already exist exactly once in the embedded
+aggregate's runtime-local mailboxes. Reconstructing a second host-pending copy is
+`invalid_execution_checkpoint`.
+
+The version-2 digest is:
+
+```text
+execution_checkpoint_digest = hash([
+  "determa-execution-checkpoint-digest-2",
+  checkpoint_without_execution_checkpoint_digest
+])
+```
+
+Admission is one atomic checkpoint mutation:
+
+1. select and authorize the logical store scope and lock/read one checkpoint revision;
+2. reject malformed, wrong-root, wrong-mode, duplicate-conflicting, terminal-target, or
+   otherwise invalid input without changing bytes or acknowledging external delivery;
+3. normalize the complete ordered batch, including exact source, cause, target, payload,
+   correlation, and envelope digest;
+4. allocate one immutable `acceptance_sequence` and initial `queue_sequence` per entry
+   in caller order and append each to its exact target runtime ready tail;
+5. append one `acceptance` receipt for each host-supplied event, increment checkpoint
+   revision once, recompute both digests, and commit; and
+6. only after commit may a broker adapter acknowledge transfer of ownership.
+
+The acceptance receipt is durable proof of admission, not proof of processing. It names
+`event_id`, request digest, acceptance sequence, accepted revision, and delivery mode.
+Equal replay while the event is ready or deferred returns that original receipt without
+mutation. Conflicting content returns `event_id_conflict`. Internal emissions append
+directly to target ready mailboxes in their producing RTC commit and are referenced by
+the producing receipt with exact acceptance and queue sequences; they never pass through
+a second `pending_deliveries` collection.
+
+Processing requires an explicit target runtime id. It selects only that runtime's ready
+head and performs one §6 RTC/classification step. A `deferred` result commits the
+ready-to-deferred move and revision but creates no terminal receipt. A later recall move
+also creates no receipt. A handled, unhandled, faulted, or lifecycle-disposed event is
+removed from its final mailbox and receives exactly one `event_terminal` receipt with
+its event id, request digest, acceptance sequence, final queue sequence, committed
+revision, resulting aggregate digest, terminal outcome, and emission references. The
+acceptance receipt may coexist with its terminal receipt because they attest different
+facts; the full envelope never coexists in two lifecycle locations.
+
+Terminal event outcomes are exactly `handled`, `unhandled`, `faulted`, and `disposed`.
+`disposed` has exactly one reason: `runtime_cancelled`, `runtime_completed`, or
+`aggregate_completed`. A successful lifecycle operation creates disposal receipts in
+runtime cleanup order and, within each runtime, ready entries followed by deferred
+entries, each in queue order. Receipt sequences are allocated in that order and may
+share one committed revision; `(committed_revision, receipt_sequence)` is strictly
+increasing. A root or contained fault freezes noncausal mailbox entries as §6.7 states.
+A cleanup fault rolls back the complete cleanup and every tentative disposal receipt;
+it cannot report successful disposal.
+
+The lifecycle of one accepted event is closed:
+
+| current location | operation | committed next location |
+|---|---|---|
+| external/unaccepted | rejected admission or pre-commit crash | external/unaccepted |
+| external/unaccepted | committed admission | one target ready mailbox plus acceptance receipt |
+| ready | enabled handler succeeds | terminal `handled` receipt |
+| ready | no enabled handler, active deferral, capacity available | same runtime deferred mailbox |
+| ready | no enabled handler, no active deferral | terminal `unhandled` receipt |
+| ready | guard/action/invariant or capacity-overflow fault | terminal `faulted` receipt; runtime fault rule applies |
+| deferred | successful selective recall | same runtime ready tail |
+| ready or deferred | successful owner disposal | terminal `disposed` receipt |
+| any engine-owned location | transaction failure before commit | exact prior location and bytes |
+
+A checkpoint containing only deferred entries is pending but not runnable. Empty ready
+mailboxes do not authorize polling, timers, or spontaneous execution; later accepted
+input or explicit host activity may change configuration and cause recall. A host can
+persist configuration and mailbox rows separately only when its transaction or
+compare-and-swap operation commits an observably equivalent single checkpoint revision.
+
+Definition migration of a version-2 checkpoint is one maintenance transaction over the
+aggregate, every mailbox, generated terminal disposal receipt, audit, outbox, and
+revision. It uses §16.15 version-2 descriptors. A queued event whose target incarnation
+is deleted or replaced, whose event is removed, or whose normalized payload/correlation
+contract is incompatible cannot be guessed, coerced, or silently discarded. It must be
+covered by a valid explicit disposal rule or the complete migration fails unchanged.
+Backup, restore, cloning, relocation, and authority fencing remain outside this contract
+and are reserved to issue #70.
+
+Version-1 to version-2 checkpoint upgrade is explicit: first perform the exact
+aggregate `1 -> 2` upgrade from §16.15, then move each version-1 `pending_delivery` in
+ascending delivery sequence into its exact target ready mailbox. Preserve event id,
+mode, origin, envelope digest, and accepted revision; derive the version-2 source/cause
+projection without changing payload or target; allocate acceptance and queue sequences
+in that same order; replace each pending result with an acceptance receipt; retain every
+terminal version-1 delivery receipt as immutable historical evidence; remove the
+version-1 pending collection, set checkpoint schema version 2, and recompute digests in
+one transaction. Any invalid or stale pending target makes the upgrade fail unchanged.
+Version 2 has no general downgrade to checkpoint version 1; it is permitted only when
+both mailbox counters are zero, all mailboxes are empty, and no version-2-only receipt
+exists.

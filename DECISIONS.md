@@ -192,6 +192,44 @@ to validate and migrate, but duplicating it per row makes every deployment and b
 needlessly expensive. Content addressing preserves integrity and allows lazy migration
 without retaining old host executable logic.
 
+## Deferral follows handler precedence and portable ownership
+
+Relevant specification: [§6.3](SPEC.md#63-hierarchical-dispatch),
+[§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall), and
+[§17.15](SPEC.md#1715-queue-bearing-checkpoint-version-2).
+
+**Decision.** Determa completes its existing deepest-to-root enabled-handler search
+before consulting deferral declarations. Accepted ready and deferred envelopes belong
+to exactly one addressed runtime and are part of queue-bearing aggregate/checkpoint
+version 2. Recall moves eligible envelopes to that runtime's ready tail without changing
+their event or acceptance identity.
+
+**Rejected alternative.** Treat any ancestor deferral declaration as suppressing a
+deeper enabled handler, or leave deferred work in a plugin-owned queue outside portable
+state.
+
+**Reason.** UML hierarchical conflict semantics allow a nested transition to override
+enclosing deferral. Portable machine behavior also cannot depend on whether a transport
+plugin happens to retain process memory. Runtime-local ownership preserves hierarchy,
+explicit targeting, serialization, and crash recovery without adding a scheduler.
+
+## Artifact version 1 remains immutable
+
+Relevant specification: [§16.15](SPEC.md#1615-queue-bearing-artifact-version-2) and
+[§17.15](SPEC.md#1715-queue-bearing-checkpoint-version-2).
+
+**Decision.** Queue-bearing aggregate, package, migration, and checkpoint artifacts use
+schema version 2. Version-1 schemas and fixtures retain their exact existing meaning;
+conversion is explicit and total.
+
+**Rejected alternative.** Add mailbox fields to version-1 artifacts or keep one accepted
+envelope in both `pending_deliveries` and an aggregate mailbox.
+
+**Reason.** Reinterpreting a portable schema breaks stored bytes. Duplicate ownership
+creates crash windows in which an event can be lost, processed twice, or reported
+terminal while still pending. Version 2 makes acceptance and terminal processing
+separate durable facts and stores the full envelope in one lifecycle location only.
+
 ## Migration preserves target identity
 
 Relevant specification: [§16.4](SPEC.md#164-immutable-identity-and-mutable-definition-binding).

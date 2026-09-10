@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://determa.dev/state/schema/migration-descriptor-v2.schema.json",
+  "title": "Determa State aggregate migration descriptor version 2",
+  "description": "Closed migration descriptor for queue-bearing aggregate-state version 2.",
+  "type": "object",
+  "required": [
+    "migration_descriptor_format",
+    "migration_descriptor_schema_version",
+    "base_descriptor",
+    "queued_event_rules",
+    "migration_descriptor_digest"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "migration_descriptor_format": {
+      "const": "determa.aggregate_migration"
+    },
+    "migration_descriptor_schema_version": {
+      "const": 2
+    },
+    "base_descriptor": {
+      "$ref": "migration-descriptor.schema.json"
+    },
+    "queued_event_rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/queuedEventRule"
+      }
+    },
+    "migration_descriptor_digest": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+    },
+    "eventName": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/identifier"
+        },
+        {
+          "enum": [
+            "determa.component_completed",
+            "determa.component_failed",
+            "determa.spawned_instance_failed"
+          ]
+        }
+      ]
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "preserveRule": {
+      "type": "object",
+      "required": [
+        "event",
+        "action"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "$ref": "#/$defs/eventName"
+        },
+        "action": {
+          "const": "preserve"
+        }
+      }
+    },
+    "disposeRule": {
+      "type": "object",
+      "required": [
+        "event",
+        "action",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "$ref": "#/$defs/eventName"
+        },
+        "action": {
+          "const": "dispose"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "queuedEventRule": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/preserveRule"
+        },
+        {
+          "$ref": "#/$defs/disposeRule"
+        }
+      ]
+    }
+  }
+}

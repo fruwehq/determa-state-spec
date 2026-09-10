@@ -35,6 +35,12 @@ These files are compact normative vectors for
   pre-acceptance failure, delivery-outcome/root-fault, creation-fault,
   emission-reference, replay-retention, root/effect tombstone, pending/terminal outbox,
   and maintenance-result union, including their otherwise-cases.
+- `aggregate-state-v2.json` is the schema-version-2 queue-bearing aggregate example.
+  It retains one ready and one deferred envelope in the addressed runtime and gives
+  acceptance identity and queue placement separate counters.
+- `execution-checkpoint-v2.json` is the schema-version-2 checkpoint example. Its
+  embedded aggregate owns its empty runtime mailboxes and the checkpoint deliberately
+  has no `pending_deliveries` collection.
 
 The source and target validated-bundle fingerprints are respectively
 `sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413`
