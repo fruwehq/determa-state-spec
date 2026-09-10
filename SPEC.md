@@ -1595,6 +1595,23 @@ If any member is invalid, the entire batch is rejected byte-for-byte. `step` nam
 exact running runtime and processes only its ready head; an empty ready mailbox returns
 `not_runnable` without mutation. Neither operation selects or advances another runtime.
 
+Before mailbox selection, `step` resolves its target with this closed rule:
+
+| target resolution | result |
+|---|---|
+| exact retained component runtime whose status is `completed` or `faulted`, or that is otherwise inactive pending owner disposal | reject with `inactive_component_target` |
+| absent or disposed runtime identity, or a root/spawned machine runtime that is completed, faulted, or otherwise non-targetable | reject with `invalid_instance_target` |
+| exact running runtime with an empty ready mailbox | `not_runnable` with null `rejection` |
+| exact running runtime with a ready head | perform the one atomic mailbox step |
+
+The first two rows are pre-step rejection outcomes: they preserve the prior aggregate
+byte-for-byte, allocate nothing, and return no emissions or lifecycle dispositions. A
+retained inactive component receives the component-specific code because its exact
+activation identity is still present for diagnosis. Once that component has been
+disposed and is no longer retained, the same stale identity falls into the absent-runtime
+row and uses `invalid_instance_target`. Root and spawned runtimes never use
+`inactive_component_target`.
+
 `create` retains its existing aggregate-state version-1 result. `create_v2` is the only
 fresh version-2 creation selection; hosts MUST choose it explicitly rather than infer it
 from later persistence. Before author initialization it sets aggregate next acceptance
@@ -1639,8 +1656,11 @@ Creation rejection codes are exactly `invalid_creation_request`,
 `invalid_machine_target`, and `invalid_binding`. Dispatch rejection codes are exactly
 `invalid_event`, `invalid_payload`, `invalid_correlation`,
 `invalid_instance_target`, `inactive_component_target`, `invalid_prior_state`, and
-`incompatible_bundle`. Bundle parsing, schema, and semantic load failures happen before
-these calls and use §2/§5 codes. A rejection commits no fault record.
+`incompatible_bundle`. The closed version-2 `step` pre-step rejection subset is exactly
+`invalid_instance_target`, `inactive_component_target`, `invalid_prior_state`, and
+`incompatible_bundle`; admission has the larger closed set in §17.15. Bundle parsing,
+schema, and semantic load failures happen before these calls and use §2/§5 codes. A
+rejection commits no fault record.
 
 `disposition` is exactly:
 
@@ -4464,8 +4484,9 @@ anything:
 The closed version-2 admission failure codes are exactly `malformed_delivery`,
 `wrong_root`, `duplicate_event_id_in_batch`, `event_id_conflict`, `terminal_root`,
 `tombstoned_root`, `invalid_delivery_mode`, `invalid_delivery_source`,
-`invalid_instance_target`, `invalid_event`, `invalid_payload`, `invalid_correlation`,
-and `delivery_digest_mismatch`. No other failure code is conforming. An all-replay batch
+`invalid_instance_target`, `inactive_component_target`, `invalid_event`,
+`invalid_payload`, `invalid_correlation`, and `delivery_digest_mismatch`. No other
+failure code is conforming. An all-replay batch
 returns its retained evidence without mutation. A mixed replay/new batch allocates only
 the new members, commits once, and returns evidence in caller order; any failure in any
 member rejects the whole batch.

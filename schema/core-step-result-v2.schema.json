@@ -94,6 +94,7 @@
         "code": {
           "enum": [
             "invalid_instance_target",
+            "inactive_component_target",
             "invalid_prior_state",
             "incompatible_bundle"
           ]
@@ -157,7 +158,30 @@
             { "$ref": "#/$defs/rejection" }
           ]
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "disposition": { "const": "rejected" }
+            },
+            "required": ["disposition"]
+          },
+          "then": {
+            "properties": {
+              "emissions": { "maxItems": 0 },
+              "lifecycle_dispositions": { "maxItems": 0 },
+              "fault": { "type": "null" },
+              "rejection": { "$ref": "#/$defs/rejection" }
+            }
+          },
+          "else": {
+            "properties": {
+              "rejection": { "type": "null" }
+            }
+          }
+        }
+      ]
     }
   }
 }
