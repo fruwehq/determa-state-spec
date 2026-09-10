@@ -2,13 +2,13 @@
   "aggregate_state_format": "determa.aggregate_state",
   "aggregate_state_schema_version": 2,
   "machine_format": 1,
-  "validated_bundle_fingerprint": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
   "namespace": "example.transaction_server",
   "root_machine_id": "transaction_server",
   "root_machine_version": "1",
   "root_instance_id": "server-1",
   "creation_id": "create-server-1",
-  "root_runtime_id": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "root_runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
   "migration_sequence": "0",
   "next_logical_step_sequence": "1",
   "next_output_sequence": "0",
@@ -16,11 +16,11 @@
   "next_queue_sequence": "4",
   "runtimes": [
     {
-      "runtime_id": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
       "identity_origin": {
         "kind": "root",
         "definition": {
-          "validated_bundle_fingerprint": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
           "machine": {
             "namespace": "example.transaction_server",
             "machine_id": "transaction_server",
@@ -33,11 +33,11 @@
       "target_identity": {
         "root": {
           "root_instance_id": "server-1",
-          "root_runtime_id": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+          "root_runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf"
         }
       },
       "current_definition": {
-        "validated_bundle_fingerprint": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
         "machine": {
           "namespace": "example.transaction_server",
           "machine_id": "transaction_server",
@@ -97,12 +97,12 @@
             "target": {
               "root": {
                 "root_instance_id": "server-1",
-                "root_runtime_id": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+                "root_runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf"
               }
             },
             "payload": ["map", []]
           },
-          "envelope_digest": "sha256:88389f14feed9b45c9bdb9f63f685e8e6fc2939e58f114f744e1980e202cd52c",
+          "envelope_digest": "sha256:371aac6a792979442f1b792d3b92a4cf6555486e2f384396d49ed074980db91e",
           "deferral_count": "0"
         }
       ],
@@ -119,7 +119,7 @@
             "target": {
               "root": {
                 "root_instance_id": "server-1",
-                "root_runtime_id": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+                "root_runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf"
               }
             },
             "payload": [
@@ -127,12 +127,12 @@
               [["transaction_id", ["string", "transaction-2"]]]
             ]
           },
-          "envelope_digest": "sha256:0955e768a9437c6bcfa9b8e7a5d17ab9a0a179ed68d1110df0068fdfec965e39",
+          "envelope_digest": "sha256:095603b0edccf4c9287848c17d640d6f82a789eaa5e8b350bb3e77eda8007f97",
           "deferral_count": "1"
         }
       ],
       "fault": null
     }
   ],
-  "aggregate_state_digest": "sha256:b6811bf1eff5f30864d18b396dfe24ac6920b902d0de2b0c84a6b927fb22aa98"
+  "aggregate_state_digest": "sha256:92318d5a45c47db4d44bd9276bf39cfd227b7ea0a91f4a5d9f1ef3db18e54337"
 }

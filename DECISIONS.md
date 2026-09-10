@@ -198,25 +198,26 @@ Relevant specification: [§6.3](SPEC.md#63-hierarchical-dispatch),
 [§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall), and
 [§17.15](SPEC.md#1715-queue-bearing-checkpoint-version-2).
 
-**Decision.** Determa completes its existing deepest-to-root enabled-handler search
-before consulting deferral declarations. Accepted ready and deferred envelopes belong
-to exactly one addressed runtime and are part of queue-bearing aggregate/checkpoint
-version 2. Recall uses one bounded structural scan with no guard evaluation and moves
-eligible envelopes to that runtime's ready tail without changing their event or
-acceptance identity. Direct aggregate-state version-1 dispatch retains caller ownership
-on `deferred` and performs no automatic recall.
+**Decision.** Determa resolves an event level by level from deepest active state to root.
+At each state an enabled handler wins over that state's deferral; if no handler there is
+enabled, that state's deferral wins over every ancestor handler. Accepted ready and
+deferred envelopes belong to exactly one addressed runtime in queue-bearing
+aggregate/checkpoint version 2. Recall uses the corresponding bounded structural walk
+with no guard evaluation. Direct aggregate-state version-1 dispatch retains caller
+ownership on `deferred` and performs no automatic recall.
 
-**Rejected alternative.** Treat any ancestor deferral declaration as suppressing a
-deeper enabled handler, or leave deferred work in a plugin-owned queue outside portable
-state.
+**Rejected alternative.** Search all hierarchy levels for a handler before consulting
+deferral, let an ancestor handler bypass a child deferral, or leave deferred work in a
+plugin-owned queue outside portable state.
 
-**Reason.** UML hierarchical conflict semantics allow a nested transition to override
-enclosing deferral. Portable machine behavior also cannot depend on whether a transport
-plugin happens to retain process memory. Runtime-local version-2 ownership preserves
-hierarchy, explicit targeting, serialization, and crash recovery without adding a
-scheduler. Structural recall also prevents an unrelated successful RTC from faulting
-while merely scanning a deferred guard; normal guards run only when the recalled event
-is selected.
+**Reason.** UML hierarchy gives the deepest active state first refusal: a child handler
+can handle before a parent deferral is reached, while a child deferral prevents an
+ancestor from handling too early. Portable machine behavior also cannot depend on
+whether a transport plugin happens to retain process memory. Runtime-local version-2
+ownership preserves hierarchy, explicit targeting, serialization, and crash recovery
+without adding a scheduler. Structural recall prevents an unrelated successful RTC from
+faulting while merely scanning a deferred guard; normal guards run only when the
+recalled event is selected.
 
 ## Artifact version 1 remains immutable
 
@@ -234,6 +235,24 @@ envelope in both `pending_deliveries` and an aggregate mailbox.
 creates crash windows in which an event can be lost, processed twice, or reported
 terminal while still pending. Version 2 makes acceptance and terminal processing
 separate durable facts and stores the full envelope in one lifecycle location only.
+
+## Queue lifecycle evidence is closed and dependency-safe
+
+Relevant specification: [§17.15](SPEC.md#1715-queue-bearing-checkpoint-version-2).
+
+**Decision.** Version-2 processing reports every lifecycle removal from the core, and a
+checkpoint host atomically translates those removals into terminal receipts. Event
+identity tombstones preserve replay and conflict evidence after dependency-closed
+receipt compaction. Version-1 receipts remain nested historical evidence during an
+explicit upgrade and never masquerade as version-2 digests or links.
+
+**Rejected alternative.** Silently drop an internally emitted event when its target is
+disposed in the same RTC, prune receipts independently, or copy a version-1 digest into
+a changed version-2 envelope.
+
+**Reason.** Every accepted or emitted envelope needs exactly one live or terminal
+location across commit, retry, migration, completion, and compaction. Explicit legacy
+wrappers preserve audit meaning while keeping both digest domains honest.
 
 ## Migration preserves target identity
 

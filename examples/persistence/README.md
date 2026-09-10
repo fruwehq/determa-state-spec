@@ -37,10 +37,13 @@ These files are compact normative vectors for
   and maintenance-result union, including their otherwise-cases.
 - `aggregate-state-v2.json` is the schema-version-2 queue-bearing aggregate example.
   It retains one ready and one deferred envelope in the addressed runtime and gives
-  acceptance identity and queue placement separate counters.
+  acceptance identity and queue placement separate counters. Its definition fingerprint,
+  runtime identity, envelope digests, and aggregate digest are bound to
+  `../portable-event-deferral.yaml`.
 - `execution-checkpoint-v2.json` is the schema-version-2 checkpoint example. Its
   embedded aggregate owns its empty runtime mailboxes and the checkpoint deliberately
-  has no `pending_deliveries` collection.
+  has no `pending_deliveries` collection. It includes the required event-identity
+  tombstone collection and is definition-bound to `source.yaml`.
 
 The source and target validated-bundle fingerprints are respectively
 `sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413`

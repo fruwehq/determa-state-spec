@@ -103,10 +103,11 @@
       "emission_references": []
     }
   ],
+  "event_identity_tombstones": [],
   "pending_outbox_intents": [],
   "next_outbox_terminal_sequence": "0",
   "terminal_outbox_records": [],
   "outbox_effect_tombstones": [],
   "migration_audit_records": [],
-  "execution_checkpoint_digest": "sha256:475d39caf2aa23460406876e8e19321fc98b44e8db4e3dfe79dfc74ae6d0cb33"
+  "execution_checkpoint_digest": "sha256:ed5a5f814fc3253f8b1bbdae7cc287b8d85da147ce7538d1e5d24b8ed7007351"
 }

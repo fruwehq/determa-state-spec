@@ -8,6 +8,7 @@
     "migration_descriptor_format",
     "migration_descriptor_schema_version",
     "base_descriptor",
+    "queued_event_default",
     "queued_event_rules",
     "migration_descriptor_digest"
   ],
@@ -21,6 +22,9 @@
     },
     "base_descriptor": {
       "$ref": "migration-descriptor.schema.json"
+    },
+    "queued_event_default": {
+      "const": "preserve_if_compatible"
     },
     "queued_event_rules": {
       "type": "array",
@@ -55,33 +59,25 @@
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$"
     },
-    "preserveRule": {
-      "type": "object",
-      "required": [
-        "event",
-        "action"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "event": {
-          "$ref": "#/$defs/eventName"
-        },
-        "action": {
-          "const": "preserve"
-        }
-      }
-    },
     "disposeRule": {
       "type": "object",
       "required": [
+        "machine_id",
         "event",
+        "delivery_mode",
         "action",
         "reason"
       ],
       "additionalProperties": false,
       "properties": {
+        "machine_id": {
+          "$ref": "#/$defs/identifier"
+        },
         "event": {
           "$ref": "#/$defs/eventName"
+        },
+        "delivery_mode": {
+          "enum": ["input", "internal"]
         },
         "action": {
           "const": "dispose"
@@ -93,14 +89,7 @@
       }
     },
     "queuedEventRule": {
-      "oneOf": [
-        {
-          "$ref": "#/$defs/preserveRule"
-        },
-        {
-          "$ref": "#/$defs/disposeRule"
-        }
-      ]
+      "$ref": "#/$defs/disposeRule"
     }
   }
 }

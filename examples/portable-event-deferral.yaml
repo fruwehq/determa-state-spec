@@ -10,6 +10,10 @@ events:
     direction: input
   authorized:
     direction: input
+  priority_request:
+    direction: input
+  retry:
+    direction: input
 
 machines:
   - machine_id: transaction_server
@@ -25,11 +29,15 @@ machines:
           type: composite
           deferred_events: [new_request]
           initial: { transition_to: busy.receiving }
+          on_events:
+            priority_request: { transition_to: idle }
           states:
             receiving:
               on_events:
                 received: { transition_to: busy.authorizing }
             authorizing:
+              deferred_events: [priority_request, retry]
               on_events:
                 new_request: {}
+                retry: { guard: "false" }
                 authorized: { transition_to: idle }

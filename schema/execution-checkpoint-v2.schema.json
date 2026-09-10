@@ -33,10 +33,41 @@
         }
       }
     },
+    "internalTerminalEmissionReference": {
+      "type": "object",
+      "required": [
+        "kind",
+        "emission_index",
+        "event_id",
+        "acceptance_sequence",
+        "terminal_receipt_sequence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "internal_terminal"
+        },
+        "emission_index": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/canonicalDecimal"
+        },
+        "event_id": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/nonEmptyString"
+        },
+        "acceptance_sequence": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/canonicalDecimal"
+        },
+        "terminal_receipt_sequence": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/canonicalDecimal"
+        }
+      }
+    },
     "emissionReference": {
       "oneOf": [
         {
           "$ref": "#/$defs/internalMailboxEmissionReference"
+        },
+        {
+          "$ref": "#/$defs/internalTerminalEmissionReference"
         },
         {
           "$ref": "execution-checkpoint.schema.json#/$defs/externalOutboxEmissionReference"
@@ -165,6 +196,48 @@
             "input",
             "internal"
           ]
+        },
+        "legacy_v1_delivery": {
+          "$ref": "#/$defs/legacyV1DeliveryEvidence"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "delivery_mode": {
+                "const": "internal"
+              }
+            },
+            "required": [
+              "delivery_mode"
+            ]
+          },
+          "then": {
+            "required": [
+              "legacy_v1_delivery"
+            ]
+          }
+        }
+      ]
+    },
+    "legacyV1DeliveryEvidence": {
+      "type": "object",
+      "required": [
+        "delivery_sequence",
+        "envelope_digest",
+        "origin"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "delivery_sequence": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/canonicalDecimal"
+        },
+        "envelope_digest": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/sha256"
+        },
+        "origin": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/deliveryOrigin"
         }
       }
     },
@@ -193,8 +266,41 @@
           "enum": [
             "runtime_cancelled",
             "runtime_completed",
-            "aggregate_completed"
+            "aggregate_completed",
+            "root_tombstoned"
           ]
+        },
+        "fault": {
+          "type": "null"
+        },
+        "rejection": {
+          "type": "null"
+        }
+      }
+    },
+    "migrationDisposedOutcome": {
+      "type": "object",
+      "required": [
+        "status",
+        "disposition",
+        "reason",
+        "migration_descriptor_digest",
+        "fault",
+        "rejection"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": ["running", "completed", "faulted"]
+        },
+        "disposition": {
+          "const": "migration_disposed"
+        },
+        "reason": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/nonEmptyString"
+        },
+        "migration_descriptor_digest": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/sha256"
         },
         "fault": {
           "type": "null"
@@ -217,8 +323,50 @@
         },
         {
           "$ref": "#/$defs/disposedOutcome"
+        },
+        {
+          "$ref": "#/$defs/migrationDisposedOutcome"
         }
       ]
+    },
+    "legacyV1CreationReceipt": {
+      "type": "object",
+      "required": ["operation_kind", "receipt_sequence", "legacy_receipt"],
+      "additionalProperties": false,
+      "properties": {
+        "operation_kind": {
+          "const": "legacy_v1_creation"
+        },
+        "receipt_sequence": {
+          "const": "0"
+        },
+        "legacy_receipt": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/creationReceipt"
+        }
+      }
+    },
+    "legacyV1OperationReceipt": {
+      "type": "object",
+      "required": ["operation_kind", "receipt_sequence", "legacy_receipt"],
+      "additionalProperties": false,
+      "properties": {
+        "operation_kind": {
+          "const": "legacy_v1_operation"
+        },
+        "receipt_sequence": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/canonicalDecimal"
+        },
+        "legacy_receipt": {
+          "oneOf": [
+            {
+              "$ref": "execution-checkpoint.schema.json#/$defs/deliveryReceipt"
+            },
+            {
+              "$ref": "execution-checkpoint.schema.json#/$defs/maintenanceMigrationReceipt"
+            }
+          ]
+        }
+      }
     },
     "terminalEventReceipt": {
       "type": "object",
@@ -283,10 +431,73 @@
           "$ref": "#/$defs/terminalEventReceipt"
         },
         {
-          "$ref": "execution-checkpoint.schema.json#/$defs/deliveryReceipt"
+          "$ref": "#/$defs/legacyV1CreationReceipt"
         },
         {
-          "$ref": "execution-checkpoint.schema.json#/$defs/maintenanceMigrationReceipt"
+          "$ref": "#/$defs/legacyV1OperationReceipt"
+        }
+      ]
+    },
+    "eventIdentityTombstone": {
+      "type": "object",
+      "required": [
+        "event_id",
+        "request_digest",
+        "request_digest_domain",
+        "acceptance_sequence",
+        "terminal_receipt_sequence",
+        "terminal_disposition"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/nonEmptyString"
+        },
+        "request_digest": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/sha256"
+        },
+        "request_digest_domain": {
+          "enum": [
+            "determa-inbox-envelope-digest-1",
+            "determa-inbox-envelope-digest-2"
+          ]
+        },
+        "acceptance_sequence": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/canonicalDecimal"
+        },
+        "terminal_receipt_sequence": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/canonicalDecimal"
+        },
+        "terminal_disposition": {
+          "enum": [
+            "handled",
+            "unhandled",
+            "rejected",
+            "faulted",
+            "disposed",
+            "migration_disposed"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "terminal_disposition": {
+                "const": "rejected"
+              }
+            },
+            "required": [
+              "terminal_disposition"
+            ]
+          },
+          "then": {
+            "properties": {
+              "request_digest_domain": {
+                "const": "determa-inbox-envelope-digest-1"
+              }
+            }
+          }
         }
       ]
     },
@@ -327,6 +538,7 @@
         "replay_retention",
         "next_operation_receipt_sequence",
         "operation_receipts",
+        "event_identity_tombstones",
         "pending_outbox_intents",
         "next_outbox_terminal_sequence",
         "terminal_outbox_records",
@@ -362,11 +574,24 @@
           "minItems": 1,
           "prefixItems": [
             {
-              "$ref": "#/$defs/creationReceipt"
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/creationReceipt"
+                },
+                {
+                  "$ref": "#/$defs/legacyV1CreationReceipt"
+                }
+              ]
             }
           ],
           "items": {
             "$ref": "#/$defs/operationReceipt"
+          }
+        },
+        "event_identity_tombstones": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/eventIdentityTombstone"
           }
         },
         "pending_outbox_intents": {
