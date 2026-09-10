@@ -886,13 +886,21 @@ emissions preserve their existing deterministic cause and use
 `system:` source locator. These fields make the already defined logical provenance
 portable; they do not change version-1 envelope bytes.
 
-The caller owns an envelope until a foreground dispatch accepts it or a mailbox
-admission commits. Before either boundary, the core atomically validates the delivery
-mode, event declaration, direction, payload, correlation, exact target incarnation, and
-target eligibility. Rejection returns the prior state unchanged, allocates no logical
-identity, and leaves the envelope caller-owned. After acceptance the envelope exists in
-exactly one engine-owned lifecycle location: one runtime's ready mailbox, that same
-runtime's deferred mailbox, or a terminal/disposal receipt under §17.15.
+Direct aggregate-state version-1 `dispatch` never transfers envelope ownership to the
+core because that artifact has no mailbox. It validates and classifies the exact
+caller-owned envelope for one immediate call. If classification is `deferred`, it
+returns the byte-for-byte prior aggregate, no emissions, and the caller retains the
+exact envelope for later resubmission. Version 1 performs no automatic recall and makes
+no portable ordering or durability claim for caller-retained deferred work.
+
+Portable automatic deferral therefore requires queue-bearing aggregate/checkpoint
+version 2. The caller owns a version-2 envelope until mailbox admission commits. Before
+that boundary, the core atomically validates the delivery mode, event declaration,
+direction, payload, correlation, exact target incarnation, and target eligibility.
+Rejection returns the prior state unchanged, allocates no logical identity, and leaves
+the envelope caller-owned. After committed admission the envelope exists in exactly one
+engine-owned lifecycle location: one runtime's ready mailbox, that same runtime's
+deferred mailbox, or a terminal/disposal receipt under §17.15.
 
 `input` mode MUST name a bundle `input` event and may supply only the `root` or
 `spawned_instance` target member for a running runtime. Direct use of the `component`
@@ -963,12 +971,13 @@ to a component remains invalid.
 
 ### 6.2 Run to completion
 
-One `dispatch` or mailbox `step` call processes at most one accepted envelope for one
-explicitly addressed runtime. The step is non-reentrant and atomic. Internal emissions
-append to exact target runtime ready mailboxes only if the operation uses queue-bearing
-aggregate-state version 2; direct aggregate-state version 1 dispatch continues to
-return them to its caller. External emissions remain output intents. No operation
-chooses another runtime, drains an aggregate, or introduces a round-robin scheduler.
+One direct `dispatch` examines at most one caller-owned envelope and one mailbox `step`
+processes at most one accepted envelope, in either case for one explicitly addressed
+runtime. The step is non-reentrant and atomic. Internal emissions append to exact target
+runtime ready mailboxes only if the operation uses queue-bearing aggregate-state version
+2; direct aggregate-state version 1 dispatch continues to return them to its caller.
+External emissions remain output intents. No operation chooses another runtime, drains
+an aggregate, or introduces a round-robin scheduler.
 
 Other runtimes may be processed concurrently only when the host's persistence layout
 provides serializable ownership of any aggregate state they might share. Two calls MUST
@@ -1015,9 +1024,12 @@ hierarchy; components and owned spawned runtimes have isolated configurations an
 mailboxes. Explicit fan-out creates independent envelopes that are classified
 independently.
 
-An unhandled result is not a core fault. The accepted envelope is consumed and is not
-retained in logical state. A host may separately audit or dead-letter that terminal
-disposition, but no transport plugin may reinterpret it as machine deferral.
+An unhandled result is not a core fault. Under version 2 the accepted envelope is
+consumed into its terminal receipt and is not retained in logical state. Under direct
+version-1 dispatch the core retains no copy and the caller continues to own the supplied
+envelope under the pre-existing delivery boundary. A host may separately audit or
+dead-letter that terminal disposition, but no transport plugin may reinterpret it as
+machine deferral.
 
 ### 6.4 Transition execution order
 
@@ -1186,32 +1198,47 @@ initialization or emission leaks from the failed attempt.
 
 ### 6.7 Deferred mailboxes and automatic recall
 
-Each runtime has one FIFO ready mailbox and one FIFO deferred mailbox. They are isolated
-from every other runtime even when the runtimes share one ownership aggregate. A
-`deferred` result atomically removes the selected ready entry, increments its
-`deferral_count`, allocates a new `queue_sequence`, and appends it to that runtime's
+The mailbox and automatic-recall rules in this subsection apply only to queue-bearing
+aggregate-state version 2. Direct version-1 `dispatch` has the caller-owned `deferred`
+result defined in §6.1 and does not retain or recall the envelope.
+
+In version 2 each runtime has one FIFO ready mailbox and one FIFO deferred mailbox. They
+are isolated from every other runtime even when the runtimes share one ownership
+aggregate. A `deferred` result atomically removes the selected ready entry, increments
+its `deferral_count`, allocates a new `queue_sequence`, and appends it to that runtime's
 deferred tail. The immutable `acceptance_sequence` and the complete normalized envelope,
 including `event_id`, `cause_id`, source, exact target incarnation, payload, and optional
 `correlation_id`, do not change. Deferral never creates an emission or a second event.
 
-After every successful RTC step has completed all transition actions, choice resolution,
-exit/entry behavior, initial descent, completion behavior, and lifecycle cleanup, the
-engine performs one automatic recall phase against the resulting stable configuration.
-It scans that runtime's deferred mailbox in existing `queue_sequence` order. For each
-entry it applies the §6.3 handler/deferral classification without executing actions. An
-entry whose classification is still `deferred` remains in place. Every other entry is
-removed, assigned a fresh `queue_sequence`, and appended to the ready tail in the same
-relative order. Existing ready entries and entries emitted by the just-completed RTC
-remain ahead of recalled entries. Recall does not dispatch recursively and consumes no
-logical-step sequence.
+After every successful `handled` RTC step has completed all transition actions, choice
+resolution, exit/entry behavior, initial descent, completion behavior, and lifecycle
+cleanup, the engine performs one bounded structural recall phase against the resulting
+stable configuration. A `deferred` classification is not a handled RTC step and does not
+immediately recall the entry it just deferred. The phase freezes the deferred entries
+present at its start and examines each exactly once in existing `queue_sequence` order.
+It evaluates no guard, action, or other expression.
 
-Guard evaluation during recall uses the same pure CEL values and ordered search as
-ordinary classification. A guard fault makes the enclosing RTC step fault and rolls
-back both that step and its recall phase. When a recalled entry later reaches the ready
-head, classification is performed again because earlier ready work may have changed the
-configuration; it may therefore be handled, become unhandled, fault, or be deferred
-again. This repeated movement preserves envelope and acceptance identity while each
-queue placement receives a new scheduling identity.
+For each frozen entry, structural recall eligibility is the following closed rule:
+
+| handler declaration in active deepest-to-root hierarchy | active deferral declaration | recall action |
+|---|---|---|
+| present | absent or present | move to ready tail; the handler may override deferral when selected |
+| absent | absent | move to ready tail; it is no longer deferred |
+| absent | present | remain in deferred position |
+
+Every moved entry receives a fresh `queue_sequence` and appends to the ready tail in the
+same relative order. Existing ready entries and entries emitted by the just-completed
+RTC remain ahead of recalled entries. Entries not in the frozen snapshot are not
+examined. Recall does not dispatch recursively, consume a logical-step sequence, or
+fault the successful RTC merely because a deferred guard would fault if evaluated.
+
+When a recalled entry later reaches the ready head, the engine performs the complete
+§6.3 deepest-to-root guard evaluation. An enabled handler wins even if a state still
+defers the event. All-false handlers with an active deferral move the entry back to the
+deferred tail; a guard fault faults that selected event's own step. A later successful
+handled RTC may make it structurally recall-eligible again. This repeated movement is
+bounded to one examination per recall phase and preserves envelope and acceptance
+identity while each queue placement receives a new scheduling identity.
 
 `deferred_event_capacity` limits the number of entries in that runtime's deferred
 mailbox after the attempted append. Omission is logically unbounded; `0` forbids every
@@ -1560,6 +1587,19 @@ these calls and use §2/§5 codes. A rejection commits no fault record.
 - `not_runnable` — a mailbox `step` named a running runtime with an empty ready mailbox;
 - `rejected` — validation failed before an RTC step; or
 - `faulted` — an engine fault occurred during the RTC step.
+
+Deferral ownership is total across the two operation profiles:
+
+| operation and artifact | classification | committed ownership/result |
+|---|---|---|
+| direct `dispatch`, aggregate-state version 1 | `deferred` | prior aggregate unchanged; exact envelope remains caller-owned |
+| mailbox `step`, aggregate-state version 2 | `deferred` | selected ready entry moves to that runtime's deferred mailbox |
+| version-2 structural recall | eligible | deferred entry moves once to that runtime's ready tail |
+| version-2 structural recall | ineligible | deferred entry remains in its existing position |
+
+Only the version-2 rows provide portable automatic retention and recall. A version-1
+caller that discards a `deferred` result discards its own envelope; the core has not
+claimed acceptance or retained a hidden copy.
 
 For the null-delivery read-only call defined by §6.1, `disposition` is null. It returns
 the unchanged state, current `status` and `fault`, empty `emissions`, and null
@@ -3240,11 +3280,12 @@ receipt carrying the required non-empty operator reason. A missing, duplicate, o
 inapplicable rule, removed/replaced target, incompatible payload contract, or unaccounted
 entry is `migration_totality_failure`; the source remains byte-for-byte unchanged.
 
-After every successful descriptor, preserved deferred entries are reclassified against
-the mapped stable configuration. Entries still deferred remain in relative order;
-newly eligible entries move to the ready tail in prior deferred order with fresh queue
-sequences. Changing only a deferral declaration is therefore explicit and deterministic,
-not silent event loss. Migration executes no handler action and emits no event.
+After every successful descriptor, preserved deferred entries use the bounded structural
+eligibility table in §6.7 against the mapped stable configuration. No guard or action is
+evaluated. Entries not structurally eligible remain in relative order; eligible entries
+move to the ready tail in prior deferred order with fresh queue sequences. Changing only
+a deferral declaration is therefore explicit and deterministic, not silent event loss.
+Migration executes no handler action and emits no event.
 Package schema version 2 carries exactly one aggregate-state version-2 envelope and only
 version-2 migration descriptors. Version mixing inside one package is invalid.
 
@@ -4320,7 +4361,8 @@ The lifecycle of one accepted event is closed:
 | ready | no enabled handler, active deferral, capacity available | same runtime deferred mailbox |
 | ready | no enabled handler, no active deferral | terminal `unhandled` receipt |
 | ready | guard/action/invariant or capacity-overflow fault | terminal `faulted` receipt; runtime fault rule applies |
-| deferred | successful selective recall | same runtime ready tail |
+| deferred | bounded structural scan finds a handler declaration or no active deferral | same runtime ready tail |
+| deferred | bounded structural scan finds no handler declaration and an active deferral | same deferred position |
 | ready or deferred | successful owner disposal | terminal `disposed` receipt |
 | any engine-owned location | transaction failure before commit | exact prior location and bytes |
 

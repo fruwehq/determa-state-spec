@@ -201,8 +201,10 @@ Relevant specification: [§6.3](SPEC.md#63-hierarchical-dispatch),
 **Decision.** Determa completes its existing deepest-to-root enabled-handler search
 before consulting deferral declarations. Accepted ready and deferred envelopes belong
 to exactly one addressed runtime and are part of queue-bearing aggregate/checkpoint
-version 2. Recall moves eligible envelopes to that runtime's ready tail without changing
-their event or acceptance identity.
+version 2. Recall uses one bounded structural scan with no guard evaluation and moves
+eligible envelopes to that runtime's ready tail without changing their event or
+acceptance identity. Direct aggregate-state version-1 dispatch retains caller ownership
+on `deferred` and performs no automatic recall.
 
 **Rejected alternative.** Treat any ancestor deferral declaration as suppressing a
 deeper enabled handler, or leave deferred work in a plugin-owned queue outside portable
@@ -210,8 +212,11 @@ state.
 
 **Reason.** UML hierarchical conflict semantics allow a nested transition to override
 enclosing deferral. Portable machine behavior also cannot depend on whether a transport
-plugin happens to retain process memory. Runtime-local ownership preserves hierarchy,
-explicit targeting, serialization, and crash recovery without adding a scheduler.
+plugin happens to retain process memory. Runtime-local version-2 ownership preserves
+hierarchy, explicit targeting, serialization, and crash recovery without adding a
+scheduler. Structural recall also prevents an unrelated successful RTC from faulting
+while merely scanning a deferred guard; normal guards run only when the recalled event
+is selected.
 
 ## Artifact version 1 remains immutable
 
