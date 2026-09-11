@@ -3505,6 +3505,14 @@ ordered emission references. Acceptance and terminal receipts may coexist becaus
 attest different facts; the complete envelope remains in only one live or terminal
 location.
 
+Each emission reference's `emission_index` copies the referenced emission's
+action-local, zero-based `emission_index` defined by §9. It is not a
+transaction-wide ordinal and is not the reference's index in `emission_references`.
+Consequently, references to emissions from different actions may carry the same
+`emission_index`. Array position preserves cross-action core emission order; `event_id`
+for an internal reference or `effect_id` for an external-outbox reference identifies
+the referenced emission unambiguously.
+
 Equal replay returns retained evidence without mutation. Unequal content for the same
 identity is `event_id_conflict`. Replay/conflict checks precede terminal-root rejection.
 Permanent retention keeps every receipt. Bounded retention may replace one

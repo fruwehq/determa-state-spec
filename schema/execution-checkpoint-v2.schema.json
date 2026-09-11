@@ -34,7 +34,8 @@
           "const": "external_outbox"
         },
         "emission_index": {
-          "$ref": "#/$defs/canonicalDecimal"
+          "$ref": "#/$defs/canonicalDecimal",
+          "description": "The referenced emission's action-local, zero-based emission_index from SPEC section 9; not a transaction-wide or receipt-array index. Array position preserves cross-action order and effect_id disambiguates the referenced emission."
         },
         "effect_id": {
           "$ref": "#/$defs/sha256"
@@ -299,7 +300,8 @@
           "const": "internal_mailbox"
         },
         "emission_index": {
-          "$ref": "#/$defs/canonicalDecimal"
+          "$ref": "#/$defs/canonicalDecimal",
+          "description": "The referenced emission's action-local, zero-based emission_index from SPEC section 9; not a transaction-wide or receipt-array index. Array position preserves cross-action order and event_id disambiguates the referenced emission."
         },
         "event_id": {
           "$ref": "#/$defs/nonEmptyString"
@@ -327,7 +329,8 @@
           "const": "internal_terminal"
         },
         "emission_index": {
-          "$ref": "#/$defs/canonicalDecimal"
+          "$ref": "#/$defs/canonicalDecimal",
+          "description": "The referenced emission's action-local, zero-based emission_index from SPEC section 9; not a transaction-wide or receipt-array index. Array position preserves cross-action order and event_id disambiguates the referenced emission."
         },
         "event_id": {
           "$ref": "#/$defs/nonEmptyString"
