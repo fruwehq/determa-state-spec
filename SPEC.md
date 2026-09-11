@@ -2695,8 +2695,9 @@ format-1 fields `runtime_id`, `cause_id`, `code`, `step_sequence`, and
 `source_locator`, plus required `definition_fingerprint`. `step_sequence` uses the
 artifact canonical-decimal projection. The definition fingerprint anchors the
 historical locator; migration never reinterprets that locator against a later
-definition. `examples/persistence/faulted-aggregate-state.json` is the normative
-faulted round-trip vector.
+definition. Conformance faulted-state vectors MUST round-trip the complete fault
+record and MUST verify its retained definition fingerprint against the definition
+that owns the historical locator.
 
 Encoding first validates the implementation's abstract aggregate under the supplied
 source bundle. Decoding verifies structure, canonical form, digest, definition
@@ -3179,10 +3180,10 @@ in the package or the receiving trusted registry. Package attachments seed the s
 put-if-absent resolver contract; they never override a registry entry and are excluded
 from the aggregate-state digest.
 
-`examples/persistence/aggregate-state-package.json` is a normative one-hop vector. Its
-source and target bundle fingerprints, shared shape fingerprint, aggregate digest,
-descriptor digest, and canonical attachment trees are fixed by the accompanying
-fixtures.
+Portable packages MUST validate against
+`schema/aggregate-state-package-v2.schema.json`. Conformance package vectors MUST fix
+their source and target bundle fingerprints, shared shape fingerprint, aggregate
+digest, descriptor digest, and canonical attachment trees.
 
 ### 16.14 Security and resource limits
 

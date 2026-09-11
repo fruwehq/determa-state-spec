@@ -172,7 +172,7 @@
       }
     },
     {
-      "name": "legacy receipt wrapper",
+      "name": "unsupported receipt wrapper",
       "expected": "schema_validation",
       "checkpoint": {
         "execution_checkpoint_format": "determa.execution_checkpoint",
@@ -207,9 +207,9 @@
             "emission_references": []
           },
           {
-            "operation_kind": "legacy_v1_operation",
+            "operation_kind": "unsupported_wrapped_operation",
             "receipt_sequence": "1",
-            "legacy_receipt": {
+            "wrapped_receipt": {
               "operation_kind": "maintenance_migration",
               "receipt_sequence": "1",
               "operation_id": "maintenance-empty-1",
@@ -229,7 +229,7 @@
         "terminal_outbox_records": [],
         "outbox_effect_tombstones": [],
         "migration_audit_records": [],
-        "execution_checkpoint_digest": "sha256:927c7b7935288ae09cde1e4b564fb57f05c87105e10bc7e1e03b301c1894cdac"
+        "execution_checkpoint_digest": "sha256:d21cb2fb9fe3d9b29ba4a457abf6efdfa6dd6b13b303afe0ad824027273dc26e"
       }
     }
   ]

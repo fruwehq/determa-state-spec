@@ -17,7 +17,7 @@ These files are compact normative vectors for
   collection.
 - `execution-checkpoint-v2-maintenance-cases.json` proves that an empty migration
   receipt remains verifiable after root tombstoning. It rejects a missing or altered
-  target definition fingerprint and rejects the removed legacy receipt wrapper.
+  target definition fingerprint and rejects an unsupported receipt wrapper.
 - `target-identity-cases.json` fixes the three exact machine-format-1 target shapes
   using artifact decimal-string projections, including values beyond JavaScript's safe
   integer boundary and rejected malformed projections.
