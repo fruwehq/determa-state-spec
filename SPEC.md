@@ -3878,6 +3878,9 @@ reused. Removing an item may leave a gap and never renumbers later work.
 ### 17.5 Maintenance-migration operations
 
 A migration with no delivery MUST carry a non-empty host-supplied `operation_id`.
+The writer also supplies the exact checkpoint revision and digest it read, as required
+by §17.9. The operation id is unique among retained native maintenance-migration
+receipts for the root.
 Its request digest is:
 
 ```text
@@ -3910,19 +3913,36 @@ A successful operation appends:
 ```
 
 It atomically replaces the aggregate, appends the §16 audit records, writes the
-receipt, increments revision once, and commits. `migration_applied` has one or more
-strictly increasing `migration_sequences` naming the appended audit records.
-`migration_no_operation` has an empty route, equal source/target definition identity,
-no audit record, and an empty sequence array; its receipt still commits so response
-loss cannot make the operation ambiguous.
+receipt at the current `next_operation_receipt_sequence`, increments that counter,
+increments checkpoint revision exactly once, recomputes the checkpoint digest, and
+commits. The receipt's `committed_revision` is that new revision. Its source and
+resulting aggregate digests are respectively the exact pre-transaction aggregate and
+committed aggregate digests.
 
-Presenting the same operation id and digest returns exactly
+For a non-empty route of length N, `result_code` is `migration_applied`, exactly N
+§16 audit records are appended in descriptor-route order, and `migration_sequences`
+is exactly their ordered sequence list. The values are strictly increasing and
+contiguous: the first is the source aggregate's `migration_sequence + 1`, and the last
+is the resulting aggregate's `migration_sequence`. A one-hop route therefore has one
+audit record and one sequence; a multi-hop route has one of each per descriptor.
+
+For an empty route, source and target definition identities are equal, the aggregate
+bytes and aggregate digest are unchanged, no migration audit record is appended,
+`result_code` is `migration_no_operation`, and `migration_sequences` is empty. The
+checkpoint transaction still allocates its receipt and increments checkpoint revision
+once so response loss cannot make the operation ambiguous.
+
+After loading and validating the checkpoint, the host checks retained operation
+identity before applying the caller's stale-writer guard. Presenting the same operation
+id and digest returns exactly
 `{ result: "committed", receipt: maintenance_migration_receipt }` without rerunning
-migration or changing revision. Reuse with a different digest is
-`operation_id_conflict` and preserves the checkpoint. A deterministic migration
-failure produces no successful receipt or candidate aggregate; quarantine/failure
-audit remains host metadata under §16.12. Retrying that failure is safe because no
-migration state committed.
+migration or changing revision, even when the replay carries the revision and digest
+from its original request. Reuse with a different digest is `operation_id_conflict`
+and preserves the checkpoint. If no retained replay/conflict applies, a mismatched
+expected revision or checkpoint digest is `checkpoint_revision_conflict`. A
+deterministic migration failure produces no successful receipt or candidate aggregate;
+quarantine/failure audit remains host metadata under §16.12. Retrying that failure is
+safe because no migration state committed.
 
 An implementation claiming this checkpoint profile MUST NOT expose an unkeyed
 maintenance-migration commit path. Operator tools MAY generate an operation id, but

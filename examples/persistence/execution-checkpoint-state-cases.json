@@ -298,6 +298,20 @@
         "resulting_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
         "migration_sequences": [],
         "result_code": "migration_no_operation"
+      },
+      {
+        "operation_kind": "maintenance_migration",
+        "receipt_sequence": "6",
+        "operation_id": "migration-multi-hop-1",
+        "request_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+        "committed_revision": "11",
+        "source_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "resulting_aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "migration_sequences": [
+          "2",
+          "3"
+        ],
+        "result_code": "migration_applied"
       }
     ]
   },
@@ -593,6 +607,20 @@
           "2"
         ],
         "result_code": "migration_no_operation"
+      },
+      {
+        "operation_kind": "maintenance_migration",
+        "receipt_sequence": "6",
+        "operation_id": "migration-out-of-order",
+        "request_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+        "committed_revision": "11",
+        "source_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "resulting_aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "migration_sequences": [
+          "3",
+          "2"
+        ],
+        "result_code": "migration_applied"
       }
     ]
   }
