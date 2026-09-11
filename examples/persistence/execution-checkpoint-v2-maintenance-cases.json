@@ -1,0 +1,236 @@
+{
+  "positive": [
+    {
+      "name": "tombstoned empty migration retains verifiable target identity",
+      "checkpoint": {
+        "execution_checkpoint_format": "determa.execution_checkpoint",
+        "execution_checkpoint_schema_version": 2,
+        "root_instance_id": "job-42",
+        "revision": "2",
+        "root_record": {
+          "status": "tombstone",
+          "root_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "creation_id": "create-1",
+          "terminal_status": "completed",
+          "final_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+          "tombstone_operation_id": "tombstone-1"
+        },
+        "replay_retention": {
+          "mode": "permanent",
+          "permanent_replay_eligible": true,
+          "pruned_through_receipt_sequence": null,
+          "policy_identifier": null
+        },
+        "next_operation_receipt_sequence": "2",
+        "operation_receipts": [
+          {
+            "operation_kind": "creation",
+            "receipt_sequence": "0",
+            "creation_id": "create-1",
+            "request_digest": "sha256:d7abbb9f00a5b48259cce0805e81eecae0220b92d8e45602673b0489e4866c30",
+            "committed_revision": "0",
+            "resulting_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+            "status": "completed",
+            "fault": null,
+            "emission_references": []
+          },
+          {
+            "operation_kind": "maintenance_migration",
+            "receipt_sequence": "1",
+            "operation_id": "maintenance-empty-1",
+            "request_digest": "sha256:4385b9ed766895b9229919536b764ee807f28dbc84123084f8e915e074977c0b",
+            "committed_revision": "1",
+            "source_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+            "target_validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+            "resulting_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+            "migration_sequences": [],
+            "result_code": "migration_no_operation"
+          }
+        ],
+        "event_identity_tombstones": [],
+        "pending_outbox_intents": [],
+        "next_outbox_terminal_sequence": "0",
+        "terminal_outbox_records": [],
+        "outbox_effect_tombstones": [],
+        "migration_audit_records": [],
+        "execution_checkpoint_digest": "sha256:5c199589e2fc793f7179f2c1faa4c946be8947e13f4212e6129cc55e029bf5e4"
+      }
+    }
+  ],
+  "negative": [
+    {
+      "name": "missing target definition fingerprint",
+      "expected": "schema_validation",
+      "checkpoint": {
+        "execution_checkpoint_format": "determa.execution_checkpoint",
+        "execution_checkpoint_schema_version": 2,
+        "root_instance_id": "job-42",
+        "revision": "2",
+        "root_record": {
+          "status": "tombstone",
+          "root_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "creation_id": "create-1",
+          "terminal_status": "completed",
+          "final_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+          "tombstone_operation_id": "tombstone-1"
+        },
+        "replay_retention": {
+          "mode": "permanent",
+          "permanent_replay_eligible": true,
+          "pruned_through_receipt_sequence": null,
+          "policy_identifier": null
+        },
+        "next_operation_receipt_sequence": "2",
+        "operation_receipts": [
+          {
+            "operation_kind": "creation",
+            "receipt_sequence": "0",
+            "creation_id": "create-1",
+            "request_digest": "sha256:d7abbb9f00a5b48259cce0805e81eecae0220b92d8e45602673b0489e4866c30",
+            "committed_revision": "0",
+            "resulting_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+            "status": "completed",
+            "fault": null,
+            "emission_references": []
+          },
+          {
+            "operation_kind": "maintenance_migration",
+            "receipt_sequence": "1",
+            "operation_id": "maintenance-empty-1",
+            "request_digest": "sha256:4385b9ed766895b9229919536b764ee807f28dbc84123084f8e915e074977c0b",
+            "committed_revision": "1",
+            "source_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+            "resulting_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+            "migration_sequences": [],
+            "result_code": "migration_no_operation"
+          }
+        ],
+        "event_identity_tombstones": [],
+        "pending_outbox_intents": [],
+        "next_outbox_terminal_sequence": "0",
+        "terminal_outbox_records": [],
+        "outbox_effect_tombstones": [],
+        "migration_audit_records": [],
+        "execution_checkpoint_digest": "sha256:f220f606b3072817aecd1c0d99548489ca84317de570df18325add207ae6aad1"
+      }
+    },
+    {
+      "name": "altered target definition fingerprint with resealed checkpoint",
+      "expected": "invalid_execution_checkpoint",
+      "checkpoint": {
+        "execution_checkpoint_format": "determa.execution_checkpoint",
+        "execution_checkpoint_schema_version": 2,
+        "root_instance_id": "job-42",
+        "revision": "2",
+        "root_record": {
+          "status": "tombstone",
+          "root_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "creation_id": "create-1",
+          "terminal_status": "completed",
+          "final_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+          "tombstone_operation_id": "tombstone-1"
+        },
+        "replay_retention": {
+          "mode": "permanent",
+          "permanent_replay_eligible": true,
+          "pruned_through_receipt_sequence": null,
+          "policy_identifier": null
+        },
+        "next_operation_receipt_sequence": "2",
+        "operation_receipts": [
+          {
+            "operation_kind": "creation",
+            "receipt_sequence": "0",
+            "creation_id": "create-1",
+            "request_digest": "sha256:d7abbb9f00a5b48259cce0805e81eecae0220b92d8e45602673b0489e4866c30",
+            "committed_revision": "0",
+            "resulting_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+            "status": "completed",
+            "fault": null,
+            "emission_references": []
+          },
+          {
+            "operation_kind": "maintenance_migration",
+            "receipt_sequence": "1",
+            "operation_id": "maintenance-empty-1",
+            "request_digest": "sha256:4385b9ed766895b9229919536b764ee807f28dbc84123084f8e915e074977c0b",
+            "committed_revision": "1",
+            "source_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+            "target_validated_bundle_fingerprint": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "resulting_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+            "migration_sequences": [],
+            "result_code": "migration_no_operation"
+          }
+        ],
+        "event_identity_tombstones": [],
+        "pending_outbox_intents": [],
+        "next_outbox_terminal_sequence": "0",
+        "terminal_outbox_records": [],
+        "outbox_effect_tombstones": [],
+        "migration_audit_records": [],
+        "execution_checkpoint_digest": "sha256:15ac802787fce4e94b995e9c54d437820587837dae3bd75d6d6baa9d37876e87"
+      }
+    },
+    {
+      "name": "unsupported receipt wrapper",
+      "expected": "schema_validation",
+      "checkpoint": {
+        "execution_checkpoint_format": "determa.execution_checkpoint",
+        "execution_checkpoint_schema_version": 2,
+        "root_instance_id": "job-42",
+        "revision": "2",
+        "root_record": {
+          "status": "tombstone",
+          "root_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "creation_id": "create-1",
+          "terminal_status": "completed",
+          "final_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+          "tombstone_operation_id": "tombstone-1"
+        },
+        "replay_retention": {
+          "mode": "permanent",
+          "permanent_replay_eligible": true,
+          "pruned_through_receipt_sequence": null,
+          "policy_identifier": null
+        },
+        "next_operation_receipt_sequence": "2",
+        "operation_receipts": [
+          {
+            "operation_kind": "creation",
+            "receipt_sequence": "0",
+            "creation_id": "create-1",
+            "request_digest": "sha256:d7abbb9f00a5b48259cce0805e81eecae0220b92d8e45602673b0489e4866c30",
+            "committed_revision": "0",
+            "resulting_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+            "status": "completed",
+            "fault": null,
+            "emission_references": []
+          },
+          {
+            "operation_kind": "unsupported_wrapped_operation",
+            "receipt_sequence": "1",
+            "wrapped_receipt": {
+              "operation_kind": "maintenance_migration",
+              "receipt_sequence": "1",
+              "operation_id": "maintenance-empty-1",
+              "request_digest": "sha256:4385b9ed766895b9229919536b764ee807f28dbc84123084f8e915e074977c0b",
+              "committed_revision": "1",
+              "source_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+              "target_validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+              "resulting_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
+              "migration_sequences": [],
+              "result_code": "migration_no_operation"
+            }
+          }
+        ],
+        "event_identity_tombstones": [],
+        "pending_outbox_intents": [],
+        "next_outbox_terminal_sequence": "0",
+        "terminal_outbox_records": [],
+        "outbox_effect_tombstones": [],
+        "migration_audit_records": [],
+        "execution_checkpoint_digest": "sha256:d21cb2fb9fe3d9b29ba4a457abf6efdfa6dd6b13b303afe0ad824027273dc26e"
+      }
+    }
+  ]
+}

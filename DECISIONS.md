@@ -196,15 +196,14 @@ without retaining old host executable logic.
 
 Relevant specification: [§6.3](SPEC.md#63-hierarchical-dispatch),
 [§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall), and
-[§17.15](SPEC.md#1715-queue-bearing-checkpoint-version-2).
+[§17.4](SPEC.md#174-aggregate-owned-admission-and-processing).
 
 **Decision.** Determa resolves an event level by level from deepest active state to root.
 At each state an enabled handler wins over that state's deferral; if no handler there is
 enabled, that state's deferral wins over every ancestor handler. Accepted ready and
-deferred envelopes belong to exactly one addressed runtime in queue-bearing
-aggregate/checkpoint version 2. Recall uses the corresponding bounded structural walk
-with no guard evaluation. Direct aggregate-state version-1 dispatch retains caller
-ownership on `deferred` and performs no automatic recall.
+deferred envelopes belong to exactly one addressed runtime in the portable
+aggregate/checkpoint. Recall uses the corresponding bounded structural walk with no
+guard evaluation.
 
 **Rejected alternative.** Search all hierarchy levels for a handler before consulting
 deferral, let an ancestor handler bypass a child deferral, or leave deferred work in a
@@ -213,46 +212,36 @@ plugin-owned queue outside portable state.
 **Reason.** UML hierarchy gives the deepest active state first refusal: a child handler
 can handle before a parent deferral is reached, while a child deferral prevents an
 ancestor from handling too early. Portable machine behavior also cannot depend on
-whether a transport plugin happens to retain process memory. Runtime-local version-2
-ownership preserves hierarchy, explicit targeting, serialization, and crash recovery
-without adding a scheduler. Structural recall prevents an unrelated successful RTC from
-faulting while merely scanning a deferred guard; normal guards run only when the
-recalled event is selected.
+whether a transport plugin happens to retain process memory. Runtime-local ownership
+preserves hierarchy, explicit targeting, serialization, and crash recovery without
+adding a scheduler. Structural recall prevents an unrelated successful RTC from faulting
+while merely scanning a deferred guard; normal guards run only when the recalled event
+is selected.
 
-## Artifact version 1 remains immutable
+## Portable artifacts have one schema version
 
-Relevant specification: [§16.15](SPEC.md#1615-queue-bearing-artifact-version-2) and
-[§17.15](SPEC.md#1715-queue-bearing-checkpoint-version-2).
+Relevant specification: [§16.1](SPEC.md#161-independent-artifact-identities) and
+[§17.1](SPEC.md#171-scope).
 
-**Decision.** Queue-bearing aggregate, package, migration, and checkpoint artifacts use
-schema version 2. Version-1 schemas and fixtures retain their exact existing meaning;
-conversion is explicit and total.
+**Decision.** Aggregate, package, migration, checkpoint, and core-result artifacts use
+schema version 2 as their sole supported portable representation. Machine document
+format 1 is independent.
 
-**Rejected alternative.** Add mailbox fields to version-1 artifacts or keep one accepted
-envelope in both `pending_deliveries` and an aggregate mailbox.
+**Rejected alternative.** Preserve an unused pre-alpha artifact representation through
+parallel schemas, compatibility wrappers, or conversion paths.
 
-**Reason.** Reinterpreting a portable schema breaks stored bytes. Duplicate ownership
-creates crash windows in which an event can be lost, processed twice, or reported
-terminal while still pending. Version 2 makes acceptance and terminal processing
-separate durable facts and stores the full envelope in one lifecycle location only.
+**Reason.** One queue-bearing ownership model is simpler and stricter. Accepted events
+have one durable lifecycle location, and implementations do not need to carry an
+unreleased compatibility surface.
 
 ## Queue lifecycle evidence is closed and dependency-safe
 
-Relevant specification: [§17.15](SPEC.md#1715-queue-bearing-checkpoint-version-2).
+Relevant specification: [§17.4](SPEC.md#174-aggregate-owned-admission-and-processing).
 
-**Decision.** Version-2 processing reports every lifecycle removal from the core, and a
+**Decision.** Processing reports every lifecycle removal from the core, and a
 checkpoint host atomically translates those removals into terminal receipts. Event
 identity tombstones preserve replay and conflict evidence after dependency-closed
-receipt compaction. Version-1 receipts remain nested historical evidence during an
-explicit upgrade and never masquerade as version-2 digests or links.
-
-**Rejected alternative.** Silently drop an internally emitted event when its target is
-disposed in the same RTC, prune receipts independently, or copy a version-1 digest into
-a changed version-2 envelope.
-
-**Reason.** Every accepted or emitted envelope needs exactly one live or terminal
-location across commit, retry, migration, completion, and compaction. Explicit legacy
-wrappers preserve audit meaning while keeping both digest domains honest.
+receipt compaction.
 
 ## Migration preserves target identity
 
@@ -303,8 +292,8 @@ Relevant specification: [§16.9](SPEC.md#169-total-transform-matrix) and
 [§16.12](SPEC.md#1612-failure-rollback-quarantine-and-audit).
 
 **Decision.** Deleted or incompatible active state requires a complete explicit
-mapping. Otherwise the original aggregate is retained and quarantined. Version 1 has
-no destructive reset migration.
+mapping. Otherwise the original aggregate is retained and quarantined. There is no
+destructive reset migration.
 
 **Rejected alternative.** Match by name, choose a surviving ancestor/initial state, or
 restart the aggregate automatically.

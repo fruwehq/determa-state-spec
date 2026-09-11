@@ -48,6 +48,7 @@ against one shared conformance suite. Guards and computed action values are writ
   §10 faults, §11 plugin boundary, §16 portable persistence/migration).
 - Non-normative rationale and review guidance: `DECISIONS.md`. It never overrides
   `SPEC.md`, the schema, or conformance.
-- Schemas: `schema/machine.schema.json`, `schema/aggregate-state.schema.json`,
-  `schema/migration-descriptor.schema.json`, and
-  `schema/aggregate-state-package.schema.json`. Examples: `examples/`.
+- Schemas: `schema/machine.schema.json`, `schema/aggregate-state-v2.schema.json`,
+  `schema/migration-descriptor-v2.schema.json`,
+  `schema/aggregate-state-package-v2.schema.json`, and
+  `schema/execution-checkpoint-v2.schema.json`. Examples: `examples/`.
