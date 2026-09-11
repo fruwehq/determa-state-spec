@@ -90,7 +90,7 @@ code-point sequences. Every specified byte ordering and every hash encodes those
 points as strict UTF-8.
 
 For a machine source, invalid Unicode is the pre-schema `invalid_unicode` load error.
-Programmatic values crossing `create` or `dispatch` are checked recursively before CEL,
+Programmatic values crossing `create` or `step` are checked recursively before CEL,
 state mutation, or identity hashing:
 
 - invalid `root_instance_id` or `creation_id` rejects creation with
@@ -596,9 +596,8 @@ A send target is one of:
 both means `self`. One target produces one independent emission. There is no implicit
 broadcast.
 
-Internal sends do not recursively dispatch. Version-1 direct dispatch returns them to
-the host in emission order. Version-2 processing appends them to exact target runtime
-ready mailboxes in that same order as part of the producing RTC commit.
+Internal sends do not recursively dispatch. Processing appends them to exact target
+runtime ready mailboxes in emission order as part of the producing RTC commit.
 
 An internal send to `self`, `owner`, `component`, or `instance` MUST name a bundle or
 machine-local `internal` event. A send to `external` MUST name a bundle `output` event
@@ -879,28 +878,16 @@ This tagged union is the normalized immutable target. Author target shorthands f
 stores the complete member and never resolves it again. A component target therefore
 names one activation incarnation, not merely a reusable `component_id`.
 
-A queue-bearing version-2 mailbox envelope additionally stores required `cause_id` and
-`source`. Host input uses `cause_id: event_id` and `source: { host: true }`. Internal
-emissions preserve their existing deterministic cause and use
-`source: { runtime: target_identity_of_emitter }`; system emissions use their exact
-`system:` source locator. These fields make the already defined logical provenance
-portable; they do not change version-1 envelope bytes.
+A portable mailbox envelope additionally stores required `cause_id` and `source`. Host input uses `cause_id: event_id` and `source: { host: true }`. Internal emissions preserve their deterministic cause and use `source: { runtime: target_identity_of_emitter }`; system emissions use their exact `system:` source locator.
 
-Direct aggregate-state version-1 `dispatch` never transfers envelope ownership to the
-core because that artifact has no mailbox. It validates and classifies the exact
-caller-owned envelope for one immediate call. If classification is `deferred`, it
-returns the byte-for-byte prior aggregate, no emissions, and the caller retains the
-exact envelope for later resubmission. Version 1 performs no automatic recall and makes
-no portable ordering or durability claim for caller-retained deferred work.
-
-Portable automatic deferral therefore requires queue-bearing aggregate/checkpoint
-version 2. The caller owns a version-2 envelope until mailbox admission commits. Before
+Portable automatic deferral uses the aggregate/checkpoint mailbox model. The caller owns
+an envelope until mailbox admission commits. Before
 that boundary, the core atomically validates the delivery mode, event declaration,
 direction, payload, correlation, exact target incarnation, and target eligibility.
 Rejection returns the prior state unchanged, allocates no logical identity, and leaves
 the envelope caller-owned. After committed admission the envelope exists in exactly one
 engine-owned lifecycle location: one runtime's ready mailbox, that same runtime's
-deferred mailbox, or a terminal/disposal receipt under §17.15.
+deferred mailbox, or a terminal/disposal receipt under §17.3.
 
 `input` mode MUST name a bundle `input` event and may supply only the `root` or
 `spawned_instance` target member for a running runtime. Direct use of the `component`
@@ -919,16 +906,15 @@ an output event in either mode rejects with `invalid_event`.
 A completed or faulted root, and a faulted spawned runtime, reject delivery with
 `invalid_instance_target`. A completed or faulted component rejects internal delivery
 with `inactive_component_target`; it cannot accumulate work that will never run.
-Rejection is atomic. Calling `dispatch` with null delivery is not a processing
-operation; read-only inspection of a terminal aggregate returns its existing status
-and no emissions.
+Rejection is atomic. Reading a terminal aggregate is not a processing operation and
+returns its existing status without emissions.
 
 Aggregate-root fault terminality overrides descendant status. Once the aggregate root
-is faulted, every non-empty dispatch targeting the root, a component, or a spawned
+is faulted, every admission targeting the root, a component, or a spawned
 descendant is rejected atomically with `invalid_instance_target`, even when the
 descendant's retained diagnostic status was running. The aggregate, counters, and
-emissions remain unchanged. A null-delivery read-only inspection returns that exact
-faulted aggregate and no emissions.
+emissions remain unchanged. Read-only inspection returns that exact faulted aggregate
+and no emissions.
 
 Reserved `env` is the only undeclared host-input exception:
 
@@ -971,15 +957,13 @@ to a component remains invalid.
 
 ### 6.2 Run to completion
 
-One direct `dispatch` examines at most one caller-owned envelope and one mailbox `step`
-processes at most one accepted envelope, in either case for one explicitly addressed
-runtime. The step is non-reentrant and atomic. Internal emissions append to exact target
-runtime ready mailboxes only if the operation uses queue-bearing aggregate-state version
-2; direct aggregate-state version 1 dispatch continues to return them to its caller.
+One mailbox `step` processes at most one accepted envelope for one explicitly
+addressed runtime. The step is non-reentrant and atomic. Internal emissions append to
+exact target-runtime ready mailboxes.
 External emissions remain output intents. No operation chooses another runtime, drains
 an aggregate, or introduces a round-robin scheduler.
 
-For a version-2 operation, a successful internal `send` action resolves and validates
+A successful internal `send` action resolves and validates
 its exact target incarnation, allocates the next acceptance and queue sequences, and
 tentatively appends the complete entry to that target's ready mailbox at that action's
 position in emission order. The entry is visible to later lifecycle cleanup in the same
@@ -1060,10 +1044,8 @@ addressed runtime's ordinary state hierarchy; components and owned spawned runti
 isolated configurations and mailboxes. Explicit fan-out creates independent envelopes
 that are resolved independently.
 
-An unhandled result is not a core fault. Under version 2 the accepted envelope is
-consumed into its terminal receipt and is not retained in logical state. Under direct
-version-1 dispatch the core retains no copy and the caller continues to own the supplied
-envelope under the pre-existing delivery boundary. A host may separately audit or
+An unhandled result is not a core fault. The accepted envelope is consumed into its
+terminal receipt and is not retained in logical state. A host may separately audit or
 dead-letter that terminal disposition, but no transport plugin may reinterpret it as
 machine deferral.
 
@@ -1234,11 +1216,7 @@ initialization or emission leaks from the failed attempt.
 
 ### 6.7 Deferred mailboxes and automatic recall
 
-The mailbox and automatic-recall rules in this subsection apply only to queue-bearing
-aggregate-state version 2. Direct version-1 `dispatch` has the caller-owned `deferred`
-result defined in §6.1 and does not retain or recall the envelope.
-
-In version 2 each runtime has one FIFO ready mailbox and one FIFO deferred mailbox. They
+Each runtime has one FIFO ready mailbox and one FIFO deferred mailbox. They
 are isolated from every other runtime even when the runtimes share one ownership
 aggregate. A `deferred` result atomically removes the selected ready entry, increments
 its `deferral_count`, allocates a new `queue_sequence`, and appends it to that runtime's
@@ -1422,9 +1400,8 @@ parallel branch of the fixed reserved `done` payload from §4.4:
 }
 ```
 
-Under aggregate-state version 2, both notifications append to the owner ready mailbox in
-the committed emission order, after work already there; under version 1 direct dispatch
-they remain returned emissions. In either representation,
+Both notifications append to the owner ready mailbox in the committed emission order,
+after work already there.
 `determa.component_completed` precedes `done`.
 
 For `determa.component_completed`, source is the component runtime and target is its
@@ -1483,7 +1460,7 @@ ordinary transition; a state-scoped holder ties its child to that state's lifeti
 
 Ownership is not otherwise tied to the transition that spawned the child. An unbound
 child or a child whose holding reference remains in scope is processed only when an
-explicit envelope targets it and the host invokes direct dispatch or a mailbox `step`
+explicit envelope targets it and the host invokes a mailbox `step`
 for that exact runtime.
 
 After its expression type-checks as `instance_reference`, `cancel` is always
@@ -1564,29 +1541,14 @@ equivalent to:
 
 ```text
 create(bundle, machine_id, root_instance_id, creation_id, bindings)
-  -> { status, state, emissions, fault, rejection }
-
-create_v2(bundle, machine_id, root_instance_id, creation_id, bindings)
   -> { status, state, emissions, lifecycle_dispositions, fault, rejection }
 
-dispatch(bundle, prior_state, delivery?)
-  -> { status, disposition, state, emissions, fault, rejection }
-
-admit(bundle, prior_state_v2, ordered_deliveries)
+admit(bundle, prior_state, ordered_deliveries)
   -> { status, accepted, state, rejection }
 
-step(bundle, prior_state_v2, target_runtime_id)
+step(bundle, prior_state, target_runtime_id)
   -> { status, disposition, state, emissions, lifecycle_dispositions, fault, rejection }
-
-delivery =
-  { input: envelope }
-  | { internal: envelope }
-  | null
 ```
-
-The two delivery members are a closed tagged union. `input` applies the public-ingress
-rules in §6.1; `internal` applies the internal-delivery rules. A non-null delivery has
-exactly one member. Null is the read-only inspection call.
 
 `admit` validates its complete ordered batch before mutation, then appends each envelope
 to its exact target runtime's ready tail in caller order. It allocates immutable
@@ -1612,21 +1574,18 @@ disposed and is no longer retained, the same stale identity falls into the absen
 row and uses `invalid_instance_target`. Root and spawned runtimes never use
 `inactive_component_target`.
 
-`create` retains its existing aggregate-state version-1 result. `create_v2` is the only
-fresh version-2 creation selection; hosts MUST choose it explicitly rather than infer it
-from later persistence. Before author initialization it sets aggregate next acceptance
+`create` is the sole portable aggregate creation operation. Before author initialization it sets aggregate next acceptance
 and queue sequences to zero and creates every runtime with empty ready/deferred
 mailboxes. Each initialization internal emission then allocates from those counters in
 emission order and starts with `deferral_count: "0"`; absent such emissions both next
 counters remain zero. Creation-time target disposal follows the same disposition rule
-as a version-2 `step`.
+as `step`.
 
 `status` is `running`, `completed`, or `faulted` for an existing aggregate. A creation
 rejected before an aggregate exists returns `status: rejected` and `state: null`.
-Dispatch rejection or an unhandled envelope preserves the prior aggregate status.
+Admission rejection or an unhandled envelope preserves the prior aggregate status.
 
-Every named result field is present. For version-1 direct dispatch, `emissions` is the
-ordered immutable emission list returned by the call. For version-2 operations it
+Every named result field is present. `emissions`
 contains full external intents plus `internal_mailbox` or `internal_disposed` references
 only; an internal envelope's deliverable copy exists solely in its target mailbox or is
 accounted by the referenced lifecycle disposition. `rejection` is null
@@ -1634,31 +1593,29 @@ except on pre-step rejection, where it is exactly
 `{ code: rejection_code }`. `fault` is:
 
 - the aggregate root's committed fault record when the aggregate root is faulted;
-- otherwise the target runtime fault newly committed by a `faulted` dispatch; or
+- otherwise the target runtime fault newly committed by a `faulted` step; or
 - null.
 
 A contained fault committed inside an otherwise successful owner RTC appears only in
 the contained-runtime state and its reserved failure emission; it does not populate the
 top-level `fault`. There is no plural `faults` result field.
 
-Every `create_v2` and `step` result also contains `lifecycle_dispositions`, including
+Every `create` and `step` result also contains `lifecycle_dispositions`, including
 the empty list; rejected creation returns the empty list. One entry contains exactly `event_id`, `request_digest`,
 `acceptance_sequence`, `final_queue_sequence`, `target_runtime_id`, and lifecycle
 `reason`. It accounts for every ready/deferred entry removed by successful lifecycle
 cleanup, including internal work emitted earlier in the same RTC. Entries use lifecycle
 cleanup runtime order, then ready entries followed by deferred entries in queue order.
 The closed structural schema for `step` is `schema/core-step-result-v2.schema.json`;
-semantic status/disposition/fault/rejection relationships remain mandatory. The
-creation result retains the creation-specific status/state shape above. Direct
-version-1 results have no lifecycle-disposition field and retain their existing shape.
+semantic status/disposition/fault/rejection relationships remain mandatory. The creation result retains the creation-specific status/state shape above.
 
 Creation rejection codes are exactly `invalid_creation_request`,
-`invalid_machine_target`, and `invalid_binding`. Dispatch rejection codes are exactly
+`invalid_machine_target`, and `invalid_binding`. Processing rejection codes are exactly
 `invalid_event`, `invalid_payload`, `invalid_correlation`,
 `invalid_instance_target`, `inactive_component_target`, `invalid_prior_state`, and
-`incompatible_bundle`. The closed version-2 `step` pre-step rejection subset is exactly
+`incompatible_bundle`. The closed `step` pre-step rejection subset is exactly
 `invalid_instance_target`, `inactive_component_target`, `invalid_prior_state`, and
-`incompatible_bundle`; admission has the larger closed set in §17.15. Bundle parsing,
+`incompatible_bundle`; admission has the larger closed set in §17.4. Bundle parsing,
 schema, and semantic load failures happen before these calls and use §2/§5 codes. A
 rejection commits no fault record.
 
@@ -1672,22 +1629,9 @@ rejection commits no fault record.
 - `rejected` — validation failed before an RTC step; or
 - `faulted` — an engine fault occurred during the RTC step.
 
-Deferral ownership is total across the two operation profiles:
-
-| operation and artifact | classification | committed ownership/result |
-|---|---|---|
-| direct `dispatch`, aggregate-state version 1 | `deferred` | prior aggregate unchanged; exact envelope remains caller-owned |
-| mailbox `step`, aggregate-state version 2 | `deferred` | selected ready entry moves to that runtime's deferred mailbox |
-| version-2 structural recall | eligible | deferred entry moves once to that runtime's ready tail |
-| version-2 structural recall | ineligible | deferred entry remains in its existing position |
-
-Only the version-2 rows provide portable automatic retention and recall. A version-1
-caller that discards a `deferred` result discards its own envelope; the core has not
-claimed acceptance or retained a hidden copy.
-
-For the null-delivery read-only call defined by §6.1, `disposition` is null. It returns
-the unchanged state, current `status` and `fault`, empty `emissions`, and null
-`rejection`.
+Deferral ownership is total: mailbox `step` moves a deferred event from the selected
+ready mailbox to that runtime's deferred mailbox; structural recall moves an eligible
+deferred event once to that runtime's ready tail and leaves an ineligible event in place.
 
 The root ownership aggregate contains:
 
@@ -1705,9 +1649,8 @@ The root ownership aggregate contains:
 
 It contains no external broker backlog, dead-letter collection, timer, broker
 acknowledgement token, credential, transport receipt, or plugin configuration.
-Aggregate-state schema version 1 can encode only an abstract aggregate whose runtime
-mailboxes are empty; schema version 2 is required whenever accepted work is ready or
-deferred. This restriction does not reinterpret any version-1 byte.
+The sole aggregate-state artifact always represents these mailboxes and counters,
+including when every mailbox is empty.
 
 Before creation, the engine creates one normalized bundle tree. Default
 materialization is closed and context-sensitive:
@@ -1811,7 +1754,7 @@ hash:
 sha256:7e48ad82ea5305c24b7730f4fd24c36ec196a0875c982b85eba5b3a5ddcbb92f
 ```
 
-Creation stores this fingerprint. Every ordinary dispatch, including read-only
+Creation stores this fingerprint. Every ordinary admission or step, plus read-only
 inspection, first validates the abstract prior-state shape and all retained
 definition/path references, then compares its stored fingerprint with the supplied
 validated bundle. Malformed or internally inconsistent prior state rejects with
@@ -1821,12 +1764,12 @@ precedes envelope validation. A different document reusing the same
 namespace/machine/version triple can therefore never reinterpret existing state.
 
 The portable aggregate-state and explicit definition-migration operations in §16 are
-separate operations around this dispatch boundary. A host may decode an aggregate
-under its exact source definition and explicitly migrate it before dispatch. Ordinary
-dispatch itself never chooses, discovers, or applies a migration.
+separate operations around this processing boundary. A host may decode an aggregate
+under its exact source definition and explicitly migrate it before admission or a step.
+Ordinary processing never chooses, discovers, or applies a migration.
 
 The host may store one aggregate in one row/document or normalize it, provided every
-dispatch sees serializable prior state and commits an observably equivalent result.
+operation sees serializable prior state and commits an observably equivalent result.
 The core itself performs no persistence.
 
 Creation initializes the aggregate and every root initial/entry action atomically.
@@ -2061,7 +2004,7 @@ inline placements cannot collide.
 action. The intent also carries the allocated aggregate-monotonic output `sequence`,
 event name, typed payload, and correlation id. Retrying the same uncommitted prior
 state and envelope reproduces the same state, emissions, ids, and order. Processing
-several envelopes by repeated `dispatch` calls produces the same result as a host
+several envelopes by repeated `step` calls produces the same result as a host
 convenience API that applies that same ordered envelope sequence atomically.
 
 The queue or external adapter may use these identities for deduplication, but the core
@@ -2142,7 +2085,7 @@ record; if its delivery later faults the owner, the owner receives a separate re
 record with the system locator above. Rejected pre-step envelopes and rejected creation
 have no committed fault record and therefore no `source_locator`.
 
-For version-2 deferred-capacity overflow, selection reserves the current aggregate
+For deferred-capacity overflow, selection reserves the current aggregate
 `next_logical_step_sequence` before classification. The failed deferred append and any
 tentative queue-sequence allocation roll back completely. Fault finalization consumes
 the selected ready entry, uses its immutable envelope `cause_id`, records code
@@ -2153,13 +2096,11 @@ author action or external intent ran. The checkpoint host creates the selected e
 terminal `faulted` receipt in that same commit; root or contained-fault propagation then
 follows the ordinary rules.
 
-For direct version-1 dispatch, the caller still owns a faulting envelope and receives
-`disposition: faulted`, preserving the established version-1 boundary. For a previously
-accepted version-2 mailbox entry, fault finalization removes that entry and creates its
-terminal `faulted` receipt in the same commit. Other ready/deferred entries remain in
-their exact locations; a root fault freezes them, while a contained fault freezes only
-that runtime subtree as §6.7 defines. A transport plugin cannot retry or discard an
-engine-owned mailbox entry independently.
+For a previously accepted mailbox entry, fault finalization removes that entry and
+creates its terminal `faulted` receipt in the same commit. Other ready/deferred entries
+remain in their exact locations; a root fault freezes them, while a contained fault
+freezes only that runtime subtree as §6.7 defines. A transport plugin cannot retry or
+discard an engine-owned mailbox entry independently.
 
 ### 10.2 Contained runtime faults
 
@@ -2391,7 +2332,7 @@ is a completeness boundary, not a compatibility promise for earlier drafts.
 | deferral and dead letters | UML-style runtime-local deferral is portable; dead-letter storage remains host policy |
 | owned spawning | retained for same-bundle machines with nominal `instance_reference` values |
 | submachines and package imports | unsupported |
-| definition migration/hot-swap | explicit portable aggregate migration under §16; never implicit in ordinary dispatch |
+| definition migration/hot-swap | explicit portable aggregate migration under §16; never implicit in ordinary processing |
 | observers and export | read-only inspection and visualization are recommended, not executable core behavior |
 | snapshots | closed portable aggregate-state envelope and package under §16 |
 | stores and CLI protocols | host/implementation concerns, not bundle grammar |
@@ -2511,8 +2452,8 @@ Persistence and migration conformance additionally requires:
 - exact pinned multi-hop routes, adjacency checks, and cycle/alternate-route rejection;
 - immutable runtime, target, nominal-reference, activation, spawn, logical-step, and
   output identities across migration;
-- queue-bearing aggregate/checkpoint version-2 round trips, version-1 immutability,
-  event acceptance/terminal receipt separation, and ready/deferred migration totality;
+- queue-bearing aggregate/checkpoint round trips, event acceptance/terminal receipt
+  separation, and ready/deferred migration totality;
 - retry-identical success or failure, complete rollback, and no counter consumption;
 - migration followed by handled, unhandled, rejected, and faulted dispatch in one
   host transaction;
@@ -2524,9 +2465,7 @@ Persistence and migration conformance additionally requires:
 Execution-checkpoint profile conformance additionally requires:
 
 - exact checkpoint and envelope digests plus byte-stable canonical round trips;
-- version-1-to-version-2 conversion with wrapped legacy receipts, converted internal
-  origins, distinct digest domains, zero-based mailbox counters, and no stale digest
-  equality claim;
+- zero-based mailbox counters, native receipt identities, and one digest domain;
 - same-RTC internal-send retention, frozen-target retention, successful lifecycle
   disposal, and rollback cases with exactly one mailbox/disposition result;
 - duplicate event ids within one batch, equal/conflicting terminal replay after root
@@ -2550,11 +2489,11 @@ Execution-checkpoint profile conformance additionally requires:
 - permanent/bounded retention, irreversible pruning history, terminal
   checkpoint/tombstone retention in both modes, dependency-closed pruning, restore
   completeness, and root-identity no-reuse;
-- rejection of physical checkpoint/root-marker deletion in schema version 1,
+- rejection of physical checkpoint/root-marker deletion,
   including bounded mode and backup/restore;
 - exact accepted/committed revision equations for delayed, foreground, creation, and
   internally emitted deliveries, including every impossible ordering;
-- atomic aggregate/pending-delivery/receipt/outbox/audit/revision replacement at every
+- atomic aggregate/mailbox/receipt/outbox/audit/revision replacement at every
   injected pre-commit crash point;
 - post-commit/pre-acknowledgement replay without redispatch or duplicate insertion;
 - embedded foreground accept/process and delayed processing with equal committed
@@ -2604,65 +2543,37 @@ specification-only change.
 
 ### 16.1 Independent artifact identities
 
-Machine documents remain numeric `format: 1`. Persistence introduces four independent
-closed JSON artifacts:
+Machine documents remain numeric `format: 1`. Portable persistence uses exactly these
+four independent closed JSON artifacts:
 
-| artifact | exact format field | exact schema-version field |
-|---|---|---|
-| aggregate-state envelope | `aggregate_state_format: "determa.aggregate_state"` | `aggregate_state_schema_version: 1` |
-| migration descriptor | `migration_descriptor_format: "determa.aggregate_migration"` | `migration_descriptor_schema_version: 1` |
-| transport package | `aggregate_state_package_format: "determa.aggregate_state_package"` | `aggregate_state_package_schema_version: 1` |
-| execution checkpoint | `execution_checkpoint_format: "determa.execution_checkpoint"` | `execution_checkpoint_schema_version: 1` |
+| artifact | exact format field | exact schema-version field | schema |
+|---|---|---|---|
+| aggregate-state envelope | `aggregate_state_format: "determa.aggregate_state"` | `aggregate_state_schema_version: 2` | `schema/aggregate-state-v2.schema.json` |
+| migration descriptor | `migration_descriptor_format: "determa.aggregate_migration"` | `migration_descriptor_schema_version: 2` | `schema/migration-descriptor-v2.schema.json` |
+| transport package | `aggregate_state_package_format: "determa.aggregate_state_package"` | `aggregate_state_package_schema_version: 2` | `schema/aggregate-state-package-v2.schema.json` |
+| execution checkpoint | `execution_checkpoint_format: "determa.execution_checkpoint"` | `execution_checkpoint_schema_version: 2` | `schema/execution-checkpoint-v2.schema.json` |
 
-Queue-bearing continuation adds aggregate-state, migration-descriptor,
-aggregate-state-package, and execution-checkpoint schema version `2` under the same
-respective format discriminators. Version 1 of every artifact above remains immutable;
-version 2 is selected explicitly and is never inferred from fields.
+Queue-bearing core results use `schema/core-step-result-v2.schema.json`. Artifact schema
+version 2 is the sole supported portable artifact version. No alternate artifact
+representation, compatibility wrapper, conversion path, or implicit conversion is
+defined. Machine document format 1 is a separate version domain and is not an artifact
+schema version.
 
-These wire schema versions, machine format, repository/package SemVer, launcher
-SemVer, and author-controlled machine `version` are independent version domains.
-Unknown artifact formats or schema versions are rejected before semantic validation;
-there is no nearest-version parsing, implicit conversion, or best-effort field
-retention.
+Artifact schema versions, machine format, repository/package SemVer, launcher SemVer,
+and author-controlled machine `version` are independent version domains. Unknown
+artifact formats or schema versions are rejected before semantic validation; there is
+no nearest-version parsing or best-effort field retention.
 
-In particular, snapshots produced by releases 0.0.1 through 0.0.6 are not modern
-portable artifacts. The caller or host MUST select one modern decoder before decoding;
-the selected decoder MUST NOT probe other artifact kinds or infer one from field shape.
-A legacy snapshot, including one with the selected decoder's discriminator absent,
-MUST be rejected before schema or semantic validation with the decoder's exact closed
-format code:
+Snapshots produced by releases 0.0.1 through 0.0.6 are not portable artifacts. The
+caller or host MUST select one artifact decoder before decoding. Missing or unknown
+discriminators fail with the decoder's exact closed format/version code; a decoder MUST
+NOT probe another artifact kind, infer one from field shape, or attempt conversion.
 
-- aggregate-state decoding uses `unsupported_aggregate_state_format` (§16.12);
-- migration-descriptor decoding uses `unsupported_migration_descriptor_format`
-  (§16.12);
-- aggregate-state-package decoding, when that decoder was selected, uses
-  `unsupported_aggregate_state_package_format` (§16.12); and
-- execution-checkpoint restoration uses `unsupported_execution_checkpoint_format`
-  (§17.1).
-
-A decoder MUST NOT fall through to another decoder, treat a legacy snapshot as a
-format-1 artifact, or attempt a migration.
-
-The artifacts MUST be JSON encoded as strict UTF-8. Their parsers apply the §2
-source-level duplicate-name, acyclic JSON-value, Unicode-scalar, Boolean, null, and
-finite-number requirements before the applicable schema. YAML is not a portable
-encoding for these artifacts. Every schema is closed: an unknown member is invalid.
-The exact structural schemas are:
-
-- `schema/aggregate-state.schema.json`;
-- `schema/migration-descriptor.schema.json`; and
-- `schema/aggregate-state-package.schema.json`; and
-- `schema/execution-checkpoint.schema.json`.
-
-The corresponding version-2 schemas are `schema/aggregate-state-v2.schema.json`,
-`schema/migration-descriptor-v2.schema.json`,
-`schema/aggregate-state-package-v2.schema.json`, and
-`schema/execution-checkpoint-v2.schema.json`. Queue-bearing core results use
-`schema/core-step-result-v2.schema.json`.
-
-Structural validity is necessary but not sufficient. The semantic invariants in this
-section are mandatory even where JSON Schema cannot express ordering, cross-reference,
-digest, type, or totality constraints.
+Artifacts MUST be strict UTF-8 JSON and apply the §2 source-level duplicate-name,
+acyclic JSON-value, Unicode-scalar, Boolean, null, and finite-number requirements before
+schema validation. YAML is not a portable artifact encoding. Every schema is closed.
+Structural validity is necessary but not sufficient: all ordering, cross-reference,
+digest, type, and totality invariants in this section remain mandatory.
 
 The portable core operations are behaviorally equivalent to:
 
@@ -2733,24 +2644,22 @@ bytes of the complete envelope with no byte-order mark, leading/trailing whitesp
 or trailing newline. A parser may accept insignificant JSON whitespace and then verify
 that the semantic data is canonical.
 
-The human-readable `aggregate-state.json`, `migrated-aggregate-state.json`, and
-`faulted-aggregate-state.json` fixtures are pretty representations, not canonical
-serialized bytes. `aggregate-state.canonical.json` and
-`migrated-aggregate-state.canonical.json` are the exact byte goldens; their complete
-file bytes MUST equal RFC 8785 serialization of the corresponding pretty fixture.
+`examples/persistence/aggregate-state-v2.json` is the normative human-readable
+aggregate example. Conformance byte vectors MUST equal RFC 8785 serialization of their
+corresponding semantic value.
 
 The digest is:
 
 ```text
 aggregate_state_digest = hash([
-  "determa-aggregate-state-digest-1",
+  "determa-aggregate-state-digest-2",
   envelope_without_aggregate_state_digest
 ])
 ```
 
 `hash` is the §9 SHA-256/JCS construction. A mismatch is
-`aggregate_state_digest_mismatch`. The digest does not include database metadata,
-quarantine state, queue state, or package attachments.
+`aggregate_state_digest_mismatch`. The digest does not include database metadata, quarantine metadata, or package
+attachments. Ready and deferred mailboxes are aggregate state and therefore are covered.
 
 ### 16.3 Complete root ownership aggregate
 
@@ -2765,8 +2674,11 @@ One envelope represents exactly one §3 root ownership aggregate. It contains:
 - lifecycle status, active leaves and state activations, live variables, history,
   spawn/state/component counters, lifetime-holder association, and retained fault;
   and
-- no plugin-owned queue, deferred event, timer, broker receipt, acknowledgement,
-  dead-letter, credential, or transport configuration.
+- every runtime's isolated ready and deferred mailboxes plus aggregate acceptance
+  and queue-placement counters.
+
+It contains no external broker backlog, timer, broker acknowledgement token, credential,
+transport receipt, or plugin configuration.
 
 The root runtime occurs exactly once and matches every top-level root identity field.
 Every other runtime has exactly one retained owner. The ownership graph is acyclic and
@@ -2826,7 +2738,7 @@ MUST reconstruct their mathematical integer values before comparing them with
 in-memory references or targets and before using them for routing or dispatch.
 
 `runtime_id`, `identity_origin`, and the complete normalized `target_identity` bytes
-are invariant across every version-1 descriptor. Root identity, component runtime
+are invariant across every descriptor. Root identity, component runtime
 identity, component activation sequence, spawned instance reference, spawned instance
 id, spawn sequence, and existing lifetime-holder activation identity are never
 rederived.
@@ -2836,7 +2748,7 @@ For a migrated component, author syntax using the target definition's current
 For a migrated spawned runtime, its existing `instance_reference` remains byte-for-byte
 stable while `current_definition` changes. New components and spawned instances use
 the target definition normally. Identity rekeying, external-reference rewriting, and
-detached child migration are unsupported in schema version 1.
+detached child migration are unsupported.
 
 ### 16.5 Content-addressed definition registry
 
@@ -2958,12 +2870,12 @@ state-bearing projection difference requires `transform` mode.
 
 A migration descriptor names exactly one source and one target machine format,
 validated-bundle fingerprint, and independently recomputed aggregate-shape
-fingerprint. Schema version 1 requires both machine formats to be numeric `1`. Its
+fingerprint. The descriptor requires both machine formats to be numeric `1`. Its
 digest is:
 
 ```text
 migration_descriptor_digest = hash([
-  "determa-migration-descriptor-1",
+  "determa-migration-descriptor-2",
   descriptor_without_migration_descriptor_digest
 ])
 ```
@@ -3093,7 +3005,7 @@ iteration uses canonical `runtime_id` order only for resource accounting; becaus
 occurrences are isolated and rule domains cannot overlap, result bytes never depend on
 host map or iteration order.
 
-When an active state is deleted or incompatible, version 1 permits only:
+When an active state is deleted or incompatible, the descriptor permits only:
 
 - an exact source-leaf to target-leaf mapping;
 - an explicit ancestor mapping accompanied by the complete resulting target leaf set;
@@ -3106,13 +3018,13 @@ The engine never guesses by equal name, nearest surviving ancestor, initial stat
 history, or root reset. Removed variables require an explicit destructive `drop` with
 an operator-facing reason. Type changes require a statically checked transform.
 Removed live components, incompatible owned runtimes, missing holders, or ambiguous
-identity mappings fail in schema version 1 rather than being silently disposed.
+identity mappings fail rather than being silently disposed.
 
 ### 16.10 Terminal aggregates
 
-Completed and faulted aggregates remain terminal. An ordinary non-null dispatch is
+Completed and faulted aggregates remain terminal. Ordinary admission or processing is
 rejected under the stored source definition before automatic host migration begins.
-Null inspection may continue using the source definition without migration.
+Read-only inspection may continue using the source definition without migration.
 
 `maintenance_mode` is a required Boolean migration-request member. Omission or a
 non-Boolean value is `invalid_migration_request`. An explicit migration may advance a
@@ -3128,7 +3040,7 @@ counters, and historical fault-definition anchors; it cannot reactivate any runt
 
 If no allowed route exists, retaining the terminal source aggregate is valid while its
 source definition remains registered. A host requiring a uniform target may quarantine
-it. Version 1 has no recovery, restart, or destructive reset policy.
+it. This specification has no recovery, restart, or destructive reset policy.
 
 ### 16.11 Lazy transactional host ordering
 
@@ -3141,16 +3053,16 @@ A persistence host supporting lazy migration follows this ordering:
    compare-and-swap guard.
 3. Lock/read the aggregate and the inbox receipt for the presented envelope.
 4. If that idempotency key is already committed, return its recorded outcome without
-   migration or dispatch.
+   migration or processing.
 5. Parse and verify the aggregate, resolve its source definition from the local cache,
    validate source state, and recheck route source.
 6. Apply the complete route to an in-memory copy, validating every intermediate.
-7. If the resulting aggregate is running and a delivery was supplied, invoke ordinary
-   target-definition dispatch exactly once.
+7. If the resulting aggregate is running and an accepted delivery is ready, invoke
+   target-definition `step` exactly once.
 8. Build deterministic migration audit records and normal core result records.
-9. Atomically replace aggregate bytes, record inbox disposition, insert ordered
-   internal/external emissions in the outbox under their existing unique identities,
-   and append audit rows.
+9. Atomically replace aggregate bytes, record receipt disposition, retain ordered
+   internal emissions in target mailboxes, insert external intents in the outbox under
+   their existing unique identities, and append audit rows.
 10. Commit once, then acknowledge broker ingress or dispatch outbox work.
 
 `handled`, `unhandled`, `rejected`, and `faulted` are core outcomes, not storage
@@ -3233,7 +3145,7 @@ Each successful descriptor returns exactly one closed audit record in route orde
 
 ```text
 {
-  migration_audit_record_schema_version: 1,
+  migration_audit_record_schema_version: 2,
   root_instance_id: non_empty_string,
   root_runtime_id: non_empty_string,
   migration_sequence: canonical_decimal,
@@ -3248,8 +3160,7 @@ Each successful descriptor returns exactly one closed audit record in route orde
 
 No other member is present. `migration_sequence` is the post-descriptor sequence.
 Source/target state digests are the exact candidate digests immediately before and
-after that descriptor. `examples/persistence/compatible-migration-audit.json` is the
-normative one-hop result. Conformance compares the complete ordered record list.
+after that descriptor. Conformance compares the complete ordered record list.
 Host observation time, worker identity, database transaction id, and operator metadata
 may be stored alongside but outside this deterministic record. Success and quarantine
 audit rows are append-only and transactional with the state they describe.
@@ -3317,8 +3228,8 @@ updates and final aggregate serialization are deliberately not transformed-outpu
 bytes. A transform descriptor with only pointer/identity mappings may also use zero.
 Cycles are forbidden. Each descriptor is checked independently against its declared
 four bounds and the corresponding configured per-descriptor limits. A route is bounded
-by its exact descriptor count plus those independent per-descriptor checks; schema
-version 1 defines no mixed-unit cumulative-chain-work counter and does not sum resource
+by its exact descriptor count plus those independent per-descriptor checks. The
+descriptor defines no mixed-unit cumulative-chain-work counter and does not sum resource
 dimensions across descriptors. Exceeding the chain-length limit or any deterministic
 per-descriptor limit fails closed with `migration_resource_limit_exceeded`.
 
@@ -3328,10 +3239,9 @@ external delivery, package import, or bulk row rewrite. A later runnable databas
 example belongs in the separate examples repository after conformance and both engines
 implement this contract.
 
-### 16.15 Queue-bearing artifact version 2
+### 16.15 Queue-bearing artifact semantics
 
-Aggregate-state schema version 2 preserves every version-1 field and adds exactly
-aggregate `next_acceptance_sequence` and `next_queue_sequence`, plus each runtime's
+The aggregate contains `next_acceptance_sequence` and `next_queue_sequence`, plus each runtime's
 `ready_mailbox` and `deferred_mailbox`. Each mailbox entry contains immutable
 `acceptance_sequence`, current `queue_sequence`, delivery mode, complete normalized
 envelope, envelope digest, and `deferral_count`. Entries in each mailbox are strictly
@@ -3354,7 +3264,7 @@ envelope_digest = hash([
 The digest is also the acceptance receipt's `request_digest` and the eventual terminal
 event receipt's `request_digest`.
 
-Version-2 aggregate serialization uses the §16.2 canonical rules and:
+Aggregate serialization uses the §16.2 canonical rules and:
 
 ```text
 aggregate_state_digest = hash([
@@ -3373,15 +3283,10 @@ before any application row, mailbox, receipt, or outbox mutation; it never drops
 unrepresented field. Ephemeral in-memory ownership is conforming when no durability is
 claimed.
 
-Aggregate-state version 1 decodes exactly as before and has no mailboxes. Explicit
-upgrade `1 -> 2` is permitted only by copying every version-1 logical field, inserting
-zero next acceptance/queue counters and empty mailboxes, setting schema version 2, and
-recomputing the version-2 digest. Downgrade `2 -> 1` is permitted only when both counters
-are zero and every mailbox is empty; otherwise it fails `migration_totality_failure`.
-No decoder performs either conversion implicitly.
+No aggregate artifact conversion or alternate mailbox-free representation is defined.
 
-Migration-descriptor schema version 2 contains one complete version-1 base descriptor,
-the fixed `queued_event_default: preserve_if_compatible`, and reusable
+The migration descriptor directly contains its source/target identities, mappings,
+terminal and resource policies, the fixed `queued_event_default: preserve_if_compatible`, and reusable
 `queued_event_rules`. A rule is an explicit disposal override keyed by exact source
 `machine_id`, event name, and delivery mode and carries `action: dispose` plus a
 non-empty operator reason. Duplicate selectors are invalid even when their reasons are
@@ -3397,7 +3302,7 @@ contract, and normalized payload without coercion. No match plus any incompatibi
 creates terminal outcome `migration_disposed` with the rule's exact reason and this
 descriptor's digest. It does not use lifecycle-only `disposed` reasons.
 
-The version-2 descriptor digest is independently recomputed as:
+The descriptor digest is independently recomputed as:
 
 ```text
 migration_descriptor_digest = hash([
@@ -3422,38 +3327,22 @@ and use the same preservation/disposal rules, but structural recall is skipped f
 subtree because it is non-runnable. Preserved entries remain frozen and serializable
 until a successful owner cleanup or root tombstone disposes them. Migration cannot
 revive, retarget, or process them.
-Package schema version 2 carries exactly one aggregate-state version-2 envelope and only
-version-2 migration descriptors. Version mixing inside one package is invalid.
+The package carries exactly one aggregate-state envelope and only direct migration
+descriptors. Alternate artifact versions and version mixing are invalid.
 
 ## 17. Portable execution checkpoints and hosting adapters
 
-### 17.1 Scope and compatibility
+### 17.1 Scope
 
-Sections 17.2 through 17.14 define execution-checkpoint schema version 1, which wraps but
-does not alter the original pure §8 `create` and `dispatch` operations. Under that
-immutable version the core processes one explicitly supplied delivery, owns no queue or
-database, and aggregate-state version 1 excludes queues, inboxes, outboxes, timers, and
-plugin configuration. Section 17.15 separately defines queue-bearing checkpoint schema
-version 2; no version-1 field or byte receives a new meaning.
-
-A checkpoint-schema-version-1 host MUST reject every new delivery before acceptance
-with host result `checkpoint_upgrade_required` whenever the selected validated bundle
-contains any `deferred_events` declaration. The check allocates no delivery sequence,
-creates no receipt, calls no core operation, changes no checkpoint byte, and leaves external
-ownership unchanged. This host result is outside the immutable version-1 checkpoint
-schema and is not an engine rejection code. The host MUST upgrade the complete
-checkpoint under §17.15 before accepting such work. Version-1 processing remains
-unchanged for bundles containing no `deferred_events` declaration.
-
-An execution checkpoint is the portable durable-host state for exactly one root
+The execution checkpoint is the sole portable durable-host state for exactly one root
 ownership aggregate transaction boundary. It combines the current aggregate-state
-envelope or terminal tombstone with accepted deliveries, durable operation receipts,
-pending, terminal, and compact outbox work, and migration audit. A host can accept input
-now and process it later without allowing the accepted envelope to exist only in
-memory. A host MAY embed this contract directly in an application process; no daemon,
-socket, broker, database server, background thread, or subprocess plugin protocol is
-required.
+envelope or terminal tombstone with durable operation receipts, event-identity
+tombstones, pending/terminal/compact outbox work, and migration audit. Accepted events
+live exactly once in aggregate runtime mailboxes; there is no host-level duplicate
+pending-work collection.
 
+A host MAY embed this contract directly in an application process; no daemon, socket,
+broker, database server, background thread, or subprocess plugin protocol is required.
 Every `ExecutionStore` is one logical store scope. The host assigns it one opaque scope
 identity and binds it to exactly one owning party or deployment trust domain. Mutually
 untrusted parties or deployment trust domains MUST NOT share a logical store scope.
@@ -3489,16 +3378,15 @@ metadata. The execution-checkpoint conformance profile MUST add host-adapter cas
 proving that equal portable identities coexist independently in two logical scopes;
 that equal portable `effect_id` values route, retry, reconcile, and deduplicate
 independently in those scopes; and that missing, ambiguous, mismatched, or unauthorized
-scope selection makes no core `create`, `dispatch`, or migration call, leaves checkpoint
+scope selection makes no core `create`, `admit`, `step`, or migration call, leaves checkpoint
 bytes unchanged, and performs no outbox mutation, delivery, or broker acknowledgement.
 Those artifacts are follow-up work and are not added here.
 
-The checkpoint artifact is strict UTF-8 JSON and obeys the parsing and closed-schema
-rules of §16.1. Unknown formats and versions fail respectively with
+The checkpoint is strict UTF-8 JSON under §16.1. Unknown formats and versions fail with
 `unsupported_execution_checkpoint_format` and
 `unsupported_execution_checkpoint_schema_version` before semantic validation. A
-recognized artifact that fails its schema or the invariants below is
-`invalid_execution_checkpoint`; a valid structure with the wrong digest is
+recognized artifact that fails schema or semantic invariants is
+`invalid_execution_checkpoint`; a wrong digest is
 `execution_checkpoint_digest_mismatch`.
 
 The closed checkpoint-host conflict codes are `event_id_conflict`,
@@ -3508,23 +3396,20 @@ the supplied committed checkpoint byte-for-byte.
 
 ### 17.2 Closed checkpoint artifact
 
-The complete schema is `schema/execution-checkpoint.schema.json`. A checkpoint has
+The complete schema is `schema/execution-checkpoint-v2.schema.json`. A checkpoint has
 exactly:
 
 ```text
 {
   execution_checkpoint_format: "determa.execution_checkpoint",
-  execution_checkpoint_schema_version: 1,
+  execution_checkpoint_schema_version: 2,
   root_instance_id: non_empty_string,
   revision: canonical_decimal,
-  root_record:
-    { status: "retained", aggregate_state }
-    | root_tombstone,
+  root_record: { status: "retained", aggregate_state } | root_tombstone,
   replay_retention: permanent_or_bounded_retention,
-  next_delivery_sequence: canonical_decimal,
-  pending_deliveries: [pending_delivery, ...],
   next_operation_receipt_sequence: canonical_decimal,
   operation_receipts: [operation_receipt, ...],
+  event_identity_tombstones: [event_identity_tombstone, ...],
   pending_outbox_intents: [pending_outbox_intent, ...],
   next_outbox_terminal_sequence: canonical_decimal,
   terminal_outbox_records: [terminal_outbox_record, ...],
@@ -3534,113 +3419,31 @@ exactly:
 }
 ```
 
-For a retained root, `root_instance_id` MUST equal the aggregate envelope's root
-identity and the aggregate MUST pass all §16 validation, including definition
-resolution and its own digest. A tombstone obeys §17.8.
-`revision` identifies the committed checkpoint generation. The first successfully
-created checkpoint has revision `"0"`. Every later transaction that changes any
-checkpoint member replaces it with revision `canonical_decimal(previous + 1)` exactly
-once. A read, idempotent replay, failed transaction, or compare-and-swap conflict
-changes neither bytes nor revision.
-
-The checkpoint digest is:
+For a retained root, checkpoint and aggregate root identities match and the aggregate
+passes all §16 validation. The first successful checkpoint has revision `"0"`; every
+later changing transaction advances it exactly once. Reads, equal replays, failed
+transactions, and CAS conflicts change no byte or counter.
 
 ```text
 execution_checkpoint_digest = hash([
-  "determa-execution-checkpoint-digest-1",
+  "determa-execution-checkpoint-digest-2",
   checkpoint_without_execution_checkpoint_digest
 ])
 ```
 
-using §9 JCS and SHA-256. Semantic validation occurs after format/version recognition
-and structural validation, verifies the embedded aggregate first, then verifies the
-checkpoint digest and the remaining cross-field invariants. The pretty and canonical
-normative representations are
-`examples/persistence/execution-checkpoint.json` and
-`examples/persistence/execution-checkpoint.canonical.json`. The canonical file is the
-exact RFC 8785 byte sequence with no trailing newline.
-
+The normative example is `examples/persistence/execution-checkpoint-v2.json`.
 Operational leases, locks, credentials, connection details, broker acknowledgement
-tokens, wall-clock attempt timestamps, worker identities, and arbitrary application
-rows are not checkpoint members. A compatible execution store MAY store those
-separately and MAY include application rows, including an application response cache,
-in the same native transaction.
+tokens, wall-clock attempt timestamps, worker identities, and application rows are not
+checkpoint members.
 
 ### 17.3 Durable operation receipts and replay
 
-An operation receipt is a durable host-layer result. It is deliberately not the
-original §8 result: it contains the committed status/disposition/fault or migration
-result, the resulting aggregate-state digest, and exact references to work inserted
-into the pending-delivery and outbox collections. It does not contain the historical
-aggregate bytes or duplicate complete emissions.
-
-The historical core `state` is represented only by
-`resulting_aggregate_state_digest`. Once a later commit replaces that aggregate, the
-old state cannot be reconstructed from the receipt. An internal envelope or external
-intent remains complete while pending; after an internal delivery is consumed, only
-its delivery receipt and digest remain. A strict outbox retains the full intent in
-either pending or terminal form (§17.6).
-
-Applications that need to replay an HTTP body, domain projection, historical aggregate,
-or other response beyond the portable receipt MUST store that application response as
-application data in the same shared transaction. Its format is application-owned and
-is not a checkpoint member.
-
-Receipts allocate zero-based `receipt_sequence` values from
-`next_operation_receipt_sequence` and occur in commit order. The creation receipt is
-always sequence `"0"`, is always the first retained receipt, and is never pruned while
-the checkpoint exists, including in bounded mode. Each emission reference is in
-original core emission order and has a contiguous zero-based `emission_index`:
-
-```text
-{ kind: "internal_delivery", emission_index, event_id, delivery_sequence }
-| { kind: "external_outbox", emission_index, effect_id }
-```
-
-An internal reference identifies the exact pending-delivery allocation created in the
-same commit. An external reference identifies the exact full intent inserted into the
-pending outbox in the same commit. Later consumption or terminalization does not alter
-the producing receipt.
-
-A delivery receipt is:
-
-```text
-{
-  operation_kind: "delivery",
-  receipt_sequence,
-  event_id,
-  request_digest,
-  accepted_delivery_sequence,
-  accepted_revision,
-  delivery_mode,
-  origin,
-  committed_revision,
-  resulting_aggregate_state_digest,
-  outcome: { status, disposition, fault, rejection },
-  emission_references
-}
-```
-
-`outcome.disposition` is exactly `handled`, `unhandled`, `rejected`, or `faulted`.
-Unhandled has running status, null fault/rejection, and no emissions. Rejected has no
-emissions and carries the exact §8 rejection. Its fault is the aggregate root fault
-exactly when status is `faulted`, as required by §8; rejected status `running` or
-`completed` has null fault. Faulted disposition has the exact committed target fault
-and null rejection. Parse failure, execution-store failure, transaction conflict, lost
-connection, resource exhaustion before a core result, and every other infrastructure
-failure produce no receipt.
-
-On duplicate processing of a committed delivery identity:
-
-- an equal request digest returns exactly
-  `{ result: "committed", receipt: delivery_receipt }` without migration, `dispatch`,
-  new work, revision change, or broker acknowledgement-side mutation;
-- a different digest fails with `event_id_conflict` and preserves the checkpoint
-  byte-for-byte.
-
-This host response is the same for the first committed processing result and its
-duplicates. It is not represented as a §8 result and does not imply that historical
-state or complete consumed internal emissions are available.
+Operation receipts allocate zero-based `receipt_sequence` values in commit order. A
+fresh checkpoint is created only from a successful `create` result. Its creation
+receipt is sequence `"0"`, `committed_revision` is `"0"`, and
+`next_operation_receipt_sequence` begins at `"1"`; initialization lifecycle receipts
+then allocate in defined order. The creation receipt is retained for the checkpoint's
+lifetime.
 
 Creation has one mandatory durable receipt:
 
@@ -3662,8 +3465,8 @@ The creation request digest is:
 
 ```text
 hash([
-  "determa-creation-request-digest-1",
-  "1",
+  "determa-creation-request-digest-2",
+  "2",
   validated_bundle_fingerprint,
   namespace,
   machine_id,
@@ -3675,8 +3478,8 @@ hash([
 ```
 
 A successful `create`, including a committed faulted initialization, atomically writes
-revision `"0"`, the retained aggregate, creation receipt, and all referenced pending
-deliveries/outbox intents. Retrying the same root and creation id with the same digest
+revision `"0"`, the retained aggregate, creation receipt, and all referenced mailbox
+entries/outbox intents. Retrying the same root and creation id with the same digest
 returns `{ result: "committed", receipt: creation_receipt }` without calling `create`.
 Any different creation id or request digest for an existing root identity is
 `creation_id_conflict`. The rule applies equally after terminal tombstoning; the root
@@ -3688,192 +3491,108 @@ application requiring replay of rejected creation requests MUST commit its own r
 record and response under an application-owned identity. This is safe because no
 Determa aggregate, emission, or checkpoint mutation was committed.
 
-### 17.4 Unified pending deliveries
+An acceptance receipt proves host admission, not processing. It records event identity,
+the `determa-inbox-envelope-digest-2` request digest, acceptance sequence, accepted
+revision, and input delivery mode. Internal emissions append directly to a target ready
+mailbox in the producing RTC and are referenced by that operation's receipt; they do not
+create acceptance receipts.
 
-`pending_deliveries` is one ordered durable collection for host input accepted for
-later processing and for committed core internal emissions. One item is:
+A terminal event receipt proves exactly one `handled`, `unhandled`, `faulted`,
+`disposed`, or `migration_disposed` outcome and records the immutable acceptance
+identity, final queue sequence, committed revision, resulting aggregate digest, and
+ordered emission references. Acceptance and terminal receipts may coexist because they
+attest different facts; the complete envelope remains in only one live or terminal
+location.
 
-```text
-{
-  delivery_sequence,
-  accepted_revision,
-  delivery_mode: "input" | "internal",
-  origin:
-    { kind: "host_input" }
-    | {
-        kind: "internal_emission",
-        producing_receipt_sequence,
-        emission_index
-      },
-  envelope: portable_presented_envelope,
-  envelope_digest
-}
-```
+Equal replay returns retained evidence without mutation. Unequal content for the same
+identity is `event_id_conflict`. Replay/conflict checks precede terminal-root rejection.
+Permanent retention keeps every receipt. Bounded retention may replace one
+acceptance-plus-terminal unit with one event-identity tombstone using only digest domain
+`determa-inbox-envelope-digest-2`. Pruning is dependency-closed and MUST NOT leave a
+dangling producer, mailbox, terminal, outbox, or audit reference.
 
-The portable presented envelope uses the §6.1 target and §16.2 typed-value projection.
-Checkpoint acceptance validates its closed wire shape, non-empty event id, root
-membership, digest, and input/internal origin consistency. Event declaration,
-direction, payload defaults/types, correlation, and current target eligibility remain
-the core `dispatch` decision and can produce a committed rejected receipt later.
+Applications needing replay of an HTTP body, domain projection, or historical aggregate
+MUST store that response as application data in the same host transaction. It is not a
+checkpoint member.
 
-The digest is:
+### 17.4 Aggregate-owned admission and processing
 
-```text
-envelope_digest = hash([
-  "determa-inbox-envelope-digest-1",
-  "1",
-  root_instance_id,
-  delivery_mode,
-  envelope
-])
-```
+Admission is one atomic checkpoint mutation. The host normalizes the complete ordered
+batch, including source, cause, exact target, payload, correlation, and envelope digest,
+then applies this closed order before allocating anything:
 
-The pending record's `envelope_digest` and its eventual delivery receipt's
-`request_digest` are exactly this same value.
+1. malformed batch/member: `malformed_delivery`;
+2. wrong checkpoint root: `wrong_root`;
+3. duplicate event id within the batch: `duplicate_event_id_in_batch`;
+4. retained identity replay/conflict comparison;
+5. non-replay target on completed/faulted root: `terminal_root`, or on tombstone:
+   `tombstoned_root`;
+6. mode, source, target, declaration, payload, correlation, and digest validation.
 
-Host input MUST have `delivery_mode: "input"` and `{ kind: "host_input" }`. A core
-internal emission MUST have `delivery_mode: "internal"` and an
-`internal_emission` origin. No other combination is valid.
+The remaining closed admission failures are `event_id_conflict`,
+`invalid_delivery_mode`, `invalid_delivery_source`, `invalid_instance_target`,
+`inactive_component_target`, `invalid_event`, `invalid_payload`,
+`invalid_correlation`, and `delivery_digest_mismatch`. Any failure rejects the complete
+batch without mutation or acknowledgement. An all-replay batch is read-only; a mixed
+replay/new batch allocates only new members and commits once.
 
-Before accepting host input, the host returns exactly one closed result:
+Successful host admission allocates one aggregate-wide `acceptance_sequence` and initial
+`queue_sequence` per new envelope in caller order, appends it to its exact target ready
+tail, creates one input acceptance receipt, advances revision once, and recomputes both
+digests. Only then may an adapter acknowledge transfer of ownership.
 
-```text
-{ result: "pending", event_id, delivery_sequence, accepted_revision }
-| { result: "committed", receipt: delivery_receipt }
-| {
-    result: "not_accepted",
-    failure: {
-      code:
-        "malformed_delivery"
-        | "wrong_root"
-        | "invalid_delivery_mode"
-        | "invalid_delivery_origin"
-        | "delivery_digest_mismatch"
-        | "event_id_conflict"
-        | "tombstoned_root"
-    }
-  }
-```
+Processing explicitly targets one runtime and selects only its ready head. A deferred
+result atomically moves the entry to that runtime's deferred tail with a new queue
+sequence and no terminal receipt. Structural recall creates no receipt. A terminal
+result removes the entry and creates exactly one terminal event receipt. Successful
+lifecycle cleanup creates disposal receipts in cleanup order; a cleanup fault rolls back
+the cleanup and every tentative receipt.
 
-No other pre-acceptance failure code or member is present. `malformed_delivery` means
-the supplied value cannot provide the closed envelope fields and identity required to
-perform acceptance. `wrong_root` means its supplied root identity does not name this
-checkpoint. `invalid_delivery_mode` and `invalid_delivery_origin` cover their
-respective closed unions and inconsistent pairing. `delivery_digest_mismatch` means a
-caller-supplied digest does not equal the canonical digest above.
-`event_id_conflict` means the event id matches a pending or retained committed
-identity but its canonical digest differs. `tombstoned_root` means the identity names
-this checkpoint but no equal pending or committed replay exists and its root record is
-a tombstone.
+Terminal outcomes are exactly `handled`, `unhandled`, `faulted`, `disposed`, and
+`migration_disposed`. Lifecycle `disposed` has exactly one reason:
+`runtime_cancelled`, `runtime_completed`, `aggregate_completed`, or `root_tombstoned`.
+`migration_disposed` instead carries a non-empty operator reason and the exact migration
+descriptor digest. A successful lifecycle operation creates disposal receipts in runtime
+cleanup order and, within each runtime, ready entries followed by deferred entries in
+queue order. Receipt sequences allocate in that order and may share one committed
+revision. Fault-frozen entries remain owned until successful cleanup or tombstoning.
 
-The host performs only the parsing necessary to extract a candidate root identity,
-event id, mode, and canonical digest, then applies this order:
+The core `step` result reports every successful cleanup removal in
+`lifecycle_dispositions`. The checkpoint host creates the selected causal event's
+terminal receipt first when terminal, then one terminal `disposed` receipt for each
+lifecycle disposition in list order. An `internal_disposed` emission names one list
+index and becomes an `internal_terminal` reference to the resulting receipt; an
+`internal_mailbox` reference names its sole retained mailbox entry. Missing, duplicate,
+mismatched, or out-of-range references are `invalid_execution_checkpoint`. State,
+receipts, outbox intents, revision, counters, and digests commit together or not at all.
 
-1. malformed values fail `malformed_delivery`;
-2. a root identity unequal to the checkpoint fails `wrong_root`;
-3. when event id and digest are available, check equal/conflicting pending and retained
-   receipt identities under the rules below, returning `event_id_conflict` through the
-   closed `not_accepted` result when unequal;
-4. if no replay applies and the root is tombstoned, fail `tombstoned_root`;
-5. validate mode, origin, and any supplied digest, returning their exact failure; and
-6. validate and commit acceptance.
+The lifecycle of one accepted event is closed:
 
-Step 3 deliberately precedes tombstone rejection, so an equal delivery committed
-before tombstoning still replays its receipt. A conflicting retained identity still
-returns `event_id_conflict`. A pending delivery cannot coexist with a tombstone, but
-the ordering remains normative for restored/candidate validation and future artifact
-versions.
+| current location | operation | committed next location |
+|---|---|---|
+| external/unaccepted | rejected admission or pre-commit crash | external/unaccepted |
+| external/unaccepted | committed admission | one target ready mailbox plus acceptance receipt |
+| ready | enabled handler succeeds | terminal `handled` receipt |
+| ready | no enabled handler, active deferral, capacity available | same runtime deferred mailbox |
+| ready | no enabled handler, no active deferral | terminal `unhandled` receipt |
+| ready | guard/action/invariant or capacity-overflow fault | terminal `faulted` receipt |
+| deferred | structural recall becomes eligible | same runtime ready tail |
+| deferred | structural recall remains ineligible | same deferred position |
+| ready or deferred | successful owner disposal | terminal `disposed` receipt |
+| ready or deferred | explicit migration disposal rule | terminal `migration_disposed` receipt |
+| any engine-owned location | transaction failure before commit | exact prior location and bytes |
 
-Every `not_accepted` result and every conflict creates no pending record or receipt,
-does not call `dispatch`, changes no counter, revision, digest, application row, or
-checkpoint byte, does not acknowledge broker ingress, and MUST NOT be reported as
-accepted. Broker-owned ingress remains broker-owned.
+The lifecycle is closed: an accepted event is in exactly one ready or deferred mailbox,
+then one terminal receipt or event tombstone. Transaction failure preserves the exact
+prior location. A checkpoint containing only deferred entries is pending but not
+runnable. Empty ready mailboxes do not authorize polling, timers, or spontaneous
+execution.
 
-Acceptance allocates the current `next_delivery_sequence`, increments it, appends the
-full item, increments checkpoint revision once, sets `accepted_revision` to that new
-revision, computes the new checkpoint digest, and commits atomically. The caller
-receives exactly:
-
-```text
-{ result: "pending", event_id, delivery_sequence, accepted_revision }
-```
-
-Once that commit succeeds, the envelope is accepted by the host and exists durably in
-the checkpoint. Before it succeeds, it is not accepted. A process crash cannot leave
-an accepted host input only in memory.
-
-Pending event ids are unique and are disjoint from every retained delivery-receipt
-event id. When the same identity is presented:
-
-- if pending with the same digest, return its exact pending result without mutation;
-- if pending with a different digest, fail `event_id_conflict`;
-- if committed with the same digest, return the exact committed delivery receipt under
-  §17.3; or
-- if committed with a different digest, fail `event_id_conflict`.
-
-Every failure preserves the checkpoint byte-for-byte. Under bounded retention, an id
-whose receipt was pruned is outside the declared replay horizon (§17.8).
-
-Internal emissions allocate delivery sequences and insert complete pending items in the
-same transaction as their producing operation. Their origin names that operation's
-`receipt_sequence` and the emission's zero-based index. The producing receipt MUST have
-at that index the exact `internal_delivery` reference with equal event id and delivery
-sequence. This bidirectional link is immutable.
-
-Processing a pending item is one atomic transition:
-
-1. select the exact item under the host's declared queue policy;
-2. invoke `dispatch` once with its recorded delivery mode and envelope;
-3. remove the pending item;
-4. append its delivery receipt, preserving delivery sequence, accepted revision,
-   mode, origin, and digest;
-5. replace the aggregate and append every newly produced pending delivery, outbox
-   intent, and migration audit record;
-6. increment revision once and commit.
-
-Handled, unhandled, rejected, and faulted outcomes consume the pending item. A failure
-before commit leaves it unchanged and produces no receipt. The processed event id
-therefore exists in exactly one of the pending set or committed delivery-receipt set,
-never both or neither after a successful processing mutation and while it remains
-inside the declared replay horizon. Bounded receipt pruning may later remove the
-committed identity exactly as §17.8 defines.
-
-For delayed processing, the delivery receipt preserves the pending record's exact
-`accepted_revision`; its `committed_revision` is the processing transaction's new
-checkpoint revision and is strictly greater than `accepted_revision`. For foreground
-accept-and-process below, both values equal the one resulting revision.
-
-Every internal emission inserted by a delivery receipt has
-`accepted_revision` equal to that producing receipt's `committed_revision`. Every
-internal emission inserted by the creation receipt has `accepted_revision: "0"`.
-Consequently, every pending delivery satisfies
-`accepted_revision <= checkpoint.revision`; every delivery receipt satisfies
-`accepted_revision <= committed_revision <= checkpoint.revision`; and every retained
-receipt's `committed_revision` values are strictly increasing in receipt order.
-Creation is the sole receipt at revision `"0"`. Equality between accepted and committed
-revision is valid only for foreground input processing. Any other ordering, or an
-internal origin whose accepted revision differs from its retained producer's committed
-revision, is `invalid_execution_checkpoint`.
-
-An embedded foreground host MAY accept and process one new host input in the same
-transaction. It still allocates a delivery sequence, applies pending dedupe, and writes
-the delivery receipt; the intermediate pending record need not be externally committed.
-`accepted_revision` and `committed_revision` are both the single resulting revision.
-Failure rolls back both acceptance and processing, so the host never reports the input
-as accepted. The successful caller receives the committed host receipt, not a pending
-result or reconstructed §8 result.
-
-An external broker message is broker-owned and unaccepted by Determa until the host
-commits either its pending record or its synchronous processing receipt. Broker
-redelivery before that commit is not checkpoint duplication. Broker acknowledgement
-occurs only after commit; loss after commit is handled by pending/receipt replay.
-
-The checkpoint contract does not require first-in-first-out selection. A host claiming
-durable first-in-first-out delivery MUST select eligible items in ascending
-`delivery_sequence` across both host and internal origins. Other deterministic or
-broker-directed policies MUST declare their queue profile. Sequence values are unique,
-strictly increasing in the stored array, less than `next_delivery_sequence`, and never
-reused. Removing an item may leave a gap and never renumbers later work.
+Definition migration is one transaction over the aggregate, every mailbox, generated
+disposal receipt, audit record, outbox member, and revision. An event whose target
+incarnation or declaration disappears, or whose payload/correlation contract becomes
+incompatible, cannot be guessed, coerced, or silently discarded. It must remain exactly
+compatible or match an explicit disposal rule; otherwise the migration fails unchanged.
 
 ### 17.5 Maintenance-migration operations
 
@@ -3885,8 +3604,8 @@ Its request digest is:
 
 ```text
 hash([
-  "determa-maintenance-migration-request-digest-1",
-  "1",
+  "determa-maintenance-migration-request-digest-2",
+  "2",
   root_instance_id,
   operation_id,
   source_aggregate_state_digest,
@@ -4066,8 +3785,8 @@ where:
 
 ```text
 intent_digest = hash([
-  "determa-outbox-intent-digest-1",
-  "1",
+  "determa-outbox-intent-digest-2",
+  "2",
   root_instance_id,
   complete_original_intent
 ])
@@ -4109,48 +3828,44 @@ aggregate facts only through later declared input envelopes.
 ### 17.7 Migration audit and canonical ordering
 
 `migration_audit_records` contains the exact successful §16.12 records in commit
-order. Every record belongs to this root, records are strictly increasing by
-`migration_sequence`. Permanent replay retains the complete successful history.
-Bounded replay may remove audit records only in the same dependency-safe transaction
-that prunes every receipt referencing them (§17.8). Failed or quarantined migration
-metadata remains host-owned because it does not describe a committed aggregate
-replacement.
+order, strictly increasing by `migration_sequence`. Permanent replay retains complete
+successful history. Bounded replay may remove audit records only in the same
+dependency-safe transaction that prunes every receipt referencing them. Failed or
+quarantined migration metadata is host-owned because it does not describe a committed
+aggregate replacement.
 
-All checkpoint arrays have one canonical semantic order:
+Canonical semantic order is exact:
 
-- pending deliveries by mathematical `delivery_sequence`;
-- operation receipts by mathematical `receipt_sequence`;
-- pending outbox intents by mathematical intent `sequence`;
-- terminal outbox records by mathematical `terminal_sequence`;
-- outbox effect tombstones by mathematical `terminal_sequence`; and
-- migration audit records by mathematical `migration_sequence`.
+- every runtime's ready and deferred mailbox is ordered by mathematical
+  `queue_sequence`;
+- operation receipts are ordered by mathematical `receipt_sequence`;
+- event-identity tombstones are ordered by mathematical
+  `terminal_receipt_sequence`;
+- pending outbox intents are ordered by mathematical intent `sequence`;
+- terminal outbox records and effect tombstones are each ordered by mathematical
+  `terminal_sequence`; and
+- migration audit records are ordered by mathematical `migration_sequence`.
 
-Every counter is strictly greater than each retained allocation in its domain and is
-never reduced or reused. Gaps caused by consumption or bounded receipt pruning are
-valid. Receipt emission indexes are contiguous from zero. Delivery event ids are
-unique within pending deliveries and within retained delivery receipts, and those two
-sets are disjoint. Maintenance operation ids are unique. Effect ids and terminal
-sequences are unique and disjoint across pending intents, full terminal records, and
-effect tombstones as applicable.
+Acceptance sequences and event ids are unique across all runtime mailboxes. A live
+mailbox event id is disjoint from terminal receipts and event tombstones; terminal
+receipts and event tombstones are disjoint. An acceptance receipt may overlap its live
+mailbox or terminal receipt but not the tombstone that replaced it. Maintenance
+operation ids are unique. Effect ids and terminal sequences are unique and disjoint
+across pending, terminal, and compact outbox forms.
 
-Every internal-emission origin resolves to one earlier producing receipt and one
-matching internal-delivery emission reference, subject only to the bounded-pruning
-rules in §17.8. Every retained delivery receipt points back to its original delivery
-sequence and origin. Every external reference resolves to one pending intent, full
-terminal record, or compact effect tombstone. Every retained migration receipt
-retains the exact target definition fingerprint used by its canonical request digest
-and, when its exact ordered audit records remain retained, the final audit target
-fingerprint equals the receipt target fingerprint. No audit is required for an empty
-migration or for a migration receipt whose audit is already attested as pruned. For an
-empty migration, the receipt's target fingerprint remains authoritative for
-request-digest validation when the aggregate is absent. Root ids,
-aggregate/tombstone identity, receipt identities, targets, revisions, digests,
-sequences, statuses, and union otherwise-cases MUST all be consistent.
+Every `internal_mailbox` emission reference resolves to its sole retained mailbox
+entry. Every `internal_terminal` reference resolves to its exact terminal receipt or a
+tombstone retaining that sequence. Every external reference resolves to one pending
+intent, terminal record, or effect tombstone. Every retained migration receipt retains
+the target definition fingerprint used by its canonical request digest. When its audit
+records remain, their final target fingerprint equals the receipt target fingerprint.
+An empty migration appends no audit; its receipt fingerprint remains authoritative for
+request-digest validation after aggregate tombstoning.
 
-A duplicate identity/sequence, noncanonical order, cross-set overlap, dangling or
-unequal linkage, record for another root, envelope/intent digest conflict, invalid
-retention transition, impossible revision/outcome union, or counter not greater than
-retained allocations is `invalid_execution_checkpoint`.
+Every retained allocation is below its next counter. Duplicate allocation,
+noncanonical order, cross-set overlap, dangling or unequal linkage, wrong-root record,
+digest conflict, invalid retention transition, impossible revision/outcome union, or
+counter regression is `invalid_execution_checkpoint`.
 
 ### 17.8 Replay retention and root lifecycle
 
@@ -4176,42 +3891,25 @@ or:
 }
 ```
 
-Permanent mode retains every operation receipt for the complete root-identity
-lifetime. It never prunes creation, delivery, or maintenance receipts. Bounded mode
-names the deployed policy and records the greatest non-creation receipt sequence
-covered by completed pruning. Creation receipt sequence `"0"` remains first and is
-retained unchanged for as long as the checkpoint exists, so creation retry and
-conflict evidence never disappears merely because delivery history is bounded.
+Creation receipt sequence `"0"` is always first and retained for the checkpoint's
+lifetime. In permanent mode, retained receipt sequences are exactly the contiguous
+range from zero through `next_operation_receipt_sequence - 1`.
 
-A non-null bounded cutoff `C` has this exact meaning:
+In bounded mode, a non-null cutoff `C` MUST be strictly less than
+`next_operation_receipt_sequence`. Every non-creation sequence from `1` through `C`
+has been pruned, and every sequence from `C + 1` through
+`next_operation_receipt_sequence - 1` is retained exactly once. With a null cutoff,
+the same contiguous permanent allocation rule applies. An empty retained suffix is
+valid only when `C = next_operation_receipt_sequence - 1`; the cutoff can never cover
+the next unallocated identity.
 
-- creation receipt `"0"` is retained;
-- every non-creation receipt with sequence `1 <= sequence <= C` has been pruned;
-- every retained non-creation receipt has sequence greater than `C`;
-- no pending internal delivery has an origin producer in `1..C`;
-- no retained committed internal-delivery receipt has an origin producer in `1..C`;
-- every retained internal origin resolves transitively through retained producers back
-  to creation or to a producer above `C`; and
-- audit records referenced only by pruned maintenance receipts and terminal
-  full/compact effect records whose producing receipts were also pruned may be removed
-  in the same transaction.
-
-Pruning may advance from the prior cutoff to candidate `C` only when removing the
-entire non-creation interval through `C` satisfies all of those conditions. If a
-pending or retained committed internal delivery depends directly or transitively on a
-producer in that interval, the cutoff stops before the earliest required producer.
-Pruning a consumer while retaining its producer is allowed: the producer's immutable
-emission reference becomes historical evidence that the consumer existed, and the
-cutoff attests that its committed receipt was removed. No retained origin may ever
-reference a pruned producer.
-
-The pruning transaction removes the dependency-closed interval, its safely removable
-audit/effect dependants, increments revision once, and never removes pending
-deliveries or pending outbox work. An equal request for the already recorded cutoff is
-an idempotent read with no revision change. A lower cutoff, a skipped receipt in
-`1..C`, or a cutoff crossing any retained-origin dependency is
-`invalid_execution_checkpoint`. No rule requires a receipt or audit record already
-attested as pruned by the cutoff.
+Pruning is dependency-closed. No mailbox entry may depend on a pruned producer receipt.
+No retained internal emission reference may lose its mailbox entry, terminal receipt,
+or event tombstone. Audit records and terminal/compact effect records referenced only
+by pruned receipts may be removed in the same transaction. Advancing the cutoff commits
+all required removals and the new revision atomically. Equal cutoff replay is read-only;
+a lower cutoff, skipped sequence, dangling dependency, or cutoff at or beyond the next
+counter is `invalid_execution_checkpoint`.
 
 The transition from permanent to bounded is allowed and irreversible.
 `permanent_replay_eligible` becomes false in that same commit and can never become true
@@ -4220,9 +3918,9 @@ new receipts. A checkpoint restored from bounded mode or with a non-null pruning
 MUST remain bounded. This recorded history prevents prior cleanup from being hidden by
 later configuration.
 
-Checkpoint schema version 1 retains root identity evidence in both permanent and
+The checkpoint retains root identity evidence in both permanent and
 bounded modes. A completed or faulted aggregate MUST remain as a retained terminal
-aggregate, or may be replaced only after all pending deliveries and pending outbox
+aggregate, or may be replaced only after all accepted mailbox entries and pending outbox
 intents are resolved by a root tombstone:
 
 ```text
@@ -4239,16 +3937,16 @@ intents are resolved by a root tombstone:
 Tombstoning is one compare-and-swap mutation with a stable operation id, preserves
 all receipts retained under the selected mode, terminal outbox records/effect
 tombstones, and retained migration audit, and increments revision once. It does not
-permit dispatch, migration, new pending work, or aggregate reconstruction. The first
+permit admission, processing, migration, new pending work, or aggregate reconstruction. The first
 commit and an equal retry return exactly
 `{ result: "tombstoned", tombstone: root_tombstone }`; the retry does not change
 revision. Another operation id fails with `operation_id_conflict`. A running aggregate
-cannot be tombstoned in schema version 1.
+cannot be tombstoned.
 
 In both retention modes, `root_instance_id` is never reused after creation, including
 after completion, fault, application deletion, backup, restore, or tombstone
 compaction. Physical deletion of the checkpoint or its root identity marker is
-unsupported in checkpoint schema version 1. Bounded mode may prune only the
+unsupported. Bounded mode may prune only the
 dependency-safe receipt/audit/effect history defined above; it never prunes creation
 receipt `"0"`, the retained terminal aggregate/root tombstone, or root identity.
 
@@ -4256,7 +3954,7 @@ A complete backup MUST retain every checkpoint, including every bounded or perma
 terminal checkpoint/root tombstone. A restore that omits one loses root identity,
 creation-conflict, and no-reuse evidence and is not a conforming restore of this
 checkpoint profile. Bounded restores retain their recorded horizon and cannot be
-upgraded to permanent replay. Permanent restores may advertise permanent replay only
+changed to permanent replay. Permanent restores may advertise permanent replay only
 when the collection is complete.
 
 ### 17.9 Transaction and concurrency ordering
@@ -4272,20 +3970,20 @@ A durable host processes one presented delivery in this exact order:
 4. On an equal pending or committed identity, return its pending result or receipt
    without redispatch. On a digest conflict, fail without mutation.
 5. If migration is requested, apply the complete §16 route to an in-memory copy.
-6. Invoke `dispatch` exactly once against that candidate, or `create` exactly once for
+6. Invoke `step` exactly once against that candidate, or `create` exactly once for
    an absent root creation.
-7. Build the candidate root record, delivery/operation receipt, pending deliveries,
+7. Build the candidate root record, delivery/operation receipt, accepted mailbox entries,
    pending/terminal/tombstoned outbox records, migration audit records, counters, next
    revision, retention state, and digest.
 8. Atomically commit the complete candidate plus any application rows participating
    through a shared native transaction.
 9. Only after commit, acknowledge broker ingress and begin pending outbox delivery.
 
-The transaction includes migration and dispatch even when dispatch is unhandled,
+The transaction includes migration and processing even when processing is unhandled,
 rejected, or faulted. A failure before step 8 preserves the prior checkpoint
 byte-for-byte. A crash after step 8 but before ingress acknowledgement causes
-redelivery to return the recorded receipt without migration, dispatch, duplicate
-pending delivery, or duplicate outbox insertion.
+redelivery to return the recorded receipt without migration, processing, duplicate
+mailbox admission, or duplicate outbox insertion.
 
 Every writer supplies the revision and digest it read. A stale writer fails with
 `checkpoint_revision_conflict`; it MUST NOT overwrite, merge, or append to the newer
@@ -4374,7 +4072,7 @@ Host profiles describe a composition of an execution store with ingress handling
 queue policy, an outbox worker, destination semantics, and application transactions.
 They are not execution-store capabilities. Every durable checkpoint host profile below
 requires `root_identity_retention`; physical checkpoint/root-marker deletion is not a
-weaker schema-version-1 profile:
+weaker profile:
 
 - `durable_embedded_processing` requires a durable store and the §17.4 atomic
   accept/process rules; no broker is required.
@@ -4405,7 +4103,7 @@ checkpoint contract provides exactly-once **committed processing** within one se
 
 - at most one aggregate replacement is committed for that identity;
 - every retry with equal content returns the first durable host receipt;
-- pending deliveries, outbox records, migration audit, application rows included in a
+- accepted mailbox entries, outbox records, migration audit, application rows included in a
   shared transaction, and revision change commit with that receipt; and
 - an uncommitted attempt has no durable effect.
 
@@ -4441,7 +4139,7 @@ deployment backup is a consistent collection containing:
 The checkpoint schema does not define that cluster manifest or require a global
 transaction across unrelated roots. A cluster backup is valid only if the storage and
 broker-specific procedure supplies an application-appropriate consistency point and
-does not omit committed checkpoints/tombstones, operation receipts, pending deliveries,
+does not omit committed checkpoints/tombstones, operation receipts, accepted mailbox entries,
 pending/terminal/tombstoned outbox records, retention history, application response
 data needed by its API, or referenced trusted artifacts. A restore that omits any
 created root's checkpoint/tombstone is nonconforming in either retention mode. A
@@ -4458,249 +4156,13 @@ host-profile contract is required before any such operation can claim conformanc
 
 ### 17.14 Future timer durability
 
-Format 1 introduces no timer semantics and checkpoint schema version 1 has no timer
-member. A host therefore MUST NOT advertise accepted timer work as covered by a durable
+Machine format 1 introduces no timer semantics and the checkpoint has no timer member.
+A host therefore MUST NOT advertise accepted timer work as covered by a durable
 checkpoint while retaining that work only in process memory. A future timer contract
 that participates in durable processing MUST add a versioned checkpoint representation
 for accepted scheduling requests, deadlines, cancellation state, and deterministic
 delivery identity, or use an external durable service whose accepted ownership and
 recovery boundary is stated explicitly.
 
-Adding non-empty timer state to this artifact requires a later checkpoint schema
-version or a separately identified durable timer artifact. It does not silently add a
-field to schema version 1 and does not change aggregate-state schema version 1.
-
-### 17.15 Queue-bearing checkpoint version 2
-
-Execution-checkpoint schema version 2 is the single durable continuation boundary for
-an aggregate-state version-2 envelope. Its closed schema is
-`schema/execution-checkpoint-v2.schema.json`. It preserves version-1 root, replay,
-outbox, audit, and revision concepts, but removes `next_delivery_sequence` and
-`pending_deliveries`: accepted envelopes already exist exactly once in the embedded
-aggregate's runtime-local mailboxes. Reconstructing a second host-pending copy is
-`invalid_execution_checkpoint`.
-
-The version-2 digest is:
-
-```text
-execution_checkpoint_digest = hash([
-  "determa-execution-checkpoint-digest-2",
-  checkpoint_without_execution_checkpoint_digest
-])
-```
-
-A fresh version-2 checkpoint is created only from a successful `create_v2` result. Its
-checkpoint `revision` and creation receipt `committed_revision` are `"0"`, and the
-creation receipt sequence is `"0"`. `next_operation_receipt_sequence` begins at `"1"`;
-creation-time lifecycle terminal receipts allocate from it in their defined order.
-`event_identity_tombstones` is empty. Outbox collections are empty unless initialization
-emitted external intents. The embedded aggregate carries the exact post-initialization
-counters from §8: acceptance and queue counters began at zero, initialization emissions
-allocated them in order, and every retained emitted entry has `deferral_count: "0"`.
-No other creation path, inferred upgrade, or default counter state is conforming.
-
-Admission is one atomic checkpoint mutation. A host first normalizes the complete
-ordered batch, including exact source, cause, target, payload, correlation, and the
-version-2 envelope digest from §16.3. It then applies this closed order before allocating
-anything:
-
-1. malformed batch or member: `malformed_delivery`;
-2. a root unequal to this checkpoint: `wrong_root`;
-3. the same `event_id` occurring more than once in this batch, whether equal or
-   conflicting: `duplicate_event_id_in_batch` for the complete batch;
-4. compare each event identity with every retained ready/deferred entry, acceptance
-   receipt, terminal receipt, and event-identity tombstone as defined below;
-5. if any non-replay member targets a completed or faulted root:
-   `terminal_root`; if the root is a tombstone: `tombstoned_root`;
-6. invalid mode, source, target, correlation, payload, or supplied digest: its existing
-   exact validation code; otherwise accept the complete batch.
-
-The closed version-2 admission failure codes are exactly `malformed_delivery`,
-`wrong_root`, `duplicate_event_id_in_batch`, `event_id_conflict`, `terminal_root`,
-`tombstoned_root`, `invalid_delivery_mode`, `invalid_delivery_source`,
-`invalid_instance_target`, `inactive_component_target`, `invalid_event`,
-`invalid_payload`, `invalid_correlation`, and `delivery_digest_mismatch`. No other
-failure code is conforming. An all-replay batch
-returns its retained evidence without mutation. A mixed replay/new batch allocates only
-the new members, commits once, and returns evidence in caller order; any failure in any
-member rejects the whole batch.
-
-Every failure rejects the complete batch, preserves every byte and counter, calls no
-core step, and leaves external ownership unchanged. For success, the host allocates one
-immutable `acceptance_sequence` and initial `queue_sequence` per entry in caller order,
-appends each to its exact target runtime ready tail, appends one `acceptance` receipt per
-host event, increments checkpoint revision once, recomputes the aggregate and checkpoint
-digests, and commits. Only after commit may a broker adapter acknowledge transfer of
-ownership.
-
-The acceptance receipt is durable proof of admission, not proof of processing. It names
-`event_id`, version-2 request digest, acceptance sequence, accepted revision, and
-delivery mode. An existing identity is equal only when its retained digest in the same
-digest domain equals the candidate digest. Equal replay returns the original acceptance
-and, when present, terminal evidence without mutation. A conflicting digest returns
-`event_id_conflict`, including after processing, root completion, root fault, or root
-tombstoning. These replay/conflict checks precede terminal-root rejection. Internal
-emissions append directly to target ready mailboxes in their producing RTC commit and
-are referenced by the producing receipt; they never pass through a second
-`pending_deliveries` collection.
-
-Processing requires an explicit target runtime id. It selects only that runtime's ready
-head and performs one §6 RTC/classification step. A `deferred` result commits the
-ready-to-deferred move and revision but creates no terminal receipt. A later recall move
-also creates no receipt. A handled, unhandled, faulted, or lifecycle-disposed event is
-removed from its final mailbox and receives exactly one `event_terminal` receipt with
-its event id, request digest, acceptance sequence, final queue sequence, committed
-revision, resulting aggregate digest, terminal outcome, and emission references. The
-acceptance receipt may coexist with its terminal receipt because they attest different
-facts; the full envelope never coexists in two lifecycle locations.
-
-Terminal event outcomes are exactly `handled`, `unhandled`, `faulted`, `disposed`, and
-`migration_disposed`. Lifecycle `disposed` has exactly one reason:
-`runtime_cancelled`, `runtime_completed`, `aggregate_completed`, or `root_tombstoned`.
-`migration_disposed` instead carries the arbitrary non-empty operator reason and exact
-version-2 migration-descriptor digest defined by §16.15; the two shapes are disjoint.
-A successful lifecycle operation creates disposal receipts in runtime cleanup order and,
-within each runtime, ready entries followed by deferred entries, each in queue order.
-Receipt sequences are allocated in that order and may share one committed revision;
-`(committed_revision, receipt_sequence)` is strictly increasing. A root or contained
-fault freezes noncausal mailbox entries as §6.7 states; frozen deferred entries are not
-recalled, processed, or capacity-evicted. They remain engine-owned until successful
-owner cleanup or root tombstoning creates terminal receipts. A cleanup fault rolls back
-the complete cleanup and every tentative disposal receipt; it cannot report successful
-disposal.
-
-The core-only `step` operation returns every successful cleanup removal in its required
-`lifecycle_dispositions` list; checkpoint receipts are not a core precondition. The
-checkpoint host translates one successful core result atomically as follows: create the
-selected causal event's terminal receipt first when it is terminal, then create one
-terminal `disposed` receipt for each lifecycle disposition in list order. An
-`internal_disposed` core emission names exactly one list index and becomes an
-`internal_terminal` emission reference naming the resulting terminal receipt; an
-`internal_mailbox` reference continues to name its sole retained mailbox entry. Missing,
-duplicate, mismatched, or out-of-range references are `invalid_execution_checkpoint`.
-All receipts, state, outbox intents, revision, counters, and digests commit together or
-none do. Root tombstoning is a host lifecycle operation and uses the same receipt rules,
-but is not returned by a core `step`.
-
-The lifecycle of one accepted event is closed:
-
-| current location | operation | committed next location |
-|---|---|---|
-| external/unaccepted | rejected admission or pre-commit crash | external/unaccepted |
-| external/unaccepted | committed admission | one target ready mailbox plus acceptance receipt |
-| ready | enabled handler succeeds | terminal `handled` receipt |
-| ready | no enabled handler, active deferral, capacity available | same runtime deferred mailbox |
-| ready | no enabled handler, no active deferral | terminal `unhandled` receipt |
-| ready | guard/action/invariant or capacity-overflow fault | terminal `faulted` receipt; runtime fault rule applies |
-| deferred | structural walk reaches a handler declaration before a deferral-only level, or reaches root with neither | same runtime ready tail |
-| deferred | structural walk reaches a deferral-only level before any handler declaration | same deferred position |
-| ready or deferred | successful owner disposal | terminal `disposed` receipt |
-| ready or deferred | explicit migration disposal rule | terminal `migration_disposed` receipt |
-| any engine-owned location | transaction failure before commit | exact prior location and bytes |
-
-An event identity exists in exactly one live location (one ready/deferred mailbox entry)
-or terminal location (one terminal receipt or one event-identity tombstone), while its
-acceptance receipt may coexist as admission evidence. Permanent replay retains all
-receipts. Bounded replay may replace an acceptance-plus-terminal receipt unit with one
-`event_identity_tombstone` containing event id, request digest, its exact digest domain,
-acceptance sequence, terminal receipt sequence, and terminal disposition. Tombstones are
-retained for the lifetime of the root record, including after root tombstoning; therefore
-equal replay and conflict detection remain exact after compaction.
-
-Pruning is dependency-closed. An acceptance or producing receipt cannot be removed while
-its event is in a mailbox. An acceptance receipt and its terminal receipt are pruned in
-one transaction that creates their tombstone. A receipt containing an internal emission
-reference cannot be pruned until the referenced event is terminal and represented by a
-retained terminal receipt or tombstone. An `internal_terminal` reference resolves to
-either its exact terminal receipt sequence or the tombstone retaining that sequence.
-External outbox references continue to obey §17.6. No receipt, mailbox entry, terminal
-record, producer reference, or tombstone may be deleted while doing so would leave a
-dangling reference or lose replay/conflict evidence. Violation is
-`invalid_execution_checkpoint`.
-
-Version-2 operation receipts remain ordered by mathematical `receipt_sequence`; event
-identity tombstones are ordered by mathematical `terminal_receipt_sequence`. Event ids,
-acceptance sequences, and terminal receipt sequences are unique in their respective
-domains. Mailbox event ids are disjoint from terminal-receipt and event-tombstone ids;
-terminal-receipt and event-tombstone ids are disjoint from each other; an acceptance
-receipt may overlap its live mailbox or terminal receipt but not a tombstone that replaced
-it. Every retained allocation is below its next counter. Noncanonical order, overlap,
-duplicate allocation, dangling dependency, or counter regression is
-`invalid_execution_checkpoint`.
-
-A checkpoint containing only deferred entries is pending but not runnable. Empty ready
-mailboxes do not authorize polling, timers, or spontaneous execution; later accepted
-input or explicit host activity may change configuration and cause recall. A host can
-persist configuration and mailbox rows separately only when its transaction or
-compare-and-swap operation commits an observably equivalent single checkpoint revision.
-
-Definition migration of a version-2 checkpoint is one maintenance transaction over the
-aggregate, every mailbox, generated terminal disposal receipt, audit, outbox, and
-revision. It uses §16.15 version-2 descriptors. A queued event whose target incarnation
-is deleted or replaced, whose event is removed, or whose normalized payload/correlation
-contract is incompatible cannot be guessed, coerced, or silently discarded. It must be
-covered by a valid explicit disposal rule or the complete migration fails unchanged.
-Backup, restore, cloning, relocation, and authority fencing remain outside this contract
-and are reserved to issue #70.
-
-Version-1 to version-2 checkpoint upgrade is explicit and atomic. It first performs the
-exact aggregate `1 -> 2` upgrade from §16.15. It wraps the version-1 creation receipt as
-`legacy_v1_creation` and every version-1 delivery or maintenance receipt as
-`legacy_v1_operation`, preserving each complete version-1 receipt byte value inside
-`legacy_receipt`. Wrapper receipt sequences retain the old mathematical order. The first
-new native acceptance receipt allocates the source checkpoint's existing
-`next_operation_receipt_sequence`. This
-makes legacy `internal_delivery` origin and emission-reference links valid historical
-evidence without pretending they are native version-2 links.
-
-Every retained version-1 delivery identity, terminal or pending, receives the v2
-acceptance identity equal to its original mathematical `delivery_sequence` (called
-`accepted_delivery_sequence` in a terminal receipt). The upgraded aggregate's
-`next_acceptance_sequence` is the source checkpoint's `next_delivery_sequence`. Thus
-legacy terminal evidence can later produce an event tombstone with an exact acceptance
-sequence, and gaps from valid old pruning remain gaps rather than being renumbered.
-
-The upgrader then converts each version-1 `pending_delivery` in ascending delivery
-sequence. It preserves event id, mode, payload, target, correlation, accepted revision,
-and the complete old delivery evidence. Host origin becomes version-2 host source.
-Internal origin becomes `{legacy_v1_internal: {producing_receipt_sequence,
-emission_index}}`; in both cases `cause_id` is the event id. The resulting envelope is a
-new version-2 value, so its digest is recomputed in the
-`determa-inbox-envelope-digest-2` domain and MUST NOT equal or claim to preserve the old
-version-1 digest. Each converted pending entry uses its original delivery sequence as
-its acceptance sequence; the host allocates only queue sequences from zero in pending
-delivery order. It sets every converted entry's `deferral_count` to `"0"`, appends it
-to its exact ready mailbox, and creates a native acceptance receipt whose optional
-`legacy_v1_delivery` field preserves old delivery sequence, digest, and origin.
-That evidence field is required when the converted delivery mode is `internal` and is
-the only conforming reason a version-2 acceptance receipt has internal mode; native
-version-2 runtime sends are represented by producing emission references instead.
-
-Old creation, request, result, envelope, and aggregate digests remain version-1
-historical evidence inside wrappers; no version-1 digest is compared with a version-2
-digest. A compact tombstone derived from legacy terminal evidence records digest domain
-`determa-inbox-envelope-digest-1`; a native version-2 event tombstone records
-`determa-inbox-envelope-digest-2`. Equal replay of legacy terminal work therefore uses
-the original version-1 request digest, while newly converted pending work uses its
-native version-2 acceptance digest. Ambiguous or missing legacy replay evidence is
-`invalid_execution_checkpoint`, never guessed.
-For a legacy terminal tombstone, `acceptance_sequence` is the nested receipt's
-`accepted_delivery_sequence` and `terminal_receipt_sequence` is its enclosing
-`legacy_v1_operation.receipt_sequence`.
-Its terminal disposition preserves the nested version-1 disposition; `rejected` is
-permitted only with the version-1 digest domain because native version-2 admission
-rejects invalid work before acceptance.
-
-The upgrader initializes `event_identity_tombstones` empty unless it performs the
-dependency-closed legacy compaction just described, removes `pending_deliveries` and
-renames the source `next_delivery_sequence` value to aggregate
-`next_acceptance_sequence`, increments checkpoint revision once, sets checkpoint schema
-version 2, advances `next_operation_receipt_sequence` once per converted pending entry,
-and recomputes the new aggregate and checkpoint digests. Changed envelopes and digest
-domains mean old and new
-outer digests normally differ. Any stale target, invalid legacy link, duplicate identity,
-or conversion that cannot satisfy the version-2 schema fails the whole upgrade with the
-version-1 checkpoint byte-for-byte unchanged. Version 2 has no general downgrade to
-checkpoint version 1; downgrade is permitted only when both mailbox counters are zero,
-all mailboxes and event tombstones are empty, and no version-2-only or wrapped legacy
-receipt exists.
+Adding non-empty timer state requires a later checkpoint schema version or a
+separately identified durable timer artifact.

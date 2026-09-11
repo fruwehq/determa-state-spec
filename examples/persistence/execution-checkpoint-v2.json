@@ -95,7 +95,7 @@
       "operation_kind": "creation",
       "receipt_sequence": "0",
       "creation_id": "create-1",
-      "request_digest": "sha256:d45fc61bc0c9db90b3f7bca2f0c3e01ef3444c2f7ec54ef241ad7557d0dbf2a9",
+      "request_digest": "sha256:d7abbb9f00a5b48259cce0805e81eecae0220b92d8e45602673b0489e4866c30",
       "committed_revision": "0",
       "resulting_aggregate_state_digest": "sha256:60d00f1d230f6e477a0683562b8ea5f96946b4e1dd8efb412125575055c65f52",
       "status": "running",
@@ -109,5 +109,5 @@
   "terminal_outbox_records": [],
   "outbox_effect_tombstones": [],
   "migration_audit_records": [],
-  "execution_checkpoint_digest": "sha256:ed5a5f814fc3253f8b1bbdae7cc287b8d85da147ce7538d1e5d24b8ed7007351"
+  "execution_checkpoint_digest": "sha256:5be1de177d8ccaffb22d4978333b99ce9b328428e3a91dfdb59eb5eef153c85b"
 }

@@ -87,21 +87,16 @@ This repository holds only the specification:
 
 - [`SPEC.md`](SPEC.md) — normative semantics;
 - [`schema/machine.schema.json`](schema/machine.schema.json) — structural JSON Schema;
-- [`schema/aggregate-state.schema.json`](schema/aggregate-state.schema.json) — portable
-  aggregate-state envelope;
-- [`schema/migration-descriptor.schema.json`](schema/migration-descriptor.schema.json)
+- [`schema/aggregate-state-v2.schema.json`](schema/aggregate-state-v2.schema.json) —
+  portable queue-bearing aggregate-state envelope;
+- [`schema/migration-descriptor-v2.schema.json`](schema/migration-descriptor-v2.schema.json)
   — declarative definition migration;
-- [`schema/aggregate-state-package.schema.json`](schema/aggregate-state-package.schema.json)
+- [`schema/aggregate-state-package-v2.schema.json`](schema/aggregate-state-package-v2.schema.json)
   — self-contained transfer package;
-- [`schema/execution-checkpoint.schema.json`](schema/execution-checkpoint.schema.json)
+- [`schema/execution-checkpoint-v2.schema.json`](schema/execution-checkpoint-v2.schema.json)
   — portable durable-host checkpoint;
-- [`schema/aggregate-state-v2.schema.json`](schema/aggregate-state-v2.schema.json),
-  [`schema/migration-descriptor-v2.schema.json`](schema/migration-descriptor-v2.schema.json),
-  [`schema/aggregate-state-package-v2.schema.json`](schema/aggregate-state-package-v2.schema.json),
-  and [`schema/execution-checkpoint-v2.schema.json`](schema/execution-checkpoint-v2.schema.json)
-  — queue-bearing artifact version 2 schemas;
-- [`schema/core-step-result-v2.schema.json`](schema/core-step-result-v2.schema.json)
-  — closed queue-bearing core step result schema;
+- [`schema/core-step-result-v2.schema.json`](schema/core-step-result-v2.schema.json) —
+  closed core step result schema;
 - [`examples/`](examples/) — schema-valid machine documents and normative vectors; and
 - [`VERSION`](VERSION) — synchronized specification/package SemVer.
 

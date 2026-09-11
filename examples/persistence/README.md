@@ -4,48 +4,23 @@ These files are compact normative vectors for
 [SPEC §16](../../SPEC.md#16-portable-persistence-and-definition-migration) and
 [SPEC §17](../../SPEC.md#17-portable-execution-checkpoints-and-hosting-adapters).
 
-- `source.yaml` and `target.yaml` have the same aggregate shape; the target changes
-  only `meta`.
-- `aggregate-state.json` is the human-readable running aggregate for `source.yaml`;
-  `aggregate-state.canonical.json` contains its exact RFC 8785 bytes with no trailing
-  newline.
-- `compatible-migration.json` advances that aggregate to `target.yaml` without a
-  state transform.
-- `migrated-aggregate-state.json` is the human-readable result, and
-  `migrated-aggregate-state.canonical.json` is its exact RFC 8785 byte result; identity
-  and logical counters are preserved while current definition bindings and
-  `migration_sequence` advance.
-- `compatible-migration-audit.json` is the exact successful per-descriptor audit
-  record.
-- `faulted-aggregate-state.json` proves that the complete format-1 fault record,
-  including `step_sequence`, survives the wire.
-- `target-identity-cases.json` fixes the three exact format-1 target shapes while using
-  decimal-string wire projections for spawned machine versions and component
-  activation sequences. It covers the JavaScript safe-integer boundary, values beyond
-  it, the signed-64 machine-version maximum, unbounded component activations, rejected
-  numeric wire forms, malformed decimals, bounds, and extra/missing-field regressions.
-- `aggregate-state-package.json` carries the aggregate, both normalized definitions,
-  the descriptor, and the exact one-hop route.
-- `execution-checkpoint.json` is the human-readable durable-host checkpoint wrapping
-  one aggregate with permanent replay, creation/delivery receipts, and one accepted
-  host input pending later processing;
-  `execution-checkpoint.canonical.json` contains its exact RFC 8785 bytes with no
-  trailing newline.
-- `execution-checkpoint-state-cases.json` fixes every checkpoint delivery-origin,
-  pre-acceptance failure, delivery-outcome/root-fault, creation-fault,
-  emission-reference, replay-retention, root/effect tombstone, pending/terminal outbox,
-  and maintenance-result union, including native version-2 empty, one-hop, and
-  multi-hop maintenance receipts, retained target-definition identity, and their
-  otherwise-cases.
-- `aggregate-state-v2.json` is the schema-version-2 queue-bearing aggregate example.
-  It retains one ready and one deferred envelope in the addressed runtime and gives
-  acceptance identity and queue placement separate counters. Its definition fingerprint,
-  runtime identity, envelope digests, and aggregate digest are bound to
-  `../portable-event-deferral.yaml`.
-- `execution-checkpoint-v2.json` is the schema-version-2 checkpoint example. Its
-  embedded aggregate owns its empty runtime mailboxes and the checkpoint deliberately
-  has no `pending_deliveries` collection. It includes the required event-identity
-  tombstone collection and is definition-bound to `source.yaml`.
+- `source.yaml` and `target.yaml` are machine documents using numeric `format: 1`.
+  They have the same aggregate shape; the target changes only `meta`.
+- `aggregate-state-v2.json` is the sole portable aggregate example. It retains one
+  ready and one deferred envelope in the addressed runtime and separates immutable
+  acceptance identity from mutable queue placement.
+- `compatible-migration-v2.json` is the sole direct migration-descriptor example. It
+  advances the source definition to the target without a state transform and carries
+  the required queue-preservation policy.
+- `execution-checkpoint-v2.json` is the sole portable checkpoint example. Its embedded
+  aggregate owns its runtime mailboxes; there is no duplicate host pending-work
+  collection.
+- `execution-checkpoint-v2-maintenance-cases.json` proves that an empty migration
+  receipt remains verifiable after root tombstoning. It rejects a missing or altered
+  target definition fingerprint and rejects the removed legacy receipt wrapper.
+- `target-identity-cases.json` fixes the three exact machine-format-1 target shapes
+  using artifact decimal-string projections, including values beyond JavaScript's safe
+  integer boundary and rejected malformed projections.
 
 The source and target validated-bundle fingerprints are respectively
 `sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413`
