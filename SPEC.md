@@ -3906,6 +3906,7 @@ A successful operation appends:
   request_digest,
   committed_revision,
   source_aggregate_state_digest,
+  target_validated_bundle_fingerprint,
   resulting_aggregate_state_digest,
   migration_sequences,
   result_code: "migration_applied" | "migration_no_operation"
@@ -3917,7 +3918,9 @@ receipt at the current `next_operation_receipt_sequence`, increments that counte
 increments checkpoint revision exactly once, recomputes the checkpoint digest, and
 commits. The receipt's `committed_revision` is that new revision. Its source and
 resulting aggregate digests are respectively the exact pre-transaction aggregate and
-committed aggregate digests.
+committed aggregate digests. Its `target_validated_bundle_fingerprint` is the exact
+target definition fingerprint used in the request digest. The receipt retains that
+definition identity even after root tombstoning removes the aggregate.
 
 For a non-empty route of length N, `result_code` is `migration_applied`, exactly N
 §16 audit records are appended in descriptor-route order, and `migration_sequences`
@@ -3930,7 +3933,14 @@ For an empty route, source and target definition identities are equal, the aggre
 bytes and aggregate digest are unchanged, no migration audit record is appended,
 `result_code` is `migration_no_operation`, and `migration_sequences` is empty. The
 checkpoint transaction still allocates its receipt and increments checkpoint revision
-once so response loss cannot make the operation ambiguous.
+once so response loss cannot make the operation ambiguous. Its retained
+`target_validated_bundle_fingerprint` equals the unchanged source aggregate definition
+fingerprint. A loader verifies the canonical request digest from the receipt's root,
+operation, source aggregate digest, target definition fingerprint, empty descriptor
+route, and Boolean maintenance mode even when the root record is a tombstone. Because
+the receipt does not repeat `maintenance_mode`, its digest is valid only when it equals
+the canonical construction for one of the two exact Boolean values; replay still
+compares the caller's complete request digest byte-for-byte.
 
 After loading and validating the checkpoint, the host checks retained operation
 identity before applying the caller's stale-writer guard. Presenting the same operation
@@ -4128,10 +4138,14 @@ matching internal-delivery emission reference, subject only to the bounded-pruni
 rules in §17.8. Every retained delivery receipt points back to its original delivery
 sequence and origin. Every external reference resolves to one pending intent, full
 terminal record, or compact effect tombstone. Every retained migration receipt
-resolves to its exact ordered audit records; no audit is required for a migration
-receipt already attested as pruned. Root ids, aggregate/tombstone identity, receipt
-identities, targets, revisions, digests, sequences, statuses, and union otherwise-cases
-MUST all be consistent.
+retains the exact target definition fingerprint used by its canonical request digest
+and, when its exact ordered audit records remain retained, the final audit target
+fingerprint equals the receipt target fingerprint. No audit is required for an empty
+migration or for a migration receipt whose audit is already attested as pruned. For an
+empty migration, the receipt's target fingerprint remains authoritative for
+request-digest validation when the aggregate is absent. Root ids,
+aggregate/tombstone identity, receipt identities, targets, revisions, digests,
+sequences, statuses, and union otherwise-cases MUST all be consistent.
 
 A duplicate identity/sequence, noncanonical order, cross-set overlap, dangling or
 unequal linkage, record for another root, envelope/intent digest conflict, invalid

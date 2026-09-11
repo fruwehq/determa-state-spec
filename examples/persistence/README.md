@@ -35,7 +35,8 @@ These files are compact normative vectors for
   pre-acceptance failure, delivery-outcome/root-fault, creation-fault,
   emission-reference, replay-retention, root/effect tombstone, pending/terminal outbox,
   and maintenance-result union, including native version-2 empty, one-hop, and
-  multi-hop maintenance receipts and their otherwise-cases.
+  multi-hop maintenance receipts, retained target-definition identity, and their
+  otherwise-cases.
 - `aggregate-state-v2.json` is the schema-version-2 queue-bearing aggregate example.
   It retains one ready and one deferred envelope in the addressed runtime and gives
   acceptance identity and queue placement separate counters. Its definition fingerprint,

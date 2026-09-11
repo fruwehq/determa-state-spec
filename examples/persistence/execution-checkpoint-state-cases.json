@@ -282,6 +282,7 @@
         "request_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
         "committed_revision": "9",
         "source_aggregate_state_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "target_validated_bundle_fingerprint": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "resulting_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
         "migration_sequences": [
           "1"
@@ -295,6 +296,7 @@
         "request_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
         "committed_revision": "10",
         "source_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "target_validated_bundle_fingerprint": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "resulting_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
         "migration_sequences": [],
         "result_code": "migration_no_operation"
@@ -306,6 +308,7 @@
         "request_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
         "committed_revision": "11",
         "source_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "target_validated_bundle_fingerprint": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
         "resulting_aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "migration_sequences": [
           "2",
@@ -591,6 +594,7 @@
         "request_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
         "committed_revision": "9",
         "source_aggregate_state_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "target_validated_bundle_fingerprint": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "resulting_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
         "migration_sequences": [],
         "result_code": "migration_applied"
@@ -602,6 +606,7 @@
         "request_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
         "committed_revision": "10",
         "source_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "target_validated_bundle_fingerprint": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "resulting_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
         "migration_sequences": [
           "2"
@@ -615,12 +620,24 @@
         "request_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
         "committed_revision": "11",
         "source_aggregate_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "target_validated_bundle_fingerprint": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
         "resulting_aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "migration_sequences": [
           "3",
           "2"
         ],
         "result_code": "migration_applied"
+      },
+      {
+        "operation_kind": "maintenance_migration",
+        "receipt_sequence": "7",
+        "operation_id": "migration-missing-target-definition",
+        "request_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "committed_revision": "12",
+        "source_aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "resulting_aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "migration_sequences": [],
+        "result_code": "migration_no_operation"
       }
     ]
   }

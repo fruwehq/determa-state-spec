@@ -428,6 +428,7 @@
         "request_digest",
         "committed_revision",
         "source_aggregate_state_digest",
+        "target_validated_bundle_fingerprint",
         "resulting_aggregate_state_digest",
         "migration_sequences",
         "result_code"
@@ -450,6 +451,9 @@
           "$ref": "execution-checkpoint.schema.json#/$defs/canonicalDecimal"
         },
         "source_aggregate_state_digest": {
+          "$ref": "execution-checkpoint.schema.json#/$defs/sha256"
+        },
+        "target_validated_bundle_fingerprint": {
           "$ref": "execution-checkpoint.schema.json#/$defs/sha256"
         },
         "resulting_aggregate_state_digest": {
