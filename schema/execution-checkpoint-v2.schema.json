@@ -301,7 +301,7 @@
         },
         "emission_index": {
           "$ref": "#/$defs/canonicalDecimal",
-          "description": "The referenced emission's action-local, zero-based emission_index from SPEC section 9; not a transaction-wide or receipt-array index. Array position preserves cross-action order and event_id disambiguates the referenced emission."
+          "description": "Copies the referenced internal emission's zero-based emission_ordinal from SPEC section 9: action-local for an author emission or lifecycle-operation-local for an engine lifecycle emission. It is not a transaction-wide or receipt-array index. Array position preserves cross-action and cross-lifecycle-operation order, and event_id disambiguates the referenced emission."
         },
         "event_id": {
           "$ref": "#/$defs/nonEmptyString"
@@ -330,7 +330,7 @@
         },
         "emission_index": {
           "$ref": "#/$defs/canonicalDecimal",
-          "description": "The referenced emission's action-local, zero-based emission_index from SPEC section 9; not a transaction-wide or receipt-array index. Array position preserves cross-action order and event_id disambiguates the referenced emission."
+          "description": "Copies the referenced internal emission's zero-based emission_ordinal from SPEC section 9: action-local for an author emission or lifecycle-operation-local for an engine lifecycle emission. It is not a transaction-wide or receipt-array index. Array position preserves cross-action and cross-lifecycle-operation order, and event_id disambiguates the referenced emission."
         },
         "event_id": {
           "$ref": "#/$defs/nonEmptyString"
