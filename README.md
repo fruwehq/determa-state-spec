@@ -41,18 +41,39 @@ remain subject to ordinary current validation. Repository/package versions and m
 formats are separate; loaders never guess either from document shape. See
 [SPEC.md §2](SPEC.md#2-conformance-parsing-and-format-identity).
 
-## Release 0.3.0
+## Unreleased 0.3.0
 
-This alpha release adds portable event deferral and resumable runtime mailboxes,
-version-1 maintenance migration receipts, and exact operation-receipt emission index
-rules. Portable persistence artifacts use schema version 1 exclusively; earlier draft
-artifact representations are no longer supported. Machine documents still use
-`format: 1`, independently of the release and artifact schema versions.
-The format-1 grammar also accepts exact runtime guard/action provider slots beside
-CEL and structured actions. Optional source compilers generate strict format-1
-definitions with a version-1 provenance manifest. Native I/O during evaluation is
-an explicit weak embedded profile; provider guarantees and missing capabilities are
-reported rather than inferred.
+This alpha specification adds portable event deferral in aggregate-owned ready and
+deferred mailboxes, version-1 maintenance migration and operation receipts, and exact
+structural inspection of a selected runtime and envelope. Bounded semantic inspection
+requires a safe nonmutating provider. Format-1 definitions may use exact runtime
+guard/action provider slots beside CEL and structured actions; optional source
+compilers emit a version-1 provenance manifest. Provider closure and configured
+capabilities are checked explicitly. Native I/O during evaluation is a weaker
+embedded profile whose guarantees must be reported.
+
+The execution-checkpoint profile, lossless application projection, and coordinator-free
+embedded facade bind complete dispositions and intents to an application-owned
+transaction. Optional native effects retain committed routes, authenticated outcomes,
+and explicit ambiguity, cancellation, and reconciliation evidence. Lossless delivery
+binds ingress ownership, committed admission, terminal disposition, and outbound
+responsibility; external brokers and dead-letter stores remain host integrations.
+Optional host authority uses scoped epochs and refuses unproved topology without a
+distributed coordinator. Optional external timers use a separately installed durable
+helper; the core has no clock, scheduler, or wakeup.
+
+Portable archives capture full selected checkpoints, immutable definitions, and
+declared required or optional participant evidence, including trusted native-effect
+journal inventory when applicable. Import stages inertly. Recovery distinguishes
+read-only quarantine, explicit fresh-scope takeover, independent clone, and verified
+local transfer; safe relocation is claimed only when the configured host proves it.
+The common version-1 public client/host protocol pins named endpoint and scope
+bindings, complete first responses, and a mechanical compatibility manifest and
+change record for local and later hosted implementations.
+
+Portable persistence artifacts and the public protocol use their sole version 1;
+earlier draft artifact representations are unsupported. Machine documents retain
+`format: 1`, independently of the unreleased package SemVer and artifact versions.
 
 ## Core model
 
@@ -75,8 +96,9 @@ guard, and transition action, but not to entry or exit actions.
 ## Host and plugin boundary
 
 The default core evaluation is a pure foreground transform from prior logical state
-plus one envelope to new logical state plus ordered emissions. It has no built-in queue, clock, timer,
-dead-letter store, broker, database, background worker, or external I/O.
+plus one envelope to new logical state plus ordered emissions. Accepted events live in
+aggregate-owned ready or deferred mailboxes. The core has no external broker, scheduler,
+clock, timer helper, dead-letter store, database, background worker, or external I/O.
 An explicitly installed native runtime provider may perform external I/O during an
 embedded evaluation under the weaker capability profile in §5.4.
 
@@ -178,6 +200,12 @@ This repository holds only the specification:
 - [`examples/`](examples/) — schema-valid machine documents and normative vectors; and
 - [`examples/providers/`](examples/providers/) — mixed CEL/native slots, source
   compilation and output validation examples;
+- [`schema/public-host-request-v1.schema.json`](schema/public-host-request-v1.schema.json) and
+  [`schema/public-host-response-v1.schema.json`](schema/public-host-response-v1.schema.json)
+  — closed public client/reference-host protocol;
+- [`schema/public-host-contract-v1.json`](schema/public-host-contract-v1.json) with [`schema/public-host-contract-v1.schema.json`](schema/public-host-contract-v1.schema.json),
+  [`schema/public-host-change-record-v1.schema.json`](schema/public-host-change-record-v1.schema.json), and
+  [`examples/public-host/`](examples/public-host/) — compatibility boundary and golden messages;
 - [`VERSION`](VERSION) — synchronized specification/package SemVer.
 
 The executable correctness target lives in

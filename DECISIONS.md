@@ -508,3 +508,38 @@ optional positive claim for a tested topology under one authority domain.
 remote worker or undo an accepted provider request. The new scope makes the weaker
 choice visible in identity, receipts and capability reports. A credential or timeout
 cannot supply a missing authority proof.
+## Public host requests pin their resolved binding
+
+Relevant specification: [§25](SPEC.md#25-public-client-and-execution-host-protocol).
+
+**Decision.** Version-1 public requests use the closed `protocol`, `protocol_version`,
+`operation_id`, `scope_binding_identity`, `operation`, `target`, `precondition`,
+`arguments` envelope. Responses use `protocol`, `protocol_version`,
+`operation_id`, `status`, `receipt`, `value`, `error`. The client saves the resolved endpoint/scope
+binding and canonical request before the first mutation. A lost response is resolved
+only at that binding with the same host operation ID and request digest. The host
+retains the complete first response while it claims operation replay. Discovery,
+inspection, history, response replay, and re-execution are separate capabilities.
+
+**Reason.** Endpoint aliases and current state can change after a commit. Resolving a
+retry against a new alias could run a second operation in a different authority;
+a digest or missing receipt alone cannot reconstruct the original response or prove
+rollback. The same public model works for the local reference host and a later hosted
+service without placing endpoint configuration in the machine definition.
+
+**Review guidance.** Exercise alias replacement after a response loss, equal and
+unequal operation-ID replay, unauthorized scope before root lookup, expired receipt
+ambiguity, the full checkpoint and receipt in the first response, and capability
+refusal before mutation. Check embedded clients and the reference host against the
+same golden request/response bytes. Require exact re-execution comparisons only
+when the complete provider closure is deterministic and portable.
+
+Closed public archive and recovery variants use the exact §22 and §24 request,
+result, archive, and destination-record shapes. Discovery reports the independently
+configured destination decoder/staging features; source archive claims do not grant
+them. A definitive nested refusal is an outer rejection with its complete inner
+result, while a successful mutation requires a durable public receipt. Verified
+local transfer, fresh-scope takeover, and clone keep their separate safety claims.
+Timer commands wrap the exact §23 helper operation and result, including its own
+digest and fire-fence evidence. A successful helper mutation needs a durable public
+receipt; a helper refusal remains an outer rejection with the full helper result.

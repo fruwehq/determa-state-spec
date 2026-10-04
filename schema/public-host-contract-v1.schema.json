@@ -1,0 +1,170 @@
+{
+  "type": "object",
+  "required": [
+    "manifest_format",
+    "manifest_schema_version",
+    "protocol",
+    "protocol_version",
+    "state_semver",
+    "fingerprint_algorithm",
+    "boundary_sources",
+    "hash_domains",
+    "capability_meanings",
+    "helper_participant_rules",
+    "golden_matrix"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "manifest_format": {
+      "const": "determa.public_host_contract"
+    },
+    "manifest_schema_version": {
+      "const": 1
+    },
+    "protocol": {
+      "const": "determa.execution_host"
+    },
+    "protocol_version": {
+      "const": 1
+    },
+    "state_semver": {
+      "const": "0.3.0"
+    },
+    "fingerprint_algorithm": {
+      "const": "sha256(raw UTF-8 file bytes)"
+    },
+    "boundary_sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "sha256"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "hash_domains": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "source"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "capability_meanings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "source",
+          "rule"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rule": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "helper_participant_rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "required_when",
+          "source",
+          "rule"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "timer",
+              "application",
+              "effect",
+              "archive"
+            ]
+          },
+          "required_when": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rule": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "golden_matrix": {
+      "type": "object",
+      "required": [
+        "positive",
+        "negative",
+        "comparison_rule"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "positive": {
+          "type": "string",
+          "minLength": 1
+        },
+        "negative": {
+          "type": "string",
+          "minLength": 1
+        },
+        "comparison_rule": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://determa.dev/state/schema/public-host-contract-v1.schema.json",
+  "title": "Determa State public host compatibility manifest version 1"
+}
