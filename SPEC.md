@@ -5035,16 +5035,18 @@ The source identity and binding digest are public provenance, not credentials.
 
 ### 24.2 Strict quarantine
 
-`strict_restore` creates an immutable, inactive quarantine for inspection and
-reconciliation when old-owner retirement or transaction fate cannot be proved.
+`strict_restore` always creates an immutable, inactive read-only quarantine for
+inspection and reconciliation. Even a proved retirement does not change this
+operation into activation. Proved continuation uses the separate tested transfer
+path and `activate_import` after its guarded commit.
 Quarantine grants no admission, processing, core step, runtime-provider evaluation,
 helper firing/dispatch/cancellation, ingress acknowledgement, effect dispatch/result
 acceptance, promotion or clock-triggered timeout work. A lease expiry, copied database,
 archive digest, changed endpoint or matching operation token cannot promote it.
 Its result records `state: "quarantined"`, `safe_relocation: false`,
-`no_duplicate_external_work: false`, and the missing proof. If the caller requests
-strict activation without exact §18 proof, it returns `scope_restore_requires_quarantine`
-with the destination inactive. Quarantine can later be used only by a separately
+`no_duplicate_external_work: false`, and the missing proof. A request for strict activation returns
+`scope_restore_requires_quarantine` and leaves the destination inactive regardless
+of proof; strict restore has no activation branch. Quarantine can later be used only by a separately
 requested operation whose full preconditions are checked afresh.
 
 ### 24.3 Explicit standalone takeover
@@ -5111,18 +5113,22 @@ leader election or cross-authority grant. Unsupported topology returns
 `prepare_transfer` resolves the retained §18 freeze evidence, complete scope
 inventory and required participant snapshots, all active claim revocations, known
 transaction fate, exact epoch and generation, and destination binding. It records
-one single-use transfer ID and destination-bound retirement proof under the guarded
-authority transaction. `stage_transfer` checks the exact archive, source binding,
-participant contract, destination binding, epoch/generation, transfer ID and an empty
-inactive destination; staging confers no writer rights. `commit_transfer` atomically
-retires the old writer, consumes the grant, advances authority epoch/generation and
-binds one staged destination. `activate_import` checks that committed record and
-its exact destination, archive, new epoch and generation under the guarded transaction
+one destination-bound prepared transfer record under the guarded authority
+transaction. This record proves a frozen source and a reserved destination, never
+retirement or an activation grant. `stage_transfer` checks that prepared record,
+the exact archive, source binding, participant contract, destination binding,
+epoch/generation, transfer ID and an empty inactive destination; staging confers no
+writer rights. `commit_transfer` atomically proves the source retired under §18,
+consumes the destination-bound single-use grant, advances authority epoch/generation
+and binds one staged destination. Only this committed record is retirement proof.
+`activate_import` checks that committed record and its exact destination, archive,
+new epoch and generation under the guarded transaction
 before exposing admission, workers, helpers or writes. Equal operation replay returns
-the first complete result. A conflicting transfer ID, destination, consumed grant,
-stale generation or unresolved transaction fate fails closed. An uncertain commit
-returns `scope_transaction_in_doubt` and remains inactive until its fate is resolved
-from trusted authority records; a timeout never selects a winner. Imported pending
+the first complete result. A conflicting transfer ID, destination, consumed grant, stale generation or
+unresolved transaction fate fails closed before stage or commit. An uncertain source
+transaction or commit returns `scope_transaction_in_doubt` and remains inactive
+until its fate is resolved from trusted authority records; a timeout never selects
+a winner and the source is never unsafely rolled back. Imported pending
 external work still requires destination idempotency evidence or reconciliation
 before retry. Fencing prevents stale Determa writes but cannot unsend a provider call.
 Only a profile that proves retirement, single use, transaction fate, complete import,
@@ -5133,7 +5139,11 @@ selection. A multi-scope request returns per-scope results, including explicit
 partial success, and makes no global atomicity claim. Callers cannot combine partial
 proofs into a scope-wide or multi-scope safe-relocation assertion. The normative
 `examples/recovery/recovery-cases-v1.json` fixes complete response and rejection
-bodies, including stale workers, quarantine, ambiguity and clone isolation.
+bodies, including stale workers, quarantine, ambiguity, clone isolation and a
+positively negotiated single-authority local transfer. Its separate guarded-source
+archive is `examples/recovery/archive-local-transfer-v1.json`. This test profile
+binds only an implementation that advertises that exact topology; the stock profile
+may continue to refuse transfer. No fixture implies a distributed grant service.
 
 ### 24.6 Records, digests, and denial behavior
 
@@ -5189,14 +5199,16 @@ independently. Batch failure never rolls back a committed per-scope result or tu
 one scope's proof into another's grant.
 
 The trusted authority ledger stores a closed
-`schema/recovery-transfer-proof-v1.schema.json` record for each prepared or consumed
+`schema/recovery-transfer-proof-v1.schema.json` record for each prepared or committed
 transfer. `proof_digest = hash(["determa-recovery-transfer-proof-1",
-proof_without_proof_digest])`. It binds the source and destination, archive and
-participant contract, freeze evidence, old and new epoch/generation, known transaction
-fate, revoked claims, old-write fence and single-use grant state. The public digest
-in a request is only a lookup key: the host resolves the record in its guarded
-ledger, checks its digest and all fields against current authority state, and consumes
-it atomically. A copied proof JSON or digest cannot grant authority. An uncertain
-fate cannot satisfy `known_committed`. No cross-authority host may advertise this
-profile unless its own topology proves the corresponding single-use and retirement
-properties across both domains.
+proof_without_proof_digest])`. The `prepared` phase binds frozen source state,
+revoked active claims, known freeze transaction fate, one transfer ID, destination
+reservation, archive and participant contract, and the exact old epoch/generation.
+It is not a retirement proof or activation grant. The `committed` phase binds the
+§18 retired source, consumed single-use grant, known commit fate, old-write fence,
+and new destination epoch/generation. A request's public proof digest is only a
+lookup key: the host resolves the phase-correct record in its guarded ledger, checks
+its digest and all fields against current authority state, and consumes the grant
+atomically. A copied proof JSON or digest cannot grant authority. Unknown transaction
+fate cannot satisfy either phase. No cross-authority host may advertise this profile
+unless its own topology proves these properties across both domains.

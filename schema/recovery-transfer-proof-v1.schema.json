@@ -1,19 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://determa.dev/state/schema/recovery-transfer-proof-v1.schema.json",
-  "title": "Trusted same-authority transfer proof record version 1",
+  "title": "Trusted same-authority transfer phase record version 1",
   "type": "object",
-  "required": [
-    "proof_format", "proof_schema_version", "transfer_id", "scope_identity",
-    "source_binding_digest", "destination_binding_digest", "archive_digest",
-    "participant_contract_digest", "freeze_evidence_digest", "source_authority_epoch",
-    "source_scope_generation", "destination_authority_epoch",
-    "destination_scope_generation", "transaction_fate", "claims_revoked",
-    "old_writes_fenced", "grant_state", "proof_digest"
-  ],
+  "required": ["proof_format", "proof_schema_version", "phase", "transfer_id", "scope_identity", "source_binding_digest", "destination_binding_digest", "archive_digest", "participant_contract_digest", "freeze_evidence_digest", "source_authority_epoch", "source_scope_generation", "destination_authority_epoch", "destination_scope_generation", "transaction_fate", "claims_revoked", "source_state", "old_writes_fenced", "grant_state", "proof_digest"],
   "properties": {
     "proof_format": { "const": "determa.recovery_transfer_proof" },
     "proof_schema_version": { "const": 1 },
+    "phase": { "enum": ["prepared", "committed"] },
     "transfer_id": { "type": "string", "minLength": 1 },
     "scope_identity": { "type": "string", "minLength": 1 },
     "source_binding_digest": { "$ref": "#/$defs/digest" },
@@ -27,11 +21,16 @@
     "destination_scope_generation": { "$ref": "#/$defs/decimal" },
     "transaction_fate": { "const": "known_committed" },
     "claims_revoked": { "const": true },
+    "source_state": { "enum": ["frozen", "retired"] },
     "old_writes_fenced": { "const": true },
-    "grant_state": { "enum": ["prepared", "consumed"] },
+    "grant_state": { "enum": ["reserved", "consumed"] },
     "proof_digest": { "$ref": "#/$defs/digest" }
   },
   "additionalProperties": false,
+  "allOf": [
+    { "if": { "properties": { "phase": { "const": "prepared" } } }, "then": { "properties": { "source_state": { "const": "frozen" }, "grant_state": { "const": "reserved" } } } },
+    { "if": { "properties": { "phase": { "const": "committed" } } }, "then": { "properties": { "source_state": { "const": "retired" }, "grant_state": { "const": "consumed" } } } }
+  ],
   "$defs": {
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
     "decimal": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" }

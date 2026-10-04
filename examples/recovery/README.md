@@ -24,3 +24,15 @@ quarantine beside an unsupported relocation refusal, with no cross-scope rollbac
 The three early refusal vectors cover an unsupported interface, unsupported version,
 and malformed recognized request. Their closed results contain null operation and
 scope fields because parsing failed before a durable operation identity existed.
+
+`archive-local-transfer-v1.json` is a complete resealed derivative of the same
+four-root producer under a separately negotiated guarded local test profile. Its
+source profile and participant contract digests are recomputed and pinned by the
+trusted local stage request and result in the cases file. This test topology has one
+authority domain; it asserts no distributed grant service. Its prepared proof binds
+a frozen source and reserved destination. Only the committed proof binds §18 source
+retirement and consumed grant. The positive sequence covers prepare, stage, commit
+and activate; negative cases cover changed destination, stale generation, consumed
+grant, source transaction in doubt, an old worker and an ambiguous provider retry.
+The stock profile continues to advertise `safe_relocation: false` and refuses
+unsupported transfer requests.
