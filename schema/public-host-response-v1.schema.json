@@ -40,7 +40,8 @@
             "operation_id",
             "request_digest",
             "receipt_kind",
-            "evidence_digest"
+            "evidence_digest",
+            "acceptance_sequence"
           ],
           "additionalProperties": false,
           "properties": {
@@ -65,8 +66,45 @@
             "evidence_digest": {
               "type": "string",
               "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "acceptance_sequence": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^(0|[1-9][0-9]*)$"
+                }
+              ]
             }
-          }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "receipt_kind": {
+                    "const": "accepted"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "acceptance_sequence": {
+                    "type": "string",
+                    "pattern": "^(0|[1-9][0-9]*)$"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "acceptance_sequence": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     },
@@ -632,7 +670,8 @@
                   "operation_id",
                   "request_digest",
                   "receipt_kind",
-                  "evidence_digest"
+                  "evidence_digest",
+                  "acceptance_sequence"
                 ],
                 "additionalProperties": false,
                 "properties": {
@@ -657,8 +696,45 @@
                   "evidence_digest": {
                     "type": "string",
                     "pattern": "^sha256:[0-9a-f]{64}$"
+                  },
+                  "acceptance_sequence": {
+                    "oneOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^(0|[1-9][0-9]*)$"
+                      }
+                    ]
                   }
-                }
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "receipt_kind": {
+                          "const": "accepted"
+                        }
+                      }
+                    },
+                    "then": {
+                      "properties": {
+                        "acceptance_sequence": {
+                          "type": "string",
+                          "pattern": "^(0|[1-9][0-9]*)$"
+                        }
+                      }
+                    },
+                    "else": {
+                      "properties": {
+                        "acceptance_sequence": {
+                          "type": "null"
+                        }
+                      }
+                    }
+                  }
+                ]
               },
               {
                 "properties": {

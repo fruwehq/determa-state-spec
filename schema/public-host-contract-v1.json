@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:045bcdd456984f61797b596e7e08e108374ed2b094c5d0effe070fcaaffde4a5"
+      "sha256": "sha256:291f67babeb91fad6e158982c1005f5beb7fca4b8fb22ae3d04f1a59cf98f18c"
     },
     {
       "path": "VERSION",
@@ -116,7 +116,7 @@
     },
     {
       "path": "schema/public-host-response-v1.schema.json",
-      "sha256": "sha256:b7ee1b7f824eade2471fc25ee2575f1e0f9c6f795e020826ea53c8f73c7bbae0"
+      "sha256": "sha256:98ebec02dd04d2763ea039b5262e02abd282c271b6a8b3fa3bdeee6a24688717"
     },
     {
       "path": "schema/runtime-action-output-v1.schema.json",
@@ -144,7 +144,7 @@
     },
     {
       "path": "examples/public-host/positive-v1.json",
-      "sha256": "sha256:12bb3a64db7e5b281732e832e1dd01fb458ba3fb2c6769f6ae45cb3ba63e324e"
+      "sha256": "sha256:15716b547f93609c6b7febffa8b75ea73b95ddecb5bf0fae500c52eeb24847a3"
     },
     {
       "path": "examples/public-host/negative-v1.json",
@@ -198,6 +198,10 @@
     },
     {
       "name": "determa-public-host-evidence-1",
+      "source": "SPEC.md#25.2"
+    },
+    {
+      "name": "determa-public-host-acceptance-evidence-1",
       "source": "SPEC.md#25.2"
     },
     {
