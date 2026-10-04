@@ -85,6 +85,13 @@ audit, and revision. Built-in and third-party execution stores use the same regi
 path and advertise only capabilities their configured instance can prove; broker
 integration is a composed host profile, not a storage capability.
 
+The optional [host authority interface](SPEC.md#18-optional-host-scope-authority)
+defines scope ownership, epochs and guards for configured hosts and plugins. A host
+reports its proven topology and refuses safe relocation when it cannot prove source
+retirement and transaction fate. The pure core remains coordinator-free; an embedding
+application may commit its result in an application-owned transaction. Standalone
+checkpoint export and import remain available without claiming safe relocation.
+
 Time-based behavior uses an external event-producing extension. A machine emits a
 declared scheduling request and may later receive a declared correlated event. The
 extension determines its clock, durability, delivery, cancellation, and credentials.

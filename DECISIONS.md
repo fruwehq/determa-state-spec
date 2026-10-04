@@ -5,6 +5,28 @@ and is not a second specification. [`SPEC.md`](SPEC.md), the schema, and applica
 conformance cases define behavior; if this record conflicts with them, correct this
 record rather than treating it as an alternative rule source.
 
+## Scope authority is an optional host capability
+
+Relevant specification: [§18](SPEC.md#18-optional-host-scope-authority).
+
+**Decision.** Pure core evaluation requires no authority service. A configured host
+or plugin may prove guarded scope writes, worker fencing, complete inventory and safe
+relocation for its exact topology. The local reference profile advertises only tested
+behavior; unsupported relocation fails closed with an inactive import. Authority
+epochs, owner records, grants and credentials remain host data rather than portable
+machine state. A separate explicit fresh-scope takeover can trade old-owner and
+duplicate-work guarantees for recovery with recorded ambiguity.
+
+**Rejected alternative.** Infer safe relocation from checkpoint integrity, root
+compare-and-swap, a copied database or an expired lease, or require a distributed
+coordinator in the open-source core.
+
+**Reason.** None of those facts prevents an old session from committing after a new
+owner activates. A guard must cover the native commit or rollback, and a promotion
+must wait until any uncertain transaction fate is resolved. The public interface
+allows a future hosted service to provide stronger authority without changing the
+portable machine model.
+
 ## Transition boundaries are relationship-specific
 
 Relevant specification: [§6.4](SPEC.md#64-transition-execution-order).
