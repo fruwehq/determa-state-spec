@@ -209,9 +209,9 @@
         "expected_scope_generation": "6",
         "arguments": {
           "destination_binding_digest": "sha256:5141cd2b3da81604aff6cd449b53b123ccba0c77ddea6c331971e933c63d3af5",
-          "freeze_evidence_digest": "sha256:d822a5de52ebad90e7d658aaad37c166f650fab890aaf41264dd200b73c07f0e"
+          "freeze_evidence_digest": "sha256:259be5496362d1d2d14e356a67f493a1fa50ac75c721bf016f7578bc7a7c979d"
         },
-        "request_digest": "sha256:5c5b3f370bfe75b530ab65a126fd061dc5e2ae08e767ac7528745ce5653fe28e"
+        "request_digest": "sha256:7cf47dc65e17b6d45460da5e0d7f49486b78e658b6a3013ecd742526b2c78fa2"
       },
       "context": {
         "authenticated_principal": "owner-1",
@@ -220,7 +220,9 @@
         "old_owner_session_fenced": true,
         "same_trusted_authority_domain": true,
         "grant_single_use": true,
-        "grant_destination_bound": true
+        "grant_destination_bound": true,
+        "retained_freeze_evidence_digest": "sha256:259be5496362d1d2d14e356a67f493a1fa50ac75c721bf016f7578bc7a7c979d",
+        "freeze_request_digest_is_not_proof": true
       },
       "expected": {
         "interface": "determa.host_authority",
@@ -232,7 +234,7 @@
         "authority_epoch": "2",
         "scope_generation": "7",
         "state": "retired",
-        "evidence_digest": "sha256:a2ddfd17f906914b0d499d9bfa0b4fb1117a655e6e4b82c77cc145eaa552d3e4",
+        "evidence_digest": "sha256:0d59cf976e852cdbe0776ee095fb6aee0b5b94fe6adac7169e71910456acb9cc",
         "error_code": null,
         "claim": null
       },
@@ -250,15 +252,17 @@
         "expected_scope_generation": "6",
         "arguments": {
           "destination_binding_digest": "sha256:5141cd2b3da81604aff6cd449b53b123ccba0c77ddea6c331971e933c63d3af5",
-          "freeze_evidence_digest": "sha256:d822a5de52ebad90e7d658aaad37c166f650fab890aaf41264dd200b73c07f0e"
+          "freeze_evidence_digest": "sha256:259be5496362d1d2d14e356a67f493a1fa50ac75c721bf016f7578bc7a7c979d"
         },
-        "request_digest": "sha256:5c5b3f370bfe75b530ab65a126fd061dc5e2ae08e767ac7528745ce5653fe28e"
+        "request_digest": "sha256:7cf47dc65e17b6d45460da5e0d7f49486b78e658b6a3013ecd742526b2c78fa2"
       },
       "context": {
         "authenticated_principal": "owner-1",
         "scope_authorized": true,
-        "recorded_request_digest": "sha256:5c5b3f370bfe75b530ab65a126fd061dc5e2ae08e767ac7528745ce5653fe28e",
-        "current_state": "retired"
+        "recorded_request_digest": "sha256:7cf47dc65e17b6d45460da5e0d7f49486b78e658b6a3013ecd742526b2c78fa2",
+        "current_state": "retired",
+        "retained_freeze_evidence_digest": "sha256:259be5496362d1d2d14e356a67f493a1fa50ac75c721bf016f7578bc7a7c979d",
+        "freeze_request_digest_is_not_proof": true
       },
       "expected": {
         "interface": "determa.host_authority",
@@ -270,7 +274,7 @@
         "authority_epoch": "2",
         "scope_generation": "7",
         "state": "retired",
-        "evidence_digest": "sha256:a2ddfd17f906914b0d499d9bfa0b4fb1117a655e6e4b82c77cc145eaa552d3e4",
+        "evidence_digest": "sha256:0d59cf976e852cdbe0776ee095fb6aee0b5b94fe6adac7169e71910456acb9cc",
         "error_code": null,
         "claim": null
       },
@@ -795,6 +799,45 @@
         "claim": null
       },
       "reason": "Unsupported interface version is rejected before scope lookup."
+    },
+    {
+      "name": "freeze_request_digest_is_not_committed_proof",
+      "request": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "prove_retirement",
+        "operation_id": "retire-wrong-freeze-proof",
+        "scope_identity": "scope-42",
+        "expected_authority_epoch": "2",
+        "expected_scope_generation": "6",
+        "arguments": {
+          "destination_binding_digest": "sha256:5141cd2b3da81604aff6cd449b53b123ccba0c77ddea6c331971e933c63d3af5",
+          "freeze_evidence_digest": "sha256:d822a5de52ebad90e7d658aaad37c166f650fab890aaf41264dd200b73c07f0e"
+        },
+        "request_digest": "sha256:66bc0894f336d79fef57d2d154b23b30039070ba4eebbf95df44739e1d3ef20c"
+      },
+      "context": {
+        "authenticated_principal": "owner-1",
+        "scope_authorized": true,
+        "state": "frozen",
+        "presented_freeze_request_digest": "sha256:d822a5de52ebad90e7d658aaad37c166f650fab890aaf41264dd200b73c07f0e",
+        "retained_freeze_evidence_digest": "sha256:259be5496362d1d2d14e356a67f493a1fa50ac75c721bf016f7578bc7a7c979d"
+      },
+      "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "prove_retirement",
+        "operation_id": "retire-wrong-freeze-proof",
+        "status": "rejected",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "6",
+        "state": "frozen",
+        "evidence_digest": null,
+        "error_code": "scope_fence_unproven",
+        "claim": null
+      },
+      "reason": "A freeze request hash is not the committed freeze receipt and cannot retire the source."
     }
   ]
 }

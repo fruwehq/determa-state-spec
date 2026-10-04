@@ -4698,8 +4698,14 @@ for the core to perform storage I/O. Each operation's `arguments` is closed by
 `fence_worker`; it is null otherwise. For success, `evidence_digest` is
 `hash(["determa-host-authority-evidence-1", request_digest,
 result_without_evidence_digest])`.
-It binds the immutable result and its committed host evidence; an authorized
-`read_authority` binds its returned snapshot without committing a new receipt.
+It binds the exact request digest and response bytes for integrity and replay; it
+does not by itself prove a transaction committed, an inventory is complete or a
+source retired. The host retains the response with the actual committed operation
+receipt and linked authority/proof records in its trusted ledger. A safety decision
+MUST resolve that retained ledger record and verify its linked committed evidence;
+caller-supplied response bytes or a matching digest alone never authorize it. An
+authorized `read_authority` binds its returned snapshot without committing a new
+receipt.
 `error_code` is null; for rejection, the digest is null and `error_code` is one of
 the closed errors in that schema. Results expose no owner or scope details to an
 unauthorized caller. `read_authority` has null expected epoch and generation and is
@@ -4807,6 +4813,13 @@ inside the same trusted authority domain. A transfer must also prove that the
 source can never resume and that no second destination can consume the grant. The
 archive supplies state, never that proof. A copied database, timeout, endpoint
 switch, credentials change or archive digest does not prove retirement.
+The `freeze_evidence_digest` input is the successful `freeze_scope` result's
+`evidence_digest`, not its request digest. The host resolves it to the retained
+committed freeze operation and checks its matching scope, epoch, generation, known
+transaction fate, revoked claims and inventory consistency point. A request digest,
+unretained response hash or mismatched freeze record returns `scope_fence_unproven`
+without retiring the scope. Retirement proof and any single-use grant likewise live
+in the trusted authority ledger; their response digest alone is never a grant.
 
 Future archive/transfer host operations may expose `prepare_transfer`,
 `stage_import`, `commit_transfer` and `activate_import` against this version-1
