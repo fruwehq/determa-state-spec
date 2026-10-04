@@ -8,7 +8,8 @@
     "supported_participant_schema_digests",
     "capability_reports",
     "trusted_source_profiles",
-    "trusted_participant_contracts"
+    "trusted_participant_contracts",
+    "trusted_host_journal_inventories"
   ],
   "additionalProperties": false,
   "properties": {
@@ -51,6 +52,12 @@
         }
       },
       "additionalProperties": false
+    },
+    "trusted_host_journal_inventories": {
+      "type": "array",
+      "items": {
+        "$ref": "../../schema/archive-host-journal-inventory-v1.schema.json"
+      }
     }
   }
 }

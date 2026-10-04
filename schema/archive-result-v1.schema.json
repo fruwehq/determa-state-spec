@@ -231,7 +231,8 @@
             "archive_source_profile_mismatch",
             "archive_participant_contract_mismatch",
             "archive_source_provenance_mismatch",
-            "archive_selection_invalid"
+            "archive_selection_invalid",
+            "archive_host_journal_inventory_mismatch"
           ]
         },
         "participant_id": {

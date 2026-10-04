@@ -160,7 +160,8 @@
         "authorized_source",
         "committed_consistency_token",
         "selected_checkpoint_digests",
-        "trusted_required_participant_ids"
+        "trusted_required_participant_ids",
+        "host_journal_inventory"
       ],
       "additionalProperties": false,
       "properties": {
@@ -186,11 +187,66 @@
             "type": "string",
             "pattern": "^[a-z][a-z0-9.-]*$"
           }
+        },
+        "host_journal_inventory": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "archive-host-journal-inventory-v1.schema.json"
+            }
+          ]
         }
       }
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://determa.dev/state/schema/archive-export-source-v1.schema.json",
-  "title": "Determa archive export source evidence fixture version 1"
+  "title": "Determa archive export source evidence fixture version 1",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "source": {
+            "properties": {
+              "profile_claims": {
+                "contains": {
+                  "const": "durable_native_results"
+                }
+              }
+            },
+            "required": [
+              "profile_claims"
+            ]
+          }
+        },
+        "required": [
+          "source"
+        ]
+      },
+      "then": {
+        "properties": {
+          "inventory_evidence": {
+            "properties": {
+              "host_journal_inventory": {
+                "$ref": "archive-host-journal-inventory-v1.schema.json"
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "inventory_evidence": {
+            "properties": {
+              "host_journal_inventory": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

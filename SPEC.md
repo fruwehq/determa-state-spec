@@ -5616,12 +5616,36 @@ participant schema; decoding it MUST yield exactly one closed §19 journal for e
 selected root covered by that source profile, in root-ID order. Each decoded journal
 MUST validate against `schema/host-effect-journal-v1.schema.json`, including its
 root ID, source scope identity, complete records and references, and journal digest.
-An empty journal is valid only when the verified source inventory proves that root
-has no §19 native-effect records or response references at the capture point.
+The same typed participant payload MUST include the exact normalized public host
+operation response bytes for every journal response reference, ordered by operation
+ID; each reference digest MUST equal
+`hash(["determa-host-operation-response-1", normalized_response])`. A response digest
+alone does not reconstruct equal replay. An empty journal is valid only when the
+verified source inventory proves that root has no §19 native-effect records or
+response references at the capture point.
 Missing, duplicate, or torn journal evidence blocks the operation. §19 active worker claims,
 credentials, and authority records remain outside the archive; their historical
 outcomes and result-admission evidence remain in the journal payload. A source that
 has only §17 outbox intents and does not claim §19 needs no journal participant.
+
+`schema/archive-host-journal-inventory-v1.schema.json` closes the separate source
+inventory commitment. Its `source_profile_digest` binds the independently verified
+source kind, logical scope, binding, generation, and profile claims; its
+`consistency_token` binds the capture point. Its ordered root entries bind each
+selected checkpoint pair, journal revision and digest, complete effect IDs, intent
+digests, attempt-report digests, outcome and result IDs, and operation response IDs
+and digests. `inventory_digest = hash(["determa-archive-host-journal-inventory-1",
+inventory_without_inventory_digest])`. Export obtains this inventory from the
+authoritative source under the same consistent capture boundary as checkpoints and
+journals, not by enumerating the archive participant after capture. Stage compares
+the complete decoded participant against independently trusted source inventory
+evidence configured for that exact source profile, selection token, and root set.
+An importer MUST NOT accept an inventory supplied only by the archive or by an
+untrusted caller. A correctly resealed deletion or rewrite of a journal record,
+attempt, outcome, or response reference is
+`archive_host_journal_inventory_mismatch` with the journal participant ID. This
+evidence proves historical capture completeness; it is not a worker claim,
+credential, authority grant, or permission to resume an inherited attempt.
 
 ### 22.2 Closed content and digest rules
 
@@ -5755,7 +5779,7 @@ stage returns one closed refusal and leaves source and destination unchanged.
 The deterministic refusal precedence is unsupported archive format, unsupported
 archive version, invalid archive shape, archive digest mismatch, source provenance,
 source profile or participant contract mismatch, invalid checkpoint or attachment,
-invalid participant closure or payload, missing required artifact or
+invalid participant closure or payload, host-journal inventory mismatch, missing required artifact or
 provider, capability mismatch, then consistency or staging failure. The result uses
 one exact code from `schema/archive-result-v1.schema.json`; implementations may attach
 nonportable diagnostics outside the result. Required absence is never downgraded to an

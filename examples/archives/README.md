@@ -27,12 +27,20 @@ actual executable closure under §11.5.
 `host-journal-payload-v1.schema.json` closes the typed envelope for the conditional
 §19 participant. The durable-native positive vector has one required participant
 with four decoded, closed journals in root order, each digest-paired to its selected
-checkpoint. All four are empty because this source snapshot has no §19 native-effect
-record; the `effect-1` outbox work is §17 external output. Provider closure, payload,
-profile, contract, and journal digests are pinned independently. Resealed missing and
-torn-journal vectors refuse staging even though their outer hashes are valid.
+checkpoint. `effect-1` has an ambiguous native attempt for its pending output and a
+separate recorded business outcome for a terminal adapter-accepted output. That
+result has not yet been admitted; adapter acceptance and business completion are
+distinct. Its pinned route, attempt reports, outcome, result event, and retained
+public operation response are all carried in the typed participant. The other
+three journals are empty. The independently trusted
+`archive-host-journal-inventory-v1.schema.json` commitment pins the complete IDs
+and digests at the source consistency point, bound to source provenance and the
+selected checkpoint pairs. Provider closure, payload, profile, contract, journal,
+and inventory digests are pinned independently. Resealed missing and torn-journal
+vectors refuse staging, as do resealed deletions of a native record, attempt,
+outcome, or response reference.
 
-`stage-cases-v1.json` contains 31 complete import requests, complete input archives,
+`stage-cases-v1.json` contains 35 complete import requests, complete input archives,
 configured trusted policy and provider evidence, exact result objects, and the exact
 inert staged archive or null. Cases include external payload reconstruction; missing
 required and absent optional participants; a resealed omission or weakened contract;
@@ -44,10 +52,11 @@ an explicit standalone source with and without participants, durable-native jour
 capture, absent optional data, missing required capture, invalid selection, and an
 inconsistent capture point.
 
-`hash-checks-v1.json` pins the JCS SHA-256 of all six archive/request/source
+`hash-checks-v1.json` pins the JCS SHA-256 of all seven archive/request/source/inventory
 schemas, the closed fixture staging configuration, both participant payload schemas,
 five definitions, four checkpoints, descriptor,
-provider closures, source profiles, participant contracts, journals, and outer archives. Each stage
+provider closures, source profiles, participant contracts, journals, authoritative
+inventory, and outer archives. Each stage
 case's `changed_paths_from_positive` lists every JSON pointer whose value differs
 from the positive archive. Resealed semantic-negative cases prove that a fresh outer
 digest does not make omitted queue, receipt, outbox, or audit evidence valid. The

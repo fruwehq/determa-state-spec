@@ -21,7 +21,7 @@
     "dependency_digests": [],
     "interface": "archive_participant"
   },
-  "host_journal_payload_schema_digest": "sha256:a18a5c3875030fe7d7e41bf73108e43c3f01de5dc201bd46c74392a0b5f3d5ce",
+  "host_journal_payload_schema_digest": "sha256:43ecf84b213d746222b1a8dd290dc03cc9cc8ca288fa20d567715d42041a042e",
   "cases": [
     {
       "case_id": "complete_export",
@@ -2345,7 +2345,8 @@
           ],
           "trusted_required_participant_ids": [
             "helper-state"
-          ]
+          ],
+          "host_journal_inventory": null
         }
       },
       "expected_archive": {
@@ -6964,7 +6965,8 @@
           ],
           "trusted_required_participant_ids": [
             "helper-state"
-          ]
+          ],
+          "host_journal_inventory": null
         }
       },
       "expected_archive": {
@@ -11559,7 +11561,8 @@
           ],
           "trusted_required_participant_ids": [
             "helper-state"
-          ]
+          ],
+          "host_journal_inventory": null
         }
       },
       "expected_archive": {
@@ -16178,7 +16181,8 @@
           ],
           "trusted_required_participant_ids": [
             "helper-state"
-          ]
+          ],
+          "host_journal_inventory": null
         }
       },
       "expected_archive": {
@@ -20805,7 +20809,8 @@
           ],
           "trusted_required_participant_ids": [
             "helper-state"
-          ]
+          ],
+          "host_journal_inventory": null
         }
       },
       "expected_archive": null,
@@ -23094,7 +23099,8 @@
           ],
           "trusted_required_participant_ids": [
             "helper-state"
-          ]
+          ],
+          "host_journal_inventory": null
         }
       },
       "expected_archive": null,
@@ -25432,7 +25438,8 @@
           ],
           "trusted_required_participant_ids": [
             "helper-state"
-          ]
+          ],
+          "host_journal_inventory": null
         }
       },
       "expected_archive": null,
@@ -27711,7 +27718,8 @@
             "sha256:f1f157b29245d86bfab1c06a7f2a14a54180fb2503d55b82a7f05190f3999a79",
             "sha256:9aab07243e93507e23e99e2a7c9c3001a14335a280022199c6bcb2a686fe273b"
           ],
-          "trusted_required_participant_ids": []
+          "trusted_required_participant_ids": [],
+          "host_journal_inventory": null
         }
       },
       "expected_archive": {
@@ -29973,12 +29981,14 @@
         "request_format": "determa.archive_export_request",
         "request_schema_version": 1,
         "source": {
-          "profile_kind": "checkpoint_host",
+          "profile_kind": "guarded_scope",
           "profile_claims": [
             "durable_embedded_processing",
-            "durable_native_results"
+            "durable_native_results",
+            "guarded_local_writes",
+            "worker_fencing"
           ],
-          "profile_digest": "sha256:5f98cf37e26e6abc1c46b3ba83a1e3edfa9908e209e02eeab78c9ad66cfed5e0",
+          "profile_digest": "sha256:657204937a1115f8ca7f7c240c5de688941c178a0c3e7ddc5bf36e76bb501381",
           "logical_scope_identity": "scope-archive-example",
           "ownership_binding_digest": "sha256:300dbfa84132cddc3451fd5ef8fb5f64ce0b5853991df41461f9bad9b73e56a1",
           "scope_generation": "7"
@@ -29997,12 +30007,14 @@
       },
       "source_capture": {
         "source": {
-          "profile_kind": "checkpoint_host",
+          "profile_kind": "guarded_scope",
           "profile_claims": [
             "durable_embedded_processing",
-            "durable_native_results"
+            "durable_native_results",
+            "guarded_local_writes",
+            "worker_fencing"
           ],
-          "profile_digest": "sha256:5f98cf37e26e6abc1c46b3ba83a1e3edfa9908e209e02eeab78c9ad66cfed5e0",
+          "profile_digest": "sha256:657204937a1115f8ca7f7c240c5de688941c178a0c3e7ddc5bf36e76bb501381",
           "logical_scope_identity": "scope-archive-example",
           "ownership_binding_digest": "sha256:300dbfa84132cddc3451fd5ef8fb5f64ce0b5853991df41461f9bad9b73e56a1",
           "scope_generation": "7"
@@ -30019,13 +30031,13 @@
                 "aggregate_state_format": "determa.aggregate_state",
                 "aggregate_state_schema_version": 1,
                 "machine_format": 1,
-                "validated_bundle_fingerprint": "sha256:69614f5c10828364f93960fa5347d212750e67f0c37b8056d8fd0966e334c74f",
+                "validated_bundle_fingerprint": "sha256:86878abacbd44c4ac383d8752cb9e37359bb105f916b9b9e2a628cd1c07e358f",
                 "namespace": "example.archive_effects",
                 "root_machine_id": "effects",
                 "root_machine_version": "1",
                 "root_instance_id": "effect-1",
                 "creation_id": "create-effect-1",
-                "root_runtime_id": "sha256:b37c524b9e24c7657a253253ab483e84b15feb65cfca1a66d37f58a8fc1bc23d",
+                "root_runtime_id": "sha256:15dbcb835be22d0a13a718ecca813245729d577c0b6ff9e7e8727b2f04f8ce3a",
                 "migration_sequence": "0",
                 "next_logical_step_sequence": "1",
                 "next_output_sequence": "3",
@@ -30033,11 +30045,11 @@
                 "next_queue_sequence": "0",
                 "runtimes": [
                   {
-                    "runtime_id": "sha256:b37c524b9e24c7657a253253ab483e84b15feb65cfca1a66d37f58a8fc1bc23d",
+                    "runtime_id": "sha256:15dbcb835be22d0a13a718ecca813245729d577c0b6ff9e7e8727b2f04f8ce3a",
                     "identity_origin": {
                       "kind": "root",
                       "definition": {
-                        "validated_bundle_fingerprint": "sha256:69614f5c10828364f93960fa5347d212750e67f0c37b8056d8fd0966e334c74f",
+                        "validated_bundle_fingerprint": "sha256:86878abacbd44c4ac383d8752cb9e37359bb105f916b9b9e2a628cd1c07e358f",
                         "machine": {
                           "namespace": "example.archive_effects",
                           "machine_id": "effects",
@@ -30050,11 +30062,11 @@
                     "target_identity": {
                       "root": {
                         "root_instance_id": "effect-1",
-                        "root_runtime_id": "sha256:b37c524b9e24c7657a253253ab483e84b15feb65cfca1a66d37f58a8fc1bc23d"
+                        "root_runtime_id": "sha256:15dbcb835be22d0a13a718ecca813245729d577c0b6ff9e7e8727b2f04f8ce3a"
                       }
                     },
                     "current_definition": {
-                      "validated_bundle_fingerprint": "sha256:69614f5c10828364f93960fa5347d212750e67f0c37b8056d8fd0966e334c74f",
+                      "validated_bundle_fingerprint": "sha256:86878abacbd44c4ac383d8752cb9e37359bb105f916b9b9e2a628cd1c07e358f",
                       "machine": {
                         "namespace": "example.archive_effects",
                         "machine_id": "effects",
@@ -30090,7 +30102,7 @@
                     "fault": null
                   }
                 ],
-                "aggregate_state_digest": "sha256:980d8c2ffdc7264768c480e3ab36e7f6a0bb6105d7ef10302c29ce85bb25074d"
+                "aggregate_state_digest": "sha256:e9d26fab9615cc023aa49558b27a59cac389569bb423c1ea4ebc8f67c8cb3e31"
               }
             },
             "replay_retention": {
@@ -30105,26 +30117,26 @@
                 "operation_kind": "creation",
                 "receipt_sequence": "0",
                 "creation_id": "create-effect-1",
-                "request_digest": "sha256:b9749908aaf173cda745167936c23cdcda723de70ed583627d98d90e495eea16",
+                "request_digest": "sha256:c831267996b8a653d0054b9ebdef5b49296de63ea1dd26c6717a7af6fd6ec4d1",
                 "committed_revision": "0",
-                "resulting_aggregate_state_digest": "sha256:980d8c2ffdc7264768c480e3ab36e7f6a0bb6105d7ef10302c29ce85bb25074d",
+                "resulting_aggregate_state_digest": "sha256:e9d26fab9615cc023aa49558b27a59cac389569bb423c1ea4ebc8f67c8cb3e31",
                 "status": "running",
                 "fault": null,
                 "emission_references": [
                   {
                     "kind": "external_outbox",
                     "emission_index": "0",
-                    "effect_id": "sha256:fe78520c0ca9460e6292f33c30c022e5ec0f62e74a2143f9121241b777b89209"
+                    "effect_id": "sha256:00b40bdc337a793ce4be11ce2241dd1fe50b2f14d96300f350601cefd91c61a3"
                   },
                   {
                     "kind": "external_outbox",
                     "emission_index": "0",
-                    "effect_id": "sha256:7385a8ba000dfadd94d5f30e2fb1e765229e815603479f3539f7245f37e3ad7d"
+                    "effect_id": "sha256:2ea51c6d2a2e386798cd51fc3aa7b06a30d0796efa86be4bf8266a2f4c76b88b"
                   },
                   {
                     "kind": "external_outbox",
                     "emission_index": "0",
-                    "effect_id": "sha256:ca805923f4306de41157b41fd7a28924a3fc44a1b1750d48f610f9926a737a56"
+                    "effect_id": "sha256:17689e9b778067bcd235553d4f45387e334a75579e851944402796781511f180"
                   }
                 ]
               }
@@ -30133,7 +30145,7 @@
             "pending_outbox_intents": [
               {
                 "intent": {
-                  "effect_id": "sha256:fe78520c0ca9460e6292f33c30c022e5ec0f62e74a2143f9121241b777b89209",
+                  "effect_id": "sha256:00b40bdc337a793ce4be11ce2241dd1fe50b2f14d96300f350601cefd91c61a3",
                   "sequence": "0",
                   "event": "pending_notice",
                   "payload": [
@@ -30154,7 +30166,7 @@
               {
                 "terminal_sequence": "0",
                 "intent": {
-                  "effect_id": "sha256:7385a8ba000dfadd94d5f30e2fb1e765229e815603479f3539f7245f37e3ad7d",
+                  "effect_id": "sha256:2ea51c6d2a2e386798cd51fc3aa7b06a30d0796efa86be4bf8266a2f4c76b88b",
                   "sequence": "1",
                   "event": "terminal_notice",
                   "payload": [
@@ -30172,8 +30184,8 @@
             "outbox_effect_tombstones": [
               {
                 "terminal_sequence": "1",
-                "effect_id": "sha256:ca805923f4306de41157b41fd7a28924a3fc44a1b1750d48f610f9926a737a56",
-                "intent_digest": "sha256:528e0033d2b7de611e1c5797ef2a6a943d84057a5a6bd6a75a29e87622d2845c",
+                "effect_id": "sha256:17689e9b778067bcd235553d4f45387e334a75579e851944402796781511f180",
+                "intent_digest": "sha256:cddae34ecf3b18271435ee6769ffbcc05338f0f23626087110cc1dc4770d700c",
                 "committed_revision": "2",
                 "outcome": {
                   "status": "dead_lettered",
@@ -30182,7 +30194,7 @@
               }
             ],
             "migration_audit_records": [],
-            "execution_checkpoint_digest": "sha256:5667b9609eaf93f15abbd803110b46fb291f2e1b842f35ab2541387213fc1f8b"
+            "execution_checkpoint_digest": "sha256:40c58f29da2c9e888e15a6fc3e0214e83194d1877a8fe466e11cd79c0374ddd8"
           },
           {
             "execution_checkpoint_format": "determa.execution_checkpoint",
@@ -30703,7 +30715,7 @@
         ],
         "normalized_definitions": [
           {
-            "validated_bundle_fingerprint": "sha256:69614f5c10828364f93960fa5347d212750e67f0c37b8056d8fd0966e334c74f",
+            "validated_bundle_fingerprint": "sha256:86878abacbd44c4ac383d8752cb9e37359bb105f916b9b9e2a628cd1c07e358f",
             "normalized_bundle": [
               "map",
               [
@@ -30752,6 +30764,21 @@
                               [
                                 "string",
                                 "output"
+                              ]
+                            ]
+                          ]
+                        ]
+                      ],
+                      [
+                        "terminal_notice_succeeded",
+                        [
+                          "map",
+                          [
+                            [
+                              "direction",
+                              [
+                                "string",
+                                "input"
                               ]
                             ]
                           ]
@@ -32232,8 +32259,8 @@
               "version": "1.0.0",
               "content_digest": "sha256:f833f7543be1ed828662470aab938aa1468d727ddb8bf1a98f49ca95658ec1f0"
             },
-            "participant_schema_digest": "sha256:a18a5c3875030fe7d7e41bf73108e43c3f01de5dc201bd46c74392a0b5f3d5ce",
-            "payload_digest": "sha256:5510645baa5f056750113ef44d4bba5db358e2222529cb3377a75d4ae26c0a88",
+            "participant_schema_digest": "sha256:43ecf84b213d746222b1a8dd290dc03cc9cc8ca288fa20d567715d42041a042e",
+            "payload_digest": "sha256:4aeb168f8f9639b9cfc1524034e487425ffde7d351ae36b346d970140f0cb01f",
             "payload": [
               "map",
               [
@@ -32249,7 +32276,7 @@
                             "checkpoint_digest",
                             [
                               "string",
-                              "sha256:5667b9609eaf93f15abbd803110b46fb291f2e1b842f35ab2541387213fc1f8b"
+                              "sha256:40c58f29da2c9e888e15a6fc3e0214e83194d1877a8fe466e11cd79c0374ddd8"
                             ]
                           ],
                           [
@@ -32263,14 +32290,657 @@
                             "effect_records",
                             [
                               "list",
-                              []
+                              [
+                                [
+                                  "map",
+                                  [
+                                    [
+                                      "admission_receipt",
+                                      [
+                                        "null"
+                                      ]
+                                    ],
+                                    [
+                                      "attempt_fence",
+                                      [
+                                        "string",
+                                        "1"
+                                      ]
+                                    ],
+                                    [
+                                      "attempt_records",
+                                      [
+                                        "list",
+                                        [
+                                          [
+                                            "map",
+                                            [
+                                              [
+                                                "attempt_fence",
+                                                [
+                                                  "string",
+                                                  "1"
+                                                ]
+                                              ],
+                                              [
+                                                "reason",
+                                                [
+                                                  "string",
+                                                  "unknown_confirmation"
+                                                ]
+                                              ],
+                                              [
+                                                "report_digest",
+                                                [
+                                                  "string",
+                                                  "sha256:a884974080073865b9f2057abb19257de90dd9c3305284c6efc0a704b8c6cd96"
+                                                ]
+                                              ],
+                                              [
+                                                "report_kind",
+                                                [
+                                                  "string",
+                                                  "ambiguous"
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "cancellation",
+                                      [
+                                        "map",
+                                        [
+                                          [
+                                            "operation_id",
+                                            [
+                                              "string",
+                                              "cancel-pending-1"
+                                            ]
+                                          ],
+                                          [
+                                            "reason",
+                                            [
+                                              "string",
+                                              "operator_request"
+                                            ]
+                                          ],
+                                          [
+                                            "state",
+                                            [
+                                              "string",
+                                              "reconciliation_required"
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "destination_binding_digest",
+                                      [
+                                        "string",
+                                        "sha256:08879d9df04200d17a482e631ccece77596c378c5517dc051871cb2c67d1f5c5"
+                                      ]
+                                    ],
+                                    [
+                                      "effect_id",
+                                      [
+                                        "string",
+                                        "sha256:00b40bdc337a793ce4be11ce2241dd1fe50b2f14d96300f350601cefd91c61a3"
+                                      ]
+                                    ],
+                                    [
+                                      "handler_reference",
+                                      [
+                                        "map",
+                                        [
+                                          [
+                                            "content_digest",
+                                            [
+                                              "string",
+                                              "sha256:3b5cc83b59afe828662e238764f8a352da7e8d0985d331cc51a22d63f1c304cb"
+                                            ]
+                                          ],
+                                          [
+                                            "identifier",
+                                            [
+                                              "string",
+                                              "example.native-handler"
+                                            ]
+                                          ],
+                                          [
+                                            "version",
+                                            [
+                                              "string",
+                                              "1.0.0"
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "idempotency_policy",
+                                      [
+                                        "string",
+                                        "destination_deduplicates"
+                                      ]
+                                    ],
+                                    [
+                                      "intent_digest",
+                                      [
+                                        "string",
+                                        "sha256:c6234fa8b333e4f0bb8686e556fd77d7797cc40653a4201169e96cedf12f8b24"
+                                      ]
+                                    ],
+                                    [
+                                      "invocation_state",
+                                      [
+                                        "string",
+                                        "ambiguous"
+                                      ]
+                                    ],
+                                    [
+                                      "operation_token",
+                                      [
+                                        "string",
+                                        "sha256:14d37503feef1437e5ed38a77b4bd1dbe8cd4b6e37b347bb77f42f7f1c995623"
+                                      ]
+                                    ],
+                                    [
+                                      "outcome",
+                                      [
+                                        "null"
+                                      ]
+                                    ],
+                                    [
+                                      "result_event_id",
+                                      [
+                                        "null"
+                                      ]
+                                    ],
+                                    [
+                                      "result_mapping",
+                                      [
+                                        "list",
+                                        [
+                                          [
+                                            "map",
+                                            [
+                                              [
+                                                "event",
+                                                [
+                                                  "string",
+                                                  "terminal_notice_succeeded"
+                                                ]
+                                              ],
+                                              [
+                                                "operation_token_location",
+                                                [
+                                                  "null"
+                                                ]
+                                              ],
+                                              [
+                                                "outcome_kind",
+                                                [
+                                                  "string",
+                                                  "succeeded"
+                                                ]
+                                              ],
+                                              [
+                                                "result_slot",
+                                                [
+                                                  "string",
+                                                  "success"
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "route_configuration_generation",
+                                      [
+                                        "string",
+                                        "7"
+                                      ]
+                                    ],
+                                    [
+                                      "target",
+                                      [
+                                        "map",
+                                        [
+                                          [
+                                            "root_instance_id",
+                                            [
+                                              "string",
+                                              "effect-1"
+                                            ]
+                                          ],
+                                          [
+                                            "runtime_id",
+                                            [
+                                              "string",
+                                              "sha256:15dbcb835be22d0a13a718ecca813245729d577c0b6ff9e7e8727b2f04f8ce3a"
+                                            ]
+                                          ],
+                                          [
+                                            "runtime_incarnation",
+                                            [
+                                              "map",
+                                              [
+                                                [
+                                                  "definition",
+                                                  [
+                                                    "map",
+                                                    [
+                                                      [
+                                                        "machine",
+                                                        [
+                                                          "map",
+                                                          [
+                                                            [
+                                                              "machine_id",
+                                                              [
+                                                                "string",
+                                                                "effects"
+                                                              ]
+                                                            ],
+                                                            [
+                                                              "machine_version",
+                                                              [
+                                                                "string",
+                                                                "1"
+                                                              ]
+                                                            ],
+                                                            [
+                                                              "namespace",
+                                                              [
+                                                                "string",
+                                                                "example.archive_effects"
+                                                              ]
+                                                            ],
+                                                            [
+                                                              "root_definition_pointer",
+                                                              [
+                                                                "string",
+                                                                "/machines/0/root"
+                                                              ]
+                                                            ]
+                                                          ]
+                                                        ]
+                                                      ],
+                                                      [
+                                                        "validated_bundle_fingerprint",
+                                                        [
+                                                          "string",
+                                                          "sha256:86878abacbd44c4ac383d8752cb9e37359bb105f916b9b9e2a628cd1c07e358f"
+                                                        ]
+                                                      ]
+                                                    ]
+                                                  ]
+                                                ],
+                                                [
+                                                  "kind",
+                                                  [
+                                                    "string",
+                                                    "root"
+                                                  ]
+                                                ],
+                                                [
+                                                  "root_instance_id",
+                                                  [
+                                                    "string",
+                                                    "effect-1"
+                                                  ]
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ]
+                                  ]
+                                ],
+                                [
+                                  "map",
+                                  [
+                                    [
+                                      "admission_receipt",
+                                      [
+                                        "null"
+                                      ]
+                                    ],
+                                    [
+                                      "attempt_fence",
+                                      [
+                                        "string",
+                                        "1"
+                                      ]
+                                    ],
+                                    [
+                                      "attempt_records",
+                                      [
+                                        "list",
+                                        [
+                                          [
+                                            "map",
+                                            [
+                                              [
+                                                "attempt_fence",
+                                                [
+                                                  "string",
+                                                  "1"
+                                                ]
+                                              ],
+                                              [
+                                                "reason",
+                                                [
+                                                  "null"
+                                                ]
+                                              ],
+                                              [
+                                                "report_digest",
+                                                [
+                                                  "string",
+                                                  "sha256:7f7fcd999a04a845067ca5f257ecbc6b1ab26909e9722caa6d44ae801ee2c5b9"
+                                                ]
+                                              ],
+                                              [
+                                                "report_kind",
+                                                [
+                                                  "string",
+                                                  "succeeded"
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "cancellation",
+                                      [
+                                        "null"
+                                      ]
+                                    ],
+                                    [
+                                      "destination_binding_digest",
+                                      [
+                                        "string",
+                                        "sha256:08879d9df04200d17a482e631ccece77596c378c5517dc051871cb2c67d1f5c5"
+                                      ]
+                                    ],
+                                    [
+                                      "effect_id",
+                                      [
+                                        "string",
+                                        "sha256:2ea51c6d2a2e386798cd51fc3aa7b06a30d0796efa86be4bf8266a2f4c76b88b"
+                                      ]
+                                    ],
+                                    [
+                                      "handler_reference",
+                                      [
+                                        "map",
+                                        [
+                                          [
+                                            "content_digest",
+                                            [
+                                              "string",
+                                              "sha256:3b5cc83b59afe828662e238764f8a352da7e8d0985d331cc51a22d63f1c304cb"
+                                            ]
+                                          ],
+                                          [
+                                            "identifier",
+                                            [
+                                              "string",
+                                              "example.native-handler"
+                                            ]
+                                          ],
+                                          [
+                                            "version",
+                                            [
+                                              "string",
+                                              "1.0.0"
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "idempotency_policy",
+                                      [
+                                        "string",
+                                        "destination_deduplicates"
+                                      ]
+                                    ],
+                                    [
+                                      "intent_digest",
+                                      [
+                                        "string",
+                                        "sha256:dcab81818d78761ce1dbaeba797755d4b200336f9000f262cb8314aaaec5fa0b"
+                                      ]
+                                    ],
+                                    [
+                                      "invocation_state",
+                                      [
+                                        "string",
+                                        "outcome_recorded"
+                                      ]
+                                    ],
+                                    [
+                                      "operation_token",
+                                      [
+                                        "string",
+                                        "sha256:4fa512e648997fd9046efa8d2756398f80322f1d783d164af1fa2394d9227643"
+                                      ]
+                                    ],
+                                    [
+                                      "outcome",
+                                      [
+                                        "map",
+                                        [
+                                          [
+                                            "attempt_fence",
+                                            [
+                                              "string",
+                                              "1"
+                                            ]
+                                          ],
+                                          [
+                                            "digest",
+                                            [
+                                              "string",
+                                              "sha256:2aed210bddef44ef8259f33f0745cfdc0587e073708a219fa239545ec046eae5"
+                                            ]
+                                          ],
+                                          [
+                                            "kind",
+                                            [
+                                              "string",
+                                              "succeeded"
+                                            ]
+                                          ],
+                                          [
+                                            "payload",
+                                            [
+                                              "list",
+                                              [
+                                                [
+                                                  "string",
+                                                  "map"
+                                                ],
+                                                [
+                                                  "list",
+                                                  []
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "result_event_id",
+                                      [
+                                        "string",
+                                        "sha256:5c6967f960e966e77e83ac5db20c431bcc2f5a5adcd1be58dbc432dcc0b0a321"
+                                      ]
+                                    ],
+                                    [
+                                      "result_mapping",
+                                      [
+                                        "list",
+                                        [
+                                          [
+                                            "map",
+                                            [
+                                              [
+                                                "event",
+                                                [
+                                                  "string",
+                                                  "terminal_notice_succeeded"
+                                                ]
+                                              ],
+                                              [
+                                                "operation_token_location",
+                                                [
+                                                  "null"
+                                                ]
+                                              ],
+                                              [
+                                                "outcome_kind",
+                                                [
+                                                  "string",
+                                                  "succeeded"
+                                                ]
+                                              ],
+                                              [
+                                                "result_slot",
+                                                [
+                                                  "string",
+                                                  "success"
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "route_configuration_generation",
+                                      [
+                                        "string",
+                                        "7"
+                                      ]
+                                    ],
+                                    [
+                                      "target",
+                                      [
+                                        "map",
+                                        [
+                                          [
+                                            "root_instance_id",
+                                            [
+                                              "string",
+                                              "effect-1"
+                                            ]
+                                          ],
+                                          [
+                                            "runtime_id",
+                                            [
+                                              "string",
+                                              "sha256:15dbcb835be22d0a13a718ecca813245729d577c0b6ff9e7e8727b2f04f8ce3a"
+                                            ]
+                                          ],
+                                          [
+                                            "runtime_incarnation",
+                                            [
+                                              "map",
+                                              [
+                                                [
+                                                  "definition",
+                                                  [
+                                                    "map",
+                                                    [
+                                                      [
+                                                        "machine",
+                                                        [
+                                                          "map",
+                                                          [
+                                                            [
+                                                              "machine_id",
+                                                              [
+                                                                "string",
+                                                                "effects"
+                                                              ]
+                                                            ],
+                                                            [
+                                                              "machine_version",
+                                                              [
+                                                                "string",
+                                                                "1"
+                                                              ]
+                                                            ],
+                                                            [
+                                                              "namespace",
+                                                              [
+                                                                "string",
+                                                                "example.archive_effects"
+                                                              ]
+                                                            ],
+                                                            [
+                                                              "root_definition_pointer",
+                                                              [
+                                                                "string",
+                                                                "/machines/0/root"
+                                                              ]
+                                                            ]
+                                                          ]
+                                                        ]
+                                                      ],
+                                                      [
+                                                        "validated_bundle_fingerprint",
+                                                        [
+                                                          "string",
+                                                          "sha256:86878abacbd44c4ac383d8752cb9e37359bb105f916b9b9e2a628cd1c07e358f"
+                                                        ]
+                                                      ]
+                                                    ]
+                                                  ]
+                                                ],
+                                                [
+                                                  "kind",
+                                                  [
+                                                    "string",
+                                                    "root"
+                                                  ]
+                                                ],
+                                                [
+                                                  "root_instance_id",
+                                                  [
+                                                    "string",
+                                                    "effect-1"
+                                                  ]
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ]
+                                  ]
+                                ]
+                              ]
                             ]
                           ],
                           [
                             "host_effect_journal_digest",
                             [
                               "string",
-                              "sha256:dbce3b93ed28249467babb2724e8258607237c0c422a57c4be815ce825cd6a2f"
+                              "sha256:90f0a8681805462ba68a661fb7da047334ed2d771ab8269053060bb67d91515b"
                             ]
                           ],
                           [
@@ -32291,14 +32961,34 @@
                             "journal_revision",
                             [
                               "string",
-                              "0"
+                              "4"
                             ]
                           ],
                           [
                             "operation_response_references",
                             [
                               "list",
-                              []
+                              [
+                                [
+                                  "map",
+                                  [
+                                    [
+                                      "operation_id",
+                                      [
+                                        "string",
+                                        "cancel-pending-1"
+                                      ]
+                                    ],
+                                    [
+                                      "response_digest",
+                                      [
+                                        "string",
+                                        "sha256:fa2ffdf1995cef1053bf0d61f665e164cb7617ce6073e44b9822d1a0969172fe"
+                                      ]
+                                    ]
+                                  ]
+                                ]
+                              ]
                             ]
                           ],
                           [
@@ -32544,6 +33234,109 @@
                       ]
                     ]
                   ]
+                ],
+                [
+                  "retained_operation_responses",
+                  [
+                    "list",
+                    [
+                      [
+                        "map",
+                        [
+                          [
+                            "normalized_response",
+                            [
+                              "map",
+                              [
+                                [
+                                  "cancellation",
+                                  [
+                                    "map",
+                                    [
+                                      [
+                                        "operation_id",
+                                        [
+                                          "string",
+                                          "cancel-pending-1"
+                                        ]
+                                      ],
+                                      [
+                                        "reason",
+                                        [
+                                          "string",
+                                          "operator_request"
+                                        ]
+                                      ],
+                                      [
+                                        "state",
+                                        [
+                                          "string",
+                                          "reconciliation_required"
+                                        ]
+                                      ]
+                                    ]
+                                  ]
+                                ],
+                                [
+                                  "effect_id",
+                                  [
+                                    "string",
+                                    "sha256:00b40bdc337a793ce4be11ce2241dd1fe50b2f14d96300f350601cefd91c61a3"
+                                  ]
+                                ],
+                                [
+                                  "error_code",
+                                  [
+                                    "null"
+                                  ]
+                                ],
+                                [
+                                  "journal_revision",
+                                  [
+                                    "string",
+                                    "3"
+                                  ]
+                                ],
+                                [
+                                  "operation_id",
+                                  [
+                                    "string",
+                                    "cancel-pending-1"
+                                  ]
+                                ],
+                                [
+                                  "outcome",
+                                  [
+                                    "null"
+                                  ]
+                                ],
+                                [
+                                  "result_event_id",
+                                  [
+                                    "null"
+                                  ]
+                                ],
+                                [
+                                  "status",
+                                  [
+                                    "string",
+                                    "reconciliation_required"
+                                  ]
+                                ]
+                              ]
+                            ]
+                          ],
+                          [
+                            "operation_id",
+                            [
+                              "string",
+                              "cancel-pending-1"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
                 ]
               ]
             ],
@@ -32567,38 +33360,109 @@
         ],
         "inventory_evidence": {
           "authorized_source": {
-            "profile_kind": "checkpoint_host",
+            "profile_kind": "guarded_scope",
             "profile_claims": [
               "durable_embedded_processing",
-              "durable_native_results"
+              "durable_native_results",
+              "guarded_local_writes",
+              "worker_fencing"
             ],
-            "profile_digest": "sha256:5f98cf37e26e6abc1c46b3ba83a1e3edfa9908e209e02eeab78c9ad66cfed5e0",
+            "profile_digest": "sha256:657204937a1115f8ca7f7c240c5de688941c178a0c3e7ddc5bf36e76bb501381",
             "logical_scope_identity": "scope-archive-example",
             "ownership_binding_digest": "sha256:300dbfa84132cddc3451fd5ef8fb5f64ce0b5853991df41461f9bad9b73e56a1",
             "scope_generation": "7"
           },
           "committed_consistency_token": "capture-7",
           "selected_checkpoint_digests": [
-            "sha256:5667b9609eaf93f15abbd803110b46fb291f2e1b842f35ab2541387213fc1f8b",
+            "sha256:40c58f29da2c9e888e15a6fc3e0214e83194d1877a8fe466e11cd79c0374ddd8",
             "sha256:858ee24a45897e02b481bf4b4155f3d95eb3a8eafb5b81d45b95bc4a0088ec49",
             "sha256:f1f157b29245d86bfab1c06a7f2a14a54180fb2503d55b82a7f05190f3999a79",
             "sha256:9aab07243e93507e23e99e2a7c9c3001a14335a280022199c6bcb2a686fe273b"
           ],
           "trusted_required_participant_ids": [
             "host-effect-journal"
-          ]
+          ],
+          "host_journal_inventory": {
+            "source_profile_digest": "sha256:657204937a1115f8ca7f7c240c5de688941c178a0c3e7ddc5bf36e76bb501381",
+            "consistency_token": "capture-7",
+            "root_inventories": [
+              {
+                "root_instance_id": "effect-1",
+                "checkpoint_revision": "4",
+                "checkpoint_digest": "sha256:40c58f29da2c9e888e15a6fc3e0214e83194d1877a8fe466e11cd79c0374ddd8",
+                "journal_revision": "4",
+                "journal_digest": "sha256:90f0a8681805462ba68a661fb7da047334ed2d771ab8269053060bb67d91515b",
+                "record_commitments": [
+                  {
+                    "effect_id": "sha256:00b40bdc337a793ce4be11ce2241dd1fe50b2f14d96300f350601cefd91c61a3",
+                    "intent_digest": "sha256:c6234fa8b333e4f0bb8686e556fd77d7797cc40653a4201169e96cedf12f8b24",
+                    "attempt_report_digests": [
+                      "sha256:a884974080073865b9f2057abb19257de90dd9c3305284c6efc0a704b8c6cd96"
+                    ],
+                    "outcome_digest": null,
+                    "result_event_id": null
+                  },
+                  {
+                    "effect_id": "sha256:2ea51c6d2a2e386798cd51fc3aa7b06a30d0796efa86be4bf8266a2f4c76b88b",
+                    "intent_digest": "sha256:dcab81818d78761ce1dbaeba797755d4b200336f9000f262cb8314aaaec5fa0b",
+                    "attempt_report_digests": [
+                      "sha256:7f7fcd999a04a845067ca5f257ecbc6b1ab26909e9722caa6d44ae801ee2c5b9"
+                    ],
+                    "outcome_digest": "sha256:2aed210bddef44ef8259f33f0745cfdc0587e073708a219fa239545ec046eae5",
+                    "result_event_id": "sha256:5c6967f960e966e77e83ac5db20c431bcc2f5a5adcd1be58dbc432dcc0b0a321"
+                  }
+                ],
+                "response_commitments": [
+                  {
+                    "operation_id": "cancel-pending-1",
+                    "response_digest": "sha256:fa2ffdf1995cef1053bf0d61f665e164cb7617ce6073e44b9822d1a0969172fe"
+                  }
+                ]
+              },
+              {
+                "root_instance_id": "fault-1",
+                "checkpoint_revision": "2",
+                "checkpoint_digest": "sha256:858ee24a45897e02b481bf4b4155f3d95eb3a8eafb5b81d45b95bc4a0088ec49",
+                "journal_revision": "0",
+                "journal_digest": "sha256:f4cc50fc1dd4ee7f31f53032b824aad666f7c5e7966cbfa8293d03357da5160b",
+                "record_commitments": [],
+                "response_commitments": []
+              },
+              {
+                "root_instance_id": "job-42",
+                "checkpoint_revision": "1",
+                "checkpoint_digest": "sha256:f1f157b29245d86bfab1c06a7f2a14a54180fb2503d55b82a7f05190f3999a79",
+                "journal_revision": "0",
+                "journal_digest": "sha256:4028d0b2bb18355db993ae8c0698e8e35ffbb3dcd734631f6c3a6352d9e640d3",
+                "record_commitments": [],
+                "response_commitments": []
+              },
+              {
+                "root_instance_id": "server-1",
+                "checkpoint_revision": "3",
+                "checkpoint_digest": "sha256:9aab07243e93507e23e99e2a7c9c3001a14335a280022199c6bcb2a686fe273b",
+                "journal_revision": "0",
+                "journal_digest": "sha256:d917f1f48f2a9eec8f337ae3c207014f568d00cbab048b743a05a75d9ed1797c",
+                "record_commitments": [],
+                "response_commitments": []
+              }
+            ],
+            "inventory_digest": "sha256:46dc5b3a63e4a3837c26d3f87859c9d67390eaca97d5ac1e2f50d70097153eaf"
+          }
         }
       },
       "expected_archive": {
         "archive_format": "determa.archive",
         "archive_schema_version": 1,
         "source": {
-          "profile_kind": "checkpoint_host",
+          "profile_kind": "guarded_scope",
           "profile_claims": [
             "durable_embedded_processing",
-            "durable_native_results"
+            "durable_native_results",
+            "guarded_local_writes",
+            "worker_fencing"
           ],
-          "profile_digest": "sha256:5f98cf37e26e6abc1c46b3ba83a1e3edfa9908e209e02eeab78c9ad66cfed5e0",
+          "profile_digest": "sha256:657204937a1115f8ca7f7c240c5de688941c178a0c3e7ddc5bf36e76bb501381",
           "logical_scope_identity": "scope-archive-example",
           "ownership_binding_digest": "sha256:300dbfa84132cddc3451fd5ef8fb5f64ce0b5853991df41461f9bad9b73e56a1",
           "scope_generation": "7"
@@ -32608,7 +33472,7 @@
             "host-effect-journal"
           ],
           "optional_participant_ids": [],
-          "participant_contract_digest": "sha256:dff7db314373bac863f58bbfda8b3376eea0d4899fe8429b8a3f45761b734f71"
+          "participant_contract_digest": "sha256:993904d58c8b45293295740c2ad413829821a1e90139cc7ce6146f0331ee605a"
         },
         "selection": {
           "root_instance_ids": [
@@ -32631,13 +33495,13 @@
                 "aggregate_state_format": "determa.aggregate_state",
                 "aggregate_state_schema_version": 1,
                 "machine_format": 1,
-                "validated_bundle_fingerprint": "sha256:69614f5c10828364f93960fa5347d212750e67f0c37b8056d8fd0966e334c74f",
+                "validated_bundle_fingerprint": "sha256:86878abacbd44c4ac383d8752cb9e37359bb105f916b9b9e2a628cd1c07e358f",
                 "namespace": "example.archive_effects",
                 "root_machine_id": "effects",
                 "root_machine_version": "1",
                 "root_instance_id": "effect-1",
                 "creation_id": "create-effect-1",
-                "root_runtime_id": "sha256:b37c524b9e24c7657a253253ab483e84b15feb65cfca1a66d37f58a8fc1bc23d",
+                "root_runtime_id": "sha256:15dbcb835be22d0a13a718ecca813245729d577c0b6ff9e7e8727b2f04f8ce3a",
                 "migration_sequence": "0",
                 "next_logical_step_sequence": "1",
                 "next_output_sequence": "3",
@@ -32645,11 +33509,11 @@
                 "next_queue_sequence": "0",
                 "runtimes": [
                   {
-                    "runtime_id": "sha256:b37c524b9e24c7657a253253ab483e84b15feb65cfca1a66d37f58a8fc1bc23d",
+                    "runtime_id": "sha256:15dbcb835be22d0a13a718ecca813245729d577c0b6ff9e7e8727b2f04f8ce3a",
                     "identity_origin": {
                       "kind": "root",
                       "definition": {
-                        "validated_bundle_fingerprint": "sha256:69614f5c10828364f93960fa5347d212750e67f0c37b8056d8fd0966e334c74f",
+                        "validated_bundle_fingerprint": "sha256:86878abacbd44c4ac383d8752cb9e37359bb105f916b9b9e2a628cd1c07e358f",
                         "machine": {
                           "namespace": "example.archive_effects",
                           "machine_id": "effects",
@@ -32662,11 +33526,11 @@
                     "target_identity": {
                       "root": {
                         "root_instance_id": "effect-1",
-                        "root_runtime_id": "sha256:b37c524b9e24c7657a253253ab483e84b15feb65cfca1a66d37f58a8fc1bc23d"
+                        "root_runtime_id": "sha256:15dbcb835be22d0a13a718ecca813245729d577c0b6ff9e7e8727b2f04f8ce3a"
                       }
                     },
                     "current_definition": {
-                      "validated_bundle_fingerprint": "sha256:69614f5c10828364f93960fa5347d212750e67f0c37b8056d8fd0966e334c74f",
+                      "validated_bundle_fingerprint": "sha256:86878abacbd44c4ac383d8752cb9e37359bb105f916b9b9e2a628cd1c07e358f",
                       "machine": {
                         "namespace": "example.archive_effects",
                         "machine_id": "effects",
@@ -32702,7 +33566,7 @@
                     "fault": null
                   }
                 ],
-                "aggregate_state_digest": "sha256:980d8c2ffdc7264768c480e3ab36e7f6a0bb6105d7ef10302c29ce85bb25074d"
+                "aggregate_state_digest": "sha256:e9d26fab9615cc023aa49558b27a59cac389569bb423c1ea4ebc8f67c8cb3e31"
               }
             },
             "replay_retention": {
@@ -32717,26 +33581,26 @@
                 "operation_kind": "creation",
                 "receipt_sequence": "0",
                 "creation_id": "create-effect-1",
-                "request_digest": "sha256:b9749908aaf173cda745167936c23cdcda723de70ed583627d98d90e495eea16",
+                "request_digest": "sha256:c831267996b8a653d0054b9ebdef5b49296de63ea1dd26c6717a7af6fd6ec4d1",
                 "committed_revision": "0",
-                "resulting_aggregate_state_digest": "sha256:980d8c2ffdc7264768c480e3ab36e7f6a0bb6105d7ef10302c29ce85bb25074d",
+                "resulting_aggregate_state_digest": "sha256:e9d26fab9615cc023aa49558b27a59cac389569bb423c1ea4ebc8f67c8cb3e31",
                 "status": "running",
                 "fault": null,
                 "emission_references": [
                   {
                     "kind": "external_outbox",
                     "emission_index": "0",
-                    "effect_id": "sha256:fe78520c0ca9460e6292f33c30c022e5ec0f62e74a2143f9121241b777b89209"
+                    "effect_id": "sha256:00b40bdc337a793ce4be11ce2241dd1fe50b2f14d96300f350601cefd91c61a3"
                   },
                   {
                     "kind": "external_outbox",
                     "emission_index": "0",
-                    "effect_id": "sha256:7385a8ba000dfadd94d5f30e2fb1e765229e815603479f3539f7245f37e3ad7d"
+                    "effect_id": "sha256:2ea51c6d2a2e386798cd51fc3aa7b06a30d0796efa86be4bf8266a2f4c76b88b"
                   },
                   {
                     "kind": "external_outbox",
                     "emission_index": "0",
-                    "effect_id": "sha256:ca805923f4306de41157b41fd7a28924a3fc44a1b1750d48f610f9926a737a56"
+                    "effect_id": "sha256:17689e9b778067bcd235553d4f45387e334a75579e851944402796781511f180"
                   }
                 ]
               }
@@ -32745,7 +33609,7 @@
             "pending_outbox_intents": [
               {
                 "intent": {
-                  "effect_id": "sha256:fe78520c0ca9460e6292f33c30c022e5ec0f62e74a2143f9121241b777b89209",
+                  "effect_id": "sha256:00b40bdc337a793ce4be11ce2241dd1fe50b2f14d96300f350601cefd91c61a3",
                   "sequence": "0",
                   "event": "pending_notice",
                   "payload": [
@@ -32766,7 +33630,7 @@
               {
                 "terminal_sequence": "0",
                 "intent": {
-                  "effect_id": "sha256:7385a8ba000dfadd94d5f30e2fb1e765229e815603479f3539f7245f37e3ad7d",
+                  "effect_id": "sha256:2ea51c6d2a2e386798cd51fc3aa7b06a30d0796efa86be4bf8266a2f4c76b88b",
                   "sequence": "1",
                   "event": "terminal_notice",
                   "payload": [
@@ -32784,8 +33648,8 @@
             "outbox_effect_tombstones": [
               {
                 "terminal_sequence": "1",
-                "effect_id": "sha256:ca805923f4306de41157b41fd7a28924a3fc44a1b1750d48f610f9926a737a56",
-                "intent_digest": "sha256:528e0033d2b7de611e1c5797ef2a6a943d84057a5a6bd6a75a29e87622d2845c",
+                "effect_id": "sha256:17689e9b778067bcd235553d4f45387e334a75579e851944402796781511f180",
+                "intent_digest": "sha256:cddae34ecf3b18271435ee6769ffbcc05338f0f23626087110cc1dc4770d700c",
                 "committed_revision": "2",
                 "outcome": {
                   "status": "dead_lettered",
@@ -32794,7 +33658,7 @@
               }
             ],
             "migration_audit_records": [],
-            "execution_checkpoint_digest": "sha256:5667b9609eaf93f15abbd803110b46fb291f2e1b842f35ab2541387213fc1f8b"
+            "execution_checkpoint_digest": "sha256:40c58f29da2c9e888e15a6fc3e0214e83194d1877a8fe466e11cd79c0374ddd8"
           },
           {
             "execution_checkpoint_format": "determa.execution_checkpoint",
@@ -33315,7 +34179,7 @@
         ],
         "normalized_definitions": [
           {
-            "validated_bundle_fingerprint": "sha256:69614f5c10828364f93960fa5347d212750e67f0c37b8056d8fd0966e334c74f",
+            "validated_bundle_fingerprint": "sha256:86878abacbd44c4ac383d8752cb9e37359bb105f916b9b9e2a628cd1c07e358f",
             "normalized_bundle": [
               "map",
               [
@@ -33364,6 +34228,21 @@
                               [
                                 "string",
                                 "output"
+                              ]
+                            ]
+                          ]
+                        ]
+                      ],
+                      [
+                        "terminal_notice_succeeded",
+                        [
+                          "map",
+                          [
+                            [
+                              "direction",
+                              [
+                                "string",
+                                "input"
                               ]
                             ]
                           ]
@@ -34844,10 +35723,10 @@
               "version": "1.0.0",
               "content_digest": "sha256:f833f7543be1ed828662470aab938aa1468d727ddb8bf1a98f49ca95658ec1f0"
             },
-            "participant_schema_digest": "sha256:a18a5c3875030fe7d7e41bf73108e43c3f01de5dc201bd46c74392a0b5f3d5ce",
+            "participant_schema_digest": "sha256:43ecf84b213d746222b1a8dd290dc03cc9cc8ca288fa20d567715d42041a042e",
             "dependencies": [],
             "storage": "embedded",
-            "payload_digest": "sha256:5510645baa5f056750113ef44d4bba5db358e2222529cb3377a75d4ae26c0a88",
+            "payload_digest": "sha256:4aeb168f8f9639b9cfc1524034e487425ffde7d351ae36b346d970140f0cb01f",
             "payload": [
               "map",
               [
@@ -34863,7 +35742,7 @@
                             "checkpoint_digest",
                             [
                               "string",
-                              "sha256:5667b9609eaf93f15abbd803110b46fb291f2e1b842f35ab2541387213fc1f8b"
+                              "sha256:40c58f29da2c9e888e15a6fc3e0214e83194d1877a8fe466e11cd79c0374ddd8"
                             ]
                           ],
                           [
@@ -34877,14 +35756,657 @@
                             "effect_records",
                             [
                               "list",
-                              []
+                              [
+                                [
+                                  "map",
+                                  [
+                                    [
+                                      "admission_receipt",
+                                      [
+                                        "null"
+                                      ]
+                                    ],
+                                    [
+                                      "attempt_fence",
+                                      [
+                                        "string",
+                                        "1"
+                                      ]
+                                    ],
+                                    [
+                                      "attempt_records",
+                                      [
+                                        "list",
+                                        [
+                                          [
+                                            "map",
+                                            [
+                                              [
+                                                "attempt_fence",
+                                                [
+                                                  "string",
+                                                  "1"
+                                                ]
+                                              ],
+                                              [
+                                                "reason",
+                                                [
+                                                  "string",
+                                                  "unknown_confirmation"
+                                                ]
+                                              ],
+                                              [
+                                                "report_digest",
+                                                [
+                                                  "string",
+                                                  "sha256:a884974080073865b9f2057abb19257de90dd9c3305284c6efc0a704b8c6cd96"
+                                                ]
+                                              ],
+                                              [
+                                                "report_kind",
+                                                [
+                                                  "string",
+                                                  "ambiguous"
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "cancellation",
+                                      [
+                                        "map",
+                                        [
+                                          [
+                                            "operation_id",
+                                            [
+                                              "string",
+                                              "cancel-pending-1"
+                                            ]
+                                          ],
+                                          [
+                                            "reason",
+                                            [
+                                              "string",
+                                              "operator_request"
+                                            ]
+                                          ],
+                                          [
+                                            "state",
+                                            [
+                                              "string",
+                                              "reconciliation_required"
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "destination_binding_digest",
+                                      [
+                                        "string",
+                                        "sha256:08879d9df04200d17a482e631ccece77596c378c5517dc051871cb2c67d1f5c5"
+                                      ]
+                                    ],
+                                    [
+                                      "effect_id",
+                                      [
+                                        "string",
+                                        "sha256:00b40bdc337a793ce4be11ce2241dd1fe50b2f14d96300f350601cefd91c61a3"
+                                      ]
+                                    ],
+                                    [
+                                      "handler_reference",
+                                      [
+                                        "map",
+                                        [
+                                          [
+                                            "content_digest",
+                                            [
+                                              "string",
+                                              "sha256:3b5cc83b59afe828662e238764f8a352da7e8d0985d331cc51a22d63f1c304cb"
+                                            ]
+                                          ],
+                                          [
+                                            "identifier",
+                                            [
+                                              "string",
+                                              "example.native-handler"
+                                            ]
+                                          ],
+                                          [
+                                            "version",
+                                            [
+                                              "string",
+                                              "1.0.0"
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "idempotency_policy",
+                                      [
+                                        "string",
+                                        "destination_deduplicates"
+                                      ]
+                                    ],
+                                    [
+                                      "intent_digest",
+                                      [
+                                        "string",
+                                        "sha256:c6234fa8b333e4f0bb8686e556fd77d7797cc40653a4201169e96cedf12f8b24"
+                                      ]
+                                    ],
+                                    [
+                                      "invocation_state",
+                                      [
+                                        "string",
+                                        "ambiguous"
+                                      ]
+                                    ],
+                                    [
+                                      "operation_token",
+                                      [
+                                        "string",
+                                        "sha256:14d37503feef1437e5ed38a77b4bd1dbe8cd4b6e37b347bb77f42f7f1c995623"
+                                      ]
+                                    ],
+                                    [
+                                      "outcome",
+                                      [
+                                        "null"
+                                      ]
+                                    ],
+                                    [
+                                      "result_event_id",
+                                      [
+                                        "null"
+                                      ]
+                                    ],
+                                    [
+                                      "result_mapping",
+                                      [
+                                        "list",
+                                        [
+                                          [
+                                            "map",
+                                            [
+                                              [
+                                                "event",
+                                                [
+                                                  "string",
+                                                  "terminal_notice_succeeded"
+                                                ]
+                                              ],
+                                              [
+                                                "operation_token_location",
+                                                [
+                                                  "null"
+                                                ]
+                                              ],
+                                              [
+                                                "outcome_kind",
+                                                [
+                                                  "string",
+                                                  "succeeded"
+                                                ]
+                                              ],
+                                              [
+                                                "result_slot",
+                                                [
+                                                  "string",
+                                                  "success"
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "route_configuration_generation",
+                                      [
+                                        "string",
+                                        "7"
+                                      ]
+                                    ],
+                                    [
+                                      "target",
+                                      [
+                                        "map",
+                                        [
+                                          [
+                                            "root_instance_id",
+                                            [
+                                              "string",
+                                              "effect-1"
+                                            ]
+                                          ],
+                                          [
+                                            "runtime_id",
+                                            [
+                                              "string",
+                                              "sha256:15dbcb835be22d0a13a718ecca813245729d577c0b6ff9e7e8727b2f04f8ce3a"
+                                            ]
+                                          ],
+                                          [
+                                            "runtime_incarnation",
+                                            [
+                                              "map",
+                                              [
+                                                [
+                                                  "definition",
+                                                  [
+                                                    "map",
+                                                    [
+                                                      [
+                                                        "machine",
+                                                        [
+                                                          "map",
+                                                          [
+                                                            [
+                                                              "machine_id",
+                                                              [
+                                                                "string",
+                                                                "effects"
+                                                              ]
+                                                            ],
+                                                            [
+                                                              "machine_version",
+                                                              [
+                                                                "string",
+                                                                "1"
+                                                              ]
+                                                            ],
+                                                            [
+                                                              "namespace",
+                                                              [
+                                                                "string",
+                                                                "example.archive_effects"
+                                                              ]
+                                                            ],
+                                                            [
+                                                              "root_definition_pointer",
+                                                              [
+                                                                "string",
+                                                                "/machines/0/root"
+                                                              ]
+                                                            ]
+                                                          ]
+                                                        ]
+                                                      ],
+                                                      [
+                                                        "validated_bundle_fingerprint",
+                                                        [
+                                                          "string",
+                                                          "sha256:86878abacbd44c4ac383d8752cb9e37359bb105f916b9b9e2a628cd1c07e358f"
+                                                        ]
+                                                      ]
+                                                    ]
+                                                  ]
+                                                ],
+                                                [
+                                                  "kind",
+                                                  [
+                                                    "string",
+                                                    "root"
+                                                  ]
+                                                ],
+                                                [
+                                                  "root_instance_id",
+                                                  [
+                                                    "string",
+                                                    "effect-1"
+                                                  ]
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ]
+                                  ]
+                                ],
+                                [
+                                  "map",
+                                  [
+                                    [
+                                      "admission_receipt",
+                                      [
+                                        "null"
+                                      ]
+                                    ],
+                                    [
+                                      "attempt_fence",
+                                      [
+                                        "string",
+                                        "1"
+                                      ]
+                                    ],
+                                    [
+                                      "attempt_records",
+                                      [
+                                        "list",
+                                        [
+                                          [
+                                            "map",
+                                            [
+                                              [
+                                                "attempt_fence",
+                                                [
+                                                  "string",
+                                                  "1"
+                                                ]
+                                              ],
+                                              [
+                                                "reason",
+                                                [
+                                                  "null"
+                                                ]
+                                              ],
+                                              [
+                                                "report_digest",
+                                                [
+                                                  "string",
+                                                  "sha256:7f7fcd999a04a845067ca5f257ecbc6b1ab26909e9722caa6d44ae801ee2c5b9"
+                                                ]
+                                              ],
+                                              [
+                                                "report_kind",
+                                                [
+                                                  "string",
+                                                  "succeeded"
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "cancellation",
+                                      [
+                                        "null"
+                                      ]
+                                    ],
+                                    [
+                                      "destination_binding_digest",
+                                      [
+                                        "string",
+                                        "sha256:08879d9df04200d17a482e631ccece77596c378c5517dc051871cb2c67d1f5c5"
+                                      ]
+                                    ],
+                                    [
+                                      "effect_id",
+                                      [
+                                        "string",
+                                        "sha256:2ea51c6d2a2e386798cd51fc3aa7b06a30d0796efa86be4bf8266a2f4c76b88b"
+                                      ]
+                                    ],
+                                    [
+                                      "handler_reference",
+                                      [
+                                        "map",
+                                        [
+                                          [
+                                            "content_digest",
+                                            [
+                                              "string",
+                                              "sha256:3b5cc83b59afe828662e238764f8a352da7e8d0985d331cc51a22d63f1c304cb"
+                                            ]
+                                          ],
+                                          [
+                                            "identifier",
+                                            [
+                                              "string",
+                                              "example.native-handler"
+                                            ]
+                                          ],
+                                          [
+                                            "version",
+                                            [
+                                              "string",
+                                              "1.0.0"
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "idempotency_policy",
+                                      [
+                                        "string",
+                                        "destination_deduplicates"
+                                      ]
+                                    ],
+                                    [
+                                      "intent_digest",
+                                      [
+                                        "string",
+                                        "sha256:dcab81818d78761ce1dbaeba797755d4b200336f9000f262cb8314aaaec5fa0b"
+                                      ]
+                                    ],
+                                    [
+                                      "invocation_state",
+                                      [
+                                        "string",
+                                        "outcome_recorded"
+                                      ]
+                                    ],
+                                    [
+                                      "operation_token",
+                                      [
+                                        "string",
+                                        "sha256:4fa512e648997fd9046efa8d2756398f80322f1d783d164af1fa2394d9227643"
+                                      ]
+                                    ],
+                                    [
+                                      "outcome",
+                                      [
+                                        "map",
+                                        [
+                                          [
+                                            "attempt_fence",
+                                            [
+                                              "string",
+                                              "1"
+                                            ]
+                                          ],
+                                          [
+                                            "digest",
+                                            [
+                                              "string",
+                                              "sha256:2aed210bddef44ef8259f33f0745cfdc0587e073708a219fa239545ec046eae5"
+                                            ]
+                                          ],
+                                          [
+                                            "kind",
+                                            [
+                                              "string",
+                                              "succeeded"
+                                            ]
+                                          ],
+                                          [
+                                            "payload",
+                                            [
+                                              "list",
+                                              [
+                                                [
+                                                  "string",
+                                                  "map"
+                                                ],
+                                                [
+                                                  "list",
+                                                  []
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "result_event_id",
+                                      [
+                                        "string",
+                                        "sha256:5c6967f960e966e77e83ac5db20c431bcc2f5a5adcd1be58dbc432dcc0b0a321"
+                                      ]
+                                    ],
+                                    [
+                                      "result_mapping",
+                                      [
+                                        "list",
+                                        [
+                                          [
+                                            "map",
+                                            [
+                                              [
+                                                "event",
+                                                [
+                                                  "string",
+                                                  "terminal_notice_succeeded"
+                                                ]
+                                              ],
+                                              [
+                                                "operation_token_location",
+                                                [
+                                                  "null"
+                                                ]
+                                              ],
+                                              [
+                                                "outcome_kind",
+                                                [
+                                                  "string",
+                                                  "succeeded"
+                                                ]
+                                              ],
+                                              [
+                                                "result_slot",
+                                                [
+                                                  "string",
+                                                  "success"
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ],
+                                    [
+                                      "route_configuration_generation",
+                                      [
+                                        "string",
+                                        "7"
+                                      ]
+                                    ],
+                                    [
+                                      "target",
+                                      [
+                                        "map",
+                                        [
+                                          [
+                                            "root_instance_id",
+                                            [
+                                              "string",
+                                              "effect-1"
+                                            ]
+                                          ],
+                                          [
+                                            "runtime_id",
+                                            [
+                                              "string",
+                                              "sha256:15dbcb835be22d0a13a718ecca813245729d577c0b6ff9e7e8727b2f04f8ce3a"
+                                            ]
+                                          ],
+                                          [
+                                            "runtime_incarnation",
+                                            [
+                                              "map",
+                                              [
+                                                [
+                                                  "definition",
+                                                  [
+                                                    "map",
+                                                    [
+                                                      [
+                                                        "machine",
+                                                        [
+                                                          "map",
+                                                          [
+                                                            [
+                                                              "machine_id",
+                                                              [
+                                                                "string",
+                                                                "effects"
+                                                              ]
+                                                            ],
+                                                            [
+                                                              "machine_version",
+                                                              [
+                                                                "string",
+                                                                "1"
+                                                              ]
+                                                            ],
+                                                            [
+                                                              "namespace",
+                                                              [
+                                                                "string",
+                                                                "example.archive_effects"
+                                                              ]
+                                                            ],
+                                                            [
+                                                              "root_definition_pointer",
+                                                              [
+                                                                "string",
+                                                                "/machines/0/root"
+                                                              ]
+                                                            ]
+                                                          ]
+                                                        ]
+                                                      ],
+                                                      [
+                                                        "validated_bundle_fingerprint",
+                                                        [
+                                                          "string",
+                                                          "sha256:86878abacbd44c4ac383d8752cb9e37359bb105f916b9b9e2a628cd1c07e358f"
+                                                        ]
+                                                      ]
+                                                    ]
+                                                  ]
+                                                ],
+                                                [
+                                                  "kind",
+                                                  [
+                                                    "string",
+                                                    "root"
+                                                  ]
+                                                ],
+                                                [
+                                                  "root_instance_id",
+                                                  [
+                                                    "string",
+                                                    "effect-1"
+                                                  ]
+                                                ]
+                                              ]
+                                            ]
+                                          ]
+                                        ]
+                                      ]
+                                    ]
+                                  ]
+                                ]
+                              ]
                             ]
                           ],
                           [
                             "host_effect_journal_digest",
                             [
                               "string",
-                              "sha256:dbce3b93ed28249467babb2724e8258607237c0c422a57c4be815ce825cd6a2f"
+                              "sha256:90f0a8681805462ba68a661fb7da047334ed2d771ab8269053060bb67d91515b"
                             ]
                           ],
                           [
@@ -34905,14 +36427,34 @@
                             "journal_revision",
                             [
                               "string",
-                              "0"
+                              "4"
                             ]
                           ],
                           [
                             "operation_response_references",
                             [
                               "list",
-                              []
+                              [
+                                [
+                                  "map",
+                                  [
+                                    [
+                                      "operation_id",
+                                      [
+                                        "string",
+                                        "cancel-pending-1"
+                                      ]
+                                    ],
+                                    [
+                                      "response_digest",
+                                      [
+                                        "string",
+                                        "sha256:fa2ffdf1995cef1053bf0d61f665e164cb7617ce6073e44b9822d1a0969172fe"
+                                      ]
+                                    ]
+                                  ]
+                                ]
+                              ]
                             ]
                           ],
                           [
@@ -35158,18 +36700,121 @@
                       ]
                     ]
                   ]
+                ],
+                [
+                  "retained_operation_responses",
+                  [
+                    "list",
+                    [
+                      [
+                        "map",
+                        [
+                          [
+                            "normalized_response",
+                            [
+                              "map",
+                              [
+                                [
+                                  "cancellation",
+                                  [
+                                    "map",
+                                    [
+                                      [
+                                        "operation_id",
+                                        [
+                                          "string",
+                                          "cancel-pending-1"
+                                        ]
+                                      ],
+                                      [
+                                        "reason",
+                                        [
+                                          "string",
+                                          "operator_request"
+                                        ]
+                                      ],
+                                      [
+                                        "state",
+                                        [
+                                          "string",
+                                          "reconciliation_required"
+                                        ]
+                                      ]
+                                    ]
+                                  ]
+                                ],
+                                [
+                                  "effect_id",
+                                  [
+                                    "string",
+                                    "sha256:00b40bdc337a793ce4be11ce2241dd1fe50b2f14d96300f350601cefd91c61a3"
+                                  ]
+                                ],
+                                [
+                                  "error_code",
+                                  [
+                                    "null"
+                                  ]
+                                ],
+                                [
+                                  "journal_revision",
+                                  [
+                                    "string",
+                                    "3"
+                                  ]
+                                ],
+                                [
+                                  "operation_id",
+                                  [
+                                    "string",
+                                    "cancel-pending-1"
+                                  ]
+                                ],
+                                [
+                                  "outcome",
+                                  [
+                                    "null"
+                                  ]
+                                ],
+                                [
+                                  "result_event_id",
+                                  [
+                                    "null"
+                                  ]
+                                ],
+                                [
+                                  "status",
+                                  [
+                                    "string",
+                                    "reconciliation_required"
+                                  ]
+                                ]
+                              ]
+                            ]
+                          ],
+                          [
+                            "operation_id",
+                            [
+                              "string",
+                              "cancel-pending-1"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
                 ]
               ]
             ]
           }
         ],
-        "archive_digest": "sha256:cc8ea73bfac033e7c26ee6b77b96db5e8c947db0ffd99a09e4db785a198ac1b9"
+        "archive_digest": "sha256:73b2aa59c9d7c757ca78b7ae88e4c735b90b283e49af7bcbf4caafb4dca6b499"
       },
       "expected_result": {
         "result_format": "determa.archive_result",
         "result_schema_version": 1,
         "status": "exported",
-        "archive_digest": "sha256:cc8ea73bfac033e7c26ee6b77b96db5e8c947db0ffd99a09e4db785a198ac1b9",
+        "archive_digest": "sha256:73b2aa59c9d7c757ca78b7ae88e4c735b90b283e49af7bcbf4caafb4dca6b499",
         "staged": false,
         "included_participant_ids": [
           "host-effect-journal"

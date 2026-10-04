@@ -35,10 +35,36 @@
           ],
           "minItems": 2,
           "maxItems": 2
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "retained_operation_responses"
+            },
+            {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "list"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "https://determa.dev/state/schema/aggregate-state-v1.schema.json#/$defs/typedMap"
+                  }
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2
         }
       ],
-      "minItems": 1,
-      "maxItems": 1
+      "minItems": 2,
+      "maxItems": 2
     }
   ],
   "minItems": 2,

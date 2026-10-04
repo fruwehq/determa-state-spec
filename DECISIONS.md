@@ -446,7 +446,10 @@ compared to independent trusted host policy; a resealed omission or weaker profi
 cannot redefine completeness. Required missing data blocks staging; optional
 omissions are reported. A source claiming §19 durable native results requires a
 closed host-journal participant paired with every selected checkpoint; a standalone
-source without helper participants remains a valid complete archive.
+source without helper participants remains a valid complete archive. The journal
+payload retains replayable public response bytes and is checked against an
+independently trusted source inventory of records, attempts, outcomes, and responses
+at the same capture point, so a resealed omission cannot redefine completeness.
 
 **Rejected alternative.** Reconstruct state by replaying event journals or collect
 arbitrary database rows under an archive label.
