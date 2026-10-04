@@ -1,6 +1,6 @@
 {
   "migration_descriptor_format": "determa.aggregate_migration",
-  "migration_descriptor_schema_version": 2,
+  "migration_descriptor_schema_version": 1,
   "source_machine_format": 1,
   "target_machine_format": 1,
   "source_validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
@@ -30,5 +30,5 @@
   },
   "queued_event_default": "preserve_if_compatible",
   "queued_event_rules": [],
-  "migration_descriptor_digest": "sha256:df66659ac1ed61cbeb8de655f8e32105952c30b5f1b28fe35ddad99efe67f706"
+  "migration_descriptor_digest": "sha256:9e0ca69f03366de7c5cb92dea67d8b7bd7979c117a22ea9de37e6c6f73a8e7d9"
 }

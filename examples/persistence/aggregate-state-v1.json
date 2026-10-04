@@ -1,6 +1,6 @@
 {
   "aggregate_state_format": "determa.aggregate_state",
-  "aggregate_state_schema_version": 2,
+  "aggregate_state_schema_version": 1,
   "machine_format": 1,
   "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
   "namespace": "example.transaction_server",
@@ -8,7 +8,7 @@
   "root_machine_version": "1",
   "root_instance_id": "server-1",
   "creation_id": "create-server-1",
-  "root_runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+  "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
   "migration_sequence": "0",
   "next_logical_step_sequence": "1",
   "next_output_sequence": "0",
@@ -16,7 +16,7 @@
   "next_queue_sequence": "4",
   "runtimes": [
     {
-      "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+      "runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
       "identity_origin": {
         "kind": "root",
         "definition": {
@@ -33,7 +33,7 @@
       "target_identity": {
         "root": {
           "root_instance_id": "server-1",
-          "root_runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf"
+          "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8"
         }
       },
       "current_definition": {
@@ -93,16 +93,21 @@
             "event": "received",
             "event_id": "received-1",
             "cause_id": "received-1",
-            "source": { "host": true },
+            "source": {
+              "host": true
+            },
             "target": {
               "root": {
                 "root_instance_id": "server-1",
-                "root_runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf"
+                "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8"
               }
             },
-            "payload": ["map", []]
+            "payload": [
+              "map",
+              []
+            ]
           },
-          "envelope_digest": "sha256:371aac6a792979442f1b792d3b92a4cf6555486e2f384396d49ed074980db91e",
+          "envelope_digest": "sha256:21fe9b70a15bab725a835c4c26e8da26bfe94a7be3feef11031abb1012fc8436",
           "deferral_count": "0"
         }
       ],
@@ -115,24 +120,34 @@
             "event": "new_request",
             "event_id": "request-2",
             "cause_id": "request-2",
-            "source": { "host": true },
+            "source": {
+              "host": true
+            },
             "target": {
               "root": {
                 "root_instance_id": "server-1",
-                "root_runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf"
+                "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8"
               }
             },
             "payload": [
               "map",
-              [["transaction_id", ["string", "transaction-2"]]]
+              [
+                [
+                  "transaction_id",
+                  [
+                    "string",
+                    "transaction-2"
+                  ]
+                ]
+              ]
             ]
           },
-          "envelope_digest": "sha256:095603b0edccf4c9287848c17d640d6f82a789eaa5e8b350bb3e77eda8007f97",
+          "envelope_digest": "sha256:d8571313a17d9f204164d40867c8a73f3330b0649df1a90b3f492b394c33b97d",
           "deferral_count": "1"
         }
       ],
       "fault": null
     }
   ],
-  "aggregate_state_digest": "sha256:92318d5a45c47db4d44bd9276bf39cfd227b7ea0a91f4a5d9f1ef3db18e54337"
+  "aggregate_state_digest": "sha256:34c9ad360e0acead451dcba98eb54a035c3985788491ee280e71f9c3e6faaab4"
 }

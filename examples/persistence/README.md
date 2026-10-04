@@ -6,16 +6,16 @@ These files are compact normative vectors for
 
 - `source.yaml` and `target.yaml` are machine documents using numeric `format: 1`.
   They have the same aggregate shape; the target changes only `meta`.
-- `aggregate-state-v2.json` is the sole portable aggregate example. It retains one
+- `aggregate-state-v1.json` is the sole portable aggregate example. It retains one
   ready and one deferred envelope in the addressed runtime and separates immutable
   acceptance identity from mutable queue placement.
-- `compatible-migration-v2.json` is the sole direct migration-descriptor example. It
+- `compatible-migration-v1.json` is the sole direct migration-descriptor example. It
   advances the source definition to the target without a state transform and carries
   the required queue-preservation policy.
-- `execution-checkpoint-v2.json` is the sole portable checkpoint example. Its embedded
+- `execution-checkpoint-v1.json` is the sole portable checkpoint example. Its embedded
   aggregate owns its runtime mailboxes; there is no duplicate host pending-work
   collection.
-- `execution-checkpoint-v2-maintenance-cases.json` proves that an empty migration
+- `execution-checkpoint-v1-maintenance-cases.json` proves that an empty migration
   receipt remains verifiable after root tombstoning. It rejects a missing or altered
   target definition fingerprint and rejects an unsupported receipt wrapper.
 - `target-identity-cases.json` fixes the three exact machine-format-1 target shapes

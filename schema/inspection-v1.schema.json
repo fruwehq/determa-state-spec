@@ -25,7 +25,7 @@
       "pattern": "^/(?:[^~/]|~[01])*(?:/(?:[^~/]|~[01])*)*$"
     },
     "incarnation": {
-      "$ref": "aggregate-state-v2.schema.json#/$defs/identityOrigin"
+      "$ref": "aggregate-state-v1.schema.json#/$defs/identityOrigin"
     },
     "request": {
       "type": "object",
@@ -55,7 +55,7 @@
           "$ref": "#/$defs/incarnation"
         },
         "envelope": {
-          "$ref": "aggregate-state-v2.schema.json#/$defs/envelope"
+          "$ref": "aggregate-state-v1.schema.json#/$defs/envelope"
         },
         "limits": {
           "oneOf": [

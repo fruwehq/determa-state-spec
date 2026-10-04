@@ -1606,7 +1606,7 @@ the empty list; rejected creation returns the empty list. One entry contains exa
 `reason`. It accounts for every ready/deferred entry removed by successful lifecycle
 cleanup, including internal work emitted earlier in the same RTC. Entries use lifecycle
 cleanup runtime order, then ready entries followed by deferred entries in queue order.
-The closed structural schema for `step` is `schema/core-step-result-v2.schema.json`;
+The closed structural schema for `step` is `schema/core-step-result-v1.schema.json`;
 semantic status/disposition/fault/rejection relationships remain mandatory. The creation result retains the creation-specific status/state shape above.
 
 Creation rejection codes are exactly `invalid_creation_request`,
@@ -1811,7 +1811,7 @@ The root runtime identity is:
 
 ```text
 hash([
-  "determa-root-runtime-identity-2",
+  "determa-root-runtime-identity-1",
   "1",
   validated_bundle_fingerprint,
   namespace,
@@ -1825,10 +1825,10 @@ Normative root-identity vector:
 
 ```text
 JCS:
-["determa-root-runtime-identity-2","1","sha256:7e48ad82ea5305c24b7730f4fd24c36ec196a0875c982b85eba5b3a5ddcbb92f","example.turnstile","turnstile","1","turnstile-42"]
+["determa-root-runtime-identity-1","1","sha256:7e48ad82ea5305c24b7730f4fd24c36ec196a0875c982b85eba5b3a5ddcbb92f","example.turnstile","turnstile","1","turnstile-42"]
 
 hash:
-sha256:72dca6d0b2b3690ae28bda2f17a461179b18fbf11daad7a12709d9384a500c64
+sha256:d42f331cbd0c491bba66d512c010f89f94c52df12057a80fecde85d3b954592f
 ```
 
 Including the validated bundle fingerprint prevents a changed same-version definition
@@ -1864,10 +1864,10 @@ initialization. With activation sequence zero, its normative identity vector is:
 
 ```text
 JCS:
-["determa-component-runtime-identity-1","1","turnstile-42","sha256:72dca6d0b2b3690ae28bda2f17a461179b18fbf11daad7a12709d9384a500c64","/machines/0/root/states/locked/components/0","0","example.turnstile","turnstile","1"]
+["determa-component-runtime-identity-1","1","turnstile-42","sha256:d42f331cbd0c491bba66d512c010f89f94c52df12057a80fecde85d3b954592f","/machines/0/root/states/locked/components/0","0","example.turnstile","turnstile","1"]
 
 hash:
-sha256:43db74b6a8d6f31543f7d142fb5e25a49e33eb3bf548e7bfd20d59513778cbc3
+sha256:b0145e3c9c3d470fda4e59e55fe1585a1a9a7d74e29377062d70bf1789ffeb76
 ```
 
 A spawned `instance_id`, which is also its runtime identity, is:
@@ -1947,10 +1947,10 @@ initialization vector is:
 
 ```text
 JCS:
-["determa-cause-identity-1","1","root_initialization","turnstile-42","sha256:72dca6d0b2b3690ae28bda2f17a461179b18fbf11daad7a12709d9384a500c64","sha256:72dca6d0b2b3690ae28bda2f17a461179b18fbf11daad7a12709d9384a500c64","create-7","0","/machines/0/root","0"]
+["determa-cause-identity-1","1","root_initialization","turnstile-42","sha256:d42f331cbd0c491bba66d512c010f89f94c52df12057a80fecde85d3b954592f","sha256:d42f331cbd0c491bba66d512c010f89f94c52df12057a80fecde85d3b954592f","create-7","0","/machines/0/root","0"]
 
 hash:
-sha256:c9e8e89a01362f40e9a74c01392d09abe2323f31c8f14f22e05bfcaf6dfac0ab
+sha256:a1ba8e26366fdefe45f62e34e2856d0bebbf22b9b73fad742ebf5294421ae91c
 ```
 
 An internal emission derives:
@@ -2673,16 +2673,21 @@ four independent closed JSON artifacts:
 
 | artifact | exact format field | exact schema-version field | schema |
 |---|---|---|---|
-| aggregate-state envelope | `aggregate_state_format: "determa.aggregate_state"` | `aggregate_state_schema_version: 2` | `schema/aggregate-state-v2.schema.json` |
-| migration descriptor | `migration_descriptor_format: "determa.aggregate_migration"` | `migration_descriptor_schema_version: 2` | `schema/migration-descriptor-v2.schema.json` |
-| transport package | `aggregate_state_package_format: "determa.aggregate_state_package"` | `aggregate_state_package_schema_version: 2` | `schema/aggregate-state-package-v2.schema.json` |
-| execution checkpoint | `execution_checkpoint_format: "determa.execution_checkpoint"` | `execution_checkpoint_schema_version: 2` | `schema/execution-checkpoint-v2.schema.json` |
+| aggregate-state envelope | `aggregate_state_format: "determa.aggregate_state"` | `aggregate_state_schema_version: 1` | `schema/aggregate-state-v1.schema.json` |
+| migration descriptor | `migration_descriptor_format: "determa.aggregate_migration"` | `migration_descriptor_schema_version: 1` | `schema/migration-descriptor-v1.schema.json` |
+| transport package | `aggregate_state_package_format: "determa.aggregate_state_package"` | `aggregate_state_package_schema_version: 1` | `schema/aggregate-state-package-v1.schema.json` |
+| execution checkpoint | `execution_checkpoint_format: "determa.execution_checkpoint"` | `execution_checkpoint_schema_version: 1` | `schema/execution-checkpoint-v1.schema.json` |
 
-Queue-bearing core results use `schema/core-step-result-v2.schema.json`. Artifact schema
-version 2 is the sole supported portable artifact version. No alternate artifact
+Queue-bearing core results use `schema/core-step-result-v1.schema.json`. Artifact schema
+version 1 is the sole supported portable artifact version. No alternate artifact
 representation, compatibility wrapper, conversion path, or implicit conversion is
 defined. Machine document format 1 is a separate version domain and is not an artifact
 schema version.
+
+The final version-1 shape is identified by its exact closed schema and digest domain,
+not by its version number alone. A prior pre-release artifact with the same numeric
+version but a different shape MUST be rejected. Decoders MUST NOT accept old field
+sets, aliases, or hash domains under version 1.
 
 Artifact schema versions, machine format, repository/package SemVer, launcher SemVer,
 and author-controlled machine `version` are independent version domains. Unknown
@@ -2769,7 +2774,7 @@ bytes of the complete envelope with no byte-order mark, leading/trailing whitesp
 or trailing newline. A parser may accept insignificant JSON whitespace and then verify
 that the semantic data is canonical.
 
-`examples/persistence/aggregate-state-v2.json` is the normative human-readable
+`examples/persistence/aggregate-state-v1.json` is the normative human-readable
 aggregate example. Conformance byte vectors MUST equal RFC 8785 serialization of their
 corresponding semantic value.
 
@@ -2777,7 +2782,7 @@ The digest is:
 
 ```text
 aggregate_state_digest = hash([
-  "determa-aggregate-state-digest-2",
+  "determa-aggregate-state-digest-1",
   envelope_without_aggregate_state_digest
 ])
 ```
@@ -3001,7 +3006,7 @@ digest is:
 
 ```text
 migration_descriptor_digest = hash([
-  "determa-migration-descriptor-2",
+  "determa-migration-descriptor-1",
   descriptor_without_migration_descriptor_digest
 ])
 ```
@@ -3271,7 +3276,7 @@ Each successful descriptor returns exactly one closed audit record in route orde
 
 ```text
 {
-  migration_audit_record_schema_version: 2,
+  migration_audit_record_schema_version: 1,
   root_instance_id: non_empty_string,
   root_runtime_id: non_empty_string,
   migration_sequence: canonical_decimal,
@@ -3306,7 +3311,7 @@ put-if-absent resolver contract; they never override a registry entry and are ex
 from the aggregate-state digest.
 
 Portable packages MUST validate against
-`schema/aggregate-state-package-v2.schema.json`. Conformance package vectors MUST fix
+`schema/aggregate-state-package-v1.schema.json`. Conformance package vectors MUST fix
 their source and target bundle fingerprints, shared shape fingerprint, aggregate
 digest, descriptor digest, and canonical attachment trees.
 
@@ -3379,8 +3384,8 @@ Each mailbox entry's envelope digest is:
 
 ```text
 envelope_digest = hash([
-  "determa-inbox-envelope-digest-2",
-  "2",
+  "determa-inbox-envelope-digest-1",
+  "1",
   root_instance_id,
   delivery_mode,
   envelope
@@ -3394,7 +3399,7 @@ Aggregate serialization uses the §16.2 canonical rules and:
 
 ```text
 aggregate_state_digest = hash([
-  "determa-aggregate-state-digest-2",
+  "determa-aggregate-state-digest-1",
   envelope_without_aggregate_state_digest
 ])
 ```
@@ -3432,7 +3437,7 @@ The descriptor digest is independently recomputed as:
 
 ```text
 migration_descriptor_digest = hash([
-  "determa-migration-descriptor-2",
+  "determa-migration-descriptor-1",
   descriptor_without_migration_descriptor_digest
 ])
 ```
@@ -3522,13 +3527,13 @@ the supplied committed checkpoint byte-for-byte.
 
 ### 17.2 Closed checkpoint artifact
 
-The complete schema is `schema/execution-checkpoint-v2.schema.json`. A checkpoint has
+The complete schema is `schema/execution-checkpoint-v1.schema.json`. A checkpoint has
 exactly:
 
 ```text
 {
   execution_checkpoint_format: "determa.execution_checkpoint",
-  execution_checkpoint_schema_version: 2,
+  execution_checkpoint_schema_version: 1,
   root_instance_id: non_empty_string,
   revision: canonical_decimal,
   root_record: { status: "retained", aggregate_state } | root_tombstone,
@@ -3552,12 +3557,12 @@ transactions, and CAS conflicts change no byte or counter.
 
 ```text
 execution_checkpoint_digest = hash([
-  "determa-execution-checkpoint-digest-2",
+  "determa-execution-checkpoint-digest-1",
   checkpoint_without_execution_checkpoint_digest
 ])
 ```
 
-The normative example is `examples/persistence/execution-checkpoint-v2.json`.
+The normative example is `examples/persistence/execution-checkpoint-v1.json`.
 Operational leases, locks, credentials, connection details, broker acknowledgement
 tokens, wall-clock attempt timestamps, worker identities, and application rows are not
 checkpoint members.
@@ -3591,8 +3596,8 @@ The creation request digest is:
 
 ```text
 hash([
-  "determa-creation-request-digest-2",
-  "2",
+  "determa-creation-request-digest-1",
+  "1",
   validated_bundle_fingerprint,
   namespace,
   machine_id,
@@ -3618,7 +3623,7 @@ record and response under an application-owned identity. This is safe because no
 Determa aggregate, emission, or checkpoint mutation was committed.
 
 An acceptance receipt proves host admission, not processing. It records event identity,
-the `determa-inbox-envelope-digest-2` request digest, acceptance sequence, accepted
+the `determa-inbox-envelope-digest-1` request digest, acceptance sequence, accepted
 revision, and input delivery mode. Internal emissions append directly to a target ready
 mailbox in the producing RTC and are referenced by that operation's receipt; they do not
 create acceptance receipts.
@@ -3645,7 +3650,7 @@ Equal replay returns retained evidence without mutation. Unequal content for the
 identity is `event_id_conflict`. Replay/conflict checks precede terminal-root rejection.
 Permanent retention keeps every receipt. Bounded retention may replace one
 acceptance-plus-terminal unit with one event-identity tombstone using only digest domain
-`determa-inbox-envelope-digest-2`. Pruning is dependency-closed and MUST NOT leave a
+`determa-inbox-envelope-digest-1`. Pruning is dependency-closed and MUST NOT leave a
 dangling producer, mailbox, terminal, outbox, or audit reference.
 
 Applications needing replay of an HTTP body, domain projection, or historical aggregate
@@ -3741,8 +3746,8 @@ Its request digest is:
 
 ```text
 hash([
-  "determa-maintenance-migration-request-digest-2",
-  "2",
+  "determa-maintenance-migration-request-digest-1",
+  "1",
   root_instance_id,
   operation_id,
   source_aggregate_state_digest,
@@ -3922,8 +3927,8 @@ where:
 
 ```text
 intent_digest = hash([
-  "determa-outbox-intent-digest-2",
-  "2",
+  "determa-outbox-intent-digest-1",
+  "1",
   root_instance_id,
   complete_original_intent
 ])
