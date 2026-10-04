@@ -1961,6 +1961,108 @@
         "properties": {
           "status": {
             "const": "committed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "receipt": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "allOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "scope_binding_identity",
+                      "operation_id",
+                      "request_digest",
+                      "receipt_kind",
+                      "evidence_digest",
+                      "acceptance_receipt"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "scope_binding_identity": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "operation_id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "request_digest": {
+                        "type": "string",
+                        "pattern": "^sha256:[0-9a-f]{64}$"
+                      },
+                      "receipt_kind": {
+                        "enum": [
+                          "committed",
+                          "accepted"
+                        ]
+                      },
+                      "evidence_digest": {
+                        "type": "string",
+                        "pattern": "^sha256:[0-9a-f]{64}$"
+                      },
+                      "acceptance_receipt": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
+                          }
+                        ]
+                      }
+                    },
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "receipt_kind": {
+                              "const": "accepted"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "acceptance_receipt": {
+                              "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
+                            }
+                          }
+                        },
+                        "else": {
+                          "properties": {
+                            "acceptance_receipt": {
+                              "type": "null"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "properties": {
+                      "receipt_kind": {
+                        "const": "committed"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "committed"
           },
           "value": {
             "properties": {
@@ -2290,6 +2392,223 @@
                           "cancel",
                           "claim_fire",
                           "complete_fire"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "receipt": {
+            "type": "object",
+            "required": [
+              "scope_binding_identity",
+              "operation_id",
+              "request_digest",
+              "receipt_kind",
+              "evidence_digest",
+              "acceptance_receipt"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "scope_binding_identity": {
+                "type": "string",
+                "minLength": 1
+              },
+              "operation_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "request_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "receipt_kind": {
+                "enum": [
+                  "committed",
+                  "accepted"
+                ]
+              },
+              "evidence_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "acceptance_receipt": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
+                  }
+                ]
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "receipt_kind": {
+                      "const": "accepted"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "acceptance_receipt": {
+                      "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "acceptance_receipt": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "committed"
+          },
+          "value": {
+            "properties": {
+              "operation": {
+                "const": "process"
+              },
+              "result": {
+                "properties": {
+                  "core_result": {
+                    "properties": {
+                      "disposition": {
+                        "enum": [
+                          "handled",
+                          "deferred",
+                          "unhandled",
+                          "faulted"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "receipt": {
+            "type": "object",
+            "required": [
+              "scope_binding_identity",
+              "operation_id",
+              "request_digest",
+              "receipt_kind",
+              "evidence_digest",
+              "acceptance_receipt"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "scope_binding_identity": {
+                "type": "string",
+                "minLength": 1
+              },
+              "operation_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "request_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "receipt_kind": {
+                "enum": [
+                  "committed",
+                  "accepted"
+                ]
+              },
+              "evidence_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "acceptance_receipt": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
+                  }
+                ]
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "receipt_kind": {
+                      "const": "accepted"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "acceptance_receipt": {
+                      "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "acceptance_receipt": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "committed"
+          },
+          "value": {
+            "properties": {
+              "operation": {
+                "const": "scope_operation"
+              },
+              "result": {
+                "properties": {
+                  "action": {
+                    "const": "authority"
+                  },
+                  "authority_result": {
+                    "properties": {
+                      "operation": {
+                        "enum": [
+                          "guarded_commit",
+                          "freeze_scope",
+                          "fence_worker",
+                          "prove_retirement"
                         ]
                       }
                     }
@@ -2919,7 +3238,18 @@
                   "const": "authority"
                 },
                 "authority_result": {
-                  "$ref": "host-authority-operation-v1.schema.json#/$defs/result"
+                  "allOf": [
+                    {
+                      "$ref": "host-authority-operation-v1.schema.json#/$defs/result"
+                    },
+                    {
+                      "properties": {
+                        "status": {
+                          "const": "accepted"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             },

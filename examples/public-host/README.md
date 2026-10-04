@@ -13,9 +13,16 @@ The committed creation/read examples contain the exact portable checkpoint from
 Committed admission and processing contain the exact before/after checkpoint
 snapshots, acceptance receipt, and terminal receipt from
 [`../delivery/execution-checkpoint-transfer-v1.json`](../delivery/execution-checkpoint-transfer-v1.json).
+Deferred and recalled processing use the exact checkpoint snapshots in
+[`../delivery/queue-placement-checkpoints-v1.json`](../delivery/queue-placement-checkpoints-v1.json)
+and retain public commit receipts even where deferral has no terminal receipt.
 The authority read and capability report copy the closed normative values in
 [`../authority/host-authority-cases-v1.json`](../authority/host-authority-cases-v1.json)
 and [`../authority/host-authority-profile-cases-v1.json`](../authority/host-authority-profile-cases-v1.json).
+Accepted mutating authority cases also carry full public receipts; the
+read-only authority case has none. Invalid response cases exercise rejected
+authority values, missing mutation receipts, and a resealed acceptance-only
+receipt on a committed response.
 The successful structural inspection of a resolved candidate copies the normative
 synthetic snapshot question and answer from
 [`../inspection/shape-and-precedence-v1.json`](../inspection/shape-and-precedence-v1.json);

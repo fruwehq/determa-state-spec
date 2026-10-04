@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:0c0b99018df791e2f9be8b79612fa73b2c4d0c6f317d891e05664af6d125c540"
+      "sha256": "sha256:7ec57ac4be248d7b7cf58a7a4fc09e64a4862fc4d55a8fbb57f199434024bfd4"
     },
     {
       "path": "VERSION",
@@ -144,7 +144,7 @@
     },
     {
       "path": "schema/public-host-response-v1.schema.json",
-      "sha256": "sha256:4320da307593f122889ab074b34e5c88916073aefd64be43c38792fe2d0f7161"
+      "sha256": "sha256:afc4bc08bdc35cd340f3b7cb19442569514d3db9c93d14f71ddbd1b878ec76d4"
     },
     {
       "path": "schema/recovery-batch-v1.schema.json",
@@ -196,15 +196,15 @@
     },
     {
       "path": "examples/public-host/positive-v1.json",
-      "sha256": "sha256:84c5428ff46f294f4eefd4f692a99c3522c523a3319da99151c303481b522951"
+      "sha256": "sha256:4f1a4229753d979169d1a56cc6bbfc35c50eb41b5d062b3ec22a95d4cfa3c36f"
     },
     {
       "path": "examples/public-host/negative-v1.json",
-      "sha256": "sha256:3d55bb11683b0fe5d6d5ff77e48e53ef2f2593422a7e8be012cdd93eb08fbd06"
+      "sha256": "sha256:2cf2a014333cb7159752a39cfb8a26630d4f8f078d1f3354c6900812ad9dc01a"
     },
     {
       "path": "examples/public-host/README.md",
-      "sha256": "sha256:b177be2f3d81256e0e202aebba46f633af5278da932fac98e8c5b4575fdbb50f"
+      "sha256": "sha256:027038a9f27eb7a7c3a0bb6674545955c7cafbeb54b6e79464d05a20a01040f0"
     },
     {
       "path": "examples/effects/active-effect-claim-v1.json",

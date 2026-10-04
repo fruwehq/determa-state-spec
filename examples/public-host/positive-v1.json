@@ -8227,6 +8227,1149 @@
         },
         "error": null
       }
+    },
+    {
+      "name": "authority_guarded_native_commit",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "commit-1",
+        "scope_binding_identity": "binding-scope-42",
+        "operation": "scope_operation",
+        "target": {
+          "root_instance_id": null,
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "action": "authority",
+          "authority_request": {
+            "interface": "determa.host_authority",
+            "interface_version": 1,
+            "operation": "guarded_commit",
+            "operation_id": "commit-1",
+            "scope_identity": "scope-42",
+            "expected_authority_epoch": "2",
+            "expected_scope_generation": "4",
+            "arguments": {
+              "mutation_digest": "sha256:4b2decac06271d5cc7736f3e67cdb387765815671f08850789ec55c5884ddd42"
+            },
+            "request_digest": "sha256:280c85d5dd16fe3132dbb25f23f498319563c9e45c05f0bba2eedd9d9b42b78a"
+          }
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"action\":\"authority\",\"authority_request\":{\"arguments\":{\"mutation_digest\":\"sha256:4b2decac06271d5cc7736f3e67cdb387765815671f08850789ec55c5884ddd42\"},\"expected_authority_epoch\":\"2\",\"expected_scope_generation\":\"4\",\"interface\":\"determa.host_authority\",\"interface_version\":1,\"operation\":\"guarded_commit\",\"operation_id\":\"commit-1\",\"request_digest\":\"sha256:280c85d5dd16fe3132dbb25f23f498319563c9e45c05f0bba2eedd9d9b42b78a\",\"scope_identity\":\"scope-42\"}},\"operation\":\"scope_operation\",\"operation_id\":\"commit-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-scope-42\",\"target\":{\"root_instance_id\":null,\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:56000daf42df033e1984d6942c1e2bd937708e97c08ae2992115af703cf36270",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "commit-1",
+        "status": "committed",
+        "receipt": {
+          "scope_binding_identity": "binding-scope-42",
+          "operation_id": "commit-1",
+          "request_digest": "sha256:56000daf42df033e1984d6942c1e2bd937708e97c08ae2992115af703cf36270",
+          "receipt_kind": "committed",
+          "acceptance_receipt": null,
+          "evidence_digest": "sha256:b2890a4542c2f6e7c4d8334b32f0f7eefba52cc0e65332cb7010224628a3d448"
+        },
+        "value": {
+          "operation": "scope_operation",
+          "result": {
+            "action": "authority",
+            "authority_result": {
+              "interface": "determa.host_authority",
+              "interface_version": 1,
+              "operation": "guarded_commit",
+              "operation_id": "commit-1",
+              "status": "accepted",
+              "scope_identity": "scope-42",
+              "authority_epoch": "2",
+              "scope_generation": "5",
+              "state": "active",
+              "evidence_digest": "sha256:e64b5597437f406bc3d1f0a78c43f9bc0e81939cb1817b9e1fb6faef35bc399c",
+              "error_code": null,
+              "claim": null
+            }
+          }
+        },
+        "error": null
+      },
+      "source_fixture": "examples/authority/host-authority-cases-v1.json#guarded_native_commit"
+    },
+    {
+      "name": "authority_freeze_after_drain",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "freeze-1",
+        "scope_binding_identity": "binding-scope-42",
+        "operation": "scope_operation",
+        "target": {
+          "root_instance_id": null,
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "action": "authority",
+          "authority_request": {
+            "interface": "determa.host_authority",
+            "interface_version": 1,
+            "operation": "freeze_scope",
+            "operation_id": "freeze-1",
+            "scope_identity": "scope-42",
+            "expected_authority_epoch": "2",
+            "expected_scope_generation": "5",
+            "arguments": {},
+            "request_digest": "sha256:d822a5de52ebad90e7d658aaad37c166f650fab890aaf41264dd200b73c07f0e"
+          }
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"action\":\"authority\",\"authority_request\":{\"arguments\":{},\"expected_authority_epoch\":\"2\",\"expected_scope_generation\":\"5\",\"interface\":\"determa.host_authority\",\"interface_version\":1,\"operation\":\"freeze_scope\",\"operation_id\":\"freeze-1\",\"request_digest\":\"sha256:d822a5de52ebad90e7d658aaad37c166f650fab890aaf41264dd200b73c07f0e\",\"scope_identity\":\"scope-42\"}},\"operation\":\"scope_operation\",\"operation_id\":\"freeze-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-scope-42\",\"target\":{\"root_instance_id\":null,\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:bd92735716e70e0c82df8627be0fa216071d54cbba9a8541afd6f44481278139",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "freeze-1",
+        "status": "committed",
+        "receipt": {
+          "scope_binding_identity": "binding-scope-42",
+          "operation_id": "freeze-1",
+          "request_digest": "sha256:bd92735716e70e0c82df8627be0fa216071d54cbba9a8541afd6f44481278139",
+          "receipt_kind": "committed",
+          "acceptance_receipt": null,
+          "evidence_digest": "sha256:0b3fd1810491c5f9ba138dc9d7357d0f05285ad1400bf6f18e6a295644e5b98f"
+        },
+        "value": {
+          "operation": "scope_operation",
+          "result": {
+            "action": "authority",
+            "authority_result": {
+              "interface": "determa.host_authority",
+              "interface_version": 1,
+              "operation": "freeze_scope",
+              "operation_id": "freeze-1",
+              "status": "accepted",
+              "scope_identity": "scope-42",
+              "authority_epoch": "2",
+              "scope_generation": "6",
+              "state": "frozen",
+              "evidence_digest": "sha256:259be5496362d1d2d14e356a67f493a1fa50ac75c721bf016f7578bc7a7c979d",
+              "error_code": null,
+              "claim": null
+            }
+          }
+        },
+        "error": null
+      },
+      "source_fixture": "examples/authority/host-authority-cases-v1.json#freeze_after_drain"
+    },
+    {
+      "name": "authority_fence_worker_allocates_new_claim",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "fence-1",
+        "scope_binding_identity": "binding-scope-42",
+        "operation": "scope_operation",
+        "target": {
+          "root_instance_id": null,
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "action": "authority",
+          "authority_request": {
+            "interface": "determa.host_authority",
+            "interface_version": 1,
+            "operation": "fence_worker",
+            "operation_id": "fence-1",
+            "scope_identity": "scope-42",
+            "expected_authority_epoch": "2",
+            "expected_scope_generation": "4",
+            "arguments": {
+              "root_instance_id": "root-7",
+              "work_kind": "effect",
+              "work_identity": "effect-17",
+              "operation_token": "token-17",
+              "expected_attempt_fence": "3",
+              "expected_worker_principal": "worker-1"
+            },
+            "request_digest": "sha256:fe90fe547cd99be6648402be1b3b186e6ff63352a3a7593d7978f6390abb2a72"
+          }
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"action\":\"authority\",\"authority_request\":{\"arguments\":{\"expected_attempt_fence\":\"3\",\"expected_worker_principal\":\"worker-1\",\"operation_token\":\"token-17\",\"root_instance_id\":\"root-7\",\"work_identity\":\"effect-17\",\"work_kind\":\"effect\"},\"expected_authority_epoch\":\"2\",\"expected_scope_generation\":\"4\",\"interface\":\"determa.host_authority\",\"interface_version\":1,\"operation\":\"fence_worker\",\"operation_id\":\"fence-1\",\"request_digest\":\"sha256:fe90fe547cd99be6648402be1b3b186e6ff63352a3a7593d7978f6390abb2a72\",\"scope_identity\":\"scope-42\"}},\"operation\":\"scope_operation\",\"operation_id\":\"fence-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-scope-42\",\"target\":{\"root_instance_id\":null,\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:470cb629d408de65d689007e90e609bb20e6a01acfee1c60ab353bba6cf56ff3",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "fence-1",
+        "status": "committed",
+        "receipt": {
+          "scope_binding_identity": "binding-scope-42",
+          "operation_id": "fence-1",
+          "request_digest": "sha256:470cb629d408de65d689007e90e609bb20e6a01acfee1c60ab353bba6cf56ff3",
+          "receipt_kind": "committed",
+          "acceptance_receipt": null,
+          "evidence_digest": "sha256:bb1bae0e898989d69356b3ad66b3eae3f59fa41bd33052ec9f9e6fb07cd1b627"
+        },
+        "value": {
+          "operation": "scope_operation",
+          "result": {
+            "action": "authority",
+            "authority_result": {
+              "interface": "determa.host_authority",
+              "interface_version": 1,
+              "operation": "fence_worker",
+              "operation_id": "fence-1",
+              "status": "accepted",
+              "scope_identity": "scope-42",
+              "authority_epoch": "2",
+              "scope_generation": "5",
+              "state": "active",
+              "error_code": null,
+              "claim": {
+                "scope_identity": "scope-42",
+                "root_instance_id": "root-7",
+                "work_kind": "effect",
+                "work_identity": "effect-17",
+                "operation_token": "token-17",
+                "scope_authority_epoch": "2",
+                "attempt_fence": "4",
+                "worker_principal": "worker-1",
+                "expires_at": "1760000000000000000",
+                "state": "active"
+              },
+              "evidence_digest": "sha256:a15b033510da3247fdf35f8e1dfc52141cee2e642a1284a1352bb37131fff9a8"
+            }
+          }
+        },
+        "error": null
+      },
+      "source_fixture": "examples/authority/host-authority-cases-v1.json#fence_worker_allocates_new_claim"
+    },
+    {
+      "name": "authority_retirement_with_known_fate",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "retire-1",
+        "scope_binding_identity": "binding-scope-42",
+        "operation": "scope_operation",
+        "target": {
+          "root_instance_id": null,
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "action": "authority",
+          "authority_request": {
+            "interface": "determa.host_authority",
+            "interface_version": 1,
+            "operation": "prove_retirement",
+            "operation_id": "retire-1",
+            "scope_identity": "scope-42",
+            "expected_authority_epoch": "2",
+            "expected_scope_generation": "6",
+            "arguments": {
+              "destination_binding_digest": "sha256:5141cd2b3da81604aff6cd449b53b123ccba0c77ddea6c331971e933c63d3af5",
+              "freeze_evidence_digest": "sha256:259be5496362d1d2d14e356a67f493a1fa50ac75c721bf016f7578bc7a7c979d"
+            },
+            "request_digest": "sha256:7cf47dc65e17b6d45460da5e0d7f49486b78e658b6a3013ecd742526b2c78fa2"
+          }
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"action\":\"authority\",\"authority_request\":{\"arguments\":{\"destination_binding_digest\":\"sha256:5141cd2b3da81604aff6cd449b53b123ccba0c77ddea6c331971e933c63d3af5\",\"freeze_evidence_digest\":\"sha256:259be5496362d1d2d14e356a67f493a1fa50ac75c721bf016f7578bc7a7c979d\"},\"expected_authority_epoch\":\"2\",\"expected_scope_generation\":\"6\",\"interface\":\"determa.host_authority\",\"interface_version\":1,\"operation\":\"prove_retirement\",\"operation_id\":\"retire-1\",\"request_digest\":\"sha256:7cf47dc65e17b6d45460da5e0d7f49486b78e658b6a3013ecd742526b2c78fa2\",\"scope_identity\":\"scope-42\"}},\"operation\":\"scope_operation\",\"operation_id\":\"retire-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-scope-42\",\"target\":{\"root_instance_id\":null,\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:0d258a08634753c17c200ec49048eefb4d046e042450784f1187eaa2cc05a722",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "retire-1",
+        "status": "committed",
+        "receipt": {
+          "scope_binding_identity": "binding-scope-42",
+          "operation_id": "retire-1",
+          "request_digest": "sha256:0d258a08634753c17c200ec49048eefb4d046e042450784f1187eaa2cc05a722",
+          "receipt_kind": "committed",
+          "acceptance_receipt": null,
+          "evidence_digest": "sha256:2806d7f7bc71ecd3403f5df549b443ece98062d2411453166e48ca139bf4a94d"
+        },
+        "value": {
+          "operation": "scope_operation",
+          "result": {
+            "action": "authority",
+            "authority_result": {
+              "interface": "determa.host_authority",
+              "interface_version": 1,
+              "operation": "prove_retirement",
+              "operation_id": "retire-1",
+              "status": "accepted",
+              "scope_identity": "scope-42",
+              "authority_epoch": "2",
+              "scope_generation": "7",
+              "state": "retired",
+              "evidence_digest": "sha256:0d59cf976e852cdbe0776ee095fb6aee0b5b94fe6adac7169e71910456acb9cc",
+              "error_code": null,
+              "claim": null
+            }
+          }
+        },
+        "error": null
+      },
+      "source_fixture": "examples/authority/host-authority-cases-v1.json#retirement_with_known_fate"
+    },
+    {
+      "name": "process_deferred_event",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-process_deferred_event",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "process",
+        "target": {
+          "root_instance_id": "server-1",
+          "runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+          "runtime_incarnation": {
+            "kind": "root",
+            "definition": {
+              "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+              "machine": {
+                "namespace": "example.transaction_server",
+                "machine_id": "transaction_server",
+                "machine_version": "1",
+                "root_definition_pointer": "/machines/0/root"
+              }
+            },
+            "root_instance_id": "server-1"
+          }
+        },
+        "precondition": {
+          "revision": "3",
+          "checkpoint_digest": "sha256:d8898b9366765f94529f43153ccb53826ea8019c4cb3512379c6b68a82e1c9e5"
+        },
+        "arguments": {}
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{},\"operation\":\"process\",\"operation_id\":\"op-process_deferred_event\",\"precondition\":{\"checkpoint_digest\":\"sha256:d8898b9366765f94529f43153ccb53826ea8019c4cb3512379c6b68a82e1c9e5\",\"revision\":\"3\"},\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"server-1\",\"runtime_id\":\"sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8\",\"runtime_incarnation\":{\"definition\":{\"machine\":{\"machine_id\":\"transaction_server\",\"machine_version\":\"1\",\"namespace\":\"example.transaction_server\",\"root_definition_pointer\":\"/machines/0/root\"},\"validated_bundle_fingerprint\":\"sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef\"},\"kind\":\"root\",\"root_instance_id\":\"server-1\"}}}]",
+      "request_digest": "sha256:5641ef1703c477b0d023a82b3d2b41f98fc496daff4e3aa9cf57d9b1c3964dc6",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-process_deferred_event",
+        "status": "committed",
+        "receipt": {
+          "scope_binding_identity": "binding-local-1",
+          "operation_id": "op-process_deferred_event",
+          "request_digest": "sha256:5641ef1703c477b0d023a82b3d2b41f98fc496daff4e3aa9cf57d9b1c3964dc6",
+          "receipt_kind": "committed",
+          "acceptance_receipt": null,
+          "evidence_digest": "sha256:2f7187030e1872693d12422ff1e26185f61256b85c48b791f09546ba9332b31f"
+        },
+        "value": {
+          "operation": "process",
+          "result": {
+            "checkpoint": {
+              "execution_checkpoint_format": "determa.execution_checkpoint",
+              "execution_checkpoint_schema_version": 1,
+              "root_instance_id": "server-1",
+              "revision": "4",
+              "root_record": {
+                "status": "retained",
+                "aggregate_state": {
+                  "aggregate_state_format": "determa.aggregate_state",
+                  "aggregate_state_schema_version": 1,
+                  "machine_format": 1,
+                  "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                  "namespace": "example.transaction_server",
+                  "root_machine_id": "transaction_server",
+                  "root_machine_version": "1",
+                  "root_instance_id": "server-1",
+                  "creation_id": "create-server-1",
+                  "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+                  "migration_sequence": "0",
+                  "next_logical_step_sequence": "2",
+                  "next_output_sequence": "0",
+                  "next_acceptance_sequence": "2",
+                  "next_queue_sequence": "3",
+                  "runtimes": [
+                    {
+                      "runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+                      "identity_origin": {
+                        "kind": "root",
+                        "definition": {
+                          "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                          "machine": {
+                            "namespace": "example.transaction_server",
+                            "machine_id": "transaction_server",
+                            "machine_version": "1",
+                            "root_definition_pointer": "/machines/0/root"
+                          }
+                        },
+                        "root_instance_id": "server-1"
+                      },
+                      "target_identity": {
+                        "root": {
+                          "root_instance_id": "server-1",
+                          "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8"
+                        }
+                      },
+                      "current_definition": {
+                        "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                        "machine": {
+                          "namespace": "example.transaction_server",
+                          "machine_id": "transaction_server",
+                          "machine_version": "1",
+                          "root_definition_pointer": "/machines/0/root"
+                        }
+                      },
+                      "relation": {
+                        "kind": "root"
+                      },
+                      "status": "running",
+                      "active_leaf_state_definition_pointers": [
+                        "/machines/0/root/states/busy/states/receiving"
+                      ],
+                      "active_state_activations": [
+                        {
+                          "state_definition_pointer": "/machines/0/root",
+                          "activation_sequence": "0"
+                        },
+                        {
+                          "state_definition_pointer": "/machines/0/root/states/busy",
+                          "activation_sequence": "0"
+                        },
+                        {
+                          "state_definition_pointer": "/machines/0/root/states/busy/states/receiving",
+                          "activation_sequence": "0"
+                        }
+                      ],
+                      "variables": [],
+                      "history": [],
+                      "next_spawn_sequence": "0",
+                      "next_state_activation_sequences": [
+                        {
+                          "definition_pointer": "/machines/0/root",
+                          "next_sequence": "1"
+                        },
+                        {
+                          "definition_pointer": "/machines/0/root/states/busy",
+                          "next_sequence": "1"
+                        },
+                        {
+                          "definition_pointer": "/machines/0/root/states/busy/states/receiving",
+                          "next_sequence": "1"
+                        },
+                        {
+                          "definition_pointer": "/machines/0/root/states/idle",
+                          "next_sequence": "1"
+                        }
+                      ],
+                      "next_component_activation_sequences": [],
+                      "ready_mailbox": [],
+                      "deferred_mailbox": [
+                        {
+                          "acceptance_sequence": "1",
+                          "queue_sequence": "2",
+                          "delivery_mode": "input",
+                          "envelope": {
+                            "event": "new_request",
+                            "event_id": "request-2",
+                            "cause_id": "request-2",
+                            "source": {
+                              "host": true
+                            },
+                            "target": {
+                              "root": {
+                                "root_instance_id": "server-1",
+                                "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8"
+                              }
+                            },
+                            "payload": [
+                              "map",
+                              [
+                                [
+                                  "transaction_id",
+                                  [
+                                    "string",
+                                    "transaction-2"
+                                  ]
+                                ]
+                              ]
+                            ]
+                          },
+                          "envelope_digest": "sha256:d8571313a17d9f204164d40867c8a73f3330b0649df1a90b3f492b394c33b97d",
+                          "deferral_count": "1"
+                        }
+                      ],
+                      "fault": null
+                    }
+                  ],
+                  "aggregate_state_digest": "sha256:82f5b8938059254ccc3521c091242a3fba254fecedb9c4aaffa5355b7b4e798c"
+                }
+              },
+              "replay_retention": {
+                "mode": "permanent",
+                "permanent_replay_eligible": true,
+                "pruned_through_receipt_sequence": null,
+                "policy_identifier": null
+              },
+              "next_operation_receipt_sequence": "4",
+              "operation_receipts": [
+                {
+                  "operation_kind": "creation",
+                  "receipt_sequence": "0",
+                  "creation_id": "create-server-1",
+                  "request_digest": "sha256:7e25722ba827c5e15a2054382275ce5e0ffa779217164a6caa3fe90af7fc3bd5",
+                  "committed_revision": "0",
+                  "resulting_aggregate_state_digest": "sha256:7a35f4ebf9bdad99cc94af79d19f0bfa68f84f44b4a520fba1fa0ea157d5aa84",
+                  "status": "running",
+                  "fault": null,
+                  "emission_references": []
+                },
+                {
+                  "operation_kind": "acceptance",
+                  "receipt_sequence": "1",
+                  "event_id": "request-1",
+                  "request_digest": "sha256:4a7d58d16d1b20d2ff6c1bc7c6fc3de53122df38cb082677af3b1d099b8628bc",
+                  "acceptance_sequence": "0",
+                  "accepted_revision": "1",
+                  "delivery_mode": "input"
+                },
+                {
+                  "operation_kind": "event_terminal",
+                  "receipt_sequence": "2",
+                  "event_id": "request-1",
+                  "request_digest": "sha256:4a7d58d16d1b20d2ff6c1bc7c6fc3de53122df38cb082677af3b1d099b8628bc",
+                  "acceptance_sequence": "0",
+                  "final_queue_sequence": "0",
+                  "committed_revision": "2",
+                  "resulting_aggregate_state_digest": "sha256:6f6b57ca552ce992edb910b0aead8ce2df9a42e239deeddc368ed9a41abd189a",
+                  "outcome": {
+                    "status": "running",
+                    "disposition": "handled",
+                    "fault": null,
+                    "rejection": null
+                  },
+                  "emission_references": []
+                },
+                {
+                  "operation_kind": "acceptance",
+                  "receipt_sequence": "3",
+                  "event_id": "request-2",
+                  "request_digest": "sha256:d8571313a17d9f204164d40867c8a73f3330b0649df1a90b3f492b394c33b97d",
+                  "acceptance_sequence": "1",
+                  "accepted_revision": "3",
+                  "delivery_mode": "input"
+                }
+              ],
+              "event_identity_tombstones": [],
+              "pending_outbox_intents": [],
+              "next_outbox_terminal_sequence": "0",
+              "terminal_outbox_records": [],
+              "outbox_effect_tombstones": [],
+              "migration_audit_records": [],
+              "execution_checkpoint_digest": "sha256:2d1a1d6fc86915a89e30ef64d43ff4a04464321eb7826f7c14e47d1665ca2118"
+            },
+            "core_result": {
+              "core_step_result_format": "determa.core_step_result",
+              "core_step_result_schema_version": 1,
+              "status": "running",
+              "disposition": "deferred",
+              "state": {
+                "aggregate_state_format": "determa.aggregate_state",
+                "aggregate_state_schema_version": 1,
+                "machine_format": 1,
+                "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                "namespace": "example.transaction_server",
+                "root_machine_id": "transaction_server",
+                "root_machine_version": "1",
+                "root_instance_id": "server-1",
+                "creation_id": "create-server-1",
+                "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+                "migration_sequence": "0",
+                "next_logical_step_sequence": "2",
+                "next_output_sequence": "0",
+                "next_acceptance_sequence": "2",
+                "next_queue_sequence": "3",
+                "runtimes": [
+                  {
+                    "runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+                    "identity_origin": {
+                      "kind": "root",
+                      "definition": {
+                        "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                        "machine": {
+                          "namespace": "example.transaction_server",
+                          "machine_id": "transaction_server",
+                          "machine_version": "1",
+                          "root_definition_pointer": "/machines/0/root"
+                        }
+                      },
+                      "root_instance_id": "server-1"
+                    },
+                    "target_identity": {
+                      "root": {
+                        "root_instance_id": "server-1",
+                        "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8"
+                      }
+                    },
+                    "current_definition": {
+                      "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                      "machine": {
+                        "namespace": "example.transaction_server",
+                        "machine_id": "transaction_server",
+                        "machine_version": "1",
+                        "root_definition_pointer": "/machines/0/root"
+                      }
+                    },
+                    "relation": {
+                      "kind": "root"
+                    },
+                    "status": "running",
+                    "active_leaf_state_definition_pointers": [
+                      "/machines/0/root/states/busy/states/receiving"
+                    ],
+                    "active_state_activations": [
+                      {
+                        "state_definition_pointer": "/machines/0/root",
+                        "activation_sequence": "0"
+                      },
+                      {
+                        "state_definition_pointer": "/machines/0/root/states/busy",
+                        "activation_sequence": "0"
+                      },
+                      {
+                        "state_definition_pointer": "/machines/0/root/states/busy/states/receiving",
+                        "activation_sequence": "0"
+                      }
+                    ],
+                    "variables": [],
+                    "history": [],
+                    "next_spawn_sequence": "0",
+                    "next_state_activation_sequences": [
+                      {
+                        "definition_pointer": "/machines/0/root",
+                        "next_sequence": "1"
+                      },
+                      {
+                        "definition_pointer": "/machines/0/root/states/busy",
+                        "next_sequence": "1"
+                      },
+                      {
+                        "definition_pointer": "/machines/0/root/states/busy/states/receiving",
+                        "next_sequence": "1"
+                      },
+                      {
+                        "definition_pointer": "/machines/0/root/states/idle",
+                        "next_sequence": "1"
+                      }
+                    ],
+                    "next_component_activation_sequences": [],
+                    "ready_mailbox": [],
+                    "deferred_mailbox": [
+                      {
+                        "acceptance_sequence": "1",
+                        "queue_sequence": "2",
+                        "delivery_mode": "input",
+                        "envelope": {
+                          "event": "new_request",
+                          "event_id": "request-2",
+                          "cause_id": "request-2",
+                          "source": {
+                            "host": true
+                          },
+                          "target": {
+                            "root": {
+                              "root_instance_id": "server-1",
+                              "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8"
+                            }
+                          },
+                          "payload": [
+                            "map",
+                            [
+                              [
+                                "transaction_id",
+                                [
+                                  "string",
+                                  "transaction-2"
+                                ]
+                              ]
+                            ]
+                          ]
+                        },
+                        "envelope_digest": "sha256:d8571313a17d9f204164d40867c8a73f3330b0649df1a90b3f492b394c33b97d",
+                        "deferral_count": "1"
+                      }
+                    ],
+                    "fault": null
+                  }
+                ],
+                "aggregate_state_digest": "sha256:82f5b8938059254ccc3521c091242a3fba254fecedb9c4aaffa5355b7b4e798c"
+              },
+              "emissions": [],
+              "lifecycle_dispositions": [],
+              "fault": null,
+              "rejection": null
+            },
+            "terminal_receipt": null
+          }
+        },
+        "error": null
+      },
+      "source_fixture": "examples/delivery/queue-placement-checkpoints-v1.json#after_deferral"
+    },
+    {
+      "name": "process_recall_event",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-process_recall_event",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "process",
+        "target": {
+          "root_instance_id": "server-1",
+          "runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+          "runtime_incarnation": {
+            "kind": "root",
+            "definition": {
+              "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+              "machine": {
+                "namespace": "example.transaction_server",
+                "machine_id": "transaction_server",
+                "machine_version": "1",
+                "root_definition_pointer": "/machines/0/root"
+              }
+            },
+            "root_instance_id": "server-1"
+          }
+        },
+        "precondition": {
+          "revision": "5",
+          "checkpoint_digest": "sha256:50d34a649b5853fb9dcca8956c5ba1247fcf5622c0cb15e7cb1ec08c3046eba0"
+        },
+        "arguments": {}
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{},\"operation\":\"process\",\"operation_id\":\"op-process_recall_event\",\"precondition\":{\"checkpoint_digest\":\"sha256:50d34a649b5853fb9dcca8956c5ba1247fcf5622c0cb15e7cb1ec08c3046eba0\",\"revision\":\"5\"},\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"server-1\",\"runtime_id\":\"sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8\",\"runtime_incarnation\":{\"definition\":{\"machine\":{\"machine_id\":\"transaction_server\",\"machine_version\":\"1\",\"namespace\":\"example.transaction_server\",\"root_definition_pointer\":\"/machines/0/root\"},\"validated_bundle_fingerprint\":\"sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef\"},\"kind\":\"root\",\"root_instance_id\":\"server-1\"}}}]",
+      "request_digest": "sha256:a8f2d843095eaf0b379aee66d17dcd291cba9523b21dd6004e92281b834aa9e4",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-process_recall_event",
+        "status": "committed",
+        "receipt": {
+          "scope_binding_identity": "binding-local-1",
+          "operation_id": "op-process_recall_event",
+          "request_digest": "sha256:a8f2d843095eaf0b379aee66d17dcd291cba9523b21dd6004e92281b834aa9e4",
+          "receipt_kind": "committed",
+          "acceptance_receipt": null,
+          "evidence_digest": "sha256:d6763cc70ac539e2a2ca05bc6c60d1a95b617456f963d6d674ad60811480b938"
+        },
+        "value": {
+          "operation": "process",
+          "result": {
+            "checkpoint": {
+              "execution_checkpoint_format": "determa.execution_checkpoint",
+              "execution_checkpoint_schema_version": 1,
+              "root_instance_id": "server-1",
+              "revision": "6",
+              "root_record": {
+                "status": "retained",
+                "aggregate_state": {
+                  "aggregate_state_format": "determa.aggregate_state",
+                  "aggregate_state_schema_version": 1,
+                  "machine_format": 1,
+                  "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                  "namespace": "example.transaction_server",
+                  "root_machine_id": "transaction_server",
+                  "root_machine_version": "1",
+                  "root_instance_id": "server-1",
+                  "creation_id": "create-server-1",
+                  "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+                  "migration_sequence": "0",
+                  "next_logical_step_sequence": "3",
+                  "next_output_sequence": "0",
+                  "next_acceptance_sequence": "3",
+                  "next_queue_sequence": "5",
+                  "runtimes": [
+                    {
+                      "runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+                      "identity_origin": {
+                        "kind": "root",
+                        "definition": {
+                          "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                          "machine": {
+                            "namespace": "example.transaction_server",
+                            "machine_id": "transaction_server",
+                            "machine_version": "1",
+                            "root_definition_pointer": "/machines/0/root"
+                          }
+                        },
+                        "root_instance_id": "server-1"
+                      },
+                      "target_identity": {
+                        "root": {
+                          "root_instance_id": "server-1",
+                          "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8"
+                        }
+                      },
+                      "current_definition": {
+                        "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                        "machine": {
+                          "namespace": "example.transaction_server",
+                          "machine_id": "transaction_server",
+                          "machine_version": "1",
+                          "root_definition_pointer": "/machines/0/root"
+                        }
+                      },
+                      "relation": {
+                        "kind": "root"
+                      },
+                      "status": "running",
+                      "active_leaf_state_definition_pointers": [
+                        "/machines/0/root/states/busy/states/authorizing"
+                      ],
+                      "active_state_activations": [
+                        {
+                          "state_definition_pointer": "/machines/0/root",
+                          "activation_sequence": "0"
+                        },
+                        {
+                          "state_definition_pointer": "/machines/0/root/states/busy",
+                          "activation_sequence": "0"
+                        },
+                        {
+                          "state_definition_pointer": "/machines/0/root/states/busy/states/authorizing",
+                          "activation_sequence": "0"
+                        }
+                      ],
+                      "variables": [],
+                      "history": [],
+                      "next_spawn_sequence": "0",
+                      "next_state_activation_sequences": [
+                        {
+                          "definition_pointer": "/machines/0/root",
+                          "next_sequence": "1"
+                        },
+                        {
+                          "definition_pointer": "/machines/0/root/states/busy",
+                          "next_sequence": "1"
+                        },
+                        {
+                          "definition_pointer": "/machines/0/root/states/busy/states/authorizing",
+                          "next_sequence": "1"
+                        },
+                        {
+                          "definition_pointer": "/machines/0/root/states/busy/states/receiving",
+                          "next_sequence": "1"
+                        },
+                        {
+                          "definition_pointer": "/machines/0/root/states/idle",
+                          "next_sequence": "1"
+                        }
+                      ],
+                      "next_component_activation_sequences": [],
+                      "ready_mailbox": [
+                        {
+                          "acceptance_sequence": "1",
+                          "queue_sequence": "4",
+                          "delivery_mode": "input",
+                          "envelope": {
+                            "event": "new_request",
+                            "event_id": "request-2",
+                            "cause_id": "request-2",
+                            "source": {
+                              "host": true
+                            },
+                            "target": {
+                              "root": {
+                                "root_instance_id": "server-1",
+                                "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8"
+                              }
+                            },
+                            "payload": [
+                              "map",
+                              [
+                                [
+                                  "transaction_id",
+                                  [
+                                    "string",
+                                    "transaction-2"
+                                  ]
+                                ]
+                              ]
+                            ]
+                          },
+                          "envelope_digest": "sha256:d8571313a17d9f204164d40867c8a73f3330b0649df1a90b3f492b394c33b97d",
+                          "deferral_count": "1"
+                        }
+                      ],
+                      "deferred_mailbox": [],
+                      "fault": null
+                    }
+                  ],
+                  "aggregate_state_digest": "sha256:66f7d59025a28cd9276d94cb9ccc96a4230a7c1617580759d5466c48429a046c"
+                }
+              },
+              "replay_retention": {
+                "mode": "permanent",
+                "permanent_replay_eligible": true,
+                "pruned_through_receipt_sequence": null,
+                "policy_identifier": null
+              },
+              "next_operation_receipt_sequence": "6",
+              "operation_receipts": [
+                {
+                  "operation_kind": "creation",
+                  "receipt_sequence": "0",
+                  "creation_id": "create-server-1",
+                  "request_digest": "sha256:7e25722ba827c5e15a2054382275ce5e0ffa779217164a6caa3fe90af7fc3bd5",
+                  "committed_revision": "0",
+                  "resulting_aggregate_state_digest": "sha256:7a35f4ebf9bdad99cc94af79d19f0bfa68f84f44b4a520fba1fa0ea157d5aa84",
+                  "status": "running",
+                  "fault": null,
+                  "emission_references": []
+                },
+                {
+                  "operation_kind": "acceptance",
+                  "receipt_sequence": "1",
+                  "event_id": "request-1",
+                  "request_digest": "sha256:4a7d58d16d1b20d2ff6c1bc7c6fc3de53122df38cb082677af3b1d099b8628bc",
+                  "acceptance_sequence": "0",
+                  "accepted_revision": "1",
+                  "delivery_mode": "input"
+                },
+                {
+                  "operation_kind": "event_terminal",
+                  "receipt_sequence": "2",
+                  "event_id": "request-1",
+                  "request_digest": "sha256:4a7d58d16d1b20d2ff6c1bc7c6fc3de53122df38cb082677af3b1d099b8628bc",
+                  "acceptance_sequence": "0",
+                  "final_queue_sequence": "0",
+                  "committed_revision": "2",
+                  "resulting_aggregate_state_digest": "sha256:6f6b57ca552ce992edb910b0aead8ce2df9a42e239deeddc368ed9a41abd189a",
+                  "outcome": {
+                    "status": "running",
+                    "disposition": "handled",
+                    "fault": null,
+                    "rejection": null
+                  },
+                  "emission_references": []
+                },
+                {
+                  "operation_kind": "acceptance",
+                  "receipt_sequence": "3",
+                  "event_id": "request-2",
+                  "request_digest": "sha256:d8571313a17d9f204164d40867c8a73f3330b0649df1a90b3f492b394c33b97d",
+                  "acceptance_sequence": "1",
+                  "accepted_revision": "3",
+                  "delivery_mode": "input"
+                },
+                {
+                  "operation_kind": "acceptance",
+                  "receipt_sequence": "4",
+                  "event_id": "received-1",
+                  "request_digest": "sha256:21fe9b70a15bab725a835c4c26e8da26bfe94a7be3feef11031abb1012fc8436",
+                  "acceptance_sequence": "2",
+                  "accepted_revision": "5",
+                  "delivery_mode": "input"
+                },
+                {
+                  "operation_kind": "event_terminal",
+                  "receipt_sequence": "5",
+                  "event_id": "received-1",
+                  "request_digest": "sha256:21fe9b70a15bab725a835c4c26e8da26bfe94a7be3feef11031abb1012fc8436",
+                  "acceptance_sequence": "2",
+                  "final_queue_sequence": "3",
+                  "committed_revision": "6",
+                  "resulting_aggregate_state_digest": "sha256:66f7d59025a28cd9276d94cb9ccc96a4230a7c1617580759d5466c48429a046c",
+                  "outcome": {
+                    "status": "running",
+                    "disposition": "handled",
+                    "fault": null,
+                    "rejection": null
+                  },
+                  "emission_references": []
+                }
+              ],
+              "event_identity_tombstones": [],
+              "pending_outbox_intents": [],
+              "next_outbox_terminal_sequence": "0",
+              "terminal_outbox_records": [],
+              "outbox_effect_tombstones": [],
+              "migration_audit_records": [],
+              "execution_checkpoint_digest": "sha256:dd2086656074c31e2318f1d635a602dc01d000472529ee288a80326645703c45"
+            },
+            "core_result": {
+              "core_step_result_format": "determa.core_step_result",
+              "core_step_result_schema_version": 1,
+              "status": "running",
+              "disposition": "handled",
+              "state": {
+                "aggregate_state_format": "determa.aggregate_state",
+                "aggregate_state_schema_version": 1,
+                "machine_format": 1,
+                "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                "namespace": "example.transaction_server",
+                "root_machine_id": "transaction_server",
+                "root_machine_version": "1",
+                "root_instance_id": "server-1",
+                "creation_id": "create-server-1",
+                "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+                "migration_sequence": "0",
+                "next_logical_step_sequence": "3",
+                "next_output_sequence": "0",
+                "next_acceptance_sequence": "3",
+                "next_queue_sequence": "5",
+                "runtimes": [
+                  {
+                    "runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+                    "identity_origin": {
+                      "kind": "root",
+                      "definition": {
+                        "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                        "machine": {
+                          "namespace": "example.transaction_server",
+                          "machine_id": "transaction_server",
+                          "machine_version": "1",
+                          "root_definition_pointer": "/machines/0/root"
+                        }
+                      },
+                      "root_instance_id": "server-1"
+                    },
+                    "target_identity": {
+                      "root": {
+                        "root_instance_id": "server-1",
+                        "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8"
+                      }
+                    },
+                    "current_definition": {
+                      "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                      "machine": {
+                        "namespace": "example.transaction_server",
+                        "machine_id": "transaction_server",
+                        "machine_version": "1",
+                        "root_definition_pointer": "/machines/0/root"
+                      }
+                    },
+                    "relation": {
+                      "kind": "root"
+                    },
+                    "status": "running",
+                    "active_leaf_state_definition_pointers": [
+                      "/machines/0/root/states/busy/states/authorizing"
+                    ],
+                    "active_state_activations": [
+                      {
+                        "state_definition_pointer": "/machines/0/root",
+                        "activation_sequence": "0"
+                      },
+                      {
+                        "state_definition_pointer": "/machines/0/root/states/busy",
+                        "activation_sequence": "0"
+                      },
+                      {
+                        "state_definition_pointer": "/machines/0/root/states/busy/states/authorizing",
+                        "activation_sequence": "0"
+                      }
+                    ],
+                    "variables": [],
+                    "history": [],
+                    "next_spawn_sequence": "0",
+                    "next_state_activation_sequences": [
+                      {
+                        "definition_pointer": "/machines/0/root",
+                        "next_sequence": "1"
+                      },
+                      {
+                        "definition_pointer": "/machines/0/root/states/busy",
+                        "next_sequence": "1"
+                      },
+                      {
+                        "definition_pointer": "/machines/0/root/states/busy/states/authorizing",
+                        "next_sequence": "1"
+                      },
+                      {
+                        "definition_pointer": "/machines/0/root/states/busy/states/receiving",
+                        "next_sequence": "1"
+                      },
+                      {
+                        "definition_pointer": "/machines/0/root/states/idle",
+                        "next_sequence": "1"
+                      }
+                    ],
+                    "next_component_activation_sequences": [],
+                    "ready_mailbox": [
+                      {
+                        "acceptance_sequence": "1",
+                        "queue_sequence": "4",
+                        "delivery_mode": "input",
+                        "envelope": {
+                          "event": "new_request",
+                          "event_id": "request-2",
+                          "cause_id": "request-2",
+                          "source": {
+                            "host": true
+                          },
+                          "target": {
+                            "root": {
+                              "root_instance_id": "server-1",
+                              "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8"
+                            }
+                          },
+                          "payload": [
+                            "map",
+                            [
+                              [
+                                "transaction_id",
+                                [
+                                  "string",
+                                  "transaction-2"
+                                ]
+                              ]
+                            ]
+                          ]
+                        },
+                        "envelope_digest": "sha256:d8571313a17d9f204164d40867c8a73f3330b0649df1a90b3f492b394c33b97d",
+                        "deferral_count": "1"
+                      }
+                    ],
+                    "deferred_mailbox": [],
+                    "fault": null
+                  }
+                ],
+                "aggregate_state_digest": "sha256:66f7d59025a28cd9276d94cb9ccc96a4230a7c1617580759d5466c48429a046c"
+              },
+              "emissions": [],
+              "lifecycle_dispositions": [],
+              "fault": null,
+              "rejection": null
+            },
+            "terminal_receipt": {
+              "operation_kind": "event_terminal",
+              "receipt_sequence": "5",
+              "event_id": "received-1",
+              "request_digest": "sha256:21fe9b70a15bab725a835c4c26e8da26bfe94a7be3feef11031abb1012fc8436",
+              "acceptance_sequence": "2",
+              "final_queue_sequence": "3",
+              "committed_revision": "6",
+              "resulting_aggregate_state_digest": "sha256:66f7d59025a28cd9276d94cb9ccc96a4230a7c1617580759d5466c48429a046c",
+              "outcome": {
+                "status": "running",
+                "disposition": "handled",
+                "fault": null,
+                "rejection": null
+              },
+              "emission_references": []
+            }
+          }
+        },
+        "error": null
+      },
+      "source_fixture": "examples/delivery/queue-placement-checkpoints-v1.json#after_recall"
     }
   ]
 }
