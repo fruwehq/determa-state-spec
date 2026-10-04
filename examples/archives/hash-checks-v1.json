@@ -1,0 +1,31 @@
+{
+  "archive_schema_digest": "sha256:f00b038f3bbe6efeb68514add8172cc074ca354caa55bfb29002a4b5c28d2b6d",
+  "participant_schema_digest": "sha256:629a0772e49440d4c5c4c2130ecd7f366817a0a48a1ee2ab0575bb4d9423e73c",
+  "result_schema_digest": "sha256:2122114cc013aa42a93d2f4791b2adfc68de5178306f8b16f866f25c483b215f",
+  "export_request_schema_digest": "sha256:5d3f363b1503db853f0a237823f670546316aeb2d5e82966b5b96f012e0580ea",
+  "import_request_schema_digest": "sha256:a602e33fe97320183e3fe3a9aea8dd8829929f01a04cb88e1b7f2682a3061a98",
+  "export_source_schema_digest": "sha256:0220998f91b1dafee78132372caf8e9591aea6abc8d8c28e3ce7d07a3862b964",
+  "stage_configuration_schema_digest": "sha256:a139f98abb4fe8769809a9d20d9b989783eef968856c2610252401bb4f287aba",
+  "helper_payload_schema_digest": "sha256:bdf0bc0a1ad1991fbc78dd7ba91c0dc9c9c44297fa419d9ef7333b6679040850",
+  "provider_closure_digest": "sha256:db53fa5c8190bb2c847324efb8bd4d8c3de6490f834ab4d8e1a1252eed727e8a",
+  "normalized_definition_fingerprint": "sha256:a4458940ab5bc76a120889379294fa4df840465f8e05b97fa368587e3167cb86",
+  "checkpoint_digest": "sha256:9aab07243e93507e23e99e2a7c9c3001a14335a280022199c6bcb2a686fe273b",
+  "checkpoint_digests": {
+    "effect-1": "sha256:5667b9609eaf93f15abbd803110b46fb291f2e1b842f35ab2541387213fc1f8b",
+    "fault-1": "sha256:858ee24a45897e02b481bf4b4155f3d95eb3a8eafb5b81d45b95bc4a0088ec49",
+    "job-42": "sha256:f1f157b29245d86bfab1c06a7f2a14a54180fb2503d55b82a7f05190f3999a79",
+    "server-1": "sha256:9aab07243e93507e23e99e2a7c9c3001a14335a280022199c6bcb2a686fe273b"
+  },
+  "definition_fingerprints": [
+    "sha256:69614f5c10828364f93960fa5347d212750e67f0c37b8056d8fd0966e334c74f",
+    "sha256:a4458940ab5bc76a120889379294fa4df840465f8e05b97fa368587e3167cb86",
+    "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+    "sha256:d9c63e89dac38aedbd3d439a9049158d39e8f3791dd55f7856540f684d16ffcc",
+    "sha256:eeec154ca64b619fe802af811b942073a2bc988b669429d7d08748dd72ab6cfc"
+  ],
+  "migration_descriptor_digest": "sha256:9e0ca69f03366de7c5cb92dea67d8b7bd7979c117a22ea9de37e6c6f73a8e7d9",
+  "source_profile_digest": "sha256:5fe87d8725e1b78ab7790c88ef109228e58e980871cad215aa4203bc618b32d2",
+  "participant_contract_digest": "sha256:f3e008d3109ef93b57d004ae616027a669e56e600b90e31fee830bbe43599448",
+  "standalone_source_profile_digest": "sha256:5d7fe23b366221700c0b4de856177c8b66509851b3ab484d154e56fa12852e1c",
+  "archive_digest": "sha256:b0a1f208b4d5dcec04d9693e39680c350f8d0f49edbc13096f0573654a8aa382"
+}
