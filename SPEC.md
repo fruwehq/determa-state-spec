@@ -4976,9 +4976,13 @@ completion does not silently erase that outstanding record or late-result policy
 The closed claim shape is `schema/host-effect-claim-v1.schema.json`. A claim has
 exactly `scope_identity`, `root_instance_id`, `work_kind`,
 `work_identity`, `operation_token`, `scope_authority_epoch`, `attempt_fence`,
-`worker_principal`, `expires_at`, and `state`. `scope_authority_epoch`
-MUST equal the current §18 `authority_epoch`; a numeric match alone is not a
-credential. For this journal `work_kind` is
+`worker_principal`, `clock_basis`, `expires_at`, and `state`. The
+active form MUST match the closed §18.4 `workerClaim` including
+`clock_basis: unix_nanoseconds` and canonical signed 64-bit Unix-epoch nanosecond
+expiry. Negative zero, float, or overflow is invalid; expiration is determined from
+trusted host time at `now >= expires_at`, and unavailable trusted time fails closed.
+`scope_authority_epoch` MUST equal the current §18 `authority_epoch`; a numeric
+match alone is not a credential. For this journal `work_kind` is
 `effect`, `work_identity` is its effect ID, and state is `active`, `revoked`, or
 `expired`. The current claim is an authority record outside the archive; historic
 claim evidence MAY be retained for audit but grants no authority. Issuing a claim

@@ -7,6 +7,7 @@
   "scope_authority_epoch": "3",
   "attempt_fence": "1",
   "worker_principal": "worker-a",
-  "expires_at": "2030-01-01T00:00:00Z",
-  "state": "active"
+  "expires_at": "1760000000000000000",
+  "state": "active",
+  "clock_basis": "unix_nanoseconds"
 }

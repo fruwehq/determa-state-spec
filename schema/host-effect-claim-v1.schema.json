@@ -15,6 +15,7 @@
         "scope_authority_epoch",
         "attempt_fence",
         "worker_principal",
+        "clock_basis",
         "expires_at",
         "state"
       ],
@@ -53,7 +54,8 @@
         },
         "expires_at": {
           "type": "string",
-          "minLength": 1
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "description": "Canonical signed Unix-epoch nanoseconds; enforce signed 64-bit bounds semantically."
         },
         "state": {
           "enum": [
@@ -61,6 +63,9 @@
             "revoked",
             "expired"
           ]
+        },
+        "clock_basis": {
+          "const": "unix_nanoseconds"
         }
       }
     }
