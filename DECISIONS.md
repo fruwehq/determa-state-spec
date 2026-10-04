@@ -430,3 +430,33 @@ confirmation as business success.
 
 **Reason.** Those shortcuts lose or duplicate responsibility across crashes and make
 replay unable to distinguish a committed decision from an abandoned attempt.
+
+## Archives stage complete Determa snapshots and declared participants
+
+Relevant specification: [§22](SPEC.md#22-portable-archives-and-declared-participants),
+[§17.13](SPEC.md#1713-cluster-checkpoint-composition),
+[§19](SPEC.md#19-committed-native-effects-and-authenticated-results), and
+[§20](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade).
+
+**Decision.** A version-1 archive contains full selected checkpoints and exact
+immutable definition attachments. Application or helper data joins only through an
+explicit participant with a pinned provider, schema, dependency closure, and complete
+payload. Its `determa.scope_archive` root is the closed manifest: content identity,
+sorted member identities, canonical-byte digests and lengths, required destination
+Determa capabilities, optional participant references, and inert source-fence or
+transfer pointers when applicable. The source provenance and full required/optional participant contract are
+compared to independent trusted host policy; a resealed omission or weaker profile
+cannot redefine completeness. Required missing data blocks staging; optional
+omissions are reported. A source claiming §19 durable native results requires a
+closed host-journal participant paired with every selected checkpoint; a standalone
+source without helper participants remains a valid complete archive. The journal
+payload retains replayable public response bytes and is checked against an
+independently trusted source inventory of records, attempts, outcomes, and responses
+at the same capture point, so a resealed omission cannot redefine completeness.
+
+**Rejected alternative.** Reconstruct state by replaying event journals or collect
+arbitrary database rows under an archive label.
+
+**Reason.** Replay can repeat effects or lose accepted deferred work, and undeclared
+rows have no portable reconstruction proof. Staging must validate exact bytes while
+remaining inert; destination authority and relocation are separate concerns.
