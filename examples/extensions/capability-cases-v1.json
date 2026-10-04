@@ -1,0 +1,464 @@
+{
+  "format": "determa.extension-capability-cases",
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "configured_capability_satisfied",
+      "expected": "accept",
+      "reason": "Exact healthy configured claim satisfies an exact requirement.",
+      "descriptor": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "interface_version": 1,
+        "supported_capabilities": [
+          "durable_single_writer",
+          "root_identity_retention"
+        ]
+      },
+      "report": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "instance_id": "primary",
+        "health": "healthy",
+        "claims": [
+          "durable_single_writer",
+          "root_identity_retention"
+        ]
+      },
+      "requirement": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "instance_id": "primary",
+        "capability": "durable_single_writer"
+      }
+    },
+    {
+      "name": "missing_configured_claim",
+      "expected": "extension_capability_mismatch",
+      "reason": "A factory can support a capability while this configured instance cannot claim it.",
+      "descriptor": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "interface_version": 1,
+        "supported_capabilities": [
+          "durable_single_writer",
+          "root_identity_retention"
+        ]
+      },
+      "report": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "instance_id": "primary",
+        "health": "healthy",
+        "claims": [
+          "root_identity_retention"
+        ]
+      },
+      "requirement": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "instance_id": "primary",
+        "capability": "durable_single_writer"
+      }
+    },
+    {
+      "name": "unhealthy_instance",
+      "expected": "extension_capability_mismatch",
+      "reason": "A stale claim does not satisfy a current requirement.",
+      "descriptor": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "interface_version": 1,
+        "supported_capabilities": [
+          "durable_single_writer",
+          "root_identity_retention"
+        ]
+      },
+      "report": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "instance_id": "primary",
+        "health": "unknown",
+        "claims": [
+          "durable_single_writer",
+          "root_identity_retention"
+        ]
+      },
+      "requirement": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "instance_id": "primary",
+        "capability": "durable_single_writer"
+      }
+    },
+    {
+      "name": "wrong_provider_digest",
+      "expected": "extension_identity_mismatch",
+      "reason": "A configured provider cannot substitute a different digest.",
+      "descriptor": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "interface_version": 1,
+        "supported_capabilities": [
+          "durable_single_writer",
+          "root_identity_retention"
+        ]
+      },
+      "report": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        },
+        "instance_id": "primary",
+        "health": "healthy",
+        "claims": [
+          "durable_single_writer",
+          "root_identity_retention"
+        ]
+      },
+      "requirement": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "instance_id": "primary",
+        "capability": "durable_single_writer"
+      }
+    },
+    {
+      "name": "duplicate_registration",
+      "expected": "duplicate_extension_registration",
+      "reason": "The second registration cannot replace the first.",
+      "registered": [
+        {
+          "category": "execution_store",
+          "provider_reference": {
+            "identifier": "sample.sqlite",
+            "version": "1.2.3",
+            "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "interface_version": 1,
+          "supported_capabilities": [
+            "durable_single_writer",
+            "root_identity_retention"
+          ]
+        },
+        {
+          "category": "execution_store",
+          "provider_reference": {
+            "identifier": "sample.sqlite",
+            "version": "1.2.3",
+            "content_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "interface_version": 1,
+          "supported_capabilities": [
+            "durable_single_writer",
+            "root_identity_retention"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "category_confusion",
+      "expected": "schema_invalid",
+      "reason": "An authority claim is not an execution-store capability.",
+      "descriptor": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "interface_version": 1,
+        "supported_capabilities": [
+          "authoritative_scope_fencing"
+        ]
+      }
+    },
+    {
+      "name": "unrecognized_requirement",
+      "expected": "schema_invalid",
+      "reason": "A requirement cannot invent a capability name.",
+      "requirement": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "instance_id": "primary",
+        "capability": "magic_transfer"
+      }
+    },
+    {
+      "name": "version_range",
+      "expected": "schema_invalid",
+      "reason": "Provider versions are exact.",
+      "descriptor": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "^1.2",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "interface_version": 1,
+        "supported_capabilities": [
+          "durable_single_writer",
+          "root_identity_retention"
+        ]
+      }
+    },
+    {
+      "name": "uri_no_privilege",
+      "expected": "extension_capability_mismatch",
+      "reason": "A URI hint cannot supply an absent authority claim.",
+      "descriptor": {
+        "category": "authority",
+        "provider_reference": {
+          "identifier": "sample.authority",
+          "version": "1.0.0",
+          "content_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "interface_version": 1,
+        "supported_capabilities": [
+          "authoritative_scope_fencing"
+        ]
+      },
+      "report": {
+        "category": "authority",
+        "provider_reference": {
+          "identifier": "sample.authority",
+          "version": "1.0.0",
+          "content_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "instance_id": "local",
+        "health": "healthy",
+        "claims": []
+      },
+      "requirement": {
+        "category": "authority",
+        "provider_reference": {
+          "identifier": "sample.authority",
+          "version": "1.0.0",
+          "content_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "instance_id": "local",
+        "capability": "authoritative_scope_fencing"
+      },
+      "lookup_uri": "authority://local"
+    },
+    {
+      "name": "missing_provider",
+      "expected": "unknown_extension",
+      "reason": "A required exact provider has no registered factory.",
+      "registered": [],
+      "requirement": {
+        "category": "execution_store",
+        "provider_reference": {
+          "identifier": "sample.sqlite",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "instance_id": "primary",
+        "capability": "durable_single_writer"
+      }
+    },
+    {
+      "name": "composition_all_and_any",
+      "expected": "accept",
+      "reason": "Pure and deterministic require every participant; possible external I/O from any unknown participant requires explicit weak-profile opt-in.",
+      "participants": [
+        {
+          "descriptor": {
+            "category": "runtime_provider",
+            "provider_reference": {
+              "identifier": "example.native",
+              "version": "1.0.0",
+              "content_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "interface_version": 1,
+            "supported_capabilities": [
+              "pure",
+              "deterministic",
+              "external_io_capable"
+            ]
+          },
+          "report": {
+            "category": "runtime_provider",
+            "provider_reference": {
+              "identifier": "example.native",
+              "version": "1.0.0",
+              "content_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "instance_id": "guard",
+            "health": "healthy",
+            "claims": [
+              "pure",
+              "deterministic"
+            ]
+          }
+        },
+        {
+          "descriptor": {
+            "category": "runtime_provider",
+            "provider_reference": {
+              "identifier": "example.native",
+              "version": "1.0.0",
+              "content_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "interface_version": 1,
+            "supported_capabilities": [
+              "pure",
+              "deterministic",
+              "external_io_capable"
+            ]
+          },
+          "report": {
+            "category": "runtime_provider",
+            "provider_reference": {
+              "identifier": "example.native",
+              "version": "1.0.0",
+              "content_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "instance_id": "action",
+            "health": "healthy",
+            "claims": [
+              "deterministic",
+              "external_io_capable"
+            ]
+          }
+        }
+      ],
+      "effective": {
+        "pure": false,
+        "deterministic": true,
+        "external_io_capable": true,
+        "weak_profile_opt_in_required": true
+      }
+    },
+    {
+      "name": "healthy_report_omits_io_hazard",
+      "expected": "extension_capability_mismatch",
+      "reason": "A healthy runtime provider report without a verified pure or no-I/O proof cannot imply absence of external I/O; a strong replay profile must reject it.",
+      "participants": [
+        {
+          "descriptor": {
+            "category": "runtime_provider",
+            "provider_reference": {
+              "identifier": "example.native",
+              "version": "1.0.0",
+              "content_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "interface_version": 1,
+            "supported_capabilities": [
+              "pure",
+              "deterministic",
+              "external_io_capable"
+            ]
+          },
+          "report": {
+            "category": "runtime_provider",
+            "provider_reference": {
+              "identifier": "example.native",
+              "version": "1.0.0",
+              "content_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "instance_id": "action",
+            "health": "healthy",
+            "claims": []
+          }
+        }
+      ],
+      "requested_profile": "automatic_retry_without_external_io",
+      "effective": {
+        "external_io_capable": true,
+        "weak_profile_opt_in_required": true
+      }
+    },
+    {
+      "name": "fencing_does_not_imply_safe_relocation",
+      "expected": "extension_capability_mismatch",
+      "reason": "An authority instance may prove guarded local writes without proving the transfer topology; safe relocation is a separate claim.",
+      "descriptor": {
+        "category": "authority",
+        "provider_reference": {
+          "identifier": "sample.authority",
+          "version": "1.0.0",
+          "content_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "interface_version": 1,
+        "supported_capabilities": [
+          "authoritative_scope_fencing",
+          "safe_relocation"
+        ]
+      },
+      "report": {
+        "category": "authority",
+        "provider_reference": {
+          "identifier": "sample.authority",
+          "version": "1.0.0",
+          "content_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "instance_id": "local",
+        "health": "healthy",
+        "claims": [
+          "authoritative_scope_fencing"
+        ]
+      },
+      "requirement": {
+        "category": "authority",
+        "provider_reference": {
+          "identifier": "sample.authority",
+          "version": "1.0.0",
+          "content_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "instance_id": "local",
+        "capability": "safe_relocation"
+      }
+    }
+  ]
+}
