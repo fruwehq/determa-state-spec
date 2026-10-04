@@ -55,7 +55,13 @@
                 "type": "object",
                 "required": [
                   "result_format"
-                ]
+                ],
+                "properties": {
+                  "destination_scope_identity": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               }
             ]
           }

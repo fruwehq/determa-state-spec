@@ -20,3 +20,7 @@ ingress acknowledgement, promotion and clock timeout decisions. The replay case
 repeats the first takeover request and its entire result; the conflict case changes
 the namespace under the same operation ID. The partial batch shows one committed
 quarantine beside an unsupported relocation refusal, with no cross-scope rollback.
+
+The three early refusal vectors cover an unsupported interface, unsupported version,
+and malformed recognized request. Their closed results contain null operation and
+scope fields because parsing failed before a durable operation identity existed.

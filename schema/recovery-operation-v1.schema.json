@@ -1326,6 +1326,82 @@
           }
         }
       ]
+    },
+    {
+      "type": "object",
+      "required": [
+        "result_format",
+        "result_schema_version",
+        "operation",
+        "operation_id",
+        "request_digest",
+        "status",
+        "code",
+        "destination_scope_identity",
+        "state",
+        "record_digest",
+        "safe_relocation",
+        "no_duplicate_external_work",
+        "warning",
+        "source",
+        "authority_epoch",
+        "scope_generation"
+      ],
+      "properties": {
+        "result_format": {
+          "const": "determa.recovery_result"
+        },
+        "result_schema_version": {
+          "const": 1
+        },
+        "operation": {
+          "type": "null"
+        },
+        "operation_id": {
+          "type": "null"
+        },
+        "request_digest": {
+          "type": "null"
+        },
+        "status": {
+          "const": "refused"
+        },
+        "code": {
+          "enum": [
+            "unsupported_recovery_format",
+            "unsupported_recovery_version",
+            "invalid_recovery_request"
+          ]
+        },
+        "destination_scope_identity": {
+          "type": "null"
+        },
+        "state": {
+          "const": "unchanged"
+        },
+        "record_digest": {
+          "type": "null"
+        },
+        "safe_relocation": {
+          "const": false
+        },
+        "no_duplicate_external_work": {
+          "const": false
+        },
+        "warning": {
+          "type": "null"
+        },
+        "source": {
+          "type": "null"
+        },
+        "authority_epoch": {
+          "type": "null"
+        },
+        "scope_generation": {
+          "type": "null"
+        }
+      },
+      "additionalProperties": false
     }
   ]
 }

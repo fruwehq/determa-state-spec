@@ -2262,5 +2262,82 @@
         }
       }
     ]
-  }
+  },
+  "early_cases": [
+    {
+      "case_id": "unsupported_format",
+      "input": {
+        "operation_format": "unknown",
+        "operation_schema_version": 1
+      },
+      "expected_result": {
+        "result_format": "determa.recovery_result",
+        "result_schema_version": 1,
+        "operation": null,
+        "operation_id": null,
+        "request_digest": null,
+        "status": "refused",
+        "code": "unsupported_recovery_format",
+        "destination_scope_identity": null,
+        "state": "unchanged",
+        "record_digest": null,
+        "safe_relocation": false,
+        "no_duplicate_external_work": false,
+        "warning": null,
+        "source": null,
+        "authority_epoch": null,
+        "scope_generation": null
+      }
+    },
+    {
+      "case_id": "unsupported_version",
+      "input": {
+        "operation_format": "determa.recovery_operation",
+        "operation_schema_version": 2
+      },
+      "expected_result": {
+        "result_format": "determa.recovery_result",
+        "result_schema_version": 1,
+        "operation": null,
+        "operation_id": null,
+        "request_digest": null,
+        "status": "refused",
+        "code": "unsupported_recovery_version",
+        "destination_scope_identity": null,
+        "state": "unchanged",
+        "record_digest": null,
+        "safe_relocation": false,
+        "no_duplicate_external_work": false,
+        "warning": null,
+        "source": null,
+        "authority_epoch": null,
+        "scope_generation": null
+      }
+    },
+    {
+      "case_id": "malformed_request",
+      "input": {
+        "operation_format": "determa.recovery_operation",
+        "operation_schema_version": 1
+      },
+      "expected_result": {
+        "result_format": "determa.recovery_result",
+        "result_schema_version": 1,
+        "operation": null,
+        "operation_id": null,
+        "request_digest": null,
+        "status": "refused",
+        "code": "invalid_recovery_request",
+        "destination_scope_identity": null,
+        "state": "unchanged",
+        "record_digest": null,
+        "safe_relocation": false,
+        "no_duplicate_external_work": false,
+        "warning": null,
+        "source": null,
+        "authority_epoch": null,
+        "scope_generation": null
+      }
+    }
+  ]
 }
