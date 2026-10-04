@@ -928,7 +928,9 @@ Self-assertion is insufficient. Effective guarantees in the first five categorie
 hold only if *every* participating CEL/compiler/runtime provider and applicable host
 policy supplies them. Effective `external_io_capable` is true if *any* participating
 provider may perform external I/O; unknown/unverified I/O is treated as possible I/O.
-The base result and capability report disclose the effective profile. Missing
+An embedding API returns the effective profile alongside the closed §8 core result;
+the profile is not a member of that portable result or checkpoint. The §11.5 host
+capability report also discloses the configured provider claims. Missing
 guarantees are false for an explicitly opted-in embedded weak profile; a host profile
 requiring them rejects at load. A native provider may deliberately perform I/O during
 evaluation, before commit. Such I/O survives a rolled-back transaction, failed CAS,
@@ -1664,7 +1666,7 @@ For the aggregate root, the engine retains terminal identity/status, history, co
 and fault-history diagnostics and returns `completed`; it retains no component or
 spawned descendant. No new ordinary envelope may target it.
 
-## 8. Pure foreground interface and logical state
+## 8. Foreground interface and logical state
 
 Language APIs may use idiomatic names, but every implementation must provide behavior
 equivalent to:
@@ -1679,6 +1681,11 @@ admit(bundle, prior_state, ordered_deliveries)
 step(bundle, prior_state, target_runtime_id)
   -> { status, disposition, state, emissions, lifecycle_dispositions, fault, rejection }
 ```
+
+With CEL and pure structured actions this is a pure foreground state transform.
+An explicitly installed impure runtime provider (§5.4) weakens that invocation as
+declared by its effective capability report; the API shape and state ownership are
+unchanged.
 
 `admit` validates its complete ordered batch before mutation, then appends each envelope
 to its exact target runtime's ready tail in caller order. It allocates immutable

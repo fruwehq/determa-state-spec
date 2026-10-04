@@ -8,7 +8,7 @@ record rather than treating it as an alternative rule source.
 ## Runtime providers are exact executable dependencies
 
 Relevant specification: [§5.4](SPEC.md#54-exact-runtime-providers-and-optional-source-compilation),
-[§8](SPEC.md#8-pure-foreground-interface-and-logical-state), and
+[§8](SPEC.md#8-foreground-interface-and-logical-state), and
 [§16.2](SPEC.md#162-canonical-values-and-aggregate-encoding).
 
 **Decision.** CEL and structured actions remain the format-1 default. Exact runtime

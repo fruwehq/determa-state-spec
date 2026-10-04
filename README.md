@@ -74,9 +74,11 @@ guard, and transition action, but not to entry or exit actions.
 
 ## Host and plugin boundary
 
-The core is a pure foreground transform from prior logical state plus one envelope to
-new logical state plus ordered emissions. It has no built-in queue, clock, timer,
+The default core evaluation is a pure foreground transform from prior logical state
+plus one envelope to new logical state plus ordered emissions. It has no built-in queue, clock, timer,
 dead-letter store, broker, database, background worker, or external I/O.
+An explicitly installed native runtime provider may perform external I/O during an
+embedded evaluation under the weaker capability profile in §5.4.
 
 The public extension boundary uses exact provider references and configured-instance
 capability reports. Hosts may inject objects directly or register bundled and third-party
