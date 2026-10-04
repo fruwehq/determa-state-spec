@@ -151,6 +151,10 @@
       "sha256": "sha256:6e61ef848a89034f609bdd46340ae6ffaff9a29f7566face50768b575df8e437"
     },
     {
+      "path": "examples/public-host/README.md",
+      "sha256": "sha256:879631673d2a84af47f452e379bfde2200ec1c775248d1fb67352f9796934c5f"
+    },
+    {
       "path": "examples/effects/effect-result-request-v1.json",
       "sha256": "sha256:c6f16704fc6c8b19fe4a36a7e4bcd97a8e6e5ce26993a50bff0490c4da44573c"
     },
