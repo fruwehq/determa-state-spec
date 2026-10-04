@@ -27,5 +27,15 @@
   "source_profile_digest": "sha256:5fe87d8725e1b78ab7790c88ef109228e58e980871cad215aa4203bc618b32d2",
   "participant_contract_digest": "sha256:f3e008d3109ef93b57d004ae616027a669e56e600b90e31fee830bbe43599448",
   "standalone_source_profile_digest": "sha256:5d7fe23b366221700c0b4de856177c8b66509851b3ab484d154e56fa12852e1c",
-  "archive_digest": "sha256:b0a1f208b4d5dcec04d9693e39680c350f8d0f49edbc13096f0573654a8aa382"
+  "archive_digest": "sha256:b0a1f208b4d5dcec04d9693e39680c350f8d0f49edbc13096f0573654a8aa382",
+  "core_archive_digest": "sha256:187ac99e083360d40600a57010ab3482acc2608b3089a80b18fb8262542fbdca",
+  "journal_archive_digest": "sha256:cc8ea73bfac033e7c26ee6b77b96db5e8c947db0ffd99a09e4db785a198ac1b9",
+  "host_journal_payload_schema_digest": "sha256:a18a5c3875030fe7d7e41bf73108e43c3f01de5dc201bd46c74392a0b5f3d5ce",
+  "host_journal_provider_closure_digest": "sha256:f833f7543be1ed828662470aab938aa1468d727ddb8bf1a98f49ca95658ec1f0",
+  "host_journal_digests": {
+    "effect-1": "sha256:dbce3b93ed28249467babb2724e8258607237c0c422a57c4be815ce825cd6a2f",
+    "fault-1": "sha256:f4cc50fc1dd4ee7f31f53032b824aad666f7c5e7966cbfa8293d03357da5160b",
+    "job-42": "sha256:4028d0b2bb18355db993ae8c0698e8e35ffbb3dcd734631f6c3a6352d9e640d3",
+    "server-1": "sha256:d917f1f48f2a9eec8f337ae3c207014f568d00cbab048b743a05a75d9ed1797c"
+  }
 }

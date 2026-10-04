@@ -444,8 +444,9 @@ explicit participant with a pinned provider, schema, dependency closure, and com
 payload. The source provenance and full required/optional participant contract are
 compared to independent trusted host policy; a resealed omission or weaker profile
 cannot redefine completeness. Required missing data blocks staging; optional
-omissions are reported. An optional §19 host journal is required when its durable
-native-result profile actually participated in the selected source.
+omissions are reported. A source claiming §19 durable native results requires a
+closed host-journal participant paired with every selected checkpoint; a standalone
+source without helper participants remains a valid complete archive.
 
 **Rejected alternative.** Reconstruct state by replaying event journals or collect
 arbitrary database rows under an archive label.

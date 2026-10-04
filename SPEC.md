@@ -5611,7 +5611,14 @@ participant under a separately pinned schema and provider. The independent sourc
 policy binds that journal participant ID into the trusted required set; an artifact
 that deletes the journal or removes the ID from its own contract still fails. Export and import verify
 each journal digest and its exact checkpoint revision/digest pair at the same capture
-point. Missing or torn journal evidence blocks the operation. §19 active worker claims,
+point. The participant payload is a canonical typed value with a closed, pinned
+participant schema; decoding it MUST yield exactly one closed §19 journal for each
+selected root covered by that source profile, in root-ID order. Each decoded journal
+MUST validate against `schema/host-effect-journal-v1.schema.json`, including its
+root ID, source scope identity, complete records and references, and journal digest.
+An empty journal is valid only when the verified source inventory proves that root
+has no §19 native-effect records or response references at the capture point.
+Missing, duplicate, or torn journal evidence blocks the operation. §19 active worker claims,
 credentials, and authority records remain outside the archive; their historical
 outcomes and result-admission evidence remain in the journal payload. A source that
 has only §17 outbox intents and does not claim §19 needs no journal participant.
