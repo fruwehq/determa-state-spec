@@ -44,8 +44,8 @@ formats are separate; loaders never guess either from document shape. See
 ## Release 0.3.0
 
 This alpha release adds portable event deferral and resumable runtime mailboxes,
-version-2 maintenance migration receipts, and exact operation-receipt emission index
-rules. Portable persistence artifacts use schema version 2 exclusively; earlier draft
+version-1 maintenance migration receipts, and exact operation-receipt emission index
+rules. Portable persistence artifacts use schema version 1 exclusively; earlier draft
 artifact representations are no longer supported. Machine documents still use
 `format: 1`, independently of the release and artifact schema versions.
 
@@ -95,15 +95,15 @@ This repository holds only the specification:
 
 - [`SPEC.md`](SPEC.md) — normative semantics;
 - [`schema/machine.schema.json`](schema/machine.schema.json) — structural JSON Schema;
-- [`schema/aggregate-state-v2.schema.json`](schema/aggregate-state-v2.schema.json) —
+- [`schema/aggregate-state-v1.schema.json`](schema/aggregate-state-v1.schema.json) —
   portable queue-bearing aggregate-state envelope;
-- [`schema/migration-descriptor-v2.schema.json`](schema/migration-descriptor-v2.schema.json)
+- [`schema/migration-descriptor-v1.schema.json`](schema/migration-descriptor-v1.schema.json)
   — declarative definition migration;
-- [`schema/aggregate-state-package-v2.schema.json`](schema/aggregate-state-package-v2.schema.json)
+- [`schema/aggregate-state-package-v1.schema.json`](schema/aggregate-state-package-v1.schema.json)
   — self-contained transfer package;
-- [`schema/execution-checkpoint-v2.schema.json`](schema/execution-checkpoint-v2.schema.json)
+- [`schema/execution-checkpoint-v1.schema.json`](schema/execution-checkpoint-v1.schema.json)
   — portable durable-host checkpoint;
-- [`schema/core-step-result-v2.schema.json`](schema/core-step-result-v2.schema.json) —
+- [`schema/core-step-result-v1.schema.json`](schema/core-step-result-v1.schema.json) —
   closed core step result schema;
 - [`examples/`](examples/) — schema-valid machine documents and normative vectors; and
 - [`VERSION`](VERSION) — synchronized specification/package SemVer.
