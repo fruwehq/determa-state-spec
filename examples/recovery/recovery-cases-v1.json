@@ -672,6 +672,282 @@
       "expected_record": null
     },
     {
+      "case_id": "quarantine_process_event_denied",
+      "prior_record": "strict_quarantine",
+      "request": {
+        "operation_format": "determa.recovery_operation",
+        "operation_schema_version": 1,
+        "operation": "guarded_action",
+        "operation_id": "quarantine_process_event_denied",
+        "destination_scope_identity": "scope-quarantine-1",
+        "expected_destination_generation": null,
+        "arguments": {
+          "action": "process_event",
+          "work_kind": null,
+          "work_identity": null,
+          "worker_scope_identity": null,
+          "worker_authority_epoch": null,
+          "attempt_fence": null
+        },
+        "request_digest": "sha256:ac6e5bb4a71ea847bd758e7d41f998367db12ee693196c34b32d5a219957b7da"
+      },
+      "expected_result": {
+        "result_format": "determa.recovery_result",
+        "result_schema_version": 1,
+        "operation": "guarded_action",
+        "operation_id": "quarantine_process_event_denied",
+        "request_digest": "sha256:ac6e5bb4a71ea847bd758e7d41f998367db12ee693196c34b32d5a219957b7da",
+        "status": "refused",
+        "code": "scope_not_active",
+        "destination_scope_identity": "scope-quarantine-1",
+        "state": "unchanged",
+        "record_digest": null,
+        "safe_relocation": false,
+        "no_duplicate_external_work": false,
+        "warning": null,
+        "source": {
+          "logical_scope_identity": "scope-archive-example",
+          "ownership_binding_digest": "sha256:300dbfa84132cddc3451fd5ef8fb5f64ce0b5853991df41461f9bad9b73e56a1",
+          "profile_digest": "sha256:987683a545a3a619cf90c8e5d12035ecadeb96b237f3cad07046636fd7378839",
+          "participant_contract_digest": "sha256:aaaa646b4554c25e3c8c5ef95ef86a71bafa0fd97fe183ef6057fbe89011df65",
+          "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac"
+        },
+        "authority_epoch": null,
+        "scope_generation": null
+      },
+      "expected_record": null
+    },
+    {
+      "case_id": "quarantine_dispatch_effect_denied",
+      "prior_record": "strict_quarantine",
+      "request": {
+        "operation_format": "determa.recovery_operation",
+        "operation_schema_version": 1,
+        "operation": "guarded_action",
+        "operation_id": "quarantine_dispatch_effect_denied",
+        "destination_scope_identity": "scope-quarantine-1",
+        "expected_destination_generation": null,
+        "arguments": {
+          "action": "dispatch_effect",
+          "work_kind": "effect",
+          "work_identity": "sha256:fe78520c0ca9460e6292f33c30c022e5ec0f62e74a2143f9121241b777b89209",
+          "worker_scope_identity": null,
+          "worker_authority_epoch": null,
+          "attempt_fence": null
+        },
+        "request_digest": "sha256:0f5a06b3e2e765237e43bcc36ce3f227aec8b70a4b20b19f45696674a2f2c6a5"
+      },
+      "expected_result": {
+        "result_format": "determa.recovery_result",
+        "result_schema_version": 1,
+        "operation": "guarded_action",
+        "operation_id": "quarantine_dispatch_effect_denied",
+        "request_digest": "sha256:0f5a06b3e2e765237e43bcc36ce3f227aec8b70a4b20b19f45696674a2f2c6a5",
+        "status": "refused",
+        "code": "scope_not_active",
+        "destination_scope_identity": "scope-quarantine-1",
+        "state": "unchanged",
+        "record_digest": null,
+        "safe_relocation": false,
+        "no_duplicate_external_work": false,
+        "warning": null,
+        "source": {
+          "logical_scope_identity": "scope-archive-example",
+          "ownership_binding_digest": "sha256:300dbfa84132cddc3451fd5ef8fb5f64ce0b5853991df41461f9bad9b73e56a1",
+          "profile_digest": "sha256:987683a545a3a619cf90c8e5d12035ecadeb96b237f3cad07046636fd7378839",
+          "participant_contract_digest": "sha256:aaaa646b4554c25e3c8c5ef95ef86a71bafa0fd97fe183ef6057fbe89011df65",
+          "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac"
+        },
+        "authority_epoch": null,
+        "scope_generation": null
+      },
+      "expected_record": null
+    },
+    {
+      "case_id": "quarantine_ack_ingress_denied",
+      "prior_record": "strict_quarantine",
+      "request": {
+        "operation_format": "determa.recovery_operation",
+        "operation_schema_version": 1,
+        "operation": "guarded_action",
+        "operation_id": "quarantine_ack_ingress_denied",
+        "destination_scope_identity": "scope-quarantine-1",
+        "expected_destination_generation": null,
+        "arguments": {
+          "action": "ack_ingress",
+          "work_kind": null,
+          "work_identity": null,
+          "worker_scope_identity": null,
+          "worker_authority_epoch": null,
+          "attempt_fence": null
+        },
+        "request_digest": "sha256:08fb3d4769ffc533c215faa9a84654ad0d2b44f28c8ae529759f6719ca74a0db"
+      },
+      "expected_result": {
+        "result_format": "determa.recovery_result",
+        "result_schema_version": 1,
+        "operation": "guarded_action",
+        "operation_id": "quarantine_ack_ingress_denied",
+        "request_digest": "sha256:08fb3d4769ffc533c215faa9a84654ad0d2b44f28c8ae529759f6719ca74a0db",
+        "status": "refused",
+        "code": "scope_not_active",
+        "destination_scope_identity": "scope-quarantine-1",
+        "state": "unchanged",
+        "record_digest": null,
+        "safe_relocation": false,
+        "no_duplicate_external_work": false,
+        "warning": null,
+        "source": {
+          "logical_scope_identity": "scope-archive-example",
+          "ownership_binding_digest": "sha256:300dbfa84132cddc3451fd5ef8fb5f64ce0b5853991df41461f9bad9b73e56a1",
+          "profile_digest": "sha256:987683a545a3a619cf90c8e5d12035ecadeb96b237f3cad07046636fd7378839",
+          "participant_contract_digest": "sha256:aaaa646b4554c25e3c8c5ef95ef86a71bafa0fd97fe183ef6057fbe89011df65",
+          "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac"
+        },
+        "authority_epoch": null,
+        "scope_generation": null
+      },
+      "expected_record": null
+    },
+    {
+      "case_id": "quarantine_promote_denied",
+      "prior_record": "strict_quarantine",
+      "request": {
+        "operation_format": "determa.recovery_operation",
+        "operation_schema_version": 1,
+        "operation": "guarded_action",
+        "operation_id": "quarantine_promote_denied",
+        "destination_scope_identity": "scope-quarantine-1",
+        "expected_destination_generation": null,
+        "arguments": {
+          "action": "promote",
+          "work_kind": null,
+          "work_identity": null,
+          "worker_scope_identity": null,
+          "worker_authority_epoch": null,
+          "attempt_fence": null
+        },
+        "request_digest": "sha256:face467f9e04774e5bfe5f4b0c466a34b0c00c4b6f9a2d635784feb145638636"
+      },
+      "expected_result": {
+        "result_format": "determa.recovery_result",
+        "result_schema_version": 1,
+        "operation": "guarded_action",
+        "operation_id": "quarantine_promote_denied",
+        "request_digest": "sha256:face467f9e04774e5bfe5f4b0c466a34b0c00c4b6f9a2d635784feb145638636",
+        "status": "refused",
+        "code": "scope_not_active",
+        "destination_scope_identity": "scope-quarantine-1",
+        "state": "unchanged",
+        "record_digest": null,
+        "safe_relocation": false,
+        "no_duplicate_external_work": false,
+        "warning": null,
+        "source": {
+          "logical_scope_identity": "scope-archive-example",
+          "ownership_binding_digest": "sha256:300dbfa84132cddc3451fd5ef8fb5f64ce0b5853991df41461f9bad9b73e56a1",
+          "profile_digest": "sha256:987683a545a3a619cf90c8e5d12035ecadeb96b237f3cad07046636fd7378839",
+          "participant_contract_digest": "sha256:aaaa646b4554c25e3c8c5ef95ef86a71bafa0fd97fe183ef6057fbe89011df65",
+          "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac"
+        },
+        "authority_epoch": null,
+        "scope_generation": null
+      },
+      "expected_record": null
+    },
+    {
+      "case_id": "quarantine_clock_timeout_denied",
+      "prior_record": "strict_quarantine",
+      "request": {
+        "operation_format": "determa.recovery_operation",
+        "operation_schema_version": 1,
+        "operation": "guarded_action",
+        "operation_id": "quarantine_clock_timeout_denied",
+        "destination_scope_identity": "scope-quarantine-1",
+        "expected_destination_generation": null,
+        "arguments": {
+          "action": "clock_timeout",
+          "work_kind": null,
+          "work_identity": null,
+          "worker_scope_identity": null,
+          "worker_authority_epoch": null,
+          "attempt_fence": null
+        },
+        "request_digest": "sha256:0ecda5f2cdea125937af6b2ecc8b31cf17d370407557adbfed04cd956ecb1d9f"
+      },
+      "expected_result": {
+        "result_format": "determa.recovery_result",
+        "result_schema_version": 1,
+        "operation": "guarded_action",
+        "operation_id": "quarantine_clock_timeout_denied",
+        "request_digest": "sha256:0ecda5f2cdea125937af6b2ecc8b31cf17d370407557adbfed04cd956ecb1d9f",
+        "status": "refused",
+        "code": "scope_not_active",
+        "destination_scope_identity": "scope-quarantine-1",
+        "state": "unchanged",
+        "record_digest": null,
+        "safe_relocation": false,
+        "no_duplicate_external_work": false,
+        "warning": null,
+        "source": {
+          "logical_scope_identity": "scope-archive-example",
+          "ownership_binding_digest": "sha256:300dbfa84132cddc3451fd5ef8fb5f64ce0b5853991df41461f9bad9b73e56a1",
+          "profile_digest": "sha256:987683a545a3a619cf90c8e5d12035ecadeb96b237f3cad07046636fd7378839",
+          "participant_contract_digest": "sha256:aaaa646b4554c25e3c8c5ef95ef86a71bafa0fd97fe183ef6057fbe89011df65",
+          "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac"
+        },
+        "authority_epoch": null,
+        "scope_generation": null
+      },
+      "expected_record": null
+    },
+    {
+      "case_id": "quarantine_cancel_helper_denied",
+      "prior_record": "strict_quarantine",
+      "request": {
+        "operation_format": "determa.recovery_operation",
+        "operation_schema_version": 1,
+        "operation": "guarded_action",
+        "operation_id": "quarantine_cancel_helper_denied",
+        "destination_scope_identity": "scope-quarantine-1",
+        "expected_destination_generation": null,
+        "arguments": {
+          "action": "cancel_helper",
+          "work_kind": "helper",
+          "work_identity": "helper-state",
+          "worker_scope_identity": null,
+          "worker_authority_epoch": null,
+          "attempt_fence": null
+        },
+        "request_digest": "sha256:feab68e8d52ff2e464f5780a94cd3309a1f37ec63ba37592e85701a7c17e6cb4"
+      },
+      "expected_result": {
+        "result_format": "determa.recovery_result",
+        "result_schema_version": 1,
+        "operation": "guarded_action",
+        "operation_id": "quarantine_cancel_helper_denied",
+        "request_digest": "sha256:feab68e8d52ff2e464f5780a94cd3309a1f37ec63ba37592e85701a7c17e6cb4",
+        "status": "refused",
+        "code": "scope_not_active",
+        "destination_scope_identity": "scope-quarantine-1",
+        "state": "unchanged",
+        "record_digest": null,
+        "safe_relocation": false,
+        "no_duplicate_external_work": false,
+        "warning": null,
+        "source": {
+          "logical_scope_identity": "scope-archive-example",
+          "ownership_binding_digest": "sha256:300dbfa84132cddc3451fd5ef8fb5f64ce0b5853991df41461f9bad9b73e56a1",
+          "profile_digest": "sha256:987683a545a3a619cf90c8e5d12035ecadeb96b237f3cad07046636fd7378839",
+          "participant_contract_digest": "sha256:aaaa646b4554c25e3c8c5ef95ef86a71bafa0fd97fe183ef6057fbe89011df65",
+          "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac"
+        },
+        "authority_epoch": null,
+        "scope_generation": null
+      },
+      "expected_record": null
+    },
+    {
       "case_id": "standalone_takeover",
       "prior_record": null,
       "request": {

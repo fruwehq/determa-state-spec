@@ -14,3 +14,9 @@ cases without rewriting source archive bytes. Equal retries replay the complete
 first result and record. The unsupported transfer cases use the stock profile with
 `safe_relocation: false`. The guard probes are read-only denials; their corresponding
 native actions must enforce the same result at commit time.
+
+The quarantine probes cover admission, processing, dispatch, helper fire/cancel,
+ingress acknowledgement, promotion and clock timeout decisions. The replay case
+repeats the first takeover request and its entire result; the conflict case changes
+the namespace under the same operation ID. The partial batch shows one committed
+quarantine beside an unsupported relocation refusal, with no cross-scope rollback.

@@ -5166,7 +5166,8 @@ preserve the first result. The examples fix the relevant precedence and full res
 
 The version-1 `guarded_action` probe gives a complete, read-only admission decision
 for `admit_event`, `process_event`, `dispatch_effect`, `submit_effect_result`,
-`fire_helper`, `ack_ingress`, `evaluate_impure_provider`, or `promote`. It does not
+`fire_helper`, `cancel_helper`, `clock_timeout`, `ack_ingress`,
+`evaluate_impure_provider`, or `promote`. It does not
 perform the action. The action itself must repeat the same guard at its native commit
 boundary; a successful probe is no transferable permit. This lets conformance assert
 quarantine and old-worker denials without invoking an external provider. Inactive

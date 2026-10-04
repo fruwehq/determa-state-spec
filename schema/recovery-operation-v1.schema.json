@@ -919,7 +919,9 @@
                 "fire_helper",
                 "ack_ingress",
                 "evaluate_impure_provider",
-                "promote"
+                "promote",
+                "clock_timeout",
+                "cancel_helper"
               ]
             },
             "work_kind": {
