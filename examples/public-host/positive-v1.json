@@ -549,6 +549,690 @@
         },
         "error": null
       }
+    },
+    {
+      "name": "cancel_before_claim_binding",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "cancel-1",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "cancel_effect",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": {
+          "revision": "0",
+          "checkpoint_digest": "sha256:975901b9ae81ae5eb78b0379adf596c8828911c5b793e5fbbfdf2acf504bfde4"
+        },
+        "arguments": {
+          "request": {
+            "operation_id": "cancel-1",
+            "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "reason": "operator_request",
+            "payload": [
+              "map",
+              [
+                [
+                  "operation_token",
+                  [
+                    "string",
+                    "business-order-42"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "expected_journal_revision": "0"
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"expected_journal_revision\":\"0\",\"request\":{\"effect_id\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"operation_id\":\"cancel-1\",\"payload\":[\"map\",[[\"operation_token\",[\"string\",\"business-order-42\"]]]],\"reason\":\"operator_request\"}},\"operation\":\"cancel_effect\",\"operation_id\":\"cancel-1\",\"precondition\":{\"checkpoint_digest\":\"sha256:975901b9ae81ae5eb78b0379adf596c8828911c5b793e5fbbfdf2acf504bfde4\",\"revision\":\"0\"},\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:36ee7a49fae48f465b421cf040e6cfdf740f882fc64d49104d522f46aac19955",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "cancel-1",
+        "status": "committed",
+        "receipt": {
+          "scope_binding_identity": "binding-local-1",
+          "operation_id": "cancel-1",
+          "request_digest": "sha256:36ee7a49fae48f465b421cf040e6cfdf740f882fc64d49104d522f46aac19955",
+          "receipt_kind": "committed",
+          "evidence_digest": "sha256:c4b997b8e6e0278b256a6f44a4d3a162c44e3b8182a435eb1f686739a6b6bda0"
+        },
+        "value": {
+          "operation": "cancel_effect",
+          "result": {
+            "result": {
+              "status": "committed",
+              "operation_id": "cancel-1",
+              "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "cancellation": {
+                "operation_id": "cancel-1",
+                "reason": "operator_request",
+                "state": "prevented_start"
+              },
+              "outcome": {
+                "kind": "cancelled",
+                "payload": [
+                  "map",
+                  [
+                    [
+                      "operation_token",
+                      [
+                        "string",
+                        "business-order-42"
+                      ]
+                    ]
+                  ]
+                ],
+                "digest": "sha256:3832f47b1b947875d7282d6f9c31eeae5d0e0cc3ab8b7b66486a8c8687498d5a",
+                "attempt_fence": "0"
+              },
+              "result_event_id": "sha256:af0a0114313325e78343a1aaa4c617affe3a7335d8fa648ea2d5b5b5c411964c",
+              "journal_revision": "1",
+              "error_code": null
+            }
+          }
+        },
+        "error": null
+      }
+    },
+    {
+      "name": "configured_scope_capabilities",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-capabilities-1",
+        "scope_binding_identity": "binding-scope-42",
+        "operation": "capabilities",
+        "target": {
+          "root_instance_id": null,
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {}
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{},\"operation\":\"capabilities\",\"operation_id\":\"op-capabilities-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-scope-42\",\"target\":{\"root_instance_id\":null,\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:3c06b47f03d16c3c1dfdc732fa9d4bab2358f1f8743074295dd2377ce0bc5247",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-capabilities-1",
+        "status": "committed",
+        "receipt": null,
+        "value": {
+          "operation": "capabilities",
+          "result": {
+            "supported_operations": [
+              "capabilities",
+              "create",
+              "admit",
+              "process",
+              "read",
+              "inspect",
+              "receipt",
+              "scope_operation"
+            ],
+            "profile_digest": "sha256:8a2d2a522b3aefe75d87738e80777b238fca4a759bc68a2fb5ac229ccef3a2de",
+            "extension_reports": [
+              {
+                "category": "authority",
+                "provider_reference": {
+                  "identifier": "reference.sqlite-authority",
+                  "version": "0.3.0",
+                  "content_digest": "sha256:5c4c1964340aca5b65393bbe9d3249cdd71be26665b3320ad694f034f2743283"
+                },
+                "instance_id": "local-authority",
+                "health": "healthy",
+                "claims": [
+                  "authoritative_scope_fencing",
+                  "consistent_scope_inventory"
+                ]
+              }
+            ],
+            "authority_profile": {
+              "profile_report_format": "determa.host_authority_profile_report",
+              "profile_report_schema_version": 1,
+              "scope_identity": "scope-42",
+              "authority_epoch": "2",
+              "scope_generation": "4",
+              "extension_report": {
+                "category": "authority",
+                "provider_reference": {
+                  "identifier": "reference.sqlite-authority",
+                  "version": "0.3.0",
+                  "content_digest": "sha256:5c4c1964340aca5b65393bbe9d3249cdd71be26665b3320ad694f034f2743283"
+                },
+                "instance_id": "local-authority",
+                "health": "healthy",
+                "claims": [
+                  "authoritative_scope_fencing",
+                  "consistent_scope_inventory"
+                ]
+              },
+              "authority_storage_boundary": "authority-db-1",
+              "topology": {
+                "identifier": "single-sqlite-database",
+                "configuration_digest": "sha256:881eeb99b1bd7671d1922ea9f433b1972a017adced05b209225fc29a16901ecc",
+                "process_boundary": "one configured authority database",
+                "host_boundary": "one local host"
+              },
+              "source_binding_digest": "sha256:b557d393e87ce7d6160a323bba5978ea2347f264308eef8b03c12d38bac2d2cd",
+              "destination_binding_digest": null,
+              "required_participants": [],
+              "guarantees": {
+                "guarded_local_writes": true,
+                "worker_fencing": false,
+                "complete_scope_inventory": true,
+                "safe_relocation": false
+              }
+            },
+            "guarantees": {
+              "inspection_structural": true,
+              "inspection_semantic": false,
+              "retained_history": true,
+              "saved_response_replay": true,
+              "deterministic_reexecution": true
+            }
+          }
+        },
+        "error": null
+      }
+    },
+    {
+      "name": "authority_scope_read",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "read-1",
+        "scope_binding_identity": "binding-scope-42",
+        "operation": "scope_operation",
+        "target": {
+          "root_instance_id": null,
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "action": "authority",
+          "authority_request": {
+            "interface": "determa.host_authority",
+            "interface_version": 1,
+            "operation": "read_authority",
+            "operation_id": "read-1",
+            "scope_identity": "scope-42",
+            "expected_authority_epoch": null,
+            "expected_scope_generation": null,
+            "arguments": {},
+            "request_digest": "sha256:02c2e86cd168c98e35d13eada78d0fba2b85de128755da1144b7479d90b328d9"
+          }
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"action\":\"authority\",\"authority_request\":{\"arguments\":{},\"expected_authority_epoch\":null,\"expected_scope_generation\":null,\"interface\":\"determa.host_authority\",\"interface_version\":1,\"operation\":\"read_authority\",\"operation_id\":\"read-1\",\"request_digest\":\"sha256:02c2e86cd168c98e35d13eada78d0fba2b85de128755da1144b7479d90b328d9\",\"scope_identity\":\"scope-42\"}},\"operation\":\"scope_operation\",\"operation_id\":\"read-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-scope-42\",\"target\":{\"root_instance_id\":null,\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:2db27875d58dff7f6301dfc54d45860a8182f54bb7c151dc3b06988a4251b94c",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "read-1",
+        "status": "committed",
+        "receipt": null,
+        "value": {
+          "operation": "scope_operation",
+          "result": {
+            "action": "authority",
+            "authority_result": {
+              "interface": "determa.host_authority",
+              "interface_version": 1,
+              "operation": "read_authority",
+              "operation_id": "read-1",
+              "status": "accepted",
+              "scope_identity": "scope-42",
+              "authority_epoch": "2",
+              "scope_generation": "4",
+              "state": "active",
+              "evidence_digest": "sha256:546adb5bb972a8ca689ce4cb9a7f72ba5b1dbcb53ea7258a103d2c93cdf41b7d",
+              "error_code": null,
+              "claim": null
+            }
+          }
+        },
+        "error": null
+      }
+    },
+    {
+      "name": "process_empty_mailbox",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-process-empty-1",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "process",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
+          "runtime_incarnation": {
+            "kind": "root",
+            "definition": {
+              "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+              "machine": {
+                "namespace": "example.persistence",
+                "machine_id": "job",
+                "machine_version": "1",
+                "root_definition_pointer": "/machines/0/root"
+              }
+            },
+            "root_instance_id": "job-42"
+          }
+        },
+        "precondition": {
+          "revision": "0",
+          "checkpoint_digest": "sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f"
+        },
+        "arguments": {}
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{},\"operation\":\"process\",\"operation_id\":\"op-process-empty-1\",\"precondition\":{\"checkpoint_digest\":\"sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f\",\"revision\":\"0\"},\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":\"sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60\",\"runtime_incarnation\":{\"definition\":{\"machine\":{\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_definition_pointer\":\"/machines/0/root\"},\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"kind\":\"root\",\"root_instance_id\":\"job-42\"}}}]",
+      "request_digest": "sha256:3506685504afd7de39e3ecc2c7d419087084b8eb83956dc0cc08747033b99ab8",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-process-empty-1",
+        "status": "committed",
+        "receipt": null,
+        "value": {
+          "operation": "process",
+          "result": {
+            "checkpoint": {
+              "execution_checkpoint_format": "determa.execution_checkpoint",
+              "execution_checkpoint_schema_version": 1,
+              "root_instance_id": "job-42",
+              "revision": "0",
+              "root_record": {
+                "status": "retained",
+                "aggregate_state": {
+                  "aggregate_state_format": "determa.aggregate_state",
+                  "aggregate_state_schema_version": 1,
+                  "machine_format": 1,
+                  "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+                  "namespace": "example.persistence",
+                  "root_machine_id": "job",
+                  "root_machine_version": "1",
+                  "root_instance_id": "job-42",
+                  "creation_id": "create-1",
+                  "root_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
+                  "migration_sequence": "0",
+                  "next_logical_step_sequence": "1",
+                  "next_output_sequence": "0",
+                  "next_acceptance_sequence": "0",
+                  "next_queue_sequence": "0",
+                  "runtimes": [
+                    {
+                      "runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
+                      "identity_origin": {
+                        "kind": "root",
+                        "definition": {
+                          "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+                          "machine": {
+                            "namespace": "example.persistence",
+                            "machine_id": "job",
+                            "machine_version": "1",
+                            "root_definition_pointer": "/machines/0/root"
+                          }
+                        },
+                        "root_instance_id": "job-42"
+                      },
+                      "target_identity": {
+                        "root": {
+                          "root_instance_id": "job-42",
+                          "root_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60"
+                        }
+                      },
+                      "current_definition": {
+                        "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+                        "machine": {
+                          "namespace": "example.persistence",
+                          "machine_id": "job",
+                          "machine_version": "1",
+                          "root_definition_pointer": "/machines/0/root"
+                        }
+                      },
+                      "relation": {
+                        "kind": "root"
+                      },
+                      "status": "running",
+                      "active_leaf_state_definition_pointers": [
+                        "/machines/0/root"
+                      ],
+                      "active_state_activations": [
+                        {
+                          "state_definition_pointer": "/machines/0/root",
+                          "activation_sequence": "0"
+                        }
+                      ],
+                      "variables": [],
+                      "history": [],
+                      "next_spawn_sequence": "0",
+                      "next_state_activation_sequences": [
+                        {
+                          "definition_pointer": "/machines/0/root",
+                          "next_sequence": "1"
+                        }
+                      ],
+                      "next_component_activation_sequences": [],
+                      "ready_mailbox": [],
+                      "deferred_mailbox": [],
+                      "fault": null
+                    }
+                  ],
+                  "aggregate_state_digest": "sha256:c401a9a5534d2dc17520ac6c9d672e611c2baaf35f120a0ec00d4f608291a81e"
+                }
+              },
+              "replay_retention": {
+                "mode": "permanent",
+                "permanent_replay_eligible": true,
+                "pruned_through_receipt_sequence": null,
+                "policy_identifier": null
+              },
+              "next_operation_receipt_sequence": "1",
+              "operation_receipts": [
+                {
+                  "operation_kind": "creation",
+                  "receipt_sequence": "0",
+                  "creation_id": "create-1",
+                  "request_digest": "sha256:d45fc61bc0c9db90b3f7bca2f0c3e01ef3444c2f7ec54ef241ad7557d0dbf2a9",
+                  "committed_revision": "0",
+                  "resulting_aggregate_state_digest": "sha256:c401a9a5534d2dc17520ac6c9d672e611c2baaf35f120a0ec00d4f608291a81e",
+                  "status": "running",
+                  "fault": null,
+                  "emission_references": []
+                }
+              ],
+              "event_identity_tombstones": [],
+              "pending_outbox_intents": [],
+              "next_outbox_terminal_sequence": "0",
+              "terminal_outbox_records": [],
+              "outbox_effect_tombstones": [],
+              "migration_audit_records": [],
+              "execution_checkpoint_digest": "sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f"
+            },
+            "core_result": {
+              "core_step_result_format": "determa.core_step_result",
+              "core_step_result_schema_version": 1,
+              "status": "running",
+              "disposition": "not_runnable",
+              "state": {
+                "aggregate_state_format": "determa.aggregate_state",
+                "aggregate_state_schema_version": 1,
+                "machine_format": 1,
+                "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+                "namespace": "example.persistence",
+                "root_machine_id": "job",
+                "root_machine_version": "1",
+                "root_instance_id": "job-42",
+                "creation_id": "create-1",
+                "root_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
+                "migration_sequence": "0",
+                "next_logical_step_sequence": "1",
+                "next_output_sequence": "0",
+                "next_acceptance_sequence": "0",
+                "next_queue_sequence": "0",
+                "runtimes": [
+                  {
+                    "runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
+                    "identity_origin": {
+                      "kind": "root",
+                      "definition": {
+                        "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+                        "machine": {
+                          "namespace": "example.persistence",
+                          "machine_id": "job",
+                          "machine_version": "1",
+                          "root_definition_pointer": "/machines/0/root"
+                        }
+                      },
+                      "root_instance_id": "job-42"
+                    },
+                    "target_identity": {
+                      "root": {
+                        "root_instance_id": "job-42",
+                        "root_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60"
+                      }
+                    },
+                    "current_definition": {
+                      "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+                      "machine": {
+                        "namespace": "example.persistence",
+                        "machine_id": "job",
+                        "machine_version": "1",
+                        "root_definition_pointer": "/machines/0/root"
+                      }
+                    },
+                    "relation": {
+                      "kind": "root"
+                    },
+                    "status": "running",
+                    "active_leaf_state_definition_pointers": [
+                      "/machines/0/root"
+                    ],
+                    "active_state_activations": [
+                      {
+                        "state_definition_pointer": "/machines/0/root",
+                        "activation_sequence": "0"
+                      }
+                    ],
+                    "variables": [],
+                    "history": [],
+                    "next_spawn_sequence": "0",
+                    "next_state_activation_sequences": [
+                      {
+                        "definition_pointer": "/machines/0/root",
+                        "next_sequence": "1"
+                      }
+                    ],
+                    "next_component_activation_sequences": [],
+                    "ready_mailbox": [],
+                    "deferred_mailbox": [],
+                    "fault": null
+                  }
+                ],
+                "aggregate_state_digest": "sha256:c401a9a5534d2dc17520ac6c9d672e611c2baaf35f120a0ec00d4f608291a81e"
+              },
+              "emissions": [],
+              "lifecycle_dispositions": [],
+              "fault": null,
+              "rejection": null
+            },
+            "terminal_receipt": null
+          }
+        },
+        "error": null
+      }
+    },
+    {
+      "name": "retained_operation_receipt",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-receipt-1",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "receipt",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "request_digest": "sha256:ee59aecee759f5bd67d9d2191a71e4d476a4a5f3cc62f6bace3fc7157a22d71d",
+          "queried_operation_id": "op-create-1"
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"queried_operation_id\":\"op-create-1\",\"request_digest\":\"sha256:ee59aecee759f5bd67d9d2191a71e4d476a4a5f3cc62f6bace3fc7157a22d71d\"},\"operation\":\"receipt\",\"operation_id\":\"op-receipt-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:828c35ee4ccfd9b362050c324397b2528d9cdfcd3b37699e16dab641257783a4",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-receipt-1",
+        "status": "committed",
+        "receipt": null,
+        "value": {
+          "operation": "receipt",
+          "result": {
+            "saved_response": {
+              "protocol": "determa.execution_host",
+              "protocol_version": 1,
+              "operation_id": "op-create-1",
+              "status": "committed",
+              "receipt": {
+                "scope_binding_identity": "binding-local-1",
+                "operation_id": "op-create-1",
+                "request_digest": "sha256:ee59aecee759f5bd67d9d2191a71e4d476a4a5f3cc62f6bace3fc7157a22d71d",
+                "receipt_kind": "committed",
+                "evidence_digest": "sha256:43c548692bba1b63ad450099e5990a5c649e1def6441c6512b99f2ba4c61d6b5"
+              },
+              "value": {
+                "operation": "create",
+                "result": {
+                  "checkpoint": {
+                    "execution_checkpoint_format": "determa.execution_checkpoint",
+                    "execution_checkpoint_schema_version": 1,
+                    "root_instance_id": "job-42",
+                    "revision": "0",
+                    "root_record": {
+                      "status": "retained",
+                      "aggregate_state": {
+                        "aggregate_state_format": "determa.aggregate_state",
+                        "aggregate_state_schema_version": 1,
+                        "machine_format": 1,
+                        "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+                        "namespace": "example.persistence",
+                        "root_machine_id": "job",
+                        "root_machine_version": "1",
+                        "root_instance_id": "job-42",
+                        "creation_id": "create-1",
+                        "root_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
+                        "migration_sequence": "0",
+                        "next_logical_step_sequence": "1",
+                        "next_output_sequence": "0",
+                        "next_acceptance_sequence": "0",
+                        "next_queue_sequence": "0",
+                        "runtimes": [
+                          {
+                            "runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
+                            "identity_origin": {
+                              "kind": "root",
+                              "definition": {
+                                "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+                                "machine": {
+                                  "namespace": "example.persistence",
+                                  "machine_id": "job",
+                                  "machine_version": "1",
+                                  "root_definition_pointer": "/machines/0/root"
+                                }
+                              },
+                              "root_instance_id": "job-42"
+                            },
+                            "target_identity": {
+                              "root": {
+                                "root_instance_id": "job-42",
+                                "root_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60"
+                              }
+                            },
+                            "current_definition": {
+                              "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+                              "machine": {
+                                "namespace": "example.persistence",
+                                "machine_id": "job",
+                                "machine_version": "1",
+                                "root_definition_pointer": "/machines/0/root"
+                              }
+                            },
+                            "relation": {
+                              "kind": "root"
+                            },
+                            "status": "running",
+                            "active_leaf_state_definition_pointers": [
+                              "/machines/0/root"
+                            ],
+                            "active_state_activations": [
+                              {
+                                "state_definition_pointer": "/machines/0/root",
+                                "activation_sequence": "0"
+                              }
+                            ],
+                            "variables": [],
+                            "history": [],
+                            "next_spawn_sequence": "0",
+                            "next_state_activation_sequences": [
+                              {
+                                "definition_pointer": "/machines/0/root",
+                                "next_sequence": "1"
+                              }
+                            ],
+                            "next_component_activation_sequences": [],
+                            "ready_mailbox": [],
+                            "deferred_mailbox": [],
+                            "fault": null
+                          }
+                        ],
+                        "aggregate_state_digest": "sha256:c401a9a5534d2dc17520ac6c9d672e611c2baaf35f120a0ec00d4f608291a81e"
+                      }
+                    },
+                    "replay_retention": {
+                      "mode": "permanent",
+                      "permanent_replay_eligible": true,
+                      "pruned_through_receipt_sequence": null,
+                      "policy_identifier": null
+                    },
+                    "next_operation_receipt_sequence": "1",
+                    "operation_receipts": [
+                      {
+                        "operation_kind": "creation",
+                        "receipt_sequence": "0",
+                        "creation_id": "create-1",
+                        "request_digest": "sha256:d45fc61bc0c9db90b3f7bca2f0c3e01ef3444c2f7ec54ef241ad7557d0dbf2a9",
+                        "committed_revision": "0",
+                        "resulting_aggregate_state_digest": "sha256:c401a9a5534d2dc17520ac6c9d672e611c2baaf35f120a0ec00d4f608291a81e",
+                        "status": "running",
+                        "fault": null,
+                        "emission_references": []
+                      }
+                    ],
+                    "event_identity_tombstones": [],
+                    "pending_outbox_intents": [],
+                    "next_outbox_terminal_sequence": "0",
+                    "terminal_outbox_records": [],
+                    "outbox_effect_tombstones": [],
+                    "migration_audit_records": [],
+                    "execution_checkpoint_digest": "sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f"
+                  },
+                  "creation_receipt": {
+                    "operation_kind": "creation",
+                    "receipt_sequence": "0",
+                    "creation_id": "create-1",
+                    "request_digest": "sha256:d45fc61bc0c9db90b3f7bca2f0c3e01ef3444c2f7ec54ef241ad7557d0dbf2a9",
+                    "committed_revision": "0",
+                    "resulting_aggregate_state_digest": "sha256:c401a9a5534d2dc17520ac6c9d672e611c2baaf35f120a0ec00d4f608291a81e",
+                    "status": "running",
+                    "fault": null,
+                    "emission_references": []
+                  },
+                  "status": "running",
+                  "emissions": [],
+                  "lifecycle_dispositions": [],
+                  "fault": null
+                }
+              },
+              "error": null
+            },
+            "retention": "retained"
+          }
+        },
+        "error": null
+      }
     }
   ]
 }

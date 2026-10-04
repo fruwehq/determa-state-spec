@@ -535,7 +535,28 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "$ref": "aggregate-state-v1.schema.json#/$defs/envelope"
+            "type": "object",
+            "required": [
+              "delivery_mode",
+              "envelope",
+              "envelope_digest"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "delivery_mode": {
+                "enum": [
+                  "input",
+                  "internal"
+                ]
+              },
+              "envelope": {
+                "$ref": "aggregate-state-v1.schema.json#/$defs/envelope"
+              },
+              "envelope_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              }
+            }
           }
         }
       }
@@ -602,28 +623,17 @@
     "cancel_effectArguments": {
       "type": "object",
       "required": [
-        "effect_id",
-        "operation_token",
-        "expected_journal_revision",
-        "reason"
+        "request",
+        "expected_journal_revision"
       ],
       "additionalProperties": false,
       "properties": {
-        "effect_id": {
-          "type": "string",
-          "pattern": "^sha256:[0-9a-f]{64}$"
-        },
-        "operation_token": {
-          "type": "string",
-          "minLength": 1
+        "request": {
+          "$ref": "effect-cancellation-request-v1.schema.json"
         },
         "expected_journal_revision": {
           "type": "string",
           "pattern": "^(0|[1-9][0-9]*)$"
-        },
-        "reason": {
-          "type": "string",
-          "minLength": 1
         }
       }
     },

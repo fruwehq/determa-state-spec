@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:b6b218af07fff9a27e1ca873993729bf926bd05b56e6288e2ff56aeaa5ff0f24"
+      "sha256": "sha256:2436274daa90815a1757d670541b24757e9ae0fdbbfe0b8bdf2a05e242597aaa"
     },
     {
       "path": "VERSION",
@@ -31,6 +31,22 @@
       "sha256": "sha256:8fd0fa85d1fbad63b94f1fa1c52d7fe5f1ed2f22c773bfad47b91611d4837b08"
     },
     {
+      "path": "schema/effect-cancellation-request-v1.schema.json",
+      "sha256": "sha256:542f62c24ed9a9a95d2170c3cc57affe748c2bbf8e84a218851261f1321530f8"
+    },
+    {
+      "path": "schema/effect-cancellation-response-v1.schema.json",
+      "sha256": "sha256:a6fea2051d066aa7856b3e72ad31cc8a33fa441dffeb9cb94c5b732d957abaf9"
+    },
+    {
+      "path": "schema/effect-result-request-v1.schema.json",
+      "sha256": "sha256:4b553ff1280efd37da7639de86f718b36dff4904ddfbe13aa6e1f76ce2ef4863"
+    },
+    {
+      "path": "schema/effect-result-response-v1.schema.json",
+      "sha256": "sha256:e5b9bf9374323ae6c52ddb50fc8d2e6f11b1652cb47671b6e427887248c478c9"
+    },
+    {
       "path": "schema/execution-checkpoint-v1.schema.json",
       "sha256": "sha256:97669ab05319bad0af8af5f6bd29e0a6d8f3b2799725b0c987184e2aa11ff8bf"
     },
@@ -48,11 +64,19 @@
     },
     {
       "path": "schema/host-authority-operation-v1.schema.json",
-      "sha256": "sha256:f12c61ad94c5b611c877dcff57402cad003847aeb4c0beb59df34383f40845aa"
+      "sha256": "sha256:5a3fd69a79179836d78cc3ebb8724d58665e3c1a35ec0bf331397cd22da4efb4"
     },
     {
       "path": "schema/host-authority-profile-report-v1.schema.json",
       "sha256": "sha256:1053a305fbd63907a3c62c8c5b4d52d401fe48374eba4d362e653b8cdeefbe36"
+    },
+    {
+      "path": "schema/host-effect-claim-v1.schema.json",
+      "sha256": "sha256:81266a8bddea399c708e92476a3a1f6e13ace8666c06571366fe0be6a425ef50"
+    },
+    {
+      "path": "schema/host-effect-journal-v1.schema.json",
+      "sha256": "sha256:b8943b5f085b6e3c0413b068795c51a64622d6e710c404819ed1802a049b19d2"
     },
     {
       "path": "schema/inspection-v1.schema.json",
@@ -84,11 +108,11 @@
     },
     {
       "path": "schema/public-host-request-v1.schema.json",
-      "sha256": "sha256:3cf22c220d4862808846be97330e008ac403067727ddeeca58429ac083faa6a2"
+      "sha256": "sha256:d0516b403cc44f5c9ffd344088d9614b676e1f4f895ca243faadbf7c43b49df8"
     },
     {
       "path": "schema/public-host-response-v1.schema.json",
-      "sha256": "sha256:3c4e679b119faf3b4a1aa48e726df0d43889ece1c24f5aec1963d74d2d3630eb"
+      "sha256": "sha256:27d94477e25204240da99544ef6ec1fd402906ad08597fe7ca1f0103af9976fb"
     },
     {
       "path": "schema/runtime-action-output-v1.schema.json",
@@ -107,12 +131,40 @@
       "sha256": "sha256:372ff68ccdcd0816978844b381014988726511f425d99bcba4734233998f6bc5"
     },
     {
+      "path": "examples/authority/host-authority-cases-v1.json",
+      "sha256": "sha256:ce080fd5dac6f15a76c8687846c79086419d4cd49959871f149e2b0f0c4092eb"
+    },
+    {
+      "path": "examples/authority/host-authority-profile-cases-v1.json",
+      "sha256": "sha256:dcb5959e4d07e8c951862886c3d5881a8fdb65f8000e007ac581c195817792d2"
+    },
+    {
       "path": "examples/public-host/positive-v1.json",
-      "sha256": "sha256:5a946a4eecdaf675b9ed4bc51f0a886a51a55ea1b2b21f0b18d1d5c1430a2b12"
+      "sha256": "sha256:e00e246208fc3d0ce677770099fffd5874f6932071103f08133cfffe61c09ab9"
     },
     {
       "path": "examples/public-host/negative-v1.json",
-      "sha256": "sha256:9069fd3e0b0dc1039e80bf99ef631c9c9a999636aa7aa64a41dc5294649aec6d"
+      "sha256": "sha256:2dcff163afa24bbc11431cd71335e60b975144eac59476cc746c82a582a54c1e"
+    },
+    {
+      "path": "examples/effects/effect-result-request-v1.json",
+      "sha256": "sha256:c6f16704fc6c8b19fe4a36a7e4bcd97a8e6e5ce26993a50bff0490c4da44573c"
+    },
+    {
+      "path": "examples/effects/effect-result-committed-response-v1.json",
+      "sha256": "sha256:1d743b779902e228d9de77ae24dcbe6b8843bc37d7ffdc841ed9777c7f9841e0"
+    },
+    {
+      "path": "examples/effects/committed-effect-checkpoint-v1.json",
+      "sha256": "sha256:d4c4909b45f1fd0711f2dd4d8ce9cafc4f2207ce51670472705f45cfe37f2e94"
+    },
+    {
+      "path": "examples/effects/effect-cancellation-request-v1.json",
+      "sha256": "sha256:33c9e083b1adaa4aa245a08f982639562afde87cfefafcfbbc74f3ffa8e14a6b"
+    },
+    {
+      "path": "examples/effects/effect-cancellation-committed-response-v1.json",
+      "sha256": "sha256:6d876212efc531cfa4dac0caaeb7d66b5b240d57913fde69cb64ff2fe13ee8e4"
     }
   ],
   "hash_domains": [
@@ -123,6 +175,10 @@
     {
       "name": "determa-public-host-evidence-1",
       "source": "SPEC.md#25.2"
+    },
+    {
+      "name": "determa-public-host-profile-1",
+      "source": "SPEC.md#25.3"
     },
     {
       "name": "determa-effect-identity-1",

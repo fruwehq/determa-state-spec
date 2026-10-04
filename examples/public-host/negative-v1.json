@@ -235,6 +235,200 @@
           "code": "stale_attempt_fence"
         }
       }
+    },
+    {
+      "name": "admit_undeclared_event",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-admit-undeclared-1",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "admit",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": {
+          "revision": "0",
+          "checkpoint_digest": "sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f"
+        },
+        "arguments": {
+          "ordered_deliveries": [
+            {
+              "delivery_mode": "input",
+              "envelope": {
+                "event": "arrive",
+                "event_id": "arrive-1",
+                "cause_id": "arrive-1",
+                "source": {
+                  "host": true
+                },
+                "target": {
+                  "root": {
+                    "root_instance_id": "job-42",
+                    "root_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60"
+                  }
+                },
+                "payload": [
+                  "map",
+                  []
+                ]
+              },
+              "envelope_digest": "sha256:e738d6643344b303919da99813fdc586976b60e68af6022f9eb5754ece85b9f6"
+            }
+          ]
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"ordered_deliveries\":[{\"delivery_mode\":\"input\",\"envelope\":{\"cause_id\":\"arrive-1\",\"event\":\"arrive\",\"event_id\":\"arrive-1\",\"payload\":[\"map\",[]],\"source\":{\"host\":true},\"target\":{\"root\":{\"root_instance_id\":\"job-42\",\"root_runtime_id\":\"sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60\"}}},\"envelope_digest\":\"sha256:e738d6643344b303919da99813fdc586976b60e68af6022f9eb5754ece85b9f6\"}]},\"operation\":\"admit\",\"operation_id\":\"op-admit-undeclared-1\",\"precondition\":{\"checkpoint_digest\":\"sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f\",\"revision\":\"0\"},\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:17e467bf284655e30178f3fe7627cd1e1ee3451fc8d6dcd72f9fa8633e4adeb6",
+      "expected_error": "invalid_event",
+      "expected_response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-admit-undeclared-1",
+        "status": "rejected",
+        "receipt": null,
+        "value": null,
+        "error": {
+          "operation": "admit",
+          "code": "invalid_event"
+        }
+      }
+    },
+    {
+      "name": "bounded_replay_evidence_expired",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-receipt-expired-1",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "receipt",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "request_digest": "sha256:a4ee1de42fa4c8104b2550de14cb65992cf3c519035ff3fb0a96cf40a0c40800",
+          "queried_operation_id": "op-effect-result-1"
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"queried_operation_id\":\"op-effect-result-1\",\"request_digest\":\"sha256:a4ee1de42fa4c8104b2550de14cb65992cf3c519035ff3fb0a96cf40a0c40800\"},\"operation\":\"receipt\",\"operation_id\":\"op-receipt-expired-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:9269c16249b4af56e88f18eb1073229fd502eebd0ae5c18b838b36dce5eb2fa5",
+      "expected_error": "replay_evidence_expired",
+      "expected_response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-receipt-expired-1",
+        "status": "committed",
+        "receipt": null,
+        "value": {
+          "operation": "receipt",
+          "result": {
+            "saved_response": null,
+            "retention": "expired"
+          }
+        },
+        "error": null
+      }
+    },
+    {
+      "name": "lost_response_alias_changed",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-create-1",
+        "scope_binding_identity": "binding-new-alias-1",
+        "operation": "create",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+          "namespace": "example.persistence",
+          "machine_id": "job",
+          "machine_version": "1",
+          "root_instance_id": "job-42",
+          "creation_id": "create-1",
+          "bindings": [
+            "map",
+            []
+          ]
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"bindings\":[\"map\",[]],\"creation_id\":\"create-1\",\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_instance_id\":\"job-42\",\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"operation\":\"create\",\"operation_id\":\"op-create-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-new-alias-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:cd16edfaa8f09ec1ada2b75239f356f75e10810f513b98d3f25fb0645f34f29e",
+      "expected_error": "client_binding_mismatch",
+      "expected_response": null
+    },
+    {
+      "name": "lost_response_pinned_endpoint_unavailable",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-create-1",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "create",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+          "namespace": "example.persistence",
+          "machine_id": "job",
+          "machine_version": "1",
+          "root_instance_id": "job-42",
+          "creation_id": "create-1",
+          "bindings": [
+            "map",
+            []
+          ]
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"bindings\":[\"map\",[]],\"creation_id\":\"create-1\",\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_instance_id\":\"job-42\",\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"operation\":\"create\",\"operation_id\":\"op-create-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:ee59aecee759f5bd67d9d2191a71e4d476a4a5f3cc62f6bace3fc7157a22d71d",
+      "expected_error": "transport_outcome_unknown",
+      "expected_response": null
+    },
+    {
+      "name": "unauthorized_absent_root_indistinguishable",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-create-1",
+        "scope_binding_identity": "unauthorized-binding",
+        "operation": "create",
+        "target": {
+          "root_instance_id": "absent-root-99",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+          "namespace": "example.persistence",
+          "machine_id": "job",
+          "machine_version": "1",
+          "root_instance_id": "absent-root-99",
+          "creation_id": "create-1",
+          "bindings": [
+            "map",
+            []
+          ]
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"bindings\":[\"map\",[]],\"creation_id\":\"create-1\",\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_instance_id\":\"absent-root-99\",\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"operation\":\"create\",\"operation_id\":\"op-create-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"unauthorized-binding\",\"target\":{\"root_instance_id\":\"absent-root-99\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:c007df80196276d53fd63a75bf9f7ce5a3b9168624a8122752f45cb07e475b39",
+      "expected_error": "transport_access_denied",
+      "expected_response": null
     }
   ]
 }

@@ -149,19 +149,28 @@
                 "clone_has_unresolved_work",
                 "clone_isolation_unproven",
                 "creation_id_conflict",
+                "delivery_digest_mismatch",
+                "duplicate_event_id_in_batch",
                 "effect_not_outstanding",
-                "effect_outcome_ambiguous",
                 "effect_result_conflict",
                 "event_disposition_missing",
                 "event_id_conflict",
                 "host_capability_mismatch",
+                "inactive_component_target",
                 "inspection_capability_unavailable",
                 "inspection_guard_failure",
                 "inspection_limit_exceeded",
+                "invalid_correlation",
+                "invalid_delivery_mode",
+                "invalid_delivery_source",
+                "invalid_event",
                 "invalid_host_request",
                 "invalid_inspection_request",
+                "invalid_instance_target",
+                "invalid_payload",
                 "invalid_timer_time",
                 "language_provider_unavailable",
+                "malformed_delivery",
                 "operation_id_conflict",
                 "outcome_unknown",
                 "portable_value_required",
@@ -184,11 +193,14 @@
                 "stale_scope_authority",
                 "standalone_takeover_ambiguous_work",
                 "standalone_takeover_requires_fresh_scope",
+                "terminal_root",
                 "timer_already_fired",
                 "timer_id_conflict",
+                "tombstoned_root",
                 "unauthorized_scope",
                 "unsupported_host_protocol",
-                "unsupported_host_protocol_version"
+                "unsupported_host_protocol_version",
+                "wrong_root"
               ]
             }
           },
@@ -274,7 +286,20 @@
                       "event_id_conflict",
                       "checkpoint_revision_conflict",
                       "event_disposition_missing",
-                      "portable_value_required"
+                      "portable_value_required",
+                      "malformed_delivery",
+                      "wrong_root",
+                      "duplicate_event_id_in_batch",
+                      "terminal_root",
+                      "tombstoned_root",
+                      "invalid_delivery_mode",
+                      "invalid_delivery_source",
+                      "invalid_instance_target",
+                      "inactive_component_target",
+                      "invalid_event",
+                      "invalid_payload",
+                      "invalid_correlation",
+                      "delivery_digest_mismatch"
                     ]
                   }
                 }
@@ -415,10 +440,13 @@
                       "outcome_unknown",
                       "replay_evidence_expired",
                       "checkpoint_revision_conflict",
+                      "scope_not_active",
+                      "stale_scope_authority",
                       "effect_not_outstanding",
                       "effect_result_conflict",
                       "stale_attempt_fence",
-                      "effect_outcome_ambiguous"
+                      "runtime_provider_output_invalid",
+                      "portable_value_required"
                     ]
                   }
                 }
@@ -446,9 +474,10 @@
                       "outcome_unknown",
                       "replay_evidence_expired",
                       "checkpoint_revision_conflict",
+                      "scope_not_active",
+                      "stale_scope_authority",
                       "effect_not_outstanding",
-                      "stale_attempt_fence",
-                      "effect_outcome_ambiguous"
+                      "effect_result_conflict"
                     ]
                   }
                 }
@@ -695,19 +724,28 @@
                   "clone_has_unresolved_work",
                   "clone_isolation_unproven",
                   "creation_id_conflict",
+                  "delivery_digest_mismatch",
+                  "duplicate_event_id_in_batch",
                   "effect_not_outstanding",
-                  "effect_outcome_ambiguous",
                   "effect_result_conflict",
                   "event_disposition_missing",
                   "event_id_conflict",
                   "host_capability_mismatch",
+                  "inactive_component_target",
                   "inspection_capability_unavailable",
                   "inspection_guard_failure",
                   "inspection_limit_exceeded",
+                  "invalid_correlation",
+                  "invalid_delivery_mode",
+                  "invalid_delivery_source",
+                  "invalid_event",
                   "invalid_host_request",
                   "invalid_inspection_request",
+                  "invalid_instance_target",
+                  "invalid_payload",
                   "invalid_timer_time",
                   "language_provider_unavailable",
+                  "malformed_delivery",
                   "operation_id_conflict",
                   "outcome_unknown",
                   "portable_value_required",
@@ -730,11 +768,14 @@
                   "stale_scope_authority",
                   "standalone_takeover_ambiguous_work",
                   "standalone_takeover_requires_fresh_scope",
+                  "terminal_root",
                   "timer_already_fired",
                   "timer_id_conflict",
+                  "tombstoned_root",
                   "unauthorized_scope",
                   "unsupported_host_protocol",
-                  "unsupported_host_protocol_version"
+                  "unsupported_host_protocol_version",
+                  "wrong_root"
                 ]
               }
             },
@@ -820,7 +861,20 @@
                         "event_id_conflict",
                         "checkpoint_revision_conflict",
                         "event_disposition_missing",
-                        "portable_value_required"
+                        "portable_value_required",
+                        "malformed_delivery",
+                        "wrong_root",
+                        "duplicate_event_id_in_batch",
+                        "terminal_root",
+                        "tombstoned_root",
+                        "invalid_delivery_mode",
+                        "invalid_delivery_source",
+                        "invalid_instance_target",
+                        "inactive_component_target",
+                        "invalid_event",
+                        "invalid_payload",
+                        "invalid_correlation",
+                        "delivery_digest_mismatch"
                       ]
                     }
                   }
@@ -961,10 +1015,13 @@
                         "outcome_unknown",
                         "replay_evidence_expired",
                         "checkpoint_revision_conflict",
+                        "scope_not_active",
+                        "stale_scope_authority",
                         "effect_not_outstanding",
                         "effect_result_conflict",
                         "stale_attempt_fence",
-                        "effect_outcome_ambiguous"
+                        "runtime_provider_output_invalid",
+                        "portable_value_required"
                       ]
                     }
                   }
@@ -992,9 +1049,10 @@
                         "outcome_unknown",
                         "replay_evidence_expired",
                         "checkpoint_revision_conflict",
+                        "scope_not_active",
+                        "stale_scope_authority",
                         "effect_not_outstanding",
-                        "stale_attempt_fence",
-                        "effect_outcome_ambiguous"
+                        "effect_result_conflict"
                       ]
                     }
                   }
@@ -1479,16 +1537,12 @@
         "result": {
           "type": "object",
           "required": [
-            "checkpoint",
-            "journal"
+            "result"
           ],
           "additionalProperties": false,
           "properties": {
-            "checkpoint": {
-              "$ref": "execution-checkpoint-v1.schema.json"
-            },
-            "journal": {
-              "$ref": "host-effect-journal-v1.schema.json"
+            "result": {
+              "$ref": "effect-cancellation-response-v1.schema.json"
             }
           }
         }
