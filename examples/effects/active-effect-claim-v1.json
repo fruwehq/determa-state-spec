@@ -1,0 +1,12 @@
+{
+  "scope_identity": "local-example",
+  "root_instance_id": "job-42",
+  "work_kind": "effect",
+  "work_identity": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "operation_token": "business-order-42",
+  "scope_authority_epoch": "3",
+  "attempt_fence": "1",
+  "worker_principal": "worker-a",
+  "expires_at": "1893456000000000000",
+  "state": "active"
+}

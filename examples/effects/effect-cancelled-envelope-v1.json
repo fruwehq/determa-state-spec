@@ -1,0 +1,27 @@
+{
+  "event": "submit_cancelled",
+  "event_id": "sha256:af0a0114313325e78343a1aaa4c617affe3a7335d8fa648ea2d5b5b5c411964c",
+  "cause_id": "sha256:af0a0114313325e78343a1aaa4c617affe3a7335d8fa648ea2d5b5b5c411964c",
+  "source": {
+    "host": true
+  },
+  "target": {
+    "root": {
+      "root_instance_id": "job-42",
+      "root_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60"
+    }
+  },
+  "payload": [
+    "map",
+    [
+      [
+        "operation_token",
+        [
+          "string",
+          "business-order-42"
+        ]
+      ]
+    ]
+  ],
+  "correlation_id": "business-order-42"
+}

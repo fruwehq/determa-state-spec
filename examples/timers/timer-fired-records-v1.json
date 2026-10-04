@@ -1,0 +1,100 @@
+{
+  "timer_artifact_format": "determa.timer_records",
+  "timer_artifact_schema_version": 1,
+  "records": [
+    {
+      "scope_identity": "scope-A",
+      "root_instance_id": "server-1",
+      "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+      "timer_id": "timer-A",
+      "schedule_request_digest": "sha256:99913eb88d372a77d2d63da0c4ed2e8dbe2a5f711a05acc9977d18a3628bb53d",
+      "clock_basis": "unix_nanoseconds",
+      "deadline_at": "110",
+      "event_name": "received",
+      "payload": [
+        "map",
+        []
+      ],
+      "correlation_id": "job-7",
+      "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+      "state": "fired",
+      "revision": "3",
+      "attempt_fence": "1",
+      "worker_principal": null,
+      "expires_at": null,
+      "admission_receipt_digest": "sha256:411e2b5d59fe15fc5635b319d384398969201ca7b58cebd557b53cbb7fb0b871"
+    }
+  ],
+  "operation_receipts": [
+    {
+      "operation_id": "schedule-A",
+      "request_digest": "sha256:99913eb88d372a77d2d63da0c4ed2e8dbe2a5f711a05acc9977d18a3628bb53d",
+      "result": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "server-1",
+        "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "schedule-A",
+        "status": "accepted",
+        "record_revision": "1",
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "delivery_state": "none",
+        "error_code": null,
+        "result_digest": "sha256:706f1b1260a8d8488288fc96fc1f77fcb3aab3d688cde8bf5a003cf3bde553ea"
+      }
+    },
+    {
+      "operation_id": "claim-A",
+      "request_digest": "sha256:c34d0db96b2961bf88f00c29362de35449d5225e9217b6ec3a23550bb654655f",
+      "result": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "server-1",
+        "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+        "timer_id": "timer-A",
+        "operation": "claim_fire",
+        "operation_id": "claim-A",
+        "status": "accepted",
+        "record_revision": "2",
+        "attempt_fence": "1",
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": "130",
+        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "delivery_state": "none",
+        "error_code": null,
+        "result_digest": "sha256:14f3c94695115f8e2b0ae6a692bb19193103aaa4188f0a44830a0488a73821fa"
+      }
+    },
+    {
+      "operation_id": "complete-A",
+      "request_digest": "sha256:aeadaa19750e2362f30fae2c1b7111494ad855821a1e2d84d40895dbadb922f9",
+      "result": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "server-1",
+        "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+        "timer_id": "timer-A",
+        "operation": "complete_fire",
+        "operation_id": "complete-A",
+        "status": "accepted",
+        "record_revision": "3",
+        "attempt_fence": "1",
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "delivery_state": "admitted",
+        "error_code": null,
+        "result_digest": "sha256:63d9d00207a9e0de6011ed63baeaff3f4e1188ecf949070da12954175fe7d108"
+      }
+    }
+  ],
+  "timer_artifact_digest": "sha256:27d5baf1cf139db88fe6c592f11ceddadfe63289ad09d611ddb6264be4ad2950"
+}

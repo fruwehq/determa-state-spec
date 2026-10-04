@@ -17,8 +17,8 @@
       ],
       "correlation_id": "job-7",
       "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
-      "state": "pending",
-      "revision": "1",
+      "state": "cancelled",
+      "revision": "2",
       "attempt_fence": "0",
       "worker_principal": null,
       "expires_at": null,
@@ -48,7 +48,30 @@
         "error_code": null,
         "result_digest": "sha256:706f1b1260a8d8488288fc96fc1f77fcb3aab3d688cde8bf5a003cf3bde553ea"
       }
+    },
+    {
+      "operation_id": "cancel-A",
+      "request_digest": "sha256:f67101382c857be0b5df21bbe77478d5b90c5560efe5f40ec6bbd5579b272a14",
+      "result": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "server-1",
+        "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+        "timer_id": "timer-A",
+        "operation": "cancel",
+        "operation_id": "cancel-A",
+        "status": "accepted",
+        "record_revision": "2",
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "delivery_state": "none",
+        "error_code": null,
+        "result_digest": "sha256:a7cd6de14bc30c4d44e5c2ed57422fd9abc46796b98c24ff4f05d47f2eea74b3"
+      }
     }
   ],
-  "timer_artifact_digest": "sha256:959e189bb44416c63c1a666af6a2fd59c7e5a873d6591237a45dc5fdc21adc2b"
+  "timer_artifact_digest": "sha256:0edffe039e7a6ff30e499aa90fd5604cf7046a95baf12d9c470cbdaa249d941d"
 }
