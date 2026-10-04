@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "context": {
+    "scope_identity": "local-example",
+    "scope_authority_epoch": "3",
+    "authorized_principal": "operator-a",
+    "trusted_host_now": "1893455999999999999",
+    "clock_basis": "unix_nanoseconds",
+    "journal_fixture": "cancel-before-claim-journal-v1.json"
+  },
+  "cases": [
+    {
+      "name": "first_preclaim_cancel",
+      "request": {
+        "operation_id": "cancel-1",
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "reason": "operator_request",
+        "payload": [
+          "map",
+          [
+            [
+              "operation_token",
+              [
+                "string",
+                "business-order-42"
+              ]
+            ]
+          ]
+        ]
+      },
+      "expected_response": {
+        "status": "committed",
+        "operation_id": "cancel-1",
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "cancellation": {
+          "operation_id": "cancel-1",
+          "reason": "operator_request",
+          "state": "prevented_start"
+        },
+        "outcome": {
+          "kind": "cancelled",
+          "payload": [
+            "map",
+            [
+              [
+                "operation_token",
+                [
+                  "string",
+                  "business-order-42"
+                ]
+              ]
+            ]
+          ],
+          "digest": "sha256:3832f47b1b947875d7282d6f9c31eeae5d0e0cc3ab8b7b66486a8c8687498d5a",
+          "attempt_fence": "0"
+        },
+        "result_event_id": "sha256:af0a0114313325e78343a1aaa4c617affe3a7335d8fa648ea2d5b5b5c411964c",
+        "journal_revision": "1",
+        "error_code": null
+      },
+      "provider_calls": 0,
+      "new_worker_claims": 0,
+      "mutates_journal": true
+    },
+    {
+      "name": "equal_cancel_replay",
+      "request": {
+        "operation_id": "cancel-1",
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "reason": "operator_request",
+        "payload": [
+          "map",
+          [
+            [
+              "operation_token",
+              [
+                "string",
+                "business-order-42"
+              ]
+            ]
+          ]
+        ]
+      },
+      "expected_response": {
+        "status": "committed",
+        "operation_id": "cancel-1",
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "cancellation": {
+          "operation_id": "cancel-1",
+          "reason": "operator_request",
+          "state": "prevented_start"
+        },
+        "outcome": {
+          "kind": "cancelled",
+          "payload": [
+            "map",
+            [
+              [
+                "operation_token",
+                [
+                  "string",
+                  "business-order-42"
+                ]
+              ]
+            ]
+          ],
+          "digest": "sha256:3832f47b1b947875d7282d6f9c31eeae5d0e0cc3ab8b7b66486a8c8687498d5a",
+          "attempt_fence": "0"
+        },
+        "result_event_id": "sha256:af0a0114313325e78343a1aaa4c617affe3a7335d8fa648ea2d5b5b5c411964c",
+        "journal_revision": "1",
+        "error_code": null
+      },
+      "provider_calls": 0,
+      "new_worker_claims": 0,
+      "mutates_journal": false
+    },
+    {
+      "name": "missing_cancelled_mapping",
+      "request": {
+        "operation_id": "cancel-1",
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "reason": "operator_request",
+        "payload": [
+          "map",
+          [
+            [
+              "operation_token",
+              [
+                "string",
+                "business-order-42"
+              ]
+            ]
+          ]
+        ]
+      },
+      "expected_response": {
+        "status": "rejected",
+        "operation_id": "cancel-1",
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "cancellation": null,
+        "outcome": null,
+        "result_event_id": null,
+        "journal_revision": null,
+        "error_code": "invalid_host_request"
+      },
+      "provider_calls": 0,
+      "new_worker_claims": 0,
+      "mutates_journal": false
+    },
+    {
+      "name": "after_possible_provider_call",
+      "journal_fixture": "cancel-after-possible-call-journal-v1.json",
+      "request": {
+        "operation_id": "cancel-2",
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "reason": "operator_request",
+        "payload": [
+          "map",
+          [
+            [
+              "operation_token",
+              [
+                "string",
+                "business-order-42"
+              ]
+            ]
+          ]
+        ]
+      },
+      "expected_response": {
+        "status": "reconciliation_required",
+        "operation_id": "cancel-2",
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "cancellation": {
+          "operation_id": "cancel-2",
+          "reason": "operator_request",
+          "state": "reconciliation_required"
+        },
+        "outcome": null,
+        "result_event_id": null,
+        "journal_revision": "3",
+        "error_code": null
+      },
+      "provider_calls": 0,
+      "new_worker_claims": 0,
+      "mutates_journal": true
+    }
+  ]
+}

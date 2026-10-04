@@ -1,0 +1,9 @@
+{
+  "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "result_slot": "accepted",
+  "result_event_id": "sha256:af33a189f63db4d252d78a7113b26f9bb8a9e98d6457e524e4af6d91c5b0e886",
+  "equal_submission": "returns retained outcome and admission receipt without mutation",
+  "unequal_payload": "effect_result_conflict before admission",
+  "wrong_operation_token": "effect_not_outstanding before admission",
+  "stale_attempt_fence": "stale_attempt_fence before admission"
+}

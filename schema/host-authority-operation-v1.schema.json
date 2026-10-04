@@ -507,7 +507,6 @@
         "scope_authority_epoch",
         "attempt_fence",
         "worker_principal",
-        "clock_basis",
         "expires_at",
         "state"
       ],
@@ -543,9 +542,6 @@
         },
         "state": {
           "const": "active"
-        },
-        "clock_basis": {
-          "const": "unix_nanoseconds"
         }
       },
       "additionalProperties": false
