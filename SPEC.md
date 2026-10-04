@@ -873,6 +873,17 @@ bundle fingerprint (§8) includes every complete binding, including source and
 dependency digests, type contract and capability flags. Descriptor source/target
 fingerprints therefore also bind exact provider closures.
 
+A runtime provider registration carries the closed
+`schema/runtime-provider-descriptor-v1.schema.json` descriptor with `kind` (`guard`
+or `actions`) and the same complete binding. Its installed implementation exposes
+the kind-specific evaluator and, only when separately proved, `inspect_guard`.
+Implementations support direct injection; an adapter using names supports explicit
+`register`, `validate_configuration`, `capabilities`, and `health`. Duplicate exact
+registrations fail. Discovery is explicit or host-allowlisted, never triggered by
+an incoming event value. Descriptor, installed implementation and slot binding must
+match exactly. A compiler provider uses the same exact reference and resolver rules
+but is registered distinctly from runtime guards/actions.
+
 `input_types` names only the read-only context portions a provider receives:
 `event: event_envelope`, `variables: typed_variables`, `owner: owner_reference`, and
 `env: external_values`. Event visibility still follows §5.3. The engine presents

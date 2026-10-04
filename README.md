@@ -102,6 +102,8 @@ This repository holds only the specification:
 - [`schema/machine.schema.json`](schema/machine.schema.json) — structural JSON Schema;
 - [`schema/provider-reference-v1.schema.json`](schema/provider-reference-v1.schema.json)
   — exact executable provider identity;
+- [`schema/runtime-provider-descriptor-v1.schema.json`](schema/runtime-provider-descriptor-v1.schema.json)
+  — exact registration and slot-kind contract;
 - [`schema/runtime-action-output-v1.schema.json`](schema/runtime-action-output-v1.schema.json)
   — checked native action proposals;
 - [`schema/language-source-v1.schema.json`](schema/language-source-v1.schema.json) and

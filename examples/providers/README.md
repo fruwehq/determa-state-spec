@@ -6,6 +6,8 @@ hex digits stand for illustrative content identities; a real loader must verify 
 installed closure and fail before evaluation when the bytes do not match. Both native
 slots disclose possible precommit external I/O. The example is therefore an explicit
 weak embedded profile, not a deterministic-replay or semantic-inspection claim.
+`guard-descriptor-v1.json` is the matching closed registration descriptor; a
+registration with `kind: actions` for that Boolean binding is invalid.
 
 `action-output.json` is a valid typed provider result: the engine checks its assign
 and send against the selected statechart scope and event declarations, then applies
