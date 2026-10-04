@@ -465,7 +465,8 @@ remaining inert; destination authority and relocation are separate concerns.
 
 Relevant specification: [§11.2](SPEC.md#112-timer-extensions),
 [§17.14](SPEC.md#1714-external-timer-durability), and
-[§23](SPEC.md#23-optional-external-timer-helper).
+[§23](SPEC.md#23-optional-external-timer-helper), and
+[§24](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation).
 
 **Decision.** The optional timer helper has a closed schedule/cancel/fire protocol,
 signed Unix-nanosecond clock values, and its own versioned record artifact. It is
@@ -478,6 +479,10 @@ checkpoint schema version 1. The required participant is pinned in the independe
 source contract and complete `determa.scope_archive` manifest, including member
 digest and byte length. Export and staging check the archive participant's configured
 capabilities separately from timer capabilities.
+Recovery treats imported timer records as inert. Inherited pending or uncertain
+fires require §24 reconciliation when the old owner may still act; a new scope
+allocates new timer fire identity. Proved same-scope relocation preserves identity
+only after helper claims are revoked and fire fate is resolved.
 
 **Rejected alternative.** Put deadlines or due polling in the core, infer timer
 durability from provider identity, or treat a committed independent fire as proof of
@@ -487,3 +492,19 @@ checkpoint admission.
 records need their own clock, storage, cancellation, retry, and crash evidence.
 The coordinated profile proves the fire/admission boundary; independent delivery
 reports its weaker, potentially ambiguous boundary.
+
+## Recovery remains an explicit host choice
+
+Relevant specification: [§24](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation).
+
+**Decision.** A strict restore always remains an inert read-only quarantine.
+Proved continuation uses the separate guarded transfer activation path. A standalone
+operator may instead create a fresh scope and namespace, retaining ambiguous work and
+source provenance with an explicit old-owner risk acknowledgement. A clone is separate
+independent execution and needs proved provider isolation. Safe relocation is an
+optional positive claim for a tested topology under one authority domain.
+
+**Reason.** Archive completeness makes state reconstructable but cannot revoke a
+remote worker or undo an accepted provider request. The new scope makes the weaker
+choice visible in identity, receipts and capability reports. A credential or timeout
+cannot supply a missing authority proof.
