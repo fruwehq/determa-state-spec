@@ -5092,8 +5092,9 @@ and resolution or explicit cancellation of all inherited pending/ambiguous exter
 work and required helper state. Binding isolation is checked against the source's
 actual provider/environment identity; a credential, alias or endpoint label change
 alone does not prove isolation. Failure returns `clone_isolation_unproven` or
-`clone_has_unresolved_work`, leaving the clone inactive. Terminal effects stay
-terminal and are never redelivered. Ready/deferred events may remain; their future
+`clone_has_unresolved_work`, leaving the clone inactive. A clone-side cancellation records the decision never to deliver that inherited work
+in the clone; it does not assert a source provider call was cancelled or undone.
+Terminal effects stay terminal and are never redelivered. Ready/deferred events may remain; their future
 execution and the new namespace are recorded in the activation evidence. A clone
 never asserts source retirement, safe relocation or prevention of duplicate business
 work across scopes.
