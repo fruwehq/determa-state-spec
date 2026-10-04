@@ -2340,10 +2340,19 @@ A guarded branch's locator is an exact pointer into the validated executable
 definition; its binding digest binds the normalized CEL guard or exact runtime
 provider reference and source/dependency closure under that definition fingerprint.
 It is `hash(["determa-guard-binding-1", definition_fingerprint, guard_locator,
-normalized_guard_binding])` under §9, where `normalized_guard_binding` is the
-canonical validated CEL source or the complete exact provider binding and closure
-defined by the runtime-provider contract. Recompilation cannot substitute a
-different binding at the same locator.
+typed_guard_binding])` under §9. `typed_guard_binding` applies the §8 typed-tree
+projection to the exact validated guard member. For a CEL guard, this is
+`["string", source]`, where `source` is exactly the Unicode string value of that
+`guard` member in the §8 normalized validated bundle tree.
+Parsing and type checking do not rewrite, trim, pretty-print, case-fold, or otherwise
+canonicalize its source text; spaces and line breaks are retained as code points.
+For a runtime-provider guard, `typed_guard_binding` is the complete exact provider
+binding and source/dependency closure, encoded as the §8 typed tree under that provider
+contract. Its object-member order is canonicalized by §8 and §9; exact string/source
+values are preserved. Recompilation cannot substitute a different binding at the
+same locator. For example, `"event.payload.amount > 1"` and
+`"event.payload.amount  > 1"` have distinct guard bindings and distinct digests,
+even though both evaluate the same way for every numeric amount.
 Structural inspection enumerates branches without invoking CEL, providers, actions,
 helper routes, or host delivery. `guard_evidence` is empty.
 
