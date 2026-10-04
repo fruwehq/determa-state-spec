@@ -2276,6 +2276,146 @@ Informative examples of valid hosts include:
 
 Plugin names and configuration never appear in portable bundle grammar.
 
+### 11.5 Public extension identity, registration, and capabilities
+
+This section is the common public host boundary for embedded applications and future
+hosted implementations. It defines the shape and meaning of extension discovery and
+capability negotiation, not a plugin ABI or a mandatory service. The core remains a
+foreground transformation (§8). A host MAY inject an object directly; no URI,
+registry, daemon, clock, coordinator, or network endpoint is needed to evaluate the
+pure core. If a host offers named registration, both bundled and third-party
+extensions MUST use the same public `register` operation and lookup rules. A named
+extension's category is exactly one of `execution_store`, `projection`, `transport`,
+`timer`, `http`, `native_handler`, `compiler`, `runtime_provider`, `resolver`, and
+`authority`. These categories are distinct: a store claim does not grant authority,
+and a transport or timer claim does not imply a durable host profile.
+The public registration path exposes `register`, `validate_configuration`,
+`capabilities`, and `health`; category-specific setup is separate. Registration
+validates a descriptor before making a factory visible. Configuration validation
+precedes opening an instance and evaluating its claims. Direct injection supplies the
+same descriptor and validation operations, even when no name resolver is installed.
+
+The closed provider reference is defined by
+`schema/provider-reference-v1.schema.json`: exactly `identifier`, `version`, and
+`content_digest`. The identifier matches `[a-z][a-z0-9.-]*`; the version is an exact
+SemVer (no range, wildcard, alias, or `latest`); the digest is a canonical SHA-256
+content digest. All three compare exactly. The digest binds the executable provider
+and its declared dependency closure according to that provider's separate contract;
+the descriptor alone is not proof that arbitrary installed code matches the digest.
+The host MUST verify the actual loaded provider and its trusted allowlist before
+executing it or claiming a guarantee. Dynamic discovery is explicit or allowlisted;
+untrusted source text, a machine document, or an unauthenticated event MUST NOT cause
+provider installation or selection. A scheme or URI is a lookup hint only. It grants
+no privilege, scope authority, credential, capability, or override right.
+Each host authorizes registration, discovery, and invocation against the authenticated
+scope and operation; possession of a provider reference is not authorization.
+
+`schema/extension-descriptor-v1.schema.json` defines a registration descriptor with
+exactly `category`, `provider_reference`, `interface_version`, and
+`supported_capabilities`. `interface_version` is the integer `1` for this boundary.
+The capability names are closed and category-specific in that schema. A descriptor
+lists only capabilities the provider knows how to evaluate; it does not assert that
+every configured instance has them. A host registers at most one factory for each
+`(category, identifier, version)`; duplicate registration, including a conflicting
+digest, fails as `duplicate_extension_registration` and does not replace the first.
+For direct injection, the host checks the supplied object's descriptor and exact
+reference through the same validation path. Missing reference yields
+`unknown_extension`; mismatched version or digest is `extension_identity_mismatch`.
+Malformed descriptors or references yield `invalid_extension_descriptor`; invalid
+host-owned configuration yields `invalid_extension_configuration`.
+No fallback to another installed version or bundled provider is permitted.
+
+After validating host-owned configuration, the host calls the registered provider's
+`capabilities(configured_instance)` and `health(configured_instance)` operations.
+`schema/extension-capability-report-v1.schema.json` defines the resulting public
+report: exact category and provider reference, a nonsecret configured `instance_id`,
+`health` (`healthy`, `degraded`, `unavailable`, or `unknown`), and closed `claims`.
+Every reported claim MUST be listed by the matching descriptor's
+`supported_capabilities`; a report with a different category, reference, or instance
+is never evidence for this instance.
+The report is scoped to that exact configured instance and current health. The host
+MUST verify claims against its policy and actual topology; self-assertion is not
+proof. `degraded`, `unavailable`, or `unknown` health cannot satisfy a requirement
+unless the capability's separate contract explicitly proves safe operation at that
+health, which no common capability here does. A missing or unproved claim is false.
+This false-by-absence rule applies to requested **guarantees**. It does not assert
+the absence of a hazard: a healthy runtime-provider report that omits
+`external_io_capable` still leaves external I/O possible unless the exact provider
+and host policy independently prove it cannot occur (for example, through a verified
+`pure` guarantee). The host MUST treat unresolved I/O status as possible I/O.
+Provider families, URI schemes, installed packages, and a previously healthy report
+do not inherit capabilities. A changed configuration or relevant health requires
+reevaluation before a newly requested operation.
+The schema's empty capability sets for `http`, `compiler`, and `resolver` mean this
+common foundation assigns them no standalone standard guarantee yet. Their separate
+contracts may add versioned category-specific capabilities; implementations MUST NOT
+invent a meaning under this version-1 vocabulary.
+The execution-store names have the meanings in §17.11. The remaining nonempty
+category sets reserve names for the corresponding projection, transport, timer,
+native-handler, runtime-provider, and authority contracts. A host MUST NOT advertise
+one of these reserved names until its defining public contract and applicable
+conformance cases exist and the configured instance passes them. In particular,
+`authoritative_scope_fencing` means the configured authority rejects stale scope
+writers under its proved epoch and ownership boundary. It is not inferred from a
+durable store, a URI, a process lock, or a readable archive. `safe_relocation` is a
+distinct claim for the exact source, destination, and authority topology, supported
+only when the separate transfer contract proves old-owner retirement and destination
+activation. Local guarded writes or a successful export do not imply it. A host MUST
+check the actual operation's source and destination against that proved topology;
+a configured-instance report alone does not authorize a particular transfer. The host
+MUST report `safe_relocation` unavailable for an unproved topology, refuse relocation
+before activation,
+and leave any staged import inactive; it MUST NOT silently invoke the weaker
+standalone takeover. Multi-host coordination and managed control-plane operations
+are outside this common foundation.
+
+`schema/extension-capability-requirement-v1.schema.json` defines one exact requirement:
+`category`, `provider_reference`, `instance_id`, and `capability`. A host profile
+resolves all its required extensions and checks every requirement against healthy,
+verified configured reports **before** loading or creating a root, admitting an
+envelope, dispatching an intent, or changing host evidence. An unknown provider,
+invalid configuration, unhealthy instance, or unsatisfied requirement fails closed
+without mutation. Hosts MAY use category-specific codes such as §17.10's
+`adapter_capability_mismatch`; otherwise they report `extension_capability_mismatch`.
+Requested profile guarantees never silently downgrade. The positive and negative
+vectors in `examples/extensions/capability-cases-v1.json` are normative for these
+common checks. Category-specific operations and stronger guarantees are defined in
+their respective sections and conformance profiles, not inferred from the registry.
+
+For a composition, a guarantee such as `pure`, `deterministic`, `portable`,
+`semantically_introspectable`, or `process_contained` is effective only when **every**
+participating provider and the host policy prove it. `external_io_capable` is a hazard
+flag: it is effective when **any** participant may perform external I/O, including an
+unknown or unverified participant. The absence of an `external_io_capable` claim is
+not a no-I/O attestation. Unknown I/O therefore requires explicit weak
+profile opt-in and prevents automatic retry or replay claims based on purity.
+Advertised `external_io_capable` grants no transactional safety. Runtime provider
+claims have the exact meanings in their dedicated provider contract; this section
+only fixes truthful composition and refusal semantics.
+
+Endpoint URLs, named endpoint/scope aliases, authentication credentials, provider
+configuration, and secret material are deployment configuration, never machine
+semantics or members of a portable state, checkpoint, receipt, or archive. A client
+MAY configure multiple named endpoints and scopes; changing a scope's endpoint never
+rewrites its statechart or proves ownership transfer. Local hosts and a future Determa
+SaaS MUST use the same public machine model, protocol, portable Determa-owned artifacts,
+capability names, and conformance tests for each capability they claim. Import must
+validate exact definitions, state, queues, receipts, unresolved intents, provenance,
+and required capabilities. External helper state moves only through a declared
+participant/export contract; unsupported required helper state must be reported, not
+silently lost. This compatibility boundary does not require or authorize a distributed
+coordinator or private SaaS infrastructure in the open-source core.
+
+Changes to public protocols, portable artifacts, capability meanings, archive/import
+behavior, effect identity, or helper boundaries require hosted-compatibility review.
+The release conformance gate MUST track fingerprints for these contracts, require an
+explicit change record and updated positive and negative vectors for changed boundary
+files, and run cross-language interoperability checks where the capability is claimed.
+A future SaaS implementation MUST run the same public conformance suites for all its
+claimed capabilities. Exact re-execution equality applies only to deterministic
+portable profiles; weak or nondeterministic profiles check canonical artifacts,
+identity, retained evidence, and safety refusals instead.
+
 ## 12. Inspection and visualization
 
 Implementations SHOULD expose read-only inspection of:
@@ -4151,6 +4291,11 @@ compare-and-swap result. Lost updates are nonconformant.
 
 This specification defines adapter behavior, not a language API, binary interface,
 wire protocol, database schema, or cross-language dynamic-loading mechanism.
+Execution stores also obey the common §11.5 identity, direct-injection, descriptor,
+configured-report, and requirement rules. An adapter's URI scheme in this section is
+a lookup key distinct from its exact provider-reference identifier. The
+`duplicate_adapter_registration` and `adapter_capability_mismatch` codes below are
+the established execution-store-specific outcomes of those common rules.
 Applications SHOULD be able to inject an execution-store object directly without a
 registry, URI, discovery, or command-line interface. If an implementation offers any
 adapter identifier, URI, or scheme resolution, it MUST expose and use one public

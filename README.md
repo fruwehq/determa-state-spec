@@ -73,6 +73,13 @@ The core is a pure foreground transform from prior logical state plus one envelo
 new logical state plus ordered emissions. It has no built-in queue, clock, timer,
 dead-letter store, broker, database, background worker, or external I/O.
 
+The public extension boundary uses exact provider references and configured-instance
+capability reports. Hosts may inject objects directly or register bundled and third-party
+factories through the same public path. Requested capabilities are checked before
+mutation, and URI lookup never grants authority. A future Determa SaaS uses the same
+public machine, client/host, checkpoint/archive, and conformance contracts; endpoints
+and credentials stay in deployment configuration. See [SPEC.md §11.5](SPEC.md#115-public-extension-identity-registration-and-capabilities).
+
 A host chooses queue and effect plugins appropriate to its deployment: for example,
 in-memory delivery, Redis, GCP Pub/Sub, or a transactional database inbox/outbox. Those
 plugins own ordering, retries, acknowledgements, discard, capacity, and dead-letter
@@ -107,6 +114,12 @@ This repository holds only the specification:
   — portable durable-host checkpoint;
 - [`schema/core-step-result-v1.schema.json`](schema/core-step-result-v1.schema.json) —
   closed core step result schema;
+- [`schema/provider-reference-v1.schema.json`](schema/provider-reference-v1.schema.json)
+  and [`schema/extension-descriptor-v1.schema.json`](schema/extension-descriptor-v1.schema.json)
+  — exact provider identity and public registration descriptor;
+- [`schema/extension-capability-report-v1.schema.json`](schema/extension-capability-report-v1.schema.json)
+  and [`schema/extension-capability-requirement-v1.schema.json`](schema/extension-capability-requirement-v1.schema.json)
+  — configured-instance claims and exact requirements;
 - [`examples/`](examples/) — schema-valid machine documents and normative vectors; and
 - [`VERSION`](VERSION) — synchronized specification/package SemVer.
 
