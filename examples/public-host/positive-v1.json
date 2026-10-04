@@ -677,7 +677,7 @@
               "receipt",
               "scope_operation"
             ],
-            "profile_digest": "sha256:8a2d2a522b3aefe75d87738e80777b238fca4a759bc68a2fb5ac229ccef3a2de",
+            "profile_digest": "sha256:6b32749167938c28656d400c4d1bad2b582ce6ab32b008660badff530955d364",
             "extension_reports": [
               {
                 "category": "authority",
@@ -734,9 +734,9 @@
             "guarantees": {
               "inspection_structural": true,
               "inspection_semantic": false,
-              "retained_history": true,
-              "saved_response_replay": true,
-              "deterministic_reexecution": true
+              "retained_history": false,
+              "saved_response_replay": false,
+              "deterministic_reexecution": false
             }
           }
         },

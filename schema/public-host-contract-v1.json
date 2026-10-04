@@ -140,7 +140,7 @@
     },
     {
       "path": "examples/public-host/positive-v1.json",
-      "sha256": "sha256:e00e246208fc3d0ce677770099fffd5874f6932071103f08133cfffe61c09ab9"
+      "sha256": "sha256:d4051f8b69b6f8b94fc8a375feb3d7fd53084cb84ce283d3498b52355401527f"
     },
     {
       "path": "examples/public-host/negative-v1.json",
