@@ -404,3 +404,18 @@ let a mapper overwrite runtime internals directly.
 receipts, and pending effects. Direct internal writes bypass declaration validation
 and the atomic checkpoint boundary. A failed projection must leave both application
 rows and Determa evidence unchanged.
+
+## Recovery remains an explicit host choice
+
+Relevant specification: [§24](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation).
+
+**Decision.** A strict restore stays inert without proof of retirement. A standalone
+operator may instead create a fresh scope and namespace, retaining ambiguous work and
+source provenance with an explicit old-owner risk acknowledgement. A clone is separate
+independent execution and needs proved provider isolation. Safe relocation is an
+optional positive claim for a tested topology under one authority domain.
+
+**Reason.** Archive completeness makes state reconstructable but cannot revoke a
+remote worker or undo an accepted provider request. The new scope makes the weaker
+choice visible in identity, receipts and capability reports. A credential or timeout
+cannot supply a missing authority proof.

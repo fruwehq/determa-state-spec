@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://determa.dev/state/schema/recovery-batch-v1.schema.json",
+  "title": "Independent per-scope recovery batch result version 1",
+  "type": "object",
+  "required": [
+    "batch_format",
+    "batch_schema_version",
+    "batch_id",
+    "status",
+    "atomic_across_scopes",
+    "scope_results"
+  ],
+  "properties": {
+    "batch_format": {
+      "const": "determa.recovery_batch_result"
+    },
+    "batch_schema_version": {
+      "const": 1
+    },
+    "batch_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "succeeded",
+        "partial",
+        "refused"
+      ]
+    },
+    "atomic_across_scopes": {
+      "const": false
+    },
+    "scope_results": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "scope_identity",
+          "result"
+        ],
+        "properties": {
+          "scope_identity": {
+            "type": "string",
+            "minLength": 1
+          },
+          "result": {
+            "allOf": [
+              {
+                "$ref": "recovery-operation-v1.schema.json"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "result_format"
+                ]
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
