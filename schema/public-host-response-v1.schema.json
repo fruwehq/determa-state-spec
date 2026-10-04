@@ -260,6 +260,48 @@
                 "wrong_root"
               ]
             },
+            "authority_result": {
+              "allOf": [
+                {
+                  "$ref": "host-authority-operation-v1.schema.json#/$defs/result"
+                },
+                {
+                  "properties": {
+                    "status": {
+                      "const": "rejected"
+                    }
+                  }
+                }
+              ]
+            },
+            "effect_result": {
+              "allOf": [
+                {
+                  "$ref": "effect-result-response-v1.schema.json"
+                },
+                {
+                  "properties": {
+                    "status": {
+                      "const": "rejected"
+                    }
+                  }
+                }
+              ]
+            },
+            "cancellation_result": {
+              "allOf": [
+                {
+                  "$ref": "effect-cancellation-response-v1.schema.json"
+                },
+                {
+                  "properties": {
+                    "status": {
+                      "const": "rejected"
+                    }
+                  }
+                }
+              ]
+            },
             "archive_result": {
               "allOf": [
                 {
@@ -720,6 +762,48 @@
                   }
                 }
               }
+            },
+            {
+              "if": {
+                "required": [
+                  "authority_result"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "operation": {
+                    "const": "scope_operation"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "required": [
+                  "effect_result"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "operation": {
+                    "const": "effect_result"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "required": [
+                  "cancellation_result"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "operation": {
+                    "const": "cancel_effect"
+                  }
+                }
+              }
             }
           ]
         }
@@ -1000,6 +1084,48 @@
                   "unsupported_host_protocol",
                   "unsupported_host_protocol_version",
                   "wrong_root"
+                ]
+              },
+              "authority_result": {
+                "allOf": [
+                  {
+                    "$ref": "host-authority-operation-v1.schema.json#/$defs/result"
+                  },
+                  {
+                    "properties": {
+                      "status": {
+                        "const": "rejected"
+                      }
+                    }
+                  }
+                ]
+              },
+              "effect_result": {
+                "allOf": [
+                  {
+                    "$ref": "effect-result-response-v1.schema.json"
+                  },
+                  {
+                    "properties": {
+                      "status": {
+                        "const": "rejected"
+                      }
+                    }
+                  }
+                ]
+              },
+              "cancellation_result": {
+                "allOf": [
+                  {
+                    "$ref": "effect-cancellation-response-v1.schema.json"
+                  },
+                  {
+                    "properties": {
+                      "status": {
+                        "const": "rejected"
+                      }
+                    }
+                  }
                 ]
               },
               "archive_result": {
@@ -1462,6 +1588,246 @@
                     }
                   }
                 }
+              },
+              {
+                "if": {
+                  "required": [
+                    "authority_result"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "operation": {
+                      "const": "scope_operation"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": [
+                    "effect_result"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "operation": {
+                      "const": "effect_result"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": [
+                    "cancellation_result"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "operation": {
+                      "const": "cancel_effect"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "committed"
+          },
+          "value": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "create",
+                  "admit",
+                  "effect_result",
+                  "cancel_effect",
+                  "timer_command"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "receipt": {
+            "type": "object",
+            "required": [
+              "scope_binding_identity",
+              "operation_id",
+              "request_digest",
+              "receipt_kind",
+              "evidence_digest",
+              "acceptance_receipt"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "scope_binding_identity": {
+                "type": "string",
+                "minLength": 1
+              },
+              "operation_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "request_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "receipt_kind": {
+                "enum": [
+                  "committed",
+                  "accepted"
+                ]
+              },
+              "evidence_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "acceptance_receipt": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
+                  }
+                ]
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "receipt_kind": {
+                      "const": "accepted"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "acceptance_receipt": {
+                      "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "acceptance_receipt": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "committed"
+          },
+          "value": {
+            "properties": {
+              "operation": {
+                "const": "scope_operation"
+              },
+              "result": {
+                "properties": {
+                  "action": {
+                    "enum": [
+                      "archive_export",
+                      "archive_import"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "receipt": {
+            "type": "object",
+            "required": [
+              "scope_binding_identity",
+              "operation_id",
+              "request_digest",
+              "receipt_kind",
+              "evidence_digest",
+              "acceptance_receipt"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "scope_binding_identity": {
+                "type": "string",
+                "minLength": 1
+              },
+              "operation_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "request_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "receipt_kind": {
+                "enum": [
+                  "committed",
+                  "accepted"
+                ]
+              },
+              "evidence_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "acceptance_receipt": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
+                  }
+                ]
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "receipt_kind": {
+                      "const": "accepted"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "acceptance_receipt": {
+                      "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "acceptance_receipt": {
+                      "type": "null"
+                    }
+                  }
+                }
               }
             ]
           }
@@ -1891,7 +2257,21 @@
           "additionalProperties": false,
           "properties": {
             "result": {
-              "$ref": "effect-result-response-v1.schema.json"
+              "allOf": [
+                {
+                  "$ref": "effect-result-response-v1.schema.json"
+                },
+                {
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "committed",
+                        "report_recorded"
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           }
         }
@@ -1916,7 +2296,21 @@
           "additionalProperties": false,
           "properties": {
             "result": {
-              "$ref": "effect-cancellation-response-v1.schema.json"
+              "allOf": [
+                {
+                  "$ref": "effect-cancellation-response-v1.schema.json"
+                },
+                {
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "committed",
+                        "reconciliation_required"
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           }
         }
@@ -1995,7 +2389,18 @@
                   "const": "archive_export"
                 },
                 "archive_result": {
-                  "$ref": "archive-result-v1.schema.json"
+                  "allOf": [
+                    {
+                      "$ref": "archive-result-v1.schema.json"
+                    },
+                    {
+                      "properties": {
+                        "status": {
+                          "const": "exported"
+                        }
+                      }
+                    }
+                  ]
                 },
                 "archive": {
                   "$ref": "archive-v1.schema.json"
@@ -2014,7 +2419,18 @@
                   "const": "archive_import"
                 },
                 "archive_result": {
-                  "$ref": "archive-result-v1.schema.json"
+                  "allOf": [
+                    {
+                      "$ref": "archive-result-v1.schema.json"
+                    },
+                    {
+                      "properties": {
+                        "status": {
+                          "const": "staged"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }

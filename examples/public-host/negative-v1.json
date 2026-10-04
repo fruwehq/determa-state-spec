@@ -2917,6 +2917,205 @@
         }
       },
       "source_fixture": "examples/archives/stage-cases-v1.json#unsupported_required_determa_capability"
+    },
+    {
+      "name": "authority_stale_epoch_nested_refusal",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "commit-stale",
+        "scope_binding_identity": "binding-scope-42",
+        "operation": "scope_operation",
+        "target": {
+          "root_instance_id": null,
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "action": "authority",
+          "authority_request": {
+            "interface": "determa.host_authority",
+            "interface_version": 1,
+            "operation": "guarded_commit",
+            "operation_id": "commit-stale",
+            "scope_identity": "scope-42",
+            "expected_authority_epoch": "1",
+            "expected_scope_generation": "4",
+            "arguments": {
+              "mutation_digest": "sha256:5a74aa4a4f0dc7684ac93a01d6821babcf174526440fa2320bbf240ae4d4cae0"
+            },
+            "request_digest": "sha256:9f5a6e9bfd43695b5b6c6615f584ba202b8437a89b4ec54be6ef78ef806d0be4"
+          }
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"action\":\"authority\",\"authority_request\":{\"arguments\":{\"mutation_digest\":\"sha256:5a74aa4a4f0dc7684ac93a01d6821babcf174526440fa2320bbf240ae4d4cae0\"},\"expected_authority_epoch\":\"1\",\"expected_scope_generation\":\"4\",\"interface\":\"determa.host_authority\",\"interface_version\":1,\"operation\":\"guarded_commit\",\"operation_id\":\"commit-stale\",\"request_digest\":\"sha256:9f5a6e9bfd43695b5b6c6615f584ba202b8437a89b4ec54be6ef78ef806d0be4\",\"scope_identity\":\"scope-42\"}},\"operation\":\"scope_operation\",\"operation_id\":\"commit-stale\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-scope-42\",\"target\":{\"root_instance_id\":null,\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:6f5c8a7da2c0ab3b057f2941d3c2f1d17a8c9e250d2de27de02ff4adc90a97a1",
+      "expected_error": "stale_scope_authority",
+      "expected_response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "commit-stale",
+        "status": "rejected",
+        "receipt": null,
+        "value": null,
+        "error": {
+          "operation": "scope_operation",
+          "code": "stale_scope_authority",
+          "authority_result": {
+            "interface": "determa.host_authority",
+            "interface_version": 1,
+            "operation": "guarded_commit",
+            "operation_id": "commit-stale",
+            "status": "rejected",
+            "scope_identity": "scope-42",
+            "authority_epoch": "2",
+            "scope_generation": "4",
+            "state": "active",
+            "evidence_digest": null,
+            "error_code": "stale_scope_authority",
+            "claim": null
+          }
+        }
+      }
+    },
+    {
+      "name": "effect_result_nested_refusal",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-effect-conflict-1",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "effect_result",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": {
+          "revision": "0",
+          "checkpoint_digest": "sha256:975901b9ae81ae5eb78b0379adf596c8828911c5b793e5fbbfdf2acf504bfde4"
+        },
+        "arguments": {
+          "result": {
+            "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "operation_token": "business-order-42",
+            "attempt_fence": "1",
+            "outcome_kind": "succeeded",
+            "payload": [
+              "map",
+              [
+                [
+                  "operation_token",
+                  [
+                    "string",
+                    "business-order-42"
+                  ]
+                ],
+                [
+                  "provider_reference",
+                  [
+                    "string",
+                    "accepted-42"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "expected_journal_revision": "1"
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"expected_journal_revision\":\"1\",\"result\":{\"attempt_fence\":\"1\",\"effect_id\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"operation_token\":\"business-order-42\",\"outcome_kind\":\"succeeded\",\"payload\":[\"map\",[[\"operation_token\",[\"string\",\"business-order-42\"]],[\"provider_reference\",[\"string\",\"accepted-42\"]]]]}},\"operation\":\"effect_result\",\"operation_id\":\"op-effect-conflict-1\",\"precondition\":{\"checkpoint_digest\":\"sha256:975901b9ae81ae5eb78b0379adf596c8828911c5b793e5fbbfdf2acf504bfde4\",\"revision\":\"0\"},\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:77e7cc1d38048d33293c730582e859c399ed298c0c948046130fbce1f8bde074",
+      "expected_error": "effect_result_conflict",
+      "expected_response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-effect-conflict-1",
+        "status": "rejected",
+        "receipt": null,
+        "value": null,
+        "error": {
+          "operation": "effect_result",
+          "code": "effect_result_conflict",
+          "effect_result": {
+            "status": "rejected",
+            "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "attempt_fence": "1",
+            "attempt_report": null,
+            "outcome": null,
+            "result_event_id": null,
+            "admission_receipt": null,
+            "checkpoint_revision": null,
+            "journal_revision": null,
+            "error_code": "effect_result_conflict"
+          }
+        }
+      }
+    },
+    {
+      "name": "cancel_effect_nested_refusal",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "cancel-1",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "cancel_effect",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": {
+          "revision": "0",
+          "checkpoint_digest": "sha256:975901b9ae81ae5eb78b0379adf596c8828911c5b793e5fbbfdf2acf504bfde4"
+        },
+        "arguments": {
+          "request": {
+            "operation_id": "cancel-1",
+            "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "reason": "operator_request",
+            "payload": [
+              "map",
+              [
+                [
+                  "operation_token",
+                  [
+                    "string",
+                    "business-order-42"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "expected_journal_revision": "0"
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"expected_journal_revision\":\"0\",\"request\":{\"effect_id\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"operation_id\":\"cancel-1\",\"payload\":[\"map\",[[\"operation_token\",[\"string\",\"business-order-42\"]]]],\"reason\":\"operator_request\"}},\"operation\":\"cancel_effect\",\"operation_id\":\"cancel-1\",\"precondition\":{\"checkpoint_digest\":\"sha256:975901b9ae81ae5eb78b0379adf596c8828911c5b793e5fbbfdf2acf504bfde4\",\"revision\":\"0\"},\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:36ee7a49fae48f465b421cf040e6cfdf740f882fc64d49104d522f46aac19955",
+      "expected_error": "invalid_host_request",
+      "expected_response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "cancel-1",
+        "status": "rejected",
+        "receipt": null,
+        "value": null,
+        "error": {
+          "operation": "cancel_effect",
+          "code": "invalid_host_request",
+          "cancellation_result": {
+            "status": "rejected",
+            "operation_id": "cancel-1",
+            "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "cancellation": null,
+            "outcome": null,
+            "result_event_id": null,
+            "journal_revision": null,
+            "error_code": "invalid_host_request"
+          }
+        }
+      }
     }
   ],
   "invalid_responses": [
