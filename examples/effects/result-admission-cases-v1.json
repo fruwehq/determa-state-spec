@@ -5,7 +5,9 @@
     "worker_principal": "worker-a",
     "scope_authority_epoch": "3",
     "claim_fixture": "active-effect-claim-v1.json",
-    "journal_fixture": "leased-host-effect-journal-v1.json"
+    "journal_fixture": "leased-host-effect-journal-v1.json",
+    "trusted_host_now": "1893455999999999999",
+    "clock_basis": "unix_nanoseconds"
   },
   "cases": [
     {
@@ -417,6 +419,234 @@
         "checkpoint_revision": null,
         "journal_revision": null,
         "error_code": "unauthorized_scope"
+      },
+      "new_core_admissions": 0,
+      "mutates_checkpoint_or_journal": false
+    },
+    {
+      "name": "claim_expired_at_exact_boundary",
+      "auth_context": {
+        "scope_identity": "local-example",
+        "worker_principal": "worker-a",
+        "scope_authority_epoch": "3",
+        "trusted_host_now": "1893456000000000000",
+        "clock_basis": "unix_nanoseconds"
+      },
+      "request": {
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "operation_token": "business-order-42",
+        "attempt_fence": "1",
+        "outcome_kind": "succeeded",
+        "payload": [
+          "map",
+          [
+            [
+              "operation_token",
+              [
+                "string",
+                "business-order-42"
+              ]
+            ],
+            [
+              "provider_reference",
+              [
+                "string",
+                "accepted-42"
+              ]
+            ]
+          ]
+        ]
+      },
+      "expected_response": {
+        "status": "rejected",
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "attempt_fence": "1",
+        "attempt_report": null,
+        "outcome": null,
+        "result_event_id": null,
+        "admission_receipt": null,
+        "checkpoint_revision": null,
+        "journal_revision": null,
+        "error_code": "stale_attempt_fence"
+      },
+      "new_core_admissions": 0,
+      "mutates_checkpoint_or_journal": false
+    },
+    {
+      "name": "expired_worker_after_outcome_commit",
+      "journal_fixture": "outcome-recorded-journal-v1.json",
+      "claim_fixture": "expired-effect-claim-v1.json",
+      "auth_context": {
+        "scope_identity": "local-example",
+        "worker_principal": "worker-a",
+        "scope_authority_epoch": "3",
+        "trusted_host_now": "1893456000000000000"
+      },
+      "request": {
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "operation_token": "business-order-42",
+        "attempt_fence": "1",
+        "outcome_kind": "succeeded",
+        "payload": [
+          "map",
+          [
+            [
+              "operation_token",
+              [
+                "string",
+                "business-order-42"
+              ]
+            ],
+            [
+              "provider_reference",
+              [
+                "string",
+                "accepted-42"
+              ]
+            ]
+          ]
+        ]
+      },
+      "expected_response": {
+        "status": "rejected",
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "attempt_fence": "1",
+        "attempt_report": null,
+        "outcome": null,
+        "result_event_id": null,
+        "admission_receipt": null,
+        "checkpoint_revision": null,
+        "journal_revision": null,
+        "error_code": "stale_attempt_fence"
+      },
+      "new_core_admissions": 0,
+      "mutates_checkpoint_or_journal": false
+    },
+    {
+      "name": "old_epoch_equal_replay_after_recovery",
+      "journal_state": "result_admitted",
+      "auth_context": {
+        "scope_identity": "local-example",
+        "worker_principal": "worker-a",
+        "scope_authority_epoch": "2",
+        "trusted_host_now": "1893456000000000000"
+      },
+      "request": {
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "operation_token": "business-order-42",
+        "attempt_fence": "1",
+        "outcome_kind": "succeeded",
+        "payload": [
+          "map",
+          [
+            [
+              "operation_token",
+              [
+                "string",
+                "business-order-42"
+              ]
+            ],
+            [
+              "provider_reference",
+              [
+                "string",
+                "accepted-42"
+              ]
+            ]
+          ]
+        ]
+      },
+      "expected_response": {
+        "status": "rejected",
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "attempt_fence": "1",
+        "attempt_report": null,
+        "outcome": null,
+        "result_event_id": null,
+        "admission_receipt": null,
+        "checkpoint_revision": null,
+        "journal_revision": null,
+        "error_code": "stale_scope_authority"
+      },
+      "new_core_admissions": 0,
+      "mutates_checkpoint_or_journal": false
+    },
+    {
+      "name": "authorized_equal_replay_after_recovery",
+      "journal_state": "result_admitted",
+      "auth_context": {
+        "scope_identity": "local-example",
+        "worker_principal": "worker-a",
+        "scope_authority_epoch": "3",
+        "trusted_host_now": "1893456000000000000"
+      },
+      "request": {
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "operation_token": "business-order-42",
+        "attempt_fence": "1",
+        "outcome_kind": "succeeded",
+        "payload": [
+          "map",
+          [
+            [
+              "operation_token",
+              [
+                "string",
+                "business-order-42"
+              ]
+            ],
+            [
+              "provider_reference",
+              [
+                "string",
+                "accepted-42"
+              ]
+            ]
+          ]
+        ]
+      },
+      "expected_response": {
+        "status": "committed",
+        "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "attempt_fence": "1",
+        "attempt_report": null,
+        "outcome": {
+          "kind": "succeeded",
+          "payload": [
+            "map",
+            [
+              [
+                "operation_token",
+                [
+                  "string",
+                  "business-order-42"
+                ]
+              ],
+              [
+                "provider_reference",
+                [
+                  "string",
+                  "accepted-42"
+                ]
+              ]
+            ]
+          ],
+          "digest": "sha256:411adfe14a88d2a4b5efa9fca68f83f20da5590d49ffc95ebbd2cdcb9380f888",
+          "attempt_fence": "1"
+        },
+        "result_event_id": "sha256:8035d712d2080d33173551a8d278ea27f7e3373b18c042cc67c657589bc0574c",
+        "admission_receipt": {
+          "operation_kind": "acceptance",
+          "receipt_sequence": "1",
+          "event_id": "sha256:8035d712d2080d33173551a8d278ea27f7e3373b18c042cc67c657589bc0574c",
+          "request_digest": "sha256:c9f201a383042214477b1142b54719b90b70c0cb359a9dfc2861794d185e2d12",
+          "acceptance_sequence": "2",
+          "accepted_revision": "1",
+          "delivery_mode": "input"
+        },
+        "checkpoint_revision": "1",
+        "journal_revision": "3",
+        "error_code": null
       },
       "new_core_admissions": 0,
       "mutates_checkpoint_or_journal": false

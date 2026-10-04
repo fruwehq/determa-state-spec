@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "trusted_host_now": "1893456000000000000",
+  "clock_basis": "unix_nanoseconds",
+  "scope_identity": "local-example",
+  "scope_authority_epoch": "3",
+  "authorized_host_principal": "host-recovery",
+  "journal_fixture": "outcome-recorded-journal-v1.json",
+  "expired_claim_fixture": "expired-effect-claim-v1.json",
+  "expected_event_envelope_fixture": "effect-result-envelope-v1.json",
+  "expected_receipt": {
+    "operation_kind": "acceptance",
+    "receipt_sequence": "1",
+    "event_id": "sha256:8035d712d2080d33173551a8d278ea27f7e3373b18c042cc67c657589bc0574c",
+    "request_digest": "sha256:c9f201a383042214477b1142b54719b90b70c0cb359a9dfc2861794d185e2d12",
+    "acceptance_sequence": "2",
+    "accepted_revision": "1",
+    "delivery_mode": "input"
+  },
+  "new_worker_claims": 0,
+  "provider_calls": 0,
+  "new_core_admissions": 1,
+  "equal_recovery_retry_core_admissions": 0,
+  "requires_old_worker_claim": false
+}

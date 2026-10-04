@@ -94,6 +94,11 @@
       }
     }
   ],
-  "operation_response_references": [],
-  "host_effect_journal_digest": "sha256:d053d55f22b99b2bb4894eb29ee86be8f3eac92f957ef094c7b1694e11f8defa"
+  "operation_response_references": [
+    {
+      "operation_id": "cancel-2",
+      "response_digest": "sha256:f0f220fa070ed225cc01dc40b42923f178dd9ca7d83fb0824c7e7affa368333a"
+    }
+  ],
+  "host_effect_journal_digest": "sha256:f5d8aa6503cd0d24baa29d44a3fc8ce160f09d3fa9079d52d5507578b099d6b5"
 }

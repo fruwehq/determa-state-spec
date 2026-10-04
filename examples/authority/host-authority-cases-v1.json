@@ -180,7 +180,6 @@
         "authority_epoch": "2",
         "scope_generation": "5",
         "state": "active",
-        "evidence_digest": "sha256:5ed0ac31313c63daa622845194ca7f37a1ae601b72bd58041a60de9c781ba38b",
         "error_code": null,
         "claim": {
           "scope_identity": "scope-42",
@@ -192,9 +191,9 @@
           "attempt_fence": "4",
           "worker_principal": "worker-1",
           "expires_at": "1760000000000000000",
-          "state": "active",
-          "clock_basis": "unix_nanoseconds"
-        }
+          "state": "active"
+        },
+        "evidence_digest": "sha256:a15b033510da3247fdf35f8e1dfc52141cee2e642a1284a1352bb37131fff9a8"
       },
       "reason": "The host allocates fence 4 and expiry under the guarded journal transaction."
     },

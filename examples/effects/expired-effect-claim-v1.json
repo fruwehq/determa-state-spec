@@ -8,5 +8,5 @@
   "attempt_fence": "1",
   "worker_principal": "worker-a",
   "expires_at": "1893456000000000000",
-  "state": "active"
+  "state": "expired"
 }

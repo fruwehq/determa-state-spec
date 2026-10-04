@@ -4781,8 +4781,8 @@ previous fence for that work, chooses expiry from its own host clock and policy,
 atomically commits the new active claim, journal state, generation and operation
 receipt under the §18.3 guard. The success result's closed `claim` contains the
 scope, root, work kind/identity, operation token, current scope authority epoch,
-new attempt fence, authenticated worker principal, `clock_basis`, `expires_at` and
-`active` state. `clock_basis` is exactly `unix_nanoseconds`; `expires_at` is a
+new attempt fence, authenticated worker principal, `expires_at` and `active`
+state. The fixed host clock basis is `unix_nanoseconds`; `expires_at` is a
 canonical signed decimal Unix-epoch nanosecond value in the signed 64-bit interval
 `[-9223372036854775808, 9223372036854775807]`. `-0`, floating values and values
 outside that range reject before a claim is issued. The host selects expiry using
@@ -4918,8 +4918,11 @@ contain no duplicate fence, and no fence exceeds the record's `attempt_fence`.
 `unclaimed`, `leased`, and `ambiguous` have null outcome, result ID, and admission
 receipt; `outcome_recorded` has a terminal outcome and result ID but null admission
 receipt; `result_admitted` and `closed` have all three, with the receipt's event ID
-equal to the result ID. A terminal outcome's fence MUST name its corresponding
-immutable attempt report. Schema validity alone is insufficient for these checks.
+equal to the result ID. A terminal outcome's fence MUST name its corresponding immutable attempt report,
+except the §19.3 host-finalized preclaim `cancelled` outcome: it has fence `"0"`,
+no attempt report, and `cancellation.state: prevented_start`. No other terminal
+outcome may omit its attempt report. Schema validity alone is insufficient for
+these checks.
 Unknown journal format/version, unequal digest, dangling checkpoint reference, or
 semantic inconsistency fails closed before any dispatch or result admission.
 
@@ -4976,10 +4979,9 @@ completion does not silently erase that outstanding record or late-result policy
 The closed claim shape is `schema/host-effect-claim-v1.schema.json`. A claim has
 exactly `scope_identity`, `root_instance_id`, `work_kind`,
 `work_identity`, `operation_token`, `scope_authority_epoch`, `attempt_fence`,
-`worker_principal`, `clock_basis`, `expires_at`, and `state`. The
-active form MUST match the closed §18.4 `workerClaim` including
-`clock_basis: unix_nanoseconds` and canonical signed 64-bit Unix-epoch nanosecond
-expiry. Negative zero, float, or overflow is invalid; expiration is determined from
+`worker_principal`, `expires_at`, and `state`. The active form MUST match
+the closed ten-field §18.4 `workerClaim` with canonical signed 64-bit Unix-epoch
+nanosecond expiry. Negative zero, float, or overflow is invalid; expiration is determined from
 trusted host time at `now >= expires_at`, and unavailable trusted time fails closed.
 `scope_authority_epoch` MUST equal the current §18 `authority_epoch`; a numeric
 match alone is not a credential. For this journal `work_kind` is
@@ -5025,11 +5027,32 @@ attempt_fence])`. Attempt reports remain separate evidence.
 
 Cancellation is null or exactly `operation_id`, `reason`, and `state`, where state is
 `requested`, `prevented_start`, `too_late`, or `reconciliation_required`. Cancellation
-and outcome recording serialize. A cancellation that wins before a claim sets `prevented_start` and forever
-forbids another claim or provider start for that effect. After a call might have
-occurred, cancellation cannot claim rollback or erase ambiguity. A recorded outcome wins over later cancellation; a late report
-cannot replace it. Equal cancellation replays; a changed request requires a distinct
-authorized operation and cannot rewrite an immutable outcome.
+and outcome recording serialize. The closed
+`schema/effect-cancellation-request-v1.schema.json` has exactly `operation_id`,
+`effect_id`, `reason`, and typed `payload`; authenticated scope and principal are
+transport context. The closed response is
+`schema/effect-cancellation-response-v1.schema.json`. It serializes
+with claim issuance and outcome recording under the current §18 scope guard. The
+`operation_id` and exact normalized request are retained for equal replay or
+`operation_id_conflict`; equal replay returns the exact retained response bytes
+without mutation. The host validates the request payload against the pinned
+`cancelled` event declaration and inserts or verifies the exact pinned token. If it wins before any claim, the host MUST require an exact
+pinned `cancelled` result mapping and a valid declared result payload. In one durable
+journal transaction it records `cancellation.state: prevented_start`, an immutable
+`cancelled` outcome with fence `"0"`, and the deterministic mapped result event ID;
+invocation state becomes `outcome_recorded`. No worker attempt or provider call is
+made, and no later claim may issue for this effect. The host then admits the pinned
+`cancelled` event through §19.4, in an independent atomic checkpoint/journal
+transaction. Crash recovery resumes that admission from the stored outcome. If no
+declared `cancelled` mapping exists, cancellation fails before mutation; the host
+MUST NOT invent an event or leave an unclaimable `unclaimed` invocation. After a call might have occurred, cancellation records
+`reconciliation_required` and returns the closed response status of the same name
+with null outcome and result ID. Its request and response digest are retained in
+`operation_response_references`; equal replay returns identical bytes. The host
+cannot claim rollback or erase ambiguity. A recorded outcome wins over later
+cancellation; a late report cannot replace it. Equal cancellation returns retained
+operation evidence without mutation; a changed request cannot rewrite an immutable
+outcome.
 
 ### 19.4 Authenticated result submission and admission
 
@@ -5037,17 +5060,18 @@ The closed request shape is `schema/effect-result-request-v1.schema.json`; the
 closed response shape is `schema/effect-result-response-v1.schema.json`. The
 result request contains exactly `effect_id`, `operation_token`,
 `attempt_fence`, `outcome_kind`, and `payload`. The authenticated transport context
-supplies principal and scope independently of those fields. Before a fresh report,
-outcome, or core admission the host validates the current
-authority epoch, active claim and fence, authenticated worker principal, exact scope
-and pinned route, outstanding invocation, exact token, allowed outcome and declared
-portable payload. It computes the immutable attempt report digest from the
-normalized request and reason, then records that report with the outcome when
-terminal. A subsequent equal replay requires current scope and principal
+supplies principal and scope independently of those fields. Before a fresh worker report or outcome commit the host validates the current
+authority epoch, live unexpired claim and fence at trusted host time, authenticated
+worker principal, exact scope and pinned route, outstanding invocation, exact token,
+allowed outcome and declared portable payload. It computes the immutable attempt
+report digest from the normalized request and reason, then records that report with
+the outcome when terminal. The worker check remains true through the outcome commit;
+an expired or revoked claim cannot create a fresh outcome. A subsequent equal replay requires current scope and principal
 authorization, exact retained request/outcome evidence, and the original authenticated
 claim principal; it does not require reviving an expired claim or admitting again.
-An old authority epoch never gains replay rights across a scope transfer. A wrong
-business token or unknown/closed unrelated invocation returns
+An old authority epoch never gains replay rights across a scope transfer. An expired or revoked worker claim returns `stale_attempt_fence` before any
+worker-originated outcome commit or core admission. A wrong business token or
+unknown/closed unrelated invocation returns
 `effect_not_outstanding`; a stale fence returns `stale_attempt_fence`; conflicting
 content for an already recorded outcome returns `effect_result_conflict`. Validation
 failure performs no core call and changes no checkpoint, journal, or outbox bytes.
@@ -5067,9 +5091,17 @@ For a terminal mapped outcome, result event identity is
 `hash(["determa-effect-result-event-1", effect_id, result_slot])`. The host builds
 the full normalized input envelope from the pinned event, target and token mapping,
 including the declared result payload. Its identity and bytes are immutable across
-transport retry or response loss. The host persists the outcome first; after a crash
-it resumes admission from that exact outcome without calling the provider again.
-Admission and journal `admission_receipt` commit atomically. The receipt is the exact
+transport retry or response loss. The host persists the outcome first.
+Admission of an already committed
+`outcome_recorded` result is a host-owned recovery operation: it requires the current
+authorized scope and §18 guarded commit, validates the immutable journal outcome,
+pinned route, target incarnation, declared result schema, token mapping, deterministic
+event ID and complete envelope against the stored evidence, and admits that exact
+event. It does not require the old worker claim to remain live, create a new claim,
+or call the provider. A host-finalized preclaim `cancelled` outcome uses the same
+path. After a crash, even if the old claim expired, recovery resumes this operation
+from the stored outcome. Admission and journal `admission_receipt` commit
+atomically. The receipt is the exact
 §17 accepted event receipt; it records the result event identity. Processing is a
 later independent core operation. Equal submission returns retained outcome/admission
 evidence without new core admission; unequal envelope or outcome is

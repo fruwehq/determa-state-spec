@@ -1,0 +1,14 @@
+{
+  "status": "reconciliation_required",
+  "operation_id": "cancel-2",
+  "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "cancellation": {
+    "operation_id": "cancel-2",
+    "reason": "operator_request",
+    "state": "reconciliation_required"
+  },
+  "outcome": null,
+  "result_event_id": null,
+  "journal_revision": "3",
+  "error_code": null
+}

@@ -1,0 +1,17 @@
+{
+  "operation_id": "cancel-1",
+  "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "reason": "operator_request",
+  "payload": [
+    "map",
+    [
+      [
+        "operation_token",
+        [
+          "string",
+          "business-order-42"
+        ]
+      ]
+    ]
+  ]
+}
