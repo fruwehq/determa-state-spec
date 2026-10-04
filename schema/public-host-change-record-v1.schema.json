@@ -1,0 +1,93 @@
+{
+  "type": "object",
+  "required": [
+    "record_format",
+    "record_schema_version",
+    "issue",
+    "old_protocol_fingerprint",
+    "proposed_protocol_fingerprint",
+    "manifest_fingerprint",
+    "affected_capabilities",
+    "cross_language_fixture_matrix"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "record_format": {
+      "const": "determa.public_host_compatibility_change"
+    },
+    "record_schema_version": {
+      "const": 1
+    },
+    "issue": {
+      "type": "string",
+      "minLength": 1
+    },
+    "old_protocol_fingerprint": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      ]
+    },
+    "proposed_protocol_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "manifest_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "affected_capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "cross_language_fixture_matrix": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": [
+          "consumer",
+          "positive",
+          "negative",
+          "rule"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "consumer": {
+            "enum": [
+              "Python embedded client",
+              "Rust embedded client",
+              "local reference host",
+              "future hosted service"
+            ]
+          },
+          "positive": {
+            "type": "string",
+            "minLength": 1
+          },
+          "negative": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rule": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://determa.dev/state/schema/public-host-change-record-v1.schema.json",
+  "title": "Determa State public host compatibility change record version 1"
+}

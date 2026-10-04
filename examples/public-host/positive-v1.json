@@ -4,35 +4,46 @@
     {
       "name": "create_committed",
       "request": {
+        "protocol": "determa.execution_host",
         "protocol_version": 1,
-        "binding_id": "local",
-        "scope_id": "scope-example",
-        "root_instance_id": "job-42",
-        "operation": "create",
         "operation_id": "op-create-1",
-        "body": {
+        "scope_binding_identity": "binding-local-1",
+        "operation": "create",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
           "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
           "namespace": "example.persistence",
           "machine_id": "job",
           "machine_version": "1",
+          "root_instance_id": "job-42",
           "creation_id": "create-1",
           "bindings": [
             "map",
             []
           ]
-        },
-        "request_digest": "sha256:dd2e46f4bfbef896943f147b9a26a0d3496aa378ebd34b502883b3763a71165f"
+        }
       },
-      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"binding_id\":\"local\",\"body\":{\"bindings\":[\"map\",[]],\"creation_id\":\"create-1\",\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"operation\":\"create\",\"operation_id\":\"op-create-1\",\"protocol_version\":1,\"root_instance_id\":\"job-42\",\"scope_id\":\"scope-example\"}]",
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"bindings\":[\"map\",[]],\"creation_id\":\"create-1\",\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_instance_id\":\"job-42\",\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"operation\":\"create\",\"operation_id\":\"op-create-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:ee59aecee759f5bd67d9d2191a71e4d476a4a5f3cc62f6bace3fc7157a22d71d",
       "response": {
+        "protocol": "determa.execution_host",
         "protocol_version": 1,
-        "operation": "create",
-        "binding_id": "local",
-        "scope_id": "scope-example",
-        "root_instance_id": "job-42",
         "operation_id": "op-create-1",
-        "body": {
-          "status": "committed",
+        "status": "committed",
+        "receipt": {
+          "scope_binding_identity": "binding-local-1",
+          "operation_id": "op-create-1",
+          "request_digest": "sha256:ee59aecee759f5bd67d9d2191a71e4d476a4a5f3cc62f6bace3fc7157a22d71d",
+          "receipt_kind": "committed",
+          "evidence_digest": "sha256:43c548692bba1b63ad450099e5990a5c649e1def6441c6512b99f2ba4c61d6b5"
+        },
+        "value": {
+          "operation": "create",
           "result": {
             "checkpoint": {
               "execution_checkpoint_format": "determa.execution_checkpoint",
@@ -147,7 +158,7 @@
               "migration_audit_records": [],
               "execution_checkpoint_digest": "sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f"
             },
-            "receipt": {
+            "creation_receipt": {
               "operation_kind": "creation",
               "receipt_sequence": "0",
               "creation_id": "create-1",
@@ -163,33 +174,39 @@
             "lifecycle_dispositions": [],
             "fault": null
           }
-        }
+        },
+        "error": null
       }
     },
     {
       "name": "read_existing_checkpoint",
       "request": {
+        "protocol": "determa.execution_host",
         "protocol_version": 1,
-        "binding_id": "local",
-        "scope_id": "scope-example",
-        "root_instance_id": "job-42",
-        "operation": "read",
         "operation_id": "op-read-1",
-        "body": {
-          "expected_checkpoint_digest": "sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f"
+        "scope_binding_identity": "binding-local-1",
+        "operation": "read",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
         },
-        "request_digest": "sha256:2db73a2bb962d12a457fb97deae6a8c390f1adf962a3f5e397356d29638b92b4"
+        "precondition": {
+          "revision": "0",
+          "checkpoint_digest": "sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f"
+        },
+        "arguments": {}
       },
-      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"binding_id\":\"local\",\"body\":{\"expected_checkpoint_digest\":\"sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f\"},\"operation\":\"read\",\"operation_id\":\"op-read-1\",\"protocol_version\":1,\"root_instance_id\":\"job-42\",\"scope_id\":\"scope-example\"}]",
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{},\"operation\":\"read\",\"operation_id\":\"op-read-1\",\"precondition\":{\"checkpoint_digest\":\"sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f\",\"revision\":\"0\"},\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:51d22c4a8887865b5f8b4b5e2e6cc7841721ad9b1cc9f184d30f8aec6ad1e064",
       "response": {
+        "protocol": "determa.execution_host",
         "protocol_version": 1,
-        "operation": "read",
-        "binding_id": "local",
-        "scope_id": "scope-example",
-        "root_instance_id": "job-42",
         "operation_id": "op-read-1",
-        "body": {
-          "status": "committed",
+        "status": "committed",
+        "receipt": null,
+        "value": {
+          "operation": "read",
           "result": {
             "checkpoint": {
               "execution_checkpoint_format": "determa.execution_checkpoint",
@@ -306,7 +323,231 @@
             },
             "observed_checkpoint_digest": "sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f"
           }
+        },
+        "error": null
+      }
+    },
+    {
+      "name": "inspect_absent_target_in_checkpoint",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-inspect-1",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "inspect",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "runtime_incarnation": {
+            "kind": "root",
+            "definition": {
+              "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+              "machine": {
+                "namespace": "example.persistence",
+                "machine_id": "job",
+                "machine_version": "1",
+                "root_definition_pointer": "/machines/0/root"
+              }
+            },
+            "root_instance_id": "job-42"
+          }
+        },
+        "precondition": {
+          "revision": "0",
+          "checkpoint_digest": "sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f"
+        },
+        "arguments": {
+          "candidate": {
+            "mode": "structural",
+            "aggregate_state_digest": "sha256:c401a9a5534d2dc17520ac6c9d672e611c2baaf35f120a0ec00d4f608291a81e",
+            "runtime_id": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "runtime_incarnation": {
+              "kind": "root",
+              "definition": {
+                "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+                "machine": {
+                  "namespace": "example.persistence",
+                  "machine_id": "job",
+                  "machine_version": "1",
+                  "root_definition_pointer": "/machines/0/root"
+                }
+              },
+              "root_instance_id": "job-42"
+            },
+            "envelope": {
+              "event": "arrive",
+              "event_id": "probe-1",
+              "cause_id": "probe-1",
+              "source": {
+                "host": true
+              },
+              "target": {
+                "root": {
+                  "root_instance_id": "job-42",
+                  "root_runtime_id": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                }
+              },
+              "payload": [
+                "map",
+                []
+              ]
+            },
+            "limits": null
+          }
         }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"candidate\":{\"aggregate_state_digest\":\"sha256:c401a9a5534d2dc17520ac6c9d672e611c2baaf35f120a0ec00d4f608291a81e\",\"envelope\":{\"cause_id\":\"probe-1\",\"event\":\"arrive\",\"event_id\":\"probe-1\",\"payload\":[\"map\",[]],\"source\":{\"host\":true},\"target\":{\"root\":{\"root_instance_id\":\"job-42\",\"root_runtime_id\":\"sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\"}}},\"limits\":null,\"mode\":\"structural\",\"runtime_id\":\"sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"runtime_incarnation\":{\"definition\":{\"machine\":{\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_definition_pointer\":\"/machines/0/root\"},\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"kind\":\"root\",\"root_instance_id\":\"job-42\"}}},\"operation\":\"inspect\",\"operation_id\":\"op-inspect-1\",\"precondition\":{\"checkpoint_digest\":\"sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f\",\"revision\":\"0\"},\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":\"sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"runtime_incarnation\":{\"definition\":{\"machine\":{\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_definition_pointer\":\"/machines/0/root\"},\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"kind\":\"root\",\"root_instance_id\":\"job-42\"}}}]",
+      "request_digest": "sha256:536777c82b3b2f5d93e3ce00d2adcd94984e8a34c68d6c2c6b131d2973dffa2f",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-inspect-1",
+        "status": "committed",
+        "receipt": null,
+        "value": {
+          "operation": "inspect",
+          "result": {
+            "outcome": {
+              "aggregate_state_digest": "sha256:c401a9a5534d2dc17520ac6c9d672e611c2baaf35f120a0ec00d4f608291a81e",
+              "definition_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+              "runtime_id": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "runtime_incarnation": {
+                "kind": "root",
+                "definition": {
+                  "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+                  "machine": {
+                    "namespace": "example.persistence",
+                    "machine_id": "job",
+                    "machine_version": "1",
+                    "root_definition_pointer": "/machines/0/root"
+                  }
+                },
+                "root_instance_id": "job-42"
+              },
+              "classification": "definitive",
+              "possible_dispositions": [
+                "invalid"
+              ],
+              "disposition": "invalid",
+              "reason": "target_not_found",
+              "levels": [],
+              "guard_evidence": []
+            },
+            "observed_checkpoint_digest": "sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f"
+          }
+        },
+        "error": null
+      }
+    },
+    {
+      "name": "committed_effect_result_binding",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-effect-result-1",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "effect_result",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": {
+          "revision": "0",
+          "checkpoint_digest": "sha256:975901b9ae81ae5eb78b0379adf596c8828911c5b793e5fbbfdf2acf504bfde4"
+        },
+        "arguments": {
+          "result": {
+            "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "operation_token": "business-order-42",
+            "attempt_fence": "1",
+            "outcome_kind": "succeeded",
+            "payload": [
+              "map",
+              [
+                [
+                  "operation_token",
+                  [
+                    "string",
+                    "business-order-42"
+                  ]
+                ],
+                [
+                  "provider_reference",
+                  [
+                    "string",
+                    "accepted-42"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "expected_journal_revision": "1"
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"expected_journal_revision\":\"1\",\"result\":{\"attempt_fence\":\"1\",\"effect_id\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"operation_token\":\"business-order-42\",\"outcome_kind\":\"succeeded\",\"payload\":[\"map\",[[\"operation_token\",[\"string\",\"business-order-42\"]],[\"provider_reference\",[\"string\",\"accepted-42\"]]]]}},\"operation\":\"effect_result\",\"operation_id\":\"op-effect-result-1\",\"precondition\":{\"checkpoint_digest\":\"sha256:975901b9ae81ae5eb78b0379adf596c8828911c5b793e5fbbfdf2acf504bfde4\",\"revision\":\"0\"},\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:a4ee1de42fa4c8104b2550de14cb65992cf3c519035ff3fb0a96cf40a0c40800",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-effect-result-1",
+        "status": "committed",
+        "receipt": {
+          "scope_binding_identity": "binding-local-1",
+          "operation_id": "op-effect-result-1",
+          "request_digest": "sha256:a4ee1de42fa4c8104b2550de14cb65992cf3c519035ff3fb0a96cf40a0c40800",
+          "receipt_kind": "committed",
+          "evidence_digest": "sha256:7766bfcc3706054fa4a6d96058f39ec47cf16080b2d8946e796563733165dc31"
+        },
+        "value": {
+          "operation": "effect_result",
+          "result": {
+            "result": {
+              "status": "committed",
+              "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "attempt_fence": "1",
+              "attempt_report": null,
+              "outcome": {
+                "kind": "succeeded",
+                "payload": [
+                  "map",
+                  [
+                    [
+                      "operation_token",
+                      [
+                        "string",
+                        "business-order-42"
+                      ]
+                    ],
+                    [
+                      "provider_reference",
+                      [
+                        "string",
+                        "accepted-42"
+                      ]
+                    ]
+                  ]
+                ],
+                "digest": "sha256:411adfe14a88d2a4b5efa9fca68f83f20da5590d49ffc95ebbd2cdcb9380f888",
+                "attempt_fence": "1"
+              },
+              "result_event_id": "sha256:8035d712d2080d33173551a8d278ea27f7e3373b18c042cc67c657589bc0574c",
+              "admission_receipt": {
+                "operation_kind": "acceptance",
+                "receipt_sequence": "1",
+                "event_id": "sha256:8035d712d2080d33173551a8d278ea27f7e3373b18c042cc67c657589bc0574c",
+                "request_digest": "sha256:c9f201a383042214477b1142b54719b90b70c0cb359a9dfc2861794d185e2d12",
+                "acceptance_sequence": "2",
+                "accepted_revision": "1",
+                "delivery_mode": "input"
+              },
+              "checkpoint_revision": "1",
+              "journal_revision": "3",
+              "error_code": null
+            }
+          }
+        },
+        "error": null
       }
     }
   ]

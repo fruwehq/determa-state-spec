@@ -404,3 +404,29 @@ let a mapper overwrite runtime internals directly.
 receipts, and pending effects. Direct internal writes bypass declaration validation
 and the atomic checkpoint boundary. A failed projection must leave both application
 rows and Determa evidence unchanged.
+
+## Public host requests pin their resolved binding
+
+Relevant specification: [§25](SPEC.md#25-public-client-and-execution-host-protocol).
+
+**Decision.** Version-1 public requests use the closed `protocol`, `protocol_version`,
+`operation_id`, `scope_binding_identity`, `operation`, `target`, `precondition`,
+`arguments` envelope. Responses use `protocol`, `protocol_version`,
+`operation_id`, `status`, `receipt`, `value`, `error`. The client saves the resolved endpoint/scope
+binding and canonical request before the first mutation. A lost response is resolved
+only at that binding with the same host operation ID and request digest. The host
+retains the complete first response while it claims operation replay. Discovery,
+inspection, history, response replay, and re-execution are separate capabilities.
+
+**Reason.** Endpoint aliases and current state can change after a commit. Resolving a
+retry against a new alias could run a second operation in a different authority;
+a digest or missing receipt alone cannot reconstruct the original response or prove
+rollback. The same public model works for the local reference host and a later hosted
+service without placing endpoint configuration in the machine definition.
+
+**Review guidance.** Exercise alias replacement after a response loss, equal and
+unequal operation-ID replay, unauthorized scope before root lookup, expired receipt
+ambiguity, the full checkpoint and receipt in the first response, and capability
+refusal before mutation. Check embedded clients and the reference host against the
+same golden request/response bytes. Require exact re-execution comparisons only
+when the complete provider closure is deterministic and portable.

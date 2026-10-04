@@ -4,124 +4,237 @@
     {
       "name": "same_operation_changed_body",
       "request": {
+        "protocol": "determa.execution_host",
         "protocol_version": 1,
-        "binding_id": "local",
-        "scope_id": "scope-example",
-        "root_instance_id": "job-42",
-        "operation": "create",
         "operation_id": "op-create-1",
-        "body": {
+        "scope_binding_identity": "binding-local-1",
+        "operation": "create",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
           "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
           "namespace": "example.persistence",
           "machine_id": "job",
           "machine_version": "1",
+          "root_instance_id": "job-42",
           "creation_id": "changed",
           "bindings": [
             "map",
             []
           ]
-        },
-        "request_digest": "sha256:dd2e46f4bfbef896943f147b9a26a0d3496aa378ebd34b502883b3763a71165f"
+        }
       },
-      "expected_error": "request_digest_mismatch"
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"bindings\":[\"map\",[]],\"creation_id\":\"changed\",\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_instance_id\":\"job-42\",\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"operation\":\"create\",\"operation_id\":\"op-create-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:47c1bf993e756783140b99ed57a92d931600de51bf6e5b6729a23a5be1652794",
+      "expected_error": "operation_id_conflict",
+      "expected_response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-create-1",
+        "status": "rejected",
+        "receipt": null,
+        "value": null,
+        "error": {
+          "operation": "create",
+          "code": "operation_id_conflict"
+        }
+      }
     },
     {
       "name": "unknown_envelope_field",
       "request": {
+        "protocol": "determa.execution_host",
         "protocol_version": 1,
-        "binding_id": "local",
-        "scope_id": "scope-example",
-        "root_instance_id": "job-42",
-        "operation": "create",
         "operation_id": "op-create-1",
-        "body": {
+        "scope_binding_identity": "binding-local-1",
+        "operation": "create",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
           "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
           "namespace": "example.persistence",
           "machine_id": "job",
           "machine_version": "1",
+          "root_instance_id": "job-42",
           "creation_id": "create-1",
           "bindings": [
             "map",
             []
           ]
         },
-        "request_digest": "sha256:dd2e46f4bfbef896943f147b9a26a0d3496aa378ebd34b502883b3763a71165f",
         "extra": 1
       },
-      "expected_error": "invalid_request"
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"bindings\":[\"map\",[]],\"creation_id\":\"create-1\",\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_instance_id\":\"job-42\",\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"extra\":1,\"operation\":\"create\",\"operation_id\":\"op-create-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:51ac4a5f62b0ccdf4ae1af12fe6a90306a1d4741ed150851d5f395a235c548fb",
+      "expected_error": "invalid_request",
+      "expected_response": null
     },
     {
       "name": "unknown_protocol_version",
       "request": {
+        "protocol": "determa.execution_host",
         "protocol_version": 2,
-        "binding_id": "local",
-        "scope_id": "scope-example",
-        "root_instance_id": "job-42",
-        "operation": "create",
         "operation_id": "op-create-1",
-        "body": {
+        "scope_binding_identity": "binding-local-1",
+        "operation": "create",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
           "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
           "namespace": "example.persistence",
           "machine_id": "job",
           "machine_version": "1",
+          "root_instance_id": "job-42",
           "creation_id": "create-1",
           "bindings": [
             "map",
             []
           ]
-        },
-        "request_digest": "sha256:dd2e46f4bfbef896943f147b9a26a0d3496aa378ebd34b502883b3763a71165f"
+        }
       },
-      "expected_error": "invalid_request"
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"bindings\":[\"map\",[]],\"creation_id\":\"create-1\",\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_instance_id\":\"job-42\",\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"operation\":\"create\",\"operation_id\":\"op-create-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":2,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:0145bc84f13593a6e835e700f0760e60c3dd345ad21086d3041aece8a9fba92a",
+      "expected_error": "invalid_request",
+      "expected_response": null
     },
     {
       "name": "invalid_typed_bindings",
       "request": {
+        "protocol": "determa.execution_host",
         "protocol_version": 1,
-        "binding_id": "local",
-        "scope_id": "scope-example",
-        "root_instance_id": "job-42",
-        "operation": "create",
         "operation_id": "op-create-1",
-        "body": {
+        "scope_binding_identity": "binding-local-1",
+        "operation": "create",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
           "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
           "namespace": "example.persistence",
           "machine_id": "job",
           "machine_version": "1",
+          "root_instance_id": "job-42",
           "creation_id": "create-1",
           "bindings": [
             "map",
             [],
             null
           ]
-        },
-        "request_digest": "sha256:dd2e46f4bfbef896943f147b9a26a0d3496aa378ebd34b502883b3763a71165f"
+        }
       },
-      "expected_error": "invalid_request"
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"bindings\":[\"map\",[],null],\"creation_id\":\"create-1\",\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_instance_id\":\"job-42\",\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"operation\":\"create\",\"operation_id\":\"op-create-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:94ca7ac982dc8fe8e5cc53940c88d5ffa67ec0382c01718b2c560bef981b8cd0",
+      "expected_error": "invalid_request",
+      "expected_response": null
     },
     {
       "name": "unauthorized_scope_precedes_existence",
       "request": {
+        "protocol": "determa.execution_host",
         "protocol_version": 1,
-        "binding_id": "local",
-        "scope_id": "another-scope",
-        "root_instance_id": "job-42",
-        "operation": "create",
         "operation_id": "op-create-1",
-        "body": {
+        "scope_binding_identity": "unauthorized-binding",
+        "operation": "create",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
           "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
           "namespace": "example.persistence",
           "machine_id": "job",
           "machine_version": "1",
+          "root_instance_id": "job-42",
           "creation_id": "create-1",
           "bindings": [
             "map",
             []
           ]
-        },
-        "request_digest": "sha256:dd2e46f4bfbef896943f147b9a26a0d3496aa378ebd34b502883b3763a71165f"
+        }
       },
-      "expected_error": "transport_access_denied"
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"bindings\":[\"map\",[]],\"creation_id\":\"create-1\",\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_instance_id\":\"job-42\",\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"operation\":\"create\",\"operation_id\":\"op-create-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"unauthorized-binding\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:26146fbd9ecee639d168b503177d5e3ec262766087e0874e5f4110d6b088d34e",
+      "expected_error": "transport_access_denied",
+      "expected_response": null
+    },
+    {
+      "name": "stale_effect_attempt",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-effect-stale-1",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "effect_result",
+        "target": {
+          "root_instance_id": "job-42",
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": {
+          "revision": "0",
+          "checkpoint_digest": "sha256:975901b9ae81ae5eb78b0379adf596c8828911c5b793e5fbbfdf2acf504bfde4"
+        },
+        "arguments": {
+          "result": {
+            "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "operation_token": "business-order-42",
+            "attempt_fence": "0",
+            "outcome_kind": "succeeded",
+            "payload": [
+              "map",
+              [
+                [
+                  "operation_token",
+                  [
+                    "string",
+                    "business-order-42"
+                  ]
+                ],
+                [
+                  "provider_reference",
+                  [
+                    "string",
+                    "accepted-42"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "expected_journal_revision": "1"
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"expected_journal_revision\":\"1\",\"result\":{\"attempt_fence\":\"0\",\"effect_id\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"operation_token\":\"business-order-42\",\"outcome_kind\":\"succeeded\",\"payload\":[\"map\",[[\"operation_token\",[\"string\",\"business-order-42\"]],[\"provider_reference\",[\"string\",\"accepted-42\"]]]]}},\"operation\":\"effect_result\",\"operation_id\":\"op-effect-stale-1\",\"precondition\":{\"checkpoint_digest\":\"sha256:975901b9ae81ae5eb78b0379adf596c8828911c5b793e5fbbfdf2acf504bfde4\",\"revision\":\"0\"},\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:e21047cdd206446f067bd2d7c3c9e248cf94b000aef5ddec4025c99547207698",
+      "expected_error": "stale_attempt_fence",
+      "expected_response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-effect-stale-1",
+        "status": "rejected",
+        "receipt": null,
+        "value": null,
+        "error": {
+          "operation": "effect_result",
+          "code": "stale_attempt_fence"
+        }
+      }
     }
   ]
 }

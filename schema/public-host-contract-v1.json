@@ -1,0 +1,227 @@
+{
+  "manifest_format": "determa.public_host_contract",
+  "manifest_schema_version": 1,
+  "protocol": "determa.execution_host",
+  "protocol_version": 1,
+  "state_semver": "0.3.0",
+  "fingerprint_algorithm": "sha256(raw UTF-8 file bytes)",
+  "boundary_sources": [
+    {
+      "path": "SPEC.md",
+      "sha256": "sha256:a605d5be4a80758d4832b8b1b4ff1102b8136dad44b6426d54c9de01d8ff1c5d"
+    },
+    {
+      "path": "VERSION",
+      "sha256": "sha256:d915cc95d6ca8f47ae297713ed46d4e5c5d99ddd29fc3c61e263bdf305f2b5b0"
+    },
+    {
+      "path": "schema/aggregate-state-package-v1.schema.json",
+      "sha256": "sha256:2146670d7b1cece9a2be53caaf8506b58a0a11e6fa67c42212e75c153945fc2b"
+    },
+    {
+      "path": "schema/aggregate-state-v1.schema.json",
+      "sha256": "sha256:7cf0eda1199ba1cfc63dc9c6c4daea9e69e502ecbb1c60570d527a6487e82d92"
+    },
+    {
+      "path": "schema/compilation-manifest-v1.schema.json",
+      "sha256": "sha256:6b670c09afd0f6c9286e40122c8a48027066e2c259bc845dfbcbb814e3975900"
+    },
+    {
+      "path": "schema/core-step-result-v1.schema.json",
+      "sha256": "sha256:8fd0fa85d1fbad63b94f1fa1c52d7fe5f1ed2f22c773bfad47b91611d4837b08"
+    },
+    {
+      "path": "schema/execution-checkpoint-v1.schema.json",
+      "sha256": "sha256:97669ab05319bad0af8af5f6bd29e0a6d8f3b2799725b0c987184e2aa11ff8bf"
+    },
+    {
+      "path": "schema/extension-capability-report-v1.schema.json",
+      "sha256": "sha256:9d3857e00984a4071f81ec110cf08fd31ff070d3d753d5e14e77442f981b8f76"
+    },
+    {
+      "path": "schema/extension-capability-requirement-v1.schema.json",
+      "sha256": "sha256:9c8c6b3120cac8c9a6719b2ec38a156739361a535081331f6d3699937fac4912"
+    },
+    {
+      "path": "schema/extension-descriptor-v1.schema.json",
+      "sha256": "sha256:0468386248ace0b1553f58d1f8699a73e4ccd2e15785e7d7b49044cace9505c8"
+    },
+    {
+      "path": "schema/host-authority-operation-v1.schema.json",
+      "sha256": "sha256:f12c61ad94c5b611c877dcff57402cad003847aeb4c0beb59df34383f40845aa"
+    },
+    {
+      "path": "schema/host-authority-profile-report-v1.schema.json",
+      "sha256": "sha256:1053a305fbd63907a3c62c8c5b4d52d401fe48374eba4d362e653b8cdeefbe36"
+    },
+    {
+      "path": "schema/inspection-v1.schema.json",
+      "sha256": "sha256:64ea87191400ed54921d1570718064d60ee0c62cbad4f784e3fafb9252b8966d"
+    },
+    {
+      "path": "schema/language-source-v1.schema.json",
+      "sha256": "sha256:1e692df3fb69a5ab3d152d233edf8c9024570bec6145dda8041f577f365e8f33"
+    },
+    {
+      "path": "schema/machine.schema.json",
+      "sha256": "sha256:bf9cbdf7f16ffc82e877a3d86214db1f0180a368651dba70beb1f810a3767a85"
+    },
+    {
+      "path": "schema/migration-descriptor-v1.schema.json",
+      "sha256": "sha256:54b9dd0183beae5b1bfc39d69b12dd5d3de3d34bf4ca6c6ecacc522e00a55ccd"
+    },
+    {
+      "path": "schema/provider-reference-v1.schema.json",
+      "sha256": "sha256:48e4e4c750e8943a957f1ad96b825a25197cb1e992025fb0958ebbf1935d9d1e"
+    },
+    {
+      "path": "schema/public-host-change-record-v1.schema.json",
+      "sha256": "sha256:8cd90cb7b8ac62c026e6981fde7a2cc0f25b195db006f1b392e4b68e59bdc09a"
+    },
+    {
+      "path": "schema/public-host-contract-v1.schema.json",
+      "sha256": "sha256:830437bdc871d3bd73b4a78490237b3892c70dd96bbfddd129befdaf89f378a8"
+    },
+    {
+      "path": "schema/public-host-request-v1.schema.json",
+      "sha256": "sha256:3cf22c220d4862808846be97330e008ac403067727ddeeca58429ac083faa6a2"
+    },
+    {
+      "path": "schema/public-host-response-v1.schema.json",
+      "sha256": "sha256:3c4e679b119faf3b4a1aa48e726df0d43889ece1c24f5aec1963d74d2d3630eb"
+    },
+    {
+      "path": "schema/runtime-action-output-v1.schema.json",
+      "sha256": "sha256:a03e288f2e050af090558eadf1bf401c97b02ee36e143929f71fce859c0c3bfc"
+    },
+    {
+      "path": "schema/runtime-provider-descriptor-v1.schema.json",
+      "sha256": "sha256:80df468f2ff70e6d1dd1fa2949e5cf6a292f815af4bf8f019211897b4a7bc9ea"
+    },
+    {
+      "path": "examples/persistence/execution-checkpoint-v1.json",
+      "sha256": "sha256:a9138981fd204db476fc3b2c66c66c6aa87bf454ae2153bc4053918d487a10d0"
+    },
+    {
+      "path": "examples/inspection/shape-and-precedence-v1.json",
+      "sha256": "sha256:372ff68ccdcd0816978844b381014988726511f425d99bcba4734233998f6bc5"
+    },
+    {
+      "path": "examples/public-host/positive-v1.json",
+      "sha256": "sha256:5a946a4eecdaf675b9ed4bc51f0a886a51a55ea1b2b21f0b18d1d5c1430a2b12"
+    },
+    {
+      "path": "examples/public-host/negative-v1.json",
+      "sha256": "sha256:9069fd3e0b0dc1039e80bf99ef631c9c9a999636aa7aa64a41dc5294649aec6d"
+    }
+  ],
+  "hash_domains": [
+    {
+      "name": "determa-public-host-request-digest-1",
+      "source": "SPEC.md#25.2"
+    },
+    {
+      "name": "determa-public-host-evidence-1",
+      "source": "SPEC.md#25.2"
+    },
+    {
+      "name": "determa-effect-identity-1",
+      "source": "SPEC.md#9"
+    },
+    {
+      "name": "determa-execution-checkpoint-digest-1",
+      "source": "SPEC.md#17.2"
+    },
+    {
+      "name": "determa-host-authority-request-1",
+      "source": "SPEC.md#18.2"
+    },
+    {
+      "name": "determa-host-effect-journal-digest-1",
+      "source": "SPEC.md#19.2"
+    }
+  ],
+  "capability_meanings": [
+    {
+      "name": "structural_inspection",
+      "source": "SPEC.md#12.1",
+      "rule": "exact candidate shape, nonmutating"
+    },
+    {
+      "name": "semantic_inspection",
+      "source": "SPEC.md#12.2",
+      "rule": "proved bounded nonmutating guard entrypoint"
+    },
+    {
+      "name": "durable_embedded_processing",
+      "source": "SPEC.md#17.11",
+      "rule": "atomic checkpoint admission and processing"
+    },
+    {
+      "name": "authoritative_scope_fencing",
+      "source": "SPEC.md#18.1",
+      "rule": "configured authority guard and old-writer refusal"
+    },
+    {
+      "name": "worker_fencing",
+      "source": "SPEC.md#18.4",
+      "rule": "authenticated current epoch, attempt fence and principal"
+    },
+    {
+      "name": "safe_relocation",
+      "source": "SPEC.md#18.5",
+      "rule": "proved source retirement and single-use destination-bound grant"
+    },
+    {
+      "name": "native_effect_results",
+      "source": "SPEC.md#19",
+      "rule": "committed pinned effect route and authenticated result"
+    },
+    {
+      "name": "lossless_projection",
+      "source": "SPEC.md#20",
+      "rule": "complete artifact round-trip for selected rows"
+    },
+    {
+      "name": "saved_response_replay",
+      "source": "SPEC.md#25.2",
+      "rule": "exact first response at saved binding"
+    },
+    {
+      "name": "deterministic_reexecution",
+      "source": "SPEC.md#25.3",
+      "rule": "exact equality only for deterministic portable closures"
+    }
+  ],
+  "helper_participant_rules": [
+    {
+      "kind": "timer",
+      "required_when": "timer profile advertises durable accepted work",
+      "source": "SPEC.md#23",
+      "rule": "separately identified helper artifact and receipt; absent required state blocks activation"
+    },
+    {
+      "kind": "application",
+      "required_when": "declared application projection archive participant",
+      "source": "SPEC.md#22",
+      "rule": "selected rows remain separately identified and losslessly reconstructible"
+    },
+    {
+      "kind": "effect",
+      "required_when": "native effect host profile",
+      "source": "SPEC.md#19",
+      "rule": "journal and checkpoint pair atomically consistent; unresolved work retained"
+    },
+    {
+      "kind": "archive",
+      "required_when": "archive import or recovery profile",
+      "source": "SPEC.md#22",
+      "rule": "all declared required participants verified before activation"
+    }
+  ],
+  "golden_matrix": {
+    "positive": "examples/public-host/positive-v1.json",
+    "negative": "examples/public-host/negative-v1.json",
+    "comparison_rule": "exact JCS hashes, closed schema and complete response bytes; exact reexecution only for deterministic portable closures"
+  }
+}

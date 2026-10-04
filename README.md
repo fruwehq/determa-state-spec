@@ -150,6 +150,12 @@ This repository holds only the specification:
 - [`examples/`](examples/) — schema-valid machine documents and normative vectors; and
 - [`examples/providers/`](examples/providers/) — mixed CEL/native slots, source
   compilation and output validation examples;
+- [`schema/public-host-request-v1.schema.json`](schema/public-host-request-v1.schema.json) and
+  [`schema/public-host-response-v1.schema.json`](schema/public-host-response-v1.schema.json)
+  — closed public client/reference-host protocol;
+- [`schema/public-host-contract-v1.json`](schema/public-host-contract-v1.json) with [`schema/public-host-contract-v1.schema.json`](schema/public-host-contract-v1.schema.json),
+  [`schema/public-host-change-record-v1.schema.json`](schema/public-host-change-record-v1.schema.json), and
+  [`examples/public-host/`](examples/public-host/) — compatibility boundary and golden messages;
 - [`VERSION`](VERSION) — synchronized specification/package SemVer.
 
 The executable correctness target lives in
