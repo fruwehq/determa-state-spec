@@ -1,0 +1,1023 @@
+{
+  "format": "determa.timer_helper.cases",
+  "version": 1,
+  "cases": [
+    {
+      "name": "schedule_first",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "schedule-A",
+        "arguments": {
+          "clock_basis": "unix_nanoseconds",
+          "delay_nanoseconds": "10",
+          "event_name": "timeout",
+          "payload": [
+            "map",
+            [
+              [
+                "amount",
+                [
+                  "integer",
+                  "7"
+                ]
+              ]
+            ]
+          ],
+          "correlation_id": "job-7"
+        },
+        "request_digest": "sha256:93032b50df595f896715571b3e96d3f3ca0820df8a67a58449b2a7aa0be19edf"
+      },
+      "prior": {
+        "trusted_now": "100",
+        "record": null
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "schedule-A",
+        "status": "accepted",
+        "record_revision": "1",
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "none",
+        "error_code": null,
+        "result_digest": "sha256:de150a2ca819ac24613b28bdd7983a52df3abf806efbe0edfab402e7a0e5178f"
+      },
+      "assertions": "Accept only after separate record and result receipt persist; computed deadline 110."
+    },
+    {
+      "name": "schedule_equal_replay",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "schedule-A",
+        "arguments": {
+          "clock_basis": "unix_nanoseconds",
+          "delay_nanoseconds": "10",
+          "event_name": "timeout",
+          "payload": [
+            "map",
+            [
+              [
+                "amount",
+                [
+                  "integer",
+                  "7"
+                ]
+              ]
+            ]
+          ],
+          "correlation_id": "job-7"
+        },
+        "request_digest": "sha256:93032b50df595f896715571b3e96d3f3ca0820df8a67a58449b2a7aa0be19edf"
+      },
+      "prior": {
+        "trusted_now": "999",
+        "record_state": "claimed",
+        "record_revision": "2",
+        "retained_request_digest": "sha256:93032b50df595f896715571b3e96d3f3ca0820df8a67a58449b2a7aa0be19edf"
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "schedule-A",
+        "status": "accepted",
+        "record_revision": "1",
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "none",
+        "error_code": null,
+        "result_digest": "sha256:de150a2ca819ac24613b28bdd7983a52df3abf806efbe0edfab402e7a0e5178f"
+      },
+      "assertions": "Exact retained first result; no deadline recomputation or second record."
+    },
+    {
+      "name": "operation_id_collision",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "schedule-A",
+        "arguments": {
+          "clock_basis": "unix_nanoseconds",
+          "delay_nanoseconds": "11",
+          "event_name": "timeout",
+          "payload": [
+            "map",
+            [
+              [
+                "amount",
+                [
+                  "integer",
+                  "7"
+                ]
+              ]
+            ]
+          ],
+          "correlation_id": "job-7"
+        },
+        "request_digest": "sha256:3b98db9ea1578cfea281718ab86b9340f679a7ac6733bd12cbf9e738a535c662"
+      },
+      "prior": {
+        "retained_request_digest": "sha256:93032b50df595f896715571b3e96d3f3ca0820df8a67a58449b2a7aa0be19edf"
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "schedule-A",
+        "status": "rejected",
+        "record_revision": "1",
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "none",
+        "error_code": "timer_operation_conflict",
+        "result_digest": null
+      },
+      "assertions": "Same operation ID and different digest never overwrite receipt."
+    },
+    {
+      "name": "timer_id_collision",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "schedule-B",
+        "arguments": {
+          "clock_basis": "unix_nanoseconds",
+          "deadline_at": "120",
+          "event_name": "timeout",
+          "payload": [
+            "map",
+            [
+              [
+                "amount",
+                [
+                  "integer",
+                  "7"
+                ]
+              ]
+            ]
+          ],
+          "correlation_id": "job-7"
+        },
+        "request_digest": "sha256:77219f83a38e5c07185ec737bd7eb6f92a5538ab25e786c54920ba8bc0e14161"
+      },
+      "prior": {
+        "record_state": "pending",
+        "record_schedule_request_digest": "sha256:93032b50df595f896715571b3e96d3f3ca0820df8a67a58449b2a7aa0be19edf"
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "schedule-B",
+        "status": "rejected",
+        "record_revision": "1",
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "none",
+        "error_code": "timer_id_conflict",
+        "result_digest": null
+      },
+      "assertions": "Different schedule cannot reuse timer identity."
+    },
+    {
+      "name": "cancel_pending",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "cancel",
+        "operation_id": "cancel-A",
+        "arguments": {
+          "expected_revision": "1"
+        },
+        "request_digest": "sha256:b0866cdeef37dc4229b283733e7d45185e7525479641201d48fd3c95d8728b2d"
+      },
+      "prior": {
+        "record_state": "pending",
+        "record_revision": "1"
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "cancel",
+        "operation_id": "cancel-A",
+        "status": "accepted",
+        "record_revision": "2",
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "none",
+        "error_code": null,
+        "result_digest": "sha256:71804d9d464673d87784698c14132f4ef52b47d8f27014276d1593b899ef3674"
+      },
+      "assertions": "Cancel wins atomic race and persists terminal state."
+    },
+    {
+      "name": "cancel_loses_to_claim",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "cancel",
+        "operation_id": "cancel-A",
+        "arguments": {
+          "expected_revision": "1"
+        },
+        "request_digest": "sha256:b0866cdeef37dc4229b283733e7d45185e7525479641201d48fd3c95d8728b2d"
+      },
+      "prior": {
+        "record_state": "claimed",
+        "record_revision": "2"
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "cancel",
+        "operation_id": "cancel-A",
+        "status": "rejected",
+        "record_revision": "2",
+        "attempt_fence": "1",
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "none",
+        "error_code": "timer_fire_in_progress",
+        "result_digest": null
+      },
+      "assertions": "Cancel cannot claim an already claimed fire was retracted."
+    },
+    {
+      "name": "claim_at_deadline",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "claim_fire",
+        "operation_id": "claim-A",
+        "arguments": {
+          "expected_revision": "1",
+          "clock_basis": "unix_nanoseconds",
+          "now": "110",
+          "worker_principal": "worker-A"
+        },
+        "request_digest": "sha256:9440e7b8d932d81f59d93da307e6508d3e813cc1a0cb0785852c46e93e6c2ba4"
+      },
+      "prior": {
+        "record_state": "pending",
+        "record_revision": "1",
+        "deadline_at": "110",
+        "trusted_now": "110",
+        "next_attempt_fence": "1",
+        "lease_expires_at": "130"
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "claim_fire",
+        "operation_id": "claim-A",
+        "status": "accepted",
+        "record_revision": "2",
+        "attempt_fence": "1",
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": "130",
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "none",
+        "error_code": null,
+        "result_digest": "sha256:3a0c76af6b71beab6c8ebfc3ab8b545970dcbc0200499f959dd1884c8366addf"
+      },
+      "assertions": "Equality is due; claim and incremented fence persist atomically."
+    },
+    {
+      "name": "claim_before_deadline",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "claim_fire",
+        "operation_id": "claim-early",
+        "arguments": {
+          "expected_revision": "1",
+          "clock_basis": "unix_nanoseconds",
+          "now": "109",
+          "worker_principal": "worker-A"
+        },
+        "request_digest": "sha256:2e8bc24a22ef3978b446ed719a6f2867594da8b00d519b520da0f17bea5e3702"
+      },
+      "prior": {
+        "record_state": "pending",
+        "record_revision": "1",
+        "deadline_at": "110",
+        "trusted_now": "109"
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "claim_fire",
+        "operation_id": "claim-early",
+        "status": "rejected",
+        "record_revision": "1",
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "none",
+        "error_code": "timer_not_due",
+        "result_digest": null
+      },
+      "assertions": "No state or fence change."
+    },
+    {
+      "name": "coordinated_fire_commits",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "complete_fire",
+        "operation_id": "complete-A",
+        "arguments": {
+          "expected_revision": "2",
+          "attempt_fence": "1",
+          "worker_principal": "worker-A",
+          "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+          "admission_receipt_digest": "sha256:32ada17bc3346652c0889322fb8366e2da2a767275a304782046c8d870abdbdf"
+        },
+        "request_digest": "sha256:c7db3a2b8ae2a58e50e7f282af18e736f3293c85266980753cc9cac14dc7bd21"
+      },
+      "prior": {
+        "record_state": "claimed",
+        "record_revision": "2",
+        "attempt_fence": "1",
+        "claim_expires_at": "130",
+        "trusted_now": "120",
+        "checkpoint_event_id_present": false,
+        "transaction_fate": "committed"
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "complete_fire",
+        "operation_id": "complete-A",
+        "status": "accepted",
+        "record_revision": "3",
+        "attempt_fence": "1",
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "admitted",
+        "error_code": null,
+        "result_digest": "sha256:2a85cf69db1b1899bbf8211a5fcef8ebbde140369ef3dc2ff028d1bbe67f4fc4"
+      },
+      "assertions": "Timer, checkpoint acceptance receipt, and source binding share commit."
+    },
+    {
+      "name": "complete_equal_replay",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "complete_fire",
+        "operation_id": "complete-A",
+        "arguments": {
+          "expected_revision": "2",
+          "attempt_fence": "1",
+          "worker_principal": "worker-A",
+          "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+          "admission_receipt_digest": "sha256:32ada17bc3346652c0889322fb8366e2da2a767275a304782046c8d870abdbdf"
+        },
+        "request_digest": "sha256:c7db3a2b8ae2a58e50e7f282af18e736f3293c85266980753cc9cac14dc7bd21"
+      },
+      "prior": {
+        "record_state": "fired",
+        "record_revision": "3",
+        "retained_request_digest": "sha256:c7db3a2b8ae2a58e50e7f282af18e736f3293c85266980753cc9cac14dc7bd21"
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "complete_fire",
+        "operation_id": "complete-A",
+        "status": "accepted",
+        "record_revision": "3",
+        "attempt_fence": "1",
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "admitted",
+        "error_code": null,
+        "result_digest": "sha256:2a85cf69db1b1899bbf8211a5fcef8ebbde140369ef3dc2ff028d1bbe67f4fc4"
+      },
+      "assertions": "Return retained result without a second admission."
+    },
+    {
+      "name": "stale_fence",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "complete_fire",
+        "operation_id": "complete-stale",
+        "arguments": {
+          "expected_revision": "2",
+          "attempt_fence": "1",
+          "worker_principal": "worker-A",
+          "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+          "admission_receipt_digest": null
+        },
+        "request_digest": "sha256:088c1ae4f1b13525c78588d9b432cb5442691ba8a6eb7b42cfd49e738068424a"
+      },
+      "prior": {
+        "record_state": "claimed",
+        "record_revision": "4",
+        "attempt_fence": "2",
+        "trusted_now": "125"
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "complete_fire",
+        "operation_id": "complete-stale",
+        "status": "rejected",
+        "record_revision": "4",
+        "attempt_fence": "2",
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "none",
+        "error_code": "timer_stale_fence",
+        "result_digest": null
+      },
+      "assertions": "Older claim cannot mutate record or checkpoint."
+    },
+    {
+      "name": "uncommitted_fire_recovery",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "claim_fire",
+        "operation_id": "claim-retry",
+        "arguments": {
+          "expected_revision": "2",
+          "clock_basis": "unix_nanoseconds",
+          "now": "131",
+          "worker_principal": "worker-B"
+        },
+        "request_digest": "sha256:5972097bf2bc18b29dd18fd4d28212effd0a94d4e54fbbb44294606bb1a2ce91"
+      },
+      "prior": {
+        "record_state": "claimed",
+        "record_revision": "2",
+        "attempt_fence": "1",
+        "claim_expires_at": "130",
+        "trusted_now": "131",
+        "prior_transaction_fate": "proved_uncommitted",
+        "next_attempt_fence": "2"
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "claim_fire",
+        "operation_id": "claim-retry",
+        "status": "accepted",
+        "record_revision": "3",
+        "attempt_fence": "2",
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": "151",
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "none",
+        "error_code": null,
+        "result_digest": "sha256:ffd77240157a31fa73c579529275004da9aa861ccd445633107b844334d2460f"
+      },
+      "assertions": "New fence reuses same event ID only after old transaction is proved uncommitted."
+    },
+    {
+      "name": "ambiguous_fire_fate",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "claim_fire",
+        "operation_id": "claim-retry",
+        "arguments": {
+          "expected_revision": "2",
+          "clock_basis": "unix_nanoseconds",
+          "now": "131",
+          "worker_principal": "worker-B"
+        },
+        "request_digest": "sha256:5972097bf2bc18b29dd18fd4d28212effd0a94d4e54fbbb44294606bb1a2ce91"
+      },
+      "prior": {
+        "record_state": "claimed",
+        "record_revision": "2",
+        "attempt_fence": "1",
+        "claim_expires_at": "130",
+        "trusted_now": "131",
+        "prior_transaction_fate": "unknown"
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "claim_fire",
+        "operation_id": "claim-retry",
+        "status": "rejected",
+        "record_revision": "2",
+        "attempt_fence": "1",
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "none",
+        "error_code": "delivery_ambiguous",
+        "result_digest": null
+      },
+      "assertions": "Expiry alone cannot authorize replay after possible committed fire."
+    },
+    {
+      "name": "read_timer",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "read_timer",
+        "operation_id": "read-A",
+        "arguments": {},
+        "request_digest": "sha256:6616fe527d80e7ea2cfa804289fb1996f39187af90e8c37b4d5e258a3e6a94c7"
+      },
+      "prior": {
+        "record_state": "fired",
+        "record_revision": "3",
+        "attempt_fence": "1"
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "read_timer",
+        "operation_id": "read-A",
+        "status": "accepted",
+        "record_revision": "3",
+        "attempt_fence": "1",
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "admitted",
+        "error_code": null,
+        "result_digest": "sha256:3e0557d9f2ee3afd11b20405d175498dd0e3e8de148c14f3d7350f50f53fd487"
+      },
+      "assertions": "Authorized read reports record without mutation."
+    },
+    {
+      "name": "negative_zero",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "invalid-negative_zero",
+        "arguments": {
+          "clock_basis": "unix_nanoseconds",
+          "deadline_at": "-0",
+          "event_name": "timeout",
+          "payload": [
+            "map",
+            [
+              [
+                "amount",
+                [
+                  "integer",
+                  "7"
+                ]
+              ]
+            ]
+          ],
+          "correlation_id": "job-7"
+        },
+        "request_digest": "sha256:aec18d3a3cfc2448a60829382622036ea1c63bb203195c901355bd5165a66021"
+      },
+      "prior": {
+        "trusted_now": "0",
+        "record": null
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "invalid-negative_zero",
+        "status": "rejected",
+        "record_revision": null,
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": null,
+        "delivery_state": "none",
+        "error_code": "invalid_timer_time",
+        "result_digest": null
+      },
+      "assertions": "Reject before record, operation receipt, event, or core mutation."
+    },
+    {
+      "name": "fraction",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "invalid-fraction",
+        "arguments": {
+          "clock_basis": "unix_nanoseconds",
+          "deadline_at": "1.0",
+          "event_name": "timeout",
+          "payload": [
+            "map",
+            [
+              [
+                "amount",
+                [
+                  "integer",
+                  "7"
+                ]
+              ]
+            ]
+          ],
+          "correlation_id": "job-7"
+        },
+        "request_digest": "sha256:023309a75da1195bc9ef5cba04a46ae7a69017c4fdbfd2edf99881741e3d44d6"
+      },
+      "prior": {
+        "trusted_now": "0",
+        "record": null
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "invalid-fraction",
+        "status": "rejected",
+        "record_revision": null,
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": null,
+        "delivery_state": "none",
+        "error_code": "invalid_timer_time",
+        "result_digest": null
+      },
+      "assertions": "Reject before record, operation receipt, event, or core mutation."
+    },
+    {
+      "name": "above_max",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "invalid-above_max",
+        "arguments": {
+          "clock_basis": "unix_nanoseconds",
+          "deadline_at": "9223372036854775808",
+          "event_name": "timeout",
+          "payload": [
+            "map",
+            [
+              [
+                "amount",
+                [
+                  "integer",
+                  "7"
+                ]
+              ]
+            ]
+          ],
+          "correlation_id": "job-7"
+        },
+        "request_digest": "sha256:3937e26e57fb8683e1d7a3ad561f3d97e86e916e92d6954ac4fcd96834a25f10"
+      },
+      "prior": {
+        "trusted_now": "0",
+        "record": null
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "invalid-above_max",
+        "status": "rejected",
+        "record_revision": null,
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": null,
+        "delivery_state": "none",
+        "error_code": "invalid_timer_time",
+        "result_digest": null
+      },
+      "assertions": "Reject before record, operation receipt, event, or core mutation."
+    },
+    {
+      "name": "json_number",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "invalid-json_number",
+        "arguments": {
+          "clock_basis": "unix_nanoseconds",
+          "deadline_at": 1,
+          "event_name": "timeout",
+          "payload": [
+            "map",
+            [
+              [
+                "amount",
+                [
+                  "integer",
+                  "7"
+                ]
+              ]
+            ]
+          ],
+          "correlation_id": "job-7"
+        },
+        "request_digest": "sha256:dd8532663106b0b86d8d17d6cedaff6d170ac0f377815df393416e291805fa4f"
+      },
+      "prior": {
+        "trusted_now": "0",
+        "record": null
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "invalid-json_number",
+        "status": "rejected",
+        "record_revision": null,
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": null,
+        "delivery_state": "none",
+        "error_code": "invalid_timer_time",
+        "result_digest": null
+      },
+      "assertions": "Reject before record, operation receipt, event, or core mutation."
+    },
+    {
+      "name": "duration_overflow",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "overflow",
+        "arguments": {
+          "clock_basis": "unix_nanoseconds",
+          "delay_nanoseconds": "1",
+          "event_name": "timeout",
+          "payload": [
+            "map",
+            [
+              [
+                "amount",
+                [
+                  "integer",
+                  "7"
+                ]
+              ]
+            ]
+          ],
+          "correlation_id": "job-7"
+        },
+        "request_digest": "sha256:462e053022b2b45cd965be2f6dea83ca92a8feb6f8f92b14c42ed070f2beef5a"
+      },
+      "prior": {
+        "trusted_now": "9223372036854775807",
+        "record": null
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "overflow",
+        "status": "rejected",
+        "record_revision": null,
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": null,
+        "delivery_state": "none",
+        "error_code": "timer_deadline_overflow",
+        "result_digest": null
+      },
+      "assertions": "Signed addition overflow rejects without record."
+    },
+    {
+      "name": "clock_unavailable",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "clock-unavailable",
+        "arguments": {
+          "clock_basis": "unix_nanoseconds",
+          "delay_nanoseconds": "1",
+          "event_name": "timeout",
+          "payload": [
+            "map",
+            [
+              [
+                "amount",
+                [
+                  "integer",
+                  "7"
+                ]
+              ]
+            ]
+          ],
+          "correlation_id": "job-7"
+        },
+        "request_digest": "sha256:fe04cb40ba2c4c220eabb8dfd1d978b06b423d23980b61485c18ae7cffaa5d9e"
+      },
+      "prior": {
+        "trusted_now": null,
+        "record": null
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "clock-unavailable",
+        "status": "rejected",
+        "record_revision": null,
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": null,
+        "delivery_state": "none",
+        "error_code": "timer_clock_unavailable",
+        "result_digest": null
+      },
+      "assertions": "No trusted time; no deadline guessed."
+    }
+  ]
+}

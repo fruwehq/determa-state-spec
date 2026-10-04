@@ -1,0 +1,62 @@
+{
+  "timer_artifact_format": "determa.timer_records",
+  "timer_artifact_schema_version": 1,
+  "records": [
+    {
+      "scope_identity": "scope-A",
+      "root_instance_id": "root-A",
+      "root_runtime_id": "runtime-A",
+      "timer_id": "timer-A",
+      "schedule_request_digest": "sha256:93032b50df595f896715571b3e96d3f3ca0820df8a67a58449b2a7aa0be19edf",
+      "clock_basis": "unix_nanoseconds",
+      "deadline_at": "110",
+      "event_name": "timeout",
+      "payload": [
+        "map",
+        [
+          [
+            "amount",
+            [
+              "integer",
+              "7"
+            ]
+          ]
+        ]
+      ],
+      "correlation_id": "job-7",
+      "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+      "state": "pending",
+      "revision": "1",
+      "attempt_fence": "0",
+      "worker_principal": null,
+      "expires_at": null,
+      "admission_receipt_digest": null
+    }
+  ],
+  "operation_receipts": [
+    {
+      "operation_id": "schedule-A",
+      "request_digest": "sha256:93032b50df595f896715571b3e96d3f3ca0820df8a67a58449b2a7aa0be19edf",
+      "result": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-A",
+        "root_instance_id": "root-A",
+        "root_runtime_id": "runtime-A",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "schedule-A",
+        "status": "accepted",
+        "record_revision": "1",
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:5e0811d1e8f41d08d2de7bd048c04eafd02438b589c97dfa01d86e045b599f05",
+        "delivery_state": "none",
+        "error_code": null,
+        "result_digest": "sha256:de150a2ca819ac24613b28bdd7983a52df3abf806efbe0edfab402e7a0e5178f"
+      }
+    }
+  ],
+  "timer_artifact_digest": "sha256:1ec00a7ceb743377736ea395b8eb60b358ed65b7f0f80ce3eea35b441f9e6b90"
+}

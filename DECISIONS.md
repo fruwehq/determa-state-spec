@@ -404,3 +404,27 @@ let a mapper overwrite runtime internals directly.
 receipts, and pending effects. Direct internal writes bypass declaration validation
 and the atomic checkpoint boundary. A failed projection must leave both application
 rows and Determa evidence unchanged.
+
+## Timer work remains an external, separately archived helper
+
+Relevant specification: [§11.2](SPEC.md#112-timer-extensions),
+[§17.14](SPEC.md#1714-external-timer-durability), and
+[§23](SPEC.md#23-optional-external-timer-helper).
+
+**Decision.** The optional timer helper has a closed schedule/cancel/fire protocol,
+signed Unix-nanosecond clock values, and its own versioned record artifact. It is
+installed and capability-checked as an external extension. A fire becomes an
+ordinary declared event with stable identity and normal admission. A durable helper
+participates in §22 archives through a separate declared participant when selected
+roots depend on its work. §17.14's earlier exclusion means timers are outside the
+core checkpoint; the separate-artifact route is now available without changing
+checkpoint schema version 1.
+
+**Rejected alternative.** Put deadlines or due polling in the core, infer timer
+durability from provider identity, or treat a committed independent fire as proof of
+checkpoint admission.
+
+**Reason.** Core evaluation remains dormant until explicitly invoked. Timer
+records need their own clock, storage, cancellation, retry, and crash evidence.
+The coordinated profile proves the fire/admission boundary; independent delivery
+reports its weaker, potentially ambiguous boundary.
