@@ -23,7 +23,8 @@
         "compiler",
         "runtime_provider",
         "resolver",
-        "authority"
+        "authority",
+        "archive_participant"
       ]
     },
     "provider_reference": {
@@ -123,7 +124,8 @@
         "properties": {
           "capability": {
             "enum": [
-              "durable_ingress_dead_letter"
+              "durable_ingress_dead_letter",
+              "source_ordered"
             ]
           }
         }
@@ -272,6 +274,30 @@
               "authoritative_scope_fencing",
               "consistent_scope_inventory",
               "safe_relocation"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "category": {
+            "const": "archive_participant"
+          }
+        },
+        "required": [
+          "category"
+        ]
+      },
+      "then": {
+        "properties": {
+          "capability": {
+            "enum": [
+              "portable_export",
+              "portable_import",
+              "exact_reconstruction",
+              "consistent_archive_capture"
             ]
           }
         }

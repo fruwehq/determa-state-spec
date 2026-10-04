@@ -1020,6 +1020,9 @@ Rejection returns the prior state unchanged, allocates no logical identity, and 
 the envelope caller-owned. After committed admission the envelope exists in exactly one
 engine-owned lifecycle location: one runtime's ready mailbox, that same runtime's
 deferred mailbox, or a terminal/disposal receipt under §17.3.
+Under the optional §21 lossless delivery profile, source ownership and acknowledgement
+follow the committed admission or durable terminal-transfer boundary; a later machine
+disposition never becomes a source-broker retry.
 
 `input` mode MUST name a bundle `input` event and may supply only the `root` or
 `spawned_instance` target member for a running runtime. Direct use of the `component`
@@ -2329,7 +2332,7 @@ unless their own handling violates the engine contract.
 The specification defines no `dead_letter`, `dead_letters`, or `dead_letter_policy`
 field and no dead-letter storage shape.
 
-A transport or audit plugin may:
+A transport or audit plugin outside the §21 lossless profile may:
 
 - discard unhandled or faulting envelopes without retaining anything;
 - retain complete envelopes and fault metadata;
@@ -2339,7 +2342,8 @@ A transport or audit plugin may:
 - expose any other explicitly configured policy.
 
 Its property names, configuration schema, retention, privacy, and operational guarantees
-belong entirely to that plugin. These policies apply only after terminal machine
+belong entirely to that plugin. Under §21, an unhandled, faulted, or disposed event
+has an explicit terminal decision and retained evidence. These policies apply only after terminal machine
 disposition or before Determa acceptance; they cannot replace, reorder, expire, or cap a
 runtime's normative ready/deferred mailboxes.
 
@@ -2370,6 +2374,10 @@ Core determinism means that the same valid prior state and same accepted sequenc
 produce the same mailbox state and result. Different transport plugins may produce
 different admission traces, but after acceptance they cannot alter §6.7 deferral,
 recall, ordering, capacity, or disposition semantics.
+
+The normative ownership, acknowledgement, retry, ordering, and durable ingress
+dead-letter rules for a lossless delivery profile are in §21. A transport's ability
+to deliver or acknowledge is not an execution-store capability.
 
 ### 11.2 Timer extensions
 
@@ -2423,9 +2431,10 @@ registry, daemon, clock, coordinator, or network endpoint is needed to evaluate 
 pure core. If a host offers named registration, both bundled and third-party
 extensions MUST use the same public `register` operation and lookup rules. A named
 extension's category is exactly one of `execution_store`, `projection`, `transport`,
-`timer`, `http`, `native_handler`, `compiler`, `runtime_provider`, `resolver`, and
-`authority`. These categories are distinct: a store claim does not grant authority,
-and a transport or timer claim does not imply a durable host profile.
+`timer`, `http`, `native_handler`, `compiler`, `runtime_provider`, `resolver`,
+`authority`, and `archive_participant`. These categories are distinct: a store claim
+does not grant authority, and a transport or timer claim does not imply a durable
+host profile.
 The public registration path exposes `register`, `validate_configuration`,
 `capabilities`, and `health`; category-specific setup is separate. Registration
 validates a descriptor before making a factory visible. Configuration validation
@@ -2489,7 +2498,7 @@ contracts may add versioned category-specific capabilities; implementations MUST
 invent a meaning under this version-1 vocabulary.
 The execution-store names have the meanings in §17.11. The remaining nonempty
 category sets reserve names for the corresponding projection, transport, timer,
-native-handler, runtime-provider, and authority contracts. A host MUST NOT advertise
+native-handler, runtime-provider, authority, and archive-participant contracts. A host MUST NOT advertise
 one of these reserved names until its defining public contract and applicable
 conformance cases exist and the configured instance passes them. In particular,
 `authoritative_scope_fencing` means the configured authority rejects stale scope
@@ -2958,8 +2967,8 @@ specification-only change.
 
 ### 16.1 Independent artifact identities
 
-Machine documents remain numeric `format: 1`. Portable persistence uses exactly these
-four independent closed JSON artifacts:
+Machine documents remain numeric `format: 1`. Portable persistence and archives
+use exactly these five independent closed JSON artifacts:
 
 | artifact | exact format field | exact schema-version field | schema |
 |---|---|---|---|
@@ -2967,6 +2976,7 @@ four independent closed JSON artifacts:
 | migration descriptor | `migration_descriptor_format: "determa.aggregate_migration"` | `migration_descriptor_schema_version: 1` | `schema/migration-descriptor-v1.schema.json` |
 | transport package | `aggregate_state_package_format: "determa.aggregate_state_package"` | `aggregate_state_package_schema_version: 1` | `schema/aggregate-state-package-v1.schema.json` |
 | execution checkpoint | `execution_checkpoint_format: "determa.execution_checkpoint"` | `execution_checkpoint_schema_version: 1` | `schema/execution-checkpoint-v1.schema.json` |
+| portable archive | `archive_format: "determa.scope_archive"` | `archive_schema_version: 1` | `schema/archive-v1.schema.json` |
 
 Queue-bearing core results use `schema/core-step-result-v1.schema.json`. Artifact schema
 version 1 is the sole supported portable artifact version. No alternate artifact
@@ -3786,12 +3796,13 @@ one scope. Missing, ambiguous, mismatched, or unauthorized selection MUST fail c
 without a core call, checkpoint mutation, outbox delivery, broker acknowledgement,
 fallback, probing, or access to another scope.
 
-The scope identity, ownership binding, principal policy, and physical isolation key are
-host metadata outside portable Determa State bytes and semantics. They MUST NOT be added
-to a machine document, aggregate state, migration descriptor, aggregate-state package,
-execution checkpoint, event, effect intent, or portable digest input. Machine
-namespaces and portable identities do not select or authorize a scope. The portable
-engine, bundle, checkpoint, and hash bytes remain tenant-agnostic; credentials,
+The active scope identity, ownership binding, principal policy, and physical isolation
+key are host metadata outside core and checkpoint semantics. They MUST NOT be added to
+a machine document, aggregate state, migration descriptor, aggregate-state package,
+execution checkpoint, event, effect intent, or their digest inputs. A §22 archive MAY
+record nonsecret source scope and binding provenance, but those bytes never select or
+authorize an active scope. Machine namespaces and portable identities do not select or authorize a scope. The portable
+engine, bundle, checkpoint, and their hash bytes remain tenant-agnostic; credentials,
 endpoints, tenant identifiers, and SaaS policy fields remain host configuration.
 
 The schemas remain unchanged because scope selection is deliberately external host
@@ -3972,6 +3983,8 @@ Successful host admission allocates one aggregate-wide `acceptance_sequence` and
 `queue_sequence` per new envelope in caller order, appends it to its exact target ready
 tail, creates one input acceptance receipt, advances revision once, and recomputes both
 digests. Only then may an adapter acknowledge transfer of ownership.
+An adapter claiming §21 MUST retain the exact source-to-acceptance binding and prove
+that it committed atomically with this admission under §21.1.
 
 Processing explicitly targets one runtime and selects only its ready head. A deferred
 result atomically moves the entry to that runtime's deferred tail with a new queue
@@ -4781,8 +4794,8 @@ previous fence for that work, chooses expiry from its own host clock and policy,
 atomically commits the new active claim, journal state, generation and operation
 receipt under the §18.3 guard. The success result's closed `claim` contains the
 scope, root, work kind/identity, operation token, current scope authority epoch,
-new attempt fence, authenticated worker principal, `clock_basis`, `expires_at` and
-`active` state. `clock_basis` is exactly `unix_nanoseconds`; `expires_at` is a
+new attempt fence, authenticated worker principal, `expires_at` and `active`
+state. The fixed host clock basis is `unix_nanoseconds`; `expires_at` is a
 canonical signed decimal Unix-epoch nanosecond value in the signed 64-bit interval
 `[-9223372036854775808, 9223372036854775807]`. `-0`, floating values and values
 outside that range reject before a claim is issued. The host selects expiry using
@@ -4856,6 +4869,277 @@ failed or unsupported safe relocation. `examples/authority/host-authority-cases-
 contains normative positive and negative interface cases. The companion
 `examples/authority/host-authority-profile-cases-v1.json` fixes positive and
 negative report and capability combinations.
+
+## 19. Committed native effects and authenticated results
+
+### 19.1 Scope and distinct identities
+
+This optional host profile executes only a selected, committed §17 external outbox
+intent. It does not execute an uncommitted core result, a merely proposed intent, or a
+request inferred from a pending journal row. The pure §8 core needs no journal,
+worker, scheduler, coordinator, or native handler. A host claiming durable native
+results MUST supply an atomic checkpoint, outbox, pinned-route, and journal-outcome
+boundary and the authority capability required for every claim it advertises (§18).
+An embedded callback without those capabilities MUST report its weaker guarantees; it
+MUST NOT advertise durable worker claims, safe relocation, or exactly-once external
+execution. This profile defines no distributed authority service.
+
+Ingress `event_id`, host request `operation_id`, durable business `operation_token`,
+and deterministic §9 `effect_id` have separate lifetimes and MUST NOT be interchanged.
+The nonempty opaque `operation_token` identifies one outstanding business invocation
+through request replay, attempts, and its result. It is chosen before the producing
+transaction commits. A workflow that checks the token at machine level carries it in
+a declared initiating input, retained variables, and a declared emitted payload. The
+pinned route copies that exact value into its declared result location. This adds no
+reserved machine field. For host-only use a host MAY derive
+`hash(["determa-host-operation-token-1", scope_identity, root_instance_id, effect_id])`;
+that value is host metadata and cannot be presented as a token already known by the
+machine. Correlation may express a declared business link but never authenticates a
+worker, claim, result, or scope. External destination idempotency is scoped by
+`(logical_scope_identity, effect_id)`; scope is not added to the portable intent.
+
+### 19.2 Closed host journal and pinned route
+
+`schema/host-effect-journal-v1.schema.json` is the closed version-1 host journal.
+Its fields are exactly `host_effect_journal_format`,
+`host_effect_journal_schema_version`, `scope_identity`, `root_instance_id`,
+`checkpoint_revision`, `checkpoint_digest`, `journal_revision`, `effect_records`,
+`operation_response_references`, and `host_effect_journal_digest`. The digest is
+`hash(["determa-host-effect-journal-digest-1",
+journal_without_host_effect_journal_digest])`. The journal is host-owned and scoped;
+it is not part of the portable aggregate or checkpoint digest. Its checkpoint pair
+MUST match an extant committed checkpoint at the same root and revision. Inserting an
+intent and its effect record, recording an outcome, result admission, and every
+checkpoint/outbox mutation that changes their joint facts MUST commit atomically.
+Recovery MUST reject a torn checkpoint/journal pair. A metadata-only journal mutation
+MAY advance `journal_revision` without a core step and MUST retain the unchanged
+checkpoint reference. Journal revision starts at `"0"` and advances exactly once per
+changing journal transaction; equal replay does not advance it.
+
+`effect_records` are strictly ordered by effect ID UTF-8 bytes and contain no
+duplicate ID. `operation_response_references` are strictly ordered by operation ID
+and contain no duplicate ID. Each reference binds a retained host
+operation ID to `hash(["determa-host-operation-response-1", normalized_response])`.
+The normalized response is the exact public result returned for the committed
+operation, excluding transport-only headers, credentials and redacted views. The
+host MUST retain or be able to reconstruct those exact bytes while it claims equal
+operation replay; a digest alone is not the response. A referenced intent MUST exist
+in exactly one pending, terminal, or compact checkpoint outbox location, and its
+recomputed digest MUST
+match `intent_digest`. Attempt records are strictly ordered by numeric fence,
+contain no duplicate fence, and no fence exceeds the record's `attempt_fence`.
+`unclaimed`, `leased`, and `ambiguous` have null outcome, result ID, and admission
+receipt; `outcome_recorded` has a terminal outcome and result ID but null admission
+receipt; `result_admitted` and `closed` have all three, with the receipt's event ID
+equal to the result ID. A terminal outcome's fence MUST name its corresponding immutable attempt report,
+except the §19.3 host-finalized preclaim `cancelled` outcome: it has fence `"0"`,
+no attempt report, and `cancellation.state: prevented_start`. No other terminal
+outcome may omit its attempt report. Schema validity alone is insufficient for
+these checks.
+Unknown journal format/version, unequal digest, dangling checkpoint reference, or
+semantic inconsistency fails closed before any dispatch or result admission.
+
+Each effect record contains exactly `effect_id`, `operation_token`, `intent_digest`,
+`handler_reference`, `destination_binding_digest`,
+`route_configuration_generation`, `result_mapping`, `target`,
+`idempotency_policy`, `attempt_fence`, `attempt_records`, `invocation_state`,
+`outcome`, `result_event_id`, `admission_receipt`, and `cancellation`. `effect_id`
+references exactly one committed checkpoint intent. `intent_digest` is the §17.6
+complete-intent digest, including its domain, root, and original intent. The
+`native_handler` reference is the exact §11.5 provider reference, resolved against
+host allowlist and dependency policy. Its binding digest identifies the precise
+destination and connector configuration without containing credentials. Configuration generation
+is a canonical decimal string. The target pins root instance ID, runtime ID, and
+exact runtime incarnation; a current alias or a later reactivation cannot redirect it.
+The ordered result mapping entries contain exactly `outcome_kind`, `event`,
+`result_slot`, and `operation_token_location`. Every permitted terminal business
+outcome has one declared result event and a distinct nonempty slot. Token location is
+`null` for host-only tokens, `{"kind":"correlation_id"}`, or
+`{"kind":"payload","pointer":canonical_json_pointer}` into the decoded logical
+declared payload map, before §16.2 typed projection. A token location MUST
+resolve to a declared string field; the host, not the worker, inserts the pinned
+value. A result is admitted only in the event's declared input mode to the pinned
+runtime incarnation. Rebinding to a new target or route requires new work, never a
+mutation of this record.
+
+Route resolution and authorization occur before the producing core call. The host
+revalidates the route generation and exact binding under the producing transaction's
+commit guard. A changed generation fails before commit; an equal operation replay
+returns its saved binding without resolving current aliases. Later configuration edits
+apply only to new intents. Every dispatch checks current scope, worker, handler, and
+destination authorization. Revocation retains work for cancellation or reconciliation;
+it never silently reroutes the pinned intent. Current authorized configuration supplies
+secrets only to the handler, outside portable values and journal digests.
+
+### 19.3 Invocation, claims, attempts, and cancellation
+
+`invocation_state` is exactly `unclaimed`, `leased`, `ambiguous`,
+`outcome_recorded`, `result_admitted`, or `closed`. A new record begins
+`unclaimed` with attempt fence `"0"`, no reports and null outcome, result ID,
+admission receipt, and cancellation. Claiming changes it to `leased` at the next
+fence. A proved safe `retryable_failure` report returns it to `unclaimed`; an
+`ambiguous` report changes it to `ambiguous`. An authorized reconciliation MAY
+resolve ambiguity or issue a new fenced claim only with its recorded external
+evidence. A terminal report records the immutable outcome and changes it to
+`outcome_recorded`; successful admission changes it to `result_admitted`. `closed`
+may follow only after result admission and retains all identity and outcome
+evidence required by the declared replay policy. These are business-invocation
+states independent of the §17.6 outbox delivery state. Outbox `confirmed` proves only
+durable adapter acceptance; it does not prove the native provider succeeded. A remote
+worker may accept responsibility while invocation remains outstanding. Runtime/root
+completion does not silently erase that outstanding record or late-result policy.
+
+The closed claim shape is `schema/host-effect-claim-v1.schema.json`. A claim has
+exactly `scope_identity`, `root_instance_id`, `work_kind`,
+`work_identity`, `operation_token`, `scope_authority_epoch`, `attempt_fence`,
+`worker_principal`, `expires_at`, and `state`. The active form MUST match
+the closed ten-field §18.4 `workerClaim` with canonical signed 64-bit Unix-epoch
+nanosecond expiry. Negative zero, float, or overflow is invalid; expiration is determined from
+trusted host time at `now >= expires_at`, and unavailable trusted time fails closed.
+`scope_authority_epoch` MUST equal the current §18 `authority_epoch`; a numeric
+match alone is not a credential. For this journal `work_kind` is
+`effect`, `work_identity` is its effect ID, and state is `active`, `revoked`, or
+`expired`. The current claim is an authority record outside the archive; historic
+claim evidence MAY be retained for audit but grants no authority. Issuing a claim
+increments the effect's canonical decimal `attempt_fence`, changes it to `leased`,
+and commits both facts under the host authority guard. Only the authenticated current
+worker principal, active unexpired claim, current scope authority epoch, and exact
+attempt fence authorize dispatch or result submission. Expiry/revocation and new
+claims serialize under that guard. The authenticated principal and matching active
+scope epoch and attempt fence MUST still hold at the journal transaction commit.
+Lease expiry can revoke host writes but cannot
+prove whether external work happened. Import never restores a live claim; an
+unresolved inherited attempt becomes ambiguous before any new attempt.
+
+Native handlers receive a declared §16.2 typed portable input, immutable invocation
+metadata, and an attempt context. They may build arbitrary SDK, protobuf, or other
+native objects internally. Such objects are not portable input, result, checkpoint,
+or journal values. A handler has no direct aggregate mutation or host transaction
+capability. Its report kind is `succeeded`, `domain_rejected`,
+`retryable_failure`, `terminal_failure`, `cancelled`, or `ambiguous`.
+`retryable_failure` requires evidence that another attempt is safe; unknown provider
+acceptance, unclassified exception, worker disappearance, or expired attempt is
+`ambiguous` unless definitive evidence proves no call occurred. A report is immutable
+and contains exactly `attempt_fence`, `report_kind`, `report_digest`, and `reason`.
+`report_digest` is `hash(["determa-effect-attempt-report-1", effect_id,
+operation_token, attempt_fence, report_kind, payload, reason])`, with the exact
+§16.2 typed payload and `null` or a stable nonempty reason code. The host retains
+external evidence separately under access policy; its digest can be included in the
+portable payload only when declared. A duplicate equal report replays and an unequal
+report for the same fence conflicts. Reports do not consume the final outcome slot.
+
+Retry after ambiguity requires proved destination deduplication under the same scoped
+`effect_id`, or explicit authorized reconciliation. A new attempt always receives a
+new fence; an old worker cannot overwrite current journal or checkpoint state.
+Neither a lease nor a journal row proves a provider call did or did not occur. No
+universal exactly-once claim follows from a host transaction. `outcome` is null until
+a terminal business outcome and then is immutable with exactly `kind`, `payload`,
+`digest`, and `attempt_fence`. Its typed portable payload and digest use §16.2 and
+`hash(["determa-effect-outcome-1", effect_id, operation_token, kind, payload,
+attempt_fence])`. Attempt reports remain separate evidence.
+
+Cancellation is null or exactly `operation_id`, `reason`, and `state`, where state is
+`requested`, `prevented_start`, `too_late`, or `reconciliation_required`. Cancellation
+and outcome recording serialize. The closed
+`schema/effect-cancellation-request-v1.schema.json` has exactly `operation_id`,
+`effect_id`, `reason`, and typed `payload`; authenticated scope and principal are
+transport context. The closed response is
+`schema/effect-cancellation-response-v1.schema.json`. It serializes
+with claim issuance and outcome recording under the current §18 scope guard. The
+`operation_id` and exact normalized request are retained for equal replay or
+`operation_id_conflict`; equal replay returns the exact retained response bytes
+without mutation. The host validates the request payload against the pinned
+`cancelled` event declaration and inserts or verifies the exact pinned token. If it wins before any claim, the host MUST require an exact
+pinned `cancelled` result mapping and a valid declared result payload. In one durable
+journal transaction it records `cancellation.state: prevented_start`, an immutable
+`cancelled` outcome with fence `"0"`, and the deterministic mapped result event ID;
+invocation state becomes `outcome_recorded`. No worker attempt or provider call is
+made, and no later claim may issue for this effect. The host then admits the pinned
+`cancelled` event through §19.4, in an independent atomic checkpoint/journal
+transaction. Crash recovery resumes that admission from the stored outcome. If no
+declared `cancelled` mapping exists, cancellation fails before mutation; the host
+MUST NOT invent an event or leave an unclaimable `unclaimed` invocation. After a call might have occurred, cancellation records
+`reconciliation_required` and returns the closed response status of the same name
+with null outcome and result ID. Its request and response digest are retained in
+`operation_response_references`; equal replay returns identical bytes. The host
+cannot claim rollback or erase ambiguity. A recorded outcome wins over later
+cancellation; a late report cannot replace it. Equal cancellation returns retained
+operation evidence without mutation; a changed request cannot rewrite an immutable
+outcome.
+
+### 19.4 Authenticated result submission and admission
+
+The closed request shape is `schema/effect-result-request-v1.schema.json`; the
+closed response shape is `schema/effect-result-response-v1.schema.json`. The
+result request contains exactly `effect_id`, `operation_token`,
+`attempt_fence`, `outcome_kind`, and `payload`. The authenticated transport context
+supplies principal and scope independently of those fields. Before a fresh worker report or outcome commit the host validates the current
+authority epoch, live unexpired claim and fence at trusted host time, authenticated
+worker principal, exact scope and pinned route, outstanding invocation, exact token,
+allowed outcome and declared portable payload. It computes the immutable attempt
+report digest from the normalized request and reason, then records that report with
+the outcome when terminal. The worker check remains true through the outcome commit;
+an expired or revoked claim cannot create a fresh outcome. A subsequent equal replay requires current scope and principal
+authorization, exact retained request/outcome evidence, and the original authenticated
+claim principal; it does not require reviving an expired claim or admitting again.
+An old authority epoch never gains replay rights across a scope transfer. An expired or revoked worker claim returns `stale_attempt_fence` before any
+worker-originated outcome commit or core admission. A wrong business token or
+unknown/closed unrelated invocation returns
+`effect_not_outstanding`; a stale fence returns `stale_attempt_fence`; conflicting
+content for an already recorded outcome returns `effect_result_conflict`. Validation
+failure performs no core call and changes no checkpoint, journal, or outbox bytes.
+
+A response has exactly `status`, `effect_id`, `attempt_fence`, `attempt_report`,
+`outcome`, `result_event_id`, `admission_receipt`, `checkpoint_revision`,
+`journal_revision`, and `error_code`. `status: committed` returns the exact terminal
+outcome and acceptance receipt; equal replay returns the same response bytes and
+revisions. `status: report_recorded` returns the immutable retry or ambiguity attempt
+report with null outcome, result ID, and receipt. `status: rejected` returns only the
+request effect ID/fence and one closed error code; all evidence and revisions are
+null, so unauthorized callers cannot infer whether another scope contains work.
+Rejected requests allocate no revision. A retry or ambiguity report leaves the
+checkpoint revision unchanged. The journal revision advances only on a fresh report.
+
+For a terminal mapped outcome, result event identity is
+`hash(["determa-effect-result-event-1", effect_id, result_slot])`. The host builds
+the full normalized input envelope from the pinned event, target and token mapping,
+including the declared result payload. Its identity and bytes are immutable across
+transport retry or response loss. The host persists the outcome first.
+Admission of an already committed
+`outcome_recorded` result is a host-owned recovery operation: it requires the current
+authorized scope and §18 guarded commit, validates the immutable journal outcome,
+pinned route, target incarnation, declared result schema, token mapping, deterministic
+event ID and complete envelope against the stored evidence, and admits that exact
+event. It does not require the old worker claim to remain live, create a new claim,
+or call the provider. A host-finalized preclaim `cancelled` outcome uses the same
+path. After a crash, even if the old claim expired, recovery resumes this operation
+from the stored outcome. Admission and journal `admission_receipt` commit
+atomically. The receipt is the exact
+§17 accepted event receipt; it records the result event identity. Processing is a
+later independent core operation. Equal submission returns retained outcome/admission
+evidence without new core admission; unequal envelope or outcome is
+`effect_result_conflict`. If admission fails because the pinned runtime is now
+ineligible, the outcome remains durable and is explicitly reconciled; the host MUST
+NOT redirect it. `result_admitted` and `closed` never permit another result admission.
+
+### 19.5 Required conformance evidence
+
+A host claiming this profile MUST pass positive and negative cases for route generation
+change before commit; exact route replay after configuration change; revoked dispatch;
+SDK-native objects remaining inside a handler; scope/token/principal/epoch/fence
+validation before admission; equal replay versus unequal conflict; stale and duplicate
+worker reports; cancellation before claim and after possible call; and terminal outbox
+acceptance with business outcome still pending. Crash cases MUST cover intent commit
+before dispatch, provider acceptance before outcome commit, outcome commit before
+admission, and admission commit before response. The first ambiguous window retains
+uncertainty; it is not converted to failure. Retrying ambiguous work requires the
+stated idempotency or reconciliation proof. Tests MUST compare checkpoint and journal
+bytes before and after every rejected operation and prove no unauthorized provider
+call or core admission. Optional relocation tests run only when the host advertises
+its §18 authority capability; otherwise safe relocation is explicitly refused and
+staged imports remain inactive. These are public conformance obligations for any
+future hosted service claiming the same capability.
+
 ## 20. Lossless application projection and embedded transaction facade
 
 This optional host contract binds selected application rows to one root ownership
@@ -4889,7 +5173,7 @@ pending and terminal effects, effect tombstones, and outbox ordering. It applies
 completed, faulted, unhandled, deferred, migrated, and tombstoned results as well as
 the happy path. An application row is never silently archived, deleted, or rewritten
 because it is outside the selected set or cannot fit a domain enum. An application
-archive participant, if later declared, is separately identified; this contract does
+archive participant under §22 is separately identified and declared; this contract does
 not include application rows in a Determa-owned archive.
 
 A configured mapping MUST validate its selected row identities, expected shape,
@@ -5001,6 +5285,582 @@ The following cases are normative. `typed` denotes the exact §16.2 projection, 
 | Selected row belongs to a different root or is ambiguous | `invalid_projection_selection`; no core call or commit. |
 | Mapping requests one native application/checkpoint transaction from a store without that proved capability | `projection_transaction_unavailable`; no core call or commit. |
 | Concurrent writer changes the checkpoint revision after candidate evaluation | `checkpoint_revision_conflict`; roll back all selected rows and checkpoint changes, with no automatic retry. |
+
+## 21. Lossless event delivery profile
+
+### 21.1 Boundary and portable delivery values
+
+This optional profile composes an ingress source, the §8 foreground core, an optional
+§17 execution store, and an outbound destination. It changes no machine grammar or
+core clock behavior. Its closed wire values are
+`schema/delivery-v1.schema.json`; version 1 is the sole version. An application may
+use the base in-memory API without a broker, worker, coordinator, daemon, or timer.
+That API MUST return every admission rejection, ready/deferred placement, terminal
+machine disposition, lifecycle disposal, and emitted intent to its caller. The caller
+owns persistence and may claim only the guarantees it actually supplies. The complete
+core `step` result in §8 and `schema/core-step-result-v1.schema.json` is the base
+result shape: its state, disposition, fault/rejection, emissions, and every
+`lifecycle_dispositions` member are mandatory fields. A caller MUST preserve or
+explicitly decide every returned external intent and lifecycle disposition before
+claiming lossless delivery. In a durable
+host, §17 receipts and records supply the machine evidence; §18 authority guards,
+§19 effect journals, and §20 application projections apply only when the host declares
+those optional profiles. A delivery adapter MUST NOT infer authority, durable
+processing, or application success from a portable envelope or provider name.
+§19 result-event admission is a host-owned journal recovery operation. It uses the
+same §17 aggregate admission boundary but has no external source item to
+acknowledge under this section.
+
+Before ingress admission, a source item has an immutable `source_scope`,
+`source_delivery_id`, and original content. The content is exactly one of
+`original_bytes_base64` (RFC 4648 padded standard Base64 of the original bytes) or
+`canonical_transport_value` (a §16.2 typed value). A decoded transport value MUST
+be canonical before it is used; arbitrary SDK/protobuf/HTTP objects stay inside the
+adapter. Base64 is canonical only when strict decoding followed by RFC 4648 standard
+encoding reproduces the exact input string, including padding. Non-zero unused pad
+bits, missing or excess padding, whitespace, alternate alphabets, and nonalphabet
+characters are `malformed_delivery` before digest comparison, admission, or source
+acknowledgement. An adapter encoding original bytes MUST produce this canonical
+form; it cannot hash a different spelling that decodes to the same bytes. Its content
+digest is exactly:
+
+```text
+source_content_digest = hash([
+  "determa-delivery-source-content-digest-1", "1",
+  source_scope, source_delivery_id, content_kind, content_value
+])
+```
+
+`hash` is the §9 SHA-256/JCS construction. The source identity is the pair
+(`source_scope`, `source_delivery_id`); it is distinct from the machine `event_id`.
+Adapters MUST retain the pair and digest across attempts. A replay of the pair with
+different content is `source_delivery_id_conflict` and cannot overwrite earlier
+evidence. A successfully normalized envelope retains its entire §6.1 value, projected
+with §16.2 typed payloads and decimal-string integer fields, through every accepted
+ready/deferred location. A durable adapter binds the source pair and digest to the
+checkpoint acceptance receipt or durable terminal-transfer record before source
+acknowledgement. The binding is host evidence outside the portable checkpoint; it
+MUST be restored with that checkpoint for a broker-integrated profile.
+For that profile, an admitted binding and its checkpoint admission MUST commit in
+one atomic host transaction. If the host cannot commit both, it cannot claim
+lossless broker-integrated ingress. The source may continue to hold an
+unacknowledged copy after commit, but replay then returns the already committed
+binding and never repeats admission.
+The admitted binding's exact digest is
+`hash(["determa-admission-binding-digest-1", "1",
+binding_without_admission_binding_digest])`. Its `envelope_digest` MUST equal
+the matching mailbox entry and acceptance receipt request digest. A dead-letter
+record itself is the terminal source binding. The first/replay vectors contain
+the exact admitted binding.
+
+### 21.2 Ingress decisions, acknowledgement, and replay
+
+The source retains ownership until either (a) §17.4 admission commits the complete
+envelope, acceptance receipt, and admitted binding, or (b) a configured durable terminal transfer
+commits a §21.4 ingress dead-letter record. Only then may the adapter acknowledge
+the source. An acknowledgement lost after commit may be retried from the retained
+binding without re-admitting or re-dead-lettering. An adapter MUST NOT acknowledge
+on validation, reservation, remote call initiation, a returned uncommitted core
+result, or a write whose durability is weaker than its advertised profile.
+
+The closed pre-commit decision is `source_owned` with one reason:
+`backpressure`, `capacity_unavailable`, `malformed_delivery`,
+`invalid_delivery`, `target_unavailable`, `precommit_failure`,
+`authority_unavailable`, `source_delivery_id_conflict`, or
+`event_id_conflict`. It returns
+`acknowledge_source: false` and leaves source ownership intact. The adapter may
+pause consumption or request source redelivery according to its configured source
+contract; it MUST NOT turn a retry exhaustion, overflow, plugin failure, or target
+removal into implicit discard. A rejected admission is not a terminal machine
+disposition. An explicit poison policy may choose §21.4 instead, if its record can
+commit before acknowledgement. The decision response identifies event identity when
+normalization succeeded; otherwise it identifies source identity and content digest.
+
+Committed admission returns `admitted`, `acknowledge_source: true`, the exact
+`event_id`, source binding, acceptance receipt sequence, and checkpoint revision and
+digest. Equal source redelivery returns that evidence unchanged. Equal machine-event
+replay follows §17.3; unequal machine-event identity is `event_id_conflict`.
+For a host claiming §18 `authoritative_scope_fencing`, replay checks never bypass
+the current-authority operation guard: a stale claimant may read history through a
+separately authenticated read but cannot acknowledge, reactivate, or mutate delivery.
+Authentication, authorization, and §18's exact guard failures retain their §18
+result codes; a delivery response MUST NOT replace them with
+`authority_unavailable`. That delivery reason covers only an unavailable required
+guard before a guarded operation begins. An admission batch follows §17.4's atomic order; a
+failed member leaves the whole batch source-owned. Broker acknowledgement is per
+source item only after the batch commit is known durable.
+
+After admission, exactly one runtime ready/deferred mailbox owns the envelope until
+a terminal §17.4 receipt owns its outcome. `deferred` is a live placement and cannot
+trigger a source retry. `unhandled`, `faulted`, `disposed`, and
+`migration_disposed` are terminal machine outcomes, never admission failures.
+The adapter MUST NOT ask the source broker to retry an admitted event because the
+machine did not handle it. Each terminal decision retains event identity, exact
+reason or fault, decision authority, receipt, and the profile's declared retention
+window. The base API returns that evidence to its caller even without durable storage.
+The checkpoint-backed `admitted`, `machine_disposition`,
+`mailbox_placement`, and `outbound_decision` responses each name an exact
+committed checkpoint revision and digest. A pre-commit `source_owned` response
+claims no checkpoint mutation; `ingress_dead_lettered` instead names its
+separately committed durable terminal record and source receipt under §21.4.
+`admitted.evidence.operation_kind` is `acceptance` and its
+`receipt_sequence` resolves only to an acceptance receipt at that revision.
+The receipt's event id, acceptance sequence, and request digest equal the response's
+event id, evidence acceptance sequence, and evidence envelope digest; the complete
+envelope occupies one ready mailbox entry at that snapshot. The admitted source
+binding names the same acceptance evidence. A `machine_disposition` instead
+requires `event_terminal` evidence resolving only to a terminal event receipt.
+Its event id, acceptance sequence, final queue sequence, request digest, complete
+outcome, and resulting aggregate digest equal the response and checkpoint; the event
+is absent from live mailboxes. Substituting a creation, acceptance, or other receipt
+kind is `invalid_delivery_evidence`. The exact first admission, equal replay,
+and terminal unhandled witnesses are `examples/delivery/delivery-v1-cases.json`
+and `examples/delivery/execution-checkpoint-transfer-v1.json`.
+
+`mailbox_placement` names the committed checkpoint and the exact live entry's
+event id, envelope digest, target runtime, acceptance sequence, current queue
+sequence, and ready/deferred location. Its `origin` resolves either to that host
+event's retained acceptance receipt or to its internal emission's producing
+operation receipt. A deferred move or structural recall allocates a new queue
+sequence but no operation receipt (§17.4). The origin receipt remains unchanged.
+No adapter may invent a terminal receipt for a live placement. Wrong origin kind,
+missing origin, or unequal entry identity is `invalid_delivery_evidence`.
+The complete before/deferred/recalled snapshots are
+`examples/delivery/queue-placement-checkpoints-v1.json`. Evidence mismatch
+rejects the response without acknowledging or dropping work; durable hosts
+quarantine a corrupt committed snapshot until its exact owner evidence is repaired.
+
+### 21.3 Ordering, pressure, and restoration
+
+Within a runtime, committed admissions append in caller batch order and §6.7 owns
+ready/deferred order thereafter. The adapter publishes its pre-admission ordering
+capability separately: `source_ordered` means it admits one bound source stream in
+source order; absence of that claim means `unordered` and promises no source order.
+Neither implies ordering
+between roots, different sources, or an emitted outbound intent and a later external
+input. A source-order claim requires proof that concurrent workers, retry gaps,
+dead-letter transfer, and recovery cannot overtake an earlier owned source item.
+Backpressure stops or defers new admission while keeping the source item available;
+it cannot evict an accepted mailbox member. The core's deferred-capacity overflow
+produces the terminal fault receipt in §10.1 and is not a transport discard.
+
+A durable broker-integrated restore MUST restore checkpoint, source bindings,
+unacknowledged external backlog or committed dead-letter records, and unresolved
+outbox work at one valid consistency point. Missing any owned item or binding
+invalidates the claimed profile; the host MUST quarantine or refuse activation
+until repaired. A changed source item at a retained identity is a conflict. An
+authority provider alone grants no guard. When the host claims §18
+`authoritative_scope_fencing`, it MUST hold the §18.3 scope operation guard through
+the native commit of admission, source binding, ingress dead-letter transfer, and
+acknowledgement evidence. Replay-triggered acknowledgement requires the same current
+guard. If its §18 host profile reports `worker_fencing: true`, continuation by a hosted worker checks
+its active claim, authenticated principal, epoch, attempt fence, and expiry under
+§18.4. The trusted host clock is used only for that optional claim expiry; it is
+never a core clock or delivery retry timer. A lease alone does not prove retirement
+of an old worker. A standalone
+in-memory host declares no cross-host fencing guarantee.
+
+### 21.4 Durable ingress dead letters and terminal policy
+
+`durable_ingress_dead_letter` is an ingress-adapter capability, never an
+execution-store capability. It requires one immutable record with source scope,
+delivery id, original content, content digest, optional normalized event id and
+envelope digest, reason code, decision authority, retention profile, and terminal
+receipt identity. The record digest is:
+
+```text
+ingress_dead_letter_digest = hash([
+  "determa-ingress-dead-letter-digest-1", "1",
+  record_without_ingress_dead_letter_digest
+])
+```
+
+The dead-letter record and source binding MUST commit durably before the source is
+acknowledged. Its content is the original bytes or canonical transport value, never
+only a payload-free error string. Equal redelivery returns the same terminal receipt;
+unequal content conflicts. A dead-letter destination that merely accepted a send is
+insufficient unless it durably accepted responsibility and supplies a recoverable
+receipt. If durability cannot be established, the source remains owner. Retention
+MUST preserve content and replay/conflict evidence for the profile's declared window;
+compaction or expiry is allowed only under an explicitly weaker published policy
+that still preserves identity and digest evidence throughout its replay window.
+No lossless profile permits silent discard, including on fault, queue overflow,
+retry exhaustion, target deletion, or restore. A deliberate discard is a terminal
+decision only under an explicitly weaker policy and MUST have event/source identity,
+reason, decision authority, and retained receipt evidence before ownership transfer.
+
+### 21.5 Outbound responsibility
+
+Each committed external intent enters §17.6 pending outbox state, or the base API
+returns the complete intent for caller-owned persistence. A durable worker retries
+the same `effect_id` and scope after `retryable_failure` or `ambiguous`;
+uncertainty MUST NOT create a new effect identity. Terminal
+`confirmed` means the destination durably accepted responsibility under its
+configured contract. It does not prove execution or business success. A later
+declared input event is the only machine-visible remote result. Definitive rejection,
+operator cancellation, declared discard, and dead-letter transfer use §17.6's exact
+terminal states with reason and complete intent; a durable dead-letter claim also
+retains the destination's durable transfer receipt. In the closed §21 outbound
+decision, `reason_code` is non-null exactly for retryable failure, ambiguity,
+permanent rejection, operator cancellation, discard, and dead-letter transfer.
+`destination_receipt_id` is non-null exactly for confirmed durable destination
+acceptance or durable dead-letter transfer. A `dead_lettered` decision with either
+field null is invalid and cannot end outbound responsibility. Retrying an outbox
+delivery after its terminal state returns its retained record and does not send
+that intent again. `outbound_decision.evidence` names the exact committed
+checkpoint revision and digest plus the effect's §17.6 outbox location. A pending
+decision resolves to the complete pending intent, its `state_revision`, and the
+same `delivery_state`; a terminal decision resolves to one complete terminal
+outbox record, its `terminal_sequence` and `committed_revision`, and the same
+`outcome`. The effect id must resolve to the producing operation receipt's
+external-outbox emission reference, and the outbox record retains the complete
+intent. An outbox state update increments checkpoint revision but allocates no
+operation receipt; the destination acceptance or dead-letter receipt is
+provider-owned evidence, not a checkpoint operation receipt. For `confirmed`
+and `dead_lettered`, the host retains one closed
+`outbound_destination_receipt` whose root, effect id, terminal sequence, outcome,
+reason, destination receipt id, and checkpoint digest agree exactly with the
+terminal outbox record and response. Its digest is
+`hash(["determa-outbound-destination-receipt-digest-1", "1",
+record_without_outbound_destination_receipt_digest])`. The record binds the
+adapter's proof; the configured destination must actually durably accept
+responsibility for the claimed outcome. The two exact records are
+`examples/delivery/outbound-destination-receipts-v1.json`.
+Missing or wrong
+effect, location, state revision, terminal sequence, or destination receipt is
+`invalid_delivery_evidence`. Exact pending, confirmed, and dead-letter
+snapshots are `examples/delivery/outbound-checkpoint-lifecycle-v1.json`.
+When §19's native-effect profile is selected, an outbox
+`confirmed` record may coexist with an `unclaimed`, `leased`, or
+`ambiguous` invocation. It does not supply a terminal business outcome, cancel
+the invocation, or authorize a provider retry. The §19 journal retains the
+business outcome, cancellation decision, and attempt evidence separately.
+An `outcome_recorded` result whose admission was interrupted remains host-owned
+recovery work: the host admits its exact pinned declared event under §19.4's
+current scope guard and checkpoint/journal transaction, without requiring the old
+worker claim or calling the provider again. A late or ineligible target follows
+§19.4's explicit reconciliation rule, never an ingress source retry or implicit
+discard. The lossless profile cannot silently remove unresolved outbound work on
+completion, cancellation, restore, or worker failure.
+
+## 22. Portable archives and declared participants
+
+### 22.1 Boundary and identity
+
+An archive is a complete snapshot of selected Determa-owned root checkpoints, their
+referenced immutable definitions, and the declared participant closure at one
+host-established consistency point. It is not an arbitrary database export. Sections
+18 (authority), 19 (effects), 20 (application projection), and 21 (delivery) own their
+respective active protocols; this section specifies only their explicitly declared
+portable archive data. An application projection under §20 is a participant only when
+its separate archive contract is declared. No core helper, timer, database service, or
+network worker is made mandatory here. Standalone takeover, cloning, relocation,
+rebinding, fencing, and scope transfer require a separate contract and are not archive
+import operations.
+
+The version-1 archive is strict UTF-8 JSON with exact
+`archive_format: "determa.scope_archive"` and `archive_schema_version: 1`; its closed schema
+is `schema/archive-v1.schema.json`. Its component is the closed
+`schema/archive-participant-v1.schema.json`. Unknown formats and versions fail before
+semantic validation with `unsupported_archive_format` and
+`unsupported_archive_schema_version`. Unknown participant formats and versions fail
+with `unsupported_archive_participant_format` and
+`unsupported_archive_participant_schema_version`. A recognized malformed artifact
+fails `invalid_archive`; a wrong digest fails `archive_digest_mismatch`. There is no
+version-1 compatibility conversion or best-effort unknown-field preservation.
+
+The selection names an ordered set of root identities in one authorized source
+context, including an explicit standalone context. The archive `source` records
+the nonsecret logical source scope identity and ownership-binding digest when present, plus its generation when one is
+proved. For explicit `standalone` provenance, all three are null and profile claims
+are empty. The `profile_kind`, sorted `profile_claims`, and digest state what source
+profile the exporter actually proved; they are descriptive and confer no access.
+The `profile_claims` vocabulary is closed by the archive schema and names only proved
+§17, §18, §19, or §20 host/profile guarantees. `durable_native_results` is the §19
+source disclosure that makes host journal participation required; no matching claim
+is inferred from the mere presence of an outbox intent. The
+principal, credentials, authorization policy, and physical scope-isolation key remain
+host metadata outside portable bytes. An importer compares this source identity,
+binding, generation and complete profile against independently trusted configured
+source policy; it never trusts a profile claim merely because archive bytes hash.
+
+The exporter MUST prove that every root in the selection has exactly one
+checkpoint, including tombstones, and that every owned runtime and
+component is represented by its checkpoint aggregate under §§7.1–7.2. The archive
+contains the exact complete §17 checkpoint for each selected root. Thus active
+configurations, typed variables, histories, owned identities, ready and deferred
+mailboxes, counters, faults, external intents, pending and terminal outbox work,
+receipts, replay retention, migration audit, and root tombstones survive without
+inference. An empty root selection is invalid. Selection completeness is relative to
+its declared roots; it does not claim a complete deployment or unrelated application
+data. The exporter records the checkpoint revision/digest it read and MUST abort if any
+selected checkpoint changes before the consistency point is secured. Application and
+host-journal participants needing a shared point MUST join the same verified boundary;
+a readable snapshot alone does not prove that boundary. When the optional §18
+`consistent_scope_inventory` profile is claimed, its inventory and frozen point MUST
+be proved against authoritative storage, including required host journal records.
+A freeze response or evidence digest is checked by resolving the linked retained
+§18 authority-ledger record and its committed evidence; the response hash alone is
+never a grant. The archive records no active worker claim, epoch authority, retirement
+proof, credential, or destination-bound grant. Import cannot mint or restore any of
+these from `consistency_token`, checkpoint bytes, or an authority response.
+
+If the selected source used §19 durable native results, its complete closed §19 host
+effect journal for every selected participating root MUST be a required archive
+participant under a separately pinned schema and provider. The independent source
+policy binds that journal participant ID into the trusted required set; an artifact
+that deletes the journal or removes the ID from its own contract still fails. Export and import verify
+each journal digest and its exact checkpoint revision/digest pair at the same capture
+point. The participant payload is a canonical typed value with a closed, pinned
+participant schema; decoding it MUST yield exactly one closed §19 journal for each
+selected root covered by that source profile, in root-ID order. Each decoded journal
+MUST validate against `schema/host-effect-journal-v1.schema.json`, including its
+root ID, source scope identity, complete records and references, and journal digest.
+The same typed participant payload MUST include the exact normalized public host
+operation response bytes for every journal response reference, ordered by operation
+ID; each reference digest MUST equal
+`hash(["determa-host-operation-response-1", normalized_response])`. A response digest
+alone does not reconstruct equal replay. An empty journal is valid only when the
+verified source inventory proves that root has no §19 native-effect records or
+response references at the capture point.
+Missing, duplicate, or torn journal evidence blocks the operation. §19 active worker claims,
+credentials, and authority records remain outside the archive; their historical
+outcomes and result-admission evidence remain in the journal payload. A source that
+has only §17 outbox intents and does not claim §19 needs no journal participant.
+
+`schema/archive-host-journal-inventory-v1.schema.json` closes the separate source
+inventory commitment. Its `source_profile_digest` binds the independently verified
+source kind, logical scope, binding, generation, and profile claims; its
+`consistency_token` binds the capture point. Its ordered root entries bind each
+selected checkpoint pair, journal revision and digest, complete effect IDs, intent
+digests, attempt-report digests, outcome and result IDs, and operation response IDs
+and digests. `inventory_digest = hash(["determa-archive-host-journal-inventory-1",
+inventory_without_inventory_digest])`. Export obtains this inventory from the
+authoritative source under the same consistent capture boundary as checkpoints and
+journals, not by enumerating the archive participant after capture. Stage compares
+the complete decoded participant against independently trusted source inventory
+evidence configured for that exact source profile, selection token, and root set.
+An importer MUST NOT accept an inventory supplied only by the archive or by an
+untrusted caller. A correctly resealed deletion or rewrite of a journal record,
+attempt, outcome, or response reference is
+`archive_host_journal_inventory_mismatch` with the journal participant ID. This
+evidence proves historical capture completeness; it is not a worker claim,
+credential, authority grant, or permission to resume an inherited attempt.
+
+### 22.2 Closed content and digest rules
+
+The version-1 archive root is its closed manifest and has exactly `archive_format`,
+`archive_schema_version`, `source`, `participant_contract`, `selection`,
+`checkpoints`, `normalized_definitions`, `migration_descriptors`, `participants`,
+`members`, `required_determa_capabilities`, `optional_participant_references`,
+`source_fence_reference`, `transfer_reference`, and `archive_digest`.
+`archive_format` is exactly `determa.scope_archive`; there is no reader for the
+earlier draft spelling. The outer `archive_digest` is the exact content identity of
+this archive, rather than a second mutable ID field. The manifest's `source` and
+`selection` bind logical scope, source binding and generation when present, profile,
+and consistency point. An explicit standalone source has null scope, binding,
+generation, fence, and transfer references.
+`source.profile_digest = hash(["determa-archive-source-profile-1",
+source_without_profile_digest])`. `participant_contract` lists the complete declared
+required and optional participant IDs, each sorted by UTF-8 bytes and disjoint. Its
+digest is `hash(["determa-archive-participant-contract-1",
+source.profile_digest, required_participant_ids, optional_participant_ids])`.
+Every included participant appears exactly once in that contract and its `required`
+Boolean agrees with the corresponding list. Every required participant appears in
+`participants`; an optional one may be absent with an explicit result report. The
+contract is checked against an independently trusted configured requirement for this
+source profile and selection. A resealed archive cannot delete a required helper,
+host journal, or application participant by editing its own contract. The importer
+MUST refuse source profile or contract mismatch even when all archive hashes verify.
+
+`members` contains one entry for every checkpoint, normalized-definition attachment,
+migration descriptor, and included participant record, and no other entry. Identity
+is respectively `checkpoint:<root_instance_id>`,
+`definition:<validated_bundle_fingerprint>`,
+`migration_descriptor:<migration_descriptor_digest>`, or
+`participant:<participant_id>`. Entries are strictly sorted by identity UTF-8 bytes
+and unique. Each entry's `digest` is SHA-256 of the exact UTF-8 RFC 8785 JCS bytes of
+the whole member object; `byte_length` is the canonical positive decimal count of
+those same bytes. The importer verifies identity, length, digest, complete closure,
+and each member's own nested digest. The outer digest includes this member table;
+it is not a substitute for comparing it to actual member bytes. For an external
+participant the member object includes its external content reference, and staging
+additionally resolves and verifies the referenced typed payload bytes.
+
+`required_determa_capabilities` is the unique UTF-8 sorted exact minimum needed to
+decode and stage the included Determa-owned content. It includes `portable_archive`,
+plus `portable_checkpoint`, `normalized_definition`, `migration_descriptor`, and
+`archive_participant` when the corresponding members exist; a source claiming §19
+durable native results also requires `host_effect_journal`. These are destination
+requirements, distinct from `source.profile_claims`, which describe source behavior.
+The exporter computes them from the captured content and profile; the importer checks
+their exact closure and that its independently configured supported-capability set
+contains them before any staging write. A missing or invented requirement in an
+otherwise resealed manifest is `archive_manifest_mismatch`; an unsupported genuine
+requirement is `archive_capability_mismatch`.
+
+`optional_participant_references` is sorted by participant ID and contains one exact
+ID, §11.5 provider reference, and schema digest for each optional ID in the declared
+contract, even when its payload was absent at capture. Its complete list is checked
+against independently trusted configured references and source capture evidence;
+absence still appears in the result. `source_fence_reference` and
+`transfer_reference` are null unless the source has an applicable retained §18
+operation. A nonnull fence reference carries only the retained operation kind, ID,
+and response digest; a transfer reference additionally carries the destination
+binding digest. They are public provenance pointers, checked against exact source
+profile and trusted retained host evidence when used. A hash or operation ID in the
+archive cannot itself prove source retirement, convey a credential, consume a grant,
+or authorize activation; §18 and the separate recovery contract perform those checks.
+
+`selection` contains `root_instance_ids`, ordered strictly by UTF-8
+bytes, and `consistency_token`, an opaque non-empty exporter assertion. The token is
+not authority, a lease, or a transaction credential. Checkpoints are ordered by
+`root_instance_id`, match selection exactly, pass §17 validation and their own digests.
+The definitions array uses the exact §16.13 attachment shape and is ordered by
+fingerprint; descriptors are ordered by digest. Every referenced definition, including
+origin/current definitions and fault anchors, every descriptor named by a retained
+migration audit record, and every descriptor needed by the exporter's declared recovery
+route MUST be attached. Attachments are independently
+hash-checked and trust-admitted before import. Digest-equal attachments may appear
+once; conflicting or missing attachments invalidate the archive. The archive does not
+invent a route or migrate a checkpoint while exporting or staging.
+
+Participant records are ordered by `participant_id` and are unique. Each has exactly
+`participant_format`, `participant_schema_version`, `participant_id`,
+`required`, `provider_reference`, `participant_schema_digest`, `dependencies`,
+`storage`, `payload_digest`, and `payload`. `provider_reference` is
+§11.5 exact identifier/version/content digest. Dependencies are unique participant IDs
+in ascending UTF-8 order, must exist in the archive, and must form an acyclic graph.
+A required participant makes all its dependencies required in effect. `storage` is
+`embedded` or `external`. Embedded payload is the complete typed §16.2 projection;
+external payload is null and names immutable bytes by `payload_digest` through the
+importer's configured content-addressed resolver. Both modes must reconstruct the
+same declared typed value exactly; an external reference is never a permission to omit
+required bytes. The payload is participant-owned and may represent application rows,
+a helper, or a host journal only under its separately versioned closed schema and
+provider contract. The archive itself does not interpret that data or confer authority.
+
+All JSON uses §16.2 strict parsing and RFC 8785 JCS serialization. Typed payloads use
+exactly its seven typed forms, canonical map ordering, and numeric constraints.
+`hash(value)` is the lowercase `sha256:` prefix plus SHA-256 of the UTF-8 JCS bytes of
+`value`, as in §16. Participant `payload_digest = hash(["determa-archive-payload-1",
+participant_id, participant_schema_digest, typed_payload])`; an external resolver
+must return the typed payload bytes that reproduce this digest. The provider's exact
+schema bytes reproduce `participant_schema_digest` using `hash(schema_json)` and its
+registered schema validates the decoded payload. The outer
+`archive_digest = hash(["determa-archive-digest-1",
+archive_without_archive_digest])`. Digest checks do not replace schema, semantic,
+provenance, or authorization checks. The archive's schema bytes are pinned by the
+importer's supported version-1 schema registry; a changed shape with the same version
+is unsupported, even if a JSON parser accepts it.
+
+### 22.3 Export, staging, and declared capability
+
+Export uses the closed `schema/archive-export-request-v1.schema.json` request:
+exact source provenance, selected roots, required and optional participant IDs, and
+consistency token. `schema/archive-export-source-v1.schema.json` closes the source
+checkpoint, definition, descriptor, participant-capture, and inventory-evidence input
+used in the normative vectors. Its inventory evidence is a host assertion that must be
+proved against source storage; the JSON shape alone cannot prove completeness. The
+host selects one authorized source context and exact roots. Before reading data, it
+resolves every selected
+participant's exact `archive_participant` provider and checks its healthy
+configured-instance `portable_export`, `exact_reconstruction`, and
+`consistent_archive_capture` claims. The `consistent_archive_capture` claim
+means this configured participant can capture its complete declared payload at the
+host-selected checkpoint consistency point; it
+does not establish that point or provide scope authority. `portable_export` and
+`portable_import` mean exact closed payload production and staging, respectively;
+`exact_reconstruction` means all declared participant state can be recovered from
+that payload and its verified external bytes. A participant MUST declare its
+dependencies, schema digest, capture and reconstruction method, and whether its payload
+includes external bytes. The host expands dependencies
+and rejects cycles, duplicate identities, missing required providers, unsupported
+schemas, unprovable completeness, or an inconsistent boundary. An optional participant
+that is absent is listed in the export result's `absent_optional_participants`; it is
+never silently treated as included. A present but unsupported optional participant is
+reported as `unsupported_optional_participants` and excluded only when no included
+required participant depends on it. The closed result schema is
+`schema/archive-result-v1.schema.json`. A success result has exact format/version,
+`status` (`exported` or `staged`), `archive_digest`, `staged`,
+`included_participant_ids`, `absent_optional_participants`, and
+`unsupported_optional_participants`. A refusal has exact format/version,
+`status: "refused"`, one `code`, nullable `participant_id`, `staged: false`, empty
+`included_participant_ids`, and the two optional-report arrays. Reports contain exact
+`participant_id` and one closed `reason`. All ID arrays are UTF-8 ordered and unique.
+Export success is `exported` with `staged: false`; import success is `staged` with
+`staged: true`.
+
+Import uses the closed `schema/archive-import-request-v1.schema.json` request. Its
+trusted source profile and participant-contract digests, expected source provenance,
+and staging identity are supplied by independent host policy, not copied from the
+untrusted archive. A caller cannot weaken that policy by changing request fields.
+The host verifies these values and authorized staging selection before any write.
+Import verifies the complete archive manifest, member bytes and required Determa
+capabilities, checkpoint and attachment
+digests, trust policy, and each included participant's exact provider fingerprint,
+transitive executable dependencies, schema bytes/digest, payload, and configured-instance
+`portable_import` and `exact_reconstruction` claims before any write. An included
+external payload must be resolved and hash-verified during staging; required missing bytes,
+providers, schemas, dependencies, or capabilities block the entire import. Optional
+participants may be absent only when the request explicitly permits their omission;
+the result names each absence or unsupported participant. If a present optional
+participant is omitted, no dependent participant may be staged. An importer MUST NOT
+substitute a provider with the same name and a different digest or infer that a helper
+is disposable. An unsupported helper is reported by ID, with its required/optional
+status, and cannot disappear without a result record.
+
+Successful import produces an inert staged archive with exact source bytes and verified
+attachments. Included participants are fully verified. An omitted optional
+participant remains an identified inert record whose provider-dependent data is not
+available for reconstruction until separately validated; omission never authorizes
+activation or deletion of its bytes. Staging creates no active execution-store scope,
+root identity claim,
+credential, ingress subscription, outbox worker, broker acknowledgement, effect
+delivery, or authority grant. It does not invoke core `create`, `admit`, `step`, or
+migration, and does not replay a journal or event deltas to reconstruct state. An
+event journal or incremental delta MAY supplement a complete snapshot for provenance
+or later synchronization, but cannot replace any checkpoint or participant snapshot.
+Activation and destination ownership are outside this section. A failed export or
+stage returns one closed refusal and leaves source and destination unchanged.
+
+The deterministic refusal precedence is unsupported archive format, unsupported
+archive version, invalid archive shape, archive digest mismatch, manifest closure,
+source provenance,
+source profile or participant contract mismatch, invalid checkpoint or attachment,
+invalid participant closure or payload, host-journal inventory mismatch, missing required artifact or
+provider, capability mismatch, then consistency or staging failure. The result uses
+one exact code from `schema/archive-result-v1.schema.json`; implementations may attach
+nonportable diagnostics outside the result. Required absence is never downgraded to an
+optional report. Conformance MUST compare complete results and staged bytes, including
+negative cases for changed checkpoint/mailbox, receipt/outbox/audit/fault omission,
+wrong schema or provider digest, resealed required-participant omission or weaker
+source claim, absent optional versus missing required, unresolved external payload,
+participant dependency cycle, and attempted activation during staging.
+
+An internally wrong source-profile or participant-contract digest is `invalid_archive`.
+An intact outer archive digest with a wrong member identity, order, byte length,
+digest, missing or extra member, or incorrect required-capability closure is
+`archive_manifest_mismatch`.
+An intact archive whose scope identity, binding, or generation differs from trusted
+source policy is `archive_source_provenance_mismatch`; a kind, claim, or profile digest
+difference is `archive_source_profile_mismatch`. An intact, differently declared
+required/optional participant set is `archive_participant_contract_mismatch`, even if
+the artifact was resealed. A required participant absent from a matching contract is
+`missing_required_artifact` with its ID. An unknown selected root or duplicate root
+selection is `archive_selection_invalid`; a selected checkpoint that changes or cannot
+be captured at the agreed point is `archive_consistency_unavailable`. These are
+pre-commit host refusals, never core faults.
+
+The normative `examples/archives/` vectors include one four-root snapshot with live
+ready/deferred entries, a retained fault, a compatible migration receipt/audit pair,
+and pending, full-terminal, and compact effect evidence anchored to producing receipts.
+The closed export cases supply complete requests and source captures, including selected
+checkpoint bytes, definition/descriptor attachments, participant capture, and a
+host-asserted consistency point. The closed stage cases supply complete import requests,
+trusted-policy fixtures, exact staged bytes or refusal, and JSON-pointer differences
+from the positive archive. Conformance verifies the source/contract pins and every
+nested digest and causal link, not merely the outer archive hash.
 
 ## 24. Recovery, fresh-scope takeover, cloning, and optional relocation
 

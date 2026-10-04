@@ -1,0 +1,12 @@
+{
+  "status": "rejected",
+  "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "attempt_fence": "1",
+  "attempt_report": null,
+  "outcome": null,
+  "result_event_id": null,
+  "admission_receipt": null,
+  "checkpoint_revision": null,
+  "journal_revision": null,
+  "error_code": "effect_result_conflict"
+}

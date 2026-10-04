@@ -1,0 +1,20 @@
+{
+  "profile": "durable_effect_results",
+  "schema_version": 1,
+  "cases": [
+    {"name": "committed_selected_intent", "given": "a selected intent and exact route commit with its checkpoint and journal record", "when": "an authorized current worker claims it", "then": "one fenced attempt may dispatch the pinned handler"},
+    {"name": "uncommitted_intent", "given": "evaluation emitted an intent but checkpoint commit failed", "when": "a worker scans", "then": "no claim, provider call, or journal insertion"},
+    {"name": "route_generation_changed", "given": "route generation changes after resolution", "when": "the producing transaction commits", "then": "reject with no checkpoint, journal, or provider mutation"},
+    {"name": "equal_request_after_route_change", "given": "a committed operation receipt and pinned route", "when": "the same operation is replayed after route configuration changes", "then": "return the saved response and route without alias resolution"},
+    {"name": "revoked_dispatch", "given": "a pinned route whose current permission is revoked", "when": "dispatch is attempted", "then": "retain pending work and make no provider call"},
+    {"name": "accepted_outbox_pending_business", "given": "the worker transport durably accepts the intent", "when": "the checkpoint outbox becomes confirmed", "then": "business invocation remains outstanding until an authenticated terminal outcome"},
+    {"name": "wrong_token", "given": "a current worker claim", "when": "the result supplies a different business token", "then": "effect_not_outstanding before core admission; bytes unchanged"},
+    {"name": "wrong_scope_or_principal", "given": "a valid effect ID and business token", "when": "another scope or principal submits", "then": "authorization failure before existence disclosure, admission, or mutation"},
+    {"name": "old_epoch_or_fence", "given": "a worker from an expired claim", "when": "it submits a result", "then": "stale_attempt_fence before core admission; bytes unchanged"},
+    {"name": "equal_and_conflicting_result", "given": "a recorded terminal outcome and accepted event", "when": "equal then unequal results are submitted", "then": "equal returns retained receipt; unequal returns effect_result_conflict without mutation"},
+    {"name": "crash_after_provider_acceptance", "given": "provider acceptance without committed outcome", "when": "host recovers", "then": "attempt is ambiguous; retry only with destination deduplication or reconciliation"},
+    {"name": "crash_after_outcome_commit", "given": "outcome committed without result admission", "when": "host recovers", "then": "admit the pinned event once without invoking provider again"},
+    {"name": "cancellation_before_claim", "given": "a committed cancellation before any claim", "when": "worker attempts dispatch", "then": "prevented_start and no provider call"},
+    {"name": "cancellation_after_possible_call", "given": "provider call may have occurred", "when": "cancellation commits", "then": "retain ambiguous work pending proof or reconciliation"}
+  ]
+}

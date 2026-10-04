@@ -1,0 +1,35 @@
+{
+  "description": "Host-retained destination acceptance and dead-letter transfer receipts bound to the alternative terminal \u00a717.6 checkpoints. The destination must itself confirm durable responsibility.",
+  "records": [
+    {
+      "delivery_message_kind": "outbound_destination_receipt",
+      "root_instance_id": "job-42",
+      "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "terminal_sequence": "0",
+      "outcome": "confirmed",
+      "reason_code": null,
+      "destination_receipt_id": "destination-acceptance-7",
+      "destination_authority": {
+        "kind": "destination",
+        "identifier": "orders-destination"
+      },
+      "execution_checkpoint_digest": "sha256:70cfa74dd783d0e0d5fbdb46b679490aad3532c93eba1918e922e654dc6f36b8",
+      "outbound_destination_receipt_digest": "sha256:64ce262dd94465d150e8bbcfad0b66b44df5fc6d12ca7506f7a5ed07e8200844"
+    },
+    {
+      "delivery_message_kind": "outbound_destination_receipt",
+      "root_instance_id": "job-42",
+      "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "terminal_sequence": "0",
+      "outcome": "dead_lettered",
+      "reason_code": "destination_policy_rejected",
+      "destination_receipt_id": "destination-dead-letter-7",
+      "destination_authority": {
+        "kind": "destination",
+        "identifier": "orders-destination"
+      },
+      "execution_checkpoint_digest": "sha256:2c2cad1db68748c942ad9842a49a7e505d3d0d26d967dcb458b60db9be5af4cf",
+      "outbound_destination_receipt_digest": "sha256:14a5803db4071f8ed4270339f9071a4af5df91ebc39bc498c845fe785f70f367"
+    }
+  ]
+}
