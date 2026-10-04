@@ -2399,6 +2399,146 @@ Informative examples of valid hosts include:
 
 Plugin names and configuration never appear in portable bundle grammar.
 
+### 11.5 Public extension identity, registration, and capabilities
+
+This section is the common public host boundary for embedded applications and future
+hosted implementations. It defines the shape and meaning of extension discovery and
+capability negotiation, not a plugin ABI or a mandatory service. The core remains a
+foreground transformation (§8). A host MAY inject an object directly; no URI,
+registry, daemon, clock, coordinator, or network endpoint is needed to evaluate the
+pure core. If a host offers named registration, both bundled and third-party
+extensions MUST use the same public `register` operation and lookup rules. A named
+extension's category is exactly one of `execution_store`, `projection`, `transport`,
+`timer`, `http`, `native_handler`, `compiler`, `runtime_provider`, `resolver`, and
+`authority`. These categories are distinct: a store claim does not grant authority,
+and a transport or timer claim does not imply a durable host profile.
+The public registration path exposes `register`, `validate_configuration`,
+`capabilities`, and `health`; category-specific setup is separate. Registration
+validates a descriptor before making a factory visible. Configuration validation
+precedes opening an instance and evaluating its claims. Direct injection supplies the
+same descriptor and validation operations, even when no name resolver is installed.
+
+The closed provider reference is defined by
+`schema/provider-reference-v1.schema.json`: exactly `identifier`, `version`, and
+`content_digest`. The identifier matches `[a-z][a-z0-9.-]*`; the version is an exact
+SemVer (no range, wildcard, alias, or `latest`); the digest is a canonical SHA-256
+content digest. All three compare exactly. The digest binds the executable provider
+and its declared dependency closure according to that provider's separate contract;
+the descriptor alone is not proof that arbitrary installed code matches the digest.
+The host MUST verify the actual loaded provider and its trusted allowlist before
+executing it or claiming a guarantee. Dynamic discovery is explicit or allowlisted;
+untrusted source text, a machine document, or an unauthenticated event MUST NOT cause
+provider installation or selection. A scheme or URI is a lookup hint only. It grants
+no privilege, scope authority, credential, capability, or override right.
+Each host authorizes registration, discovery, and invocation against the authenticated
+scope and operation; possession of a provider reference is not authorization.
+
+`schema/extension-descriptor-v1.schema.json` defines a registration descriptor with
+exactly `category`, `provider_reference`, `interface_version`, and
+`supported_capabilities`. `interface_version` is the integer `1` for this boundary.
+The capability names are closed and category-specific in that schema. A descriptor
+lists only capabilities the provider knows how to evaluate; it does not assert that
+every configured instance has them. A host registers at most one factory for each
+`(category, identifier, version)`; duplicate registration, including a conflicting
+digest, fails as `duplicate_extension_registration` and does not replace the first.
+For direct injection, the host checks the supplied object's descriptor and exact
+reference through the same validation path. Missing reference yields
+`unknown_extension`; mismatched version or digest is `extension_identity_mismatch`.
+Malformed descriptors or references yield `invalid_extension_descriptor`; invalid
+host-owned configuration yields `invalid_extension_configuration`.
+No fallback to another installed version or bundled provider is permitted.
+
+After validating host-owned configuration, the host calls the registered provider's
+`capabilities(configured_instance)` and `health(configured_instance)` operations.
+`schema/extension-capability-report-v1.schema.json` defines the resulting public
+report: exact category and provider reference, a nonsecret configured `instance_id`,
+`health` (`healthy`, `degraded`, `unavailable`, or `unknown`), and closed `claims`.
+Every reported claim MUST be listed by the matching descriptor's
+`supported_capabilities`; a report with a different category, reference, or instance
+is never evidence for this instance.
+The report is scoped to that exact configured instance and current health. The host
+MUST verify claims against its policy and actual topology; self-assertion is not
+proof. `degraded`, `unavailable`, or `unknown` health cannot satisfy a requirement
+unless the capability's separate contract explicitly proves safe operation at that
+health, which no common capability here does. A missing or unproved claim is false.
+This false-by-absence rule applies to requested **guarantees**. It does not assert
+the absence of a hazard: a healthy runtime-provider report that omits
+`external_io_capable` still leaves external I/O possible unless the exact provider
+and host policy independently prove it cannot occur (for example, through a verified
+`pure` guarantee). The host MUST treat unresolved I/O status as possible I/O.
+Provider families, URI schemes, installed packages, and a previously healthy report
+do not inherit capabilities. A changed configuration or relevant health requires
+reevaluation before a newly requested operation.
+The schema's empty capability sets for `http`, `compiler`, and `resolver` mean this
+common foundation assigns them no standalone standard guarantee yet. Their separate
+contracts may add versioned category-specific capabilities; implementations MUST NOT
+invent a meaning under this version-1 vocabulary.
+The execution-store names have the meanings in §17.11. The remaining nonempty
+category sets reserve names for the corresponding projection, transport, timer,
+native-handler, runtime-provider, and authority contracts. A host MUST NOT advertise
+one of these reserved names until its defining public contract and applicable
+conformance cases exist and the configured instance passes them. In particular,
+`authoritative_scope_fencing` means the configured authority rejects stale scope
+writers under its proved epoch and ownership boundary. It is not inferred from a
+durable store, a URI, a process lock, or a readable archive. `safe_relocation` is a
+distinct claim for the exact source, destination, and authority topology, supported
+only when the separate transfer contract proves old-owner retirement and destination
+activation. Local guarded writes or a successful export do not imply it. A host MUST
+check the actual operation's source and destination against that proved topology;
+a configured-instance report alone does not authorize a particular transfer. The host
+MUST report `safe_relocation` unavailable for an unproved topology, refuse relocation
+before activation,
+and leave any staged import inactive; it MUST NOT silently invoke the weaker
+standalone takeover. Multi-host coordination and managed control-plane operations
+are outside this common foundation.
+
+`schema/extension-capability-requirement-v1.schema.json` defines one exact requirement:
+`category`, `provider_reference`, `instance_id`, and `capability`. A host profile
+resolves all its required extensions and checks every requirement against healthy,
+verified configured reports **before** loading or creating a root, admitting an
+envelope, dispatching an intent, or changing host evidence. An unknown provider,
+invalid configuration, unhealthy instance, or unsatisfied requirement fails closed
+without mutation. Hosts MAY use category-specific codes such as §17.10's
+`adapter_capability_mismatch`; otherwise they report `extension_capability_mismatch`.
+Requested profile guarantees never silently downgrade. The positive and negative
+vectors in `examples/extensions/capability-cases-v1.json` are normative for these
+common checks. Category-specific operations and stronger guarantees are defined in
+their respective sections and conformance profiles, not inferred from the registry.
+
+For a composition, a guarantee such as `pure`, `deterministic`, `portable`,
+`semantically_introspectable`, or `process_contained` is effective only when **every**
+participating provider and the host policy prove it. `external_io_capable` is a hazard
+flag: it is effective when **any** participant may perform external I/O, including an
+unknown or unverified participant. The absence of an `external_io_capable` claim is
+not a no-I/O attestation. Unknown I/O therefore requires explicit weak
+profile opt-in and prevents automatic retry or replay claims based on purity.
+Advertised `external_io_capable` grants no transactional safety. Runtime provider
+claims have the exact meanings in their dedicated provider contract; this section
+only fixes truthful composition and refusal semantics.
+
+Endpoint URLs, named endpoint/scope aliases, authentication credentials, provider
+configuration, and secret material are deployment configuration, never machine
+semantics or members of a portable state, checkpoint, receipt, or archive. A client
+MAY configure multiple named endpoints and scopes; changing a scope's endpoint never
+rewrites its statechart or proves ownership transfer. Local hosts and a future Determa
+SaaS MUST use the same public machine model, protocol, portable Determa-owned artifacts,
+capability names, and conformance tests for each capability they claim. Import must
+validate exact definitions, state, queues, receipts, unresolved intents, provenance,
+and required capabilities. External helper state moves only through a declared
+participant/export contract; unsupported required helper state must be reported, not
+silently lost. This compatibility boundary does not require or authorize a distributed
+coordinator or private SaaS infrastructure in the open-source core.
+
+Changes to public protocols, portable artifacts, capability meanings, archive/import
+behavior, effect identity, or helper boundaries require hosted-compatibility review.
+The release conformance gate MUST track fingerprints for these contracts, require an
+explicit change record and updated positive and negative vectors for changed boundary
+files, and run cross-language interoperability checks where the capability is claimed.
+A future SaaS implementation MUST run the same public conformance suites for all its
+claimed capabilities. Exact re-execution equality applies only to deterministic
+portable profiles; weak or nondeterministic profiles check canonical artifacts,
+identity, retained evidence, and safety refusals instead.
+
 ## 12. Inspection and visualization
 
 Implementations SHOULD expose read-only inspection of:
@@ -2414,11 +2554,150 @@ Runtime-local ready/deferred mailbox contents and their portable ordering identi
 core state and SHOULD be inspectable. External broker backlog, delivery attempts, dead
 letters, scheduled jobs, and broker acknowledgements remain plugin-owned.
 
-Enabled-event inspection is deliberately undefined in format 1. A configuration alone
-can reveal only structurally present handlers: whether a guarded handler is enabled is
-a property of the configuration together with a candidate envelope and current
-variables. Implementations MUST NOT present an implementation-specific enabled-event
-shape as a portable format-1 contract.
+### 12.1 Exact candidate inspection
+
+`inspect_candidate` is a read-only core operation over one validated executable
+definition, one valid portable aggregate, one exact runtime incarnation, and one
+normalized candidate envelope. Its closed request and outcome are defined by
+`schema/inspection-v1.schema.json`. The request has exactly `mode`,
+`aggregate_state_digest`, `runtime_id`, `runtime_incarnation`, `envelope`, and `limits`.
+`runtime_incarnation` is the runtime's exact portable `identity_origin` (§16.3),
+including its component activation or spawned sequence where applicable. A caller
+cannot substitute a matching machine or placement with a different incarnation.
+`structural` requires `limits: null`; `semantic` requires two positive canonical
+decimal limits, `maximum_guard_evaluations` and `maximum_evaluation_steps`.
+The caller supplies a complete normalized envelope; inspection validates it with
+the same declaration, direction, payload, target, and reserved-event rules as
+admission, but never admits it. The envelope's exact target must identify the
+requested runtime incarnation. The digest must match the supplied aggregate before
+inspection begins. Invalid request shape or digest is an operation failure,
+`invalid_inspection_request`, with no classification.
+
+A successful result has exactly `aggregate_state_digest`,
+`definition_fingerprint`, `runtime_id`, `runtime_incarnation`, `classification`,
+`possible_dispositions`, `disposition`, `reason`, `levels`, and `guard_evidence`.
+The fingerprint is the addressed runtime's exact current executable definition,
+including provider closure when applicable. For an absent or mismatched runtime,
+it is the aggregate root's exact current executable definition; this does not
+imply that an absent target was resolved. `possible_dispositions` is a nonempty
+duplicate-free subset
+in canonical order `handled_now`, `deferred`, `unhandled`, `invalid`. A
+`definitive` result has one possibility and the same non-null `disposition`; a
+`conditional` result has at least two possibilities and `disposition: null`.
+`reason` is null except for `invalid`, when it is exactly one of
+`target_not_found`, `target_incarnation_mismatch`, `invalid_envelope`, or
+`runtime_inactive`. Missing runtime and wrong incarnation take precedence over
+envelope validation; an inactive exact runtime takes precedence over envelope
+validation. Invalid envelope includes wrong target, visibility, direction, payload,
+and reserved failure-event usage. Invalid results have no levels or guard evidence.
+These classifications are predictions about dispatch, never admission receipts or
+promises that actions will complete. A guard error is not an `invalid` disposition.
+
+Each `levels` element has exactly `state_id`, `handler_branches`, and `defers`.
+Elements enumerate the active ancestry deepest state first, ending at the runtime
+root. `state_id` is the exact state-definition pointer; `defers` is the Boolean
+answer for this event at that level. Branches preserve declaration order and have
+exactly `branch_index`, `guard_locator`, and `guard_binding_digest`. The index is a
+zero-based canonical decimal string. An unguarded branch has both guard fields null.
+A guarded branch's locator is an exact pointer into the validated executable
+definition; its binding digest binds the normalized CEL guard or exact runtime
+provider reference and source/dependency closure under that definition fingerprint.
+It is `hash(["determa-guard-binding-1", definition_fingerprint, guard_locator,
+typed_guard_binding])` under §9. `typed_guard_binding` applies the §8 typed-tree
+projection to the exact validated guard member. For a CEL guard, this is
+`["string", source]`, where `source` is exactly the Unicode string value of that
+`guard` member in the §8 normalized validated bundle tree.
+Parsing and type checking do not rewrite, trim, pretty-print, case-fold, or otherwise
+canonicalize its source text; spaces and line breaks are retained as code points.
+For a runtime-provider guard, `typed_guard_binding` is the complete exact provider
+binding and source/dependency closure, encoded as the §8 typed tree under that provider
+contract. Its object-member order is canonicalized by §8 and §9; exact string/source
+values are preserved. Recompilation cannot substitute a different binding at the
+same locator. For example, `"event.payload.amount > 1"` and
+`"event.payload.amount  > 1"` have distinct guard bindings and distinct digests,
+even though both evaluate the same way for every numeric amount.
+Structural inspection enumerates branches without invoking CEL, providers, actions,
+helper routes, or host delivery. `guard_evidence` is empty.
+
+Structural `possible_dispositions` is the union of every outcome reachable by
+assigning true/false to each guarded branch while obeying §6.3 branch order and
+same-state deferral precedence. At a level, any true branch or final unguarded
+default handles; only the all-false path tests same-state deferral, then continues
+to the parent when no deferral exists. A child deferral blocks all ancestors. Thus a
+guarded branch followed by an unguarded default is definitively `handled_now`;
+a guard-only handler with same-state deferral may be `handled_now` or `deferred`;
+and the same handler without deferral may be `handled_now` or the ancestor outcome.
+No reachable declaration means definitively `unhandled`. Structural inspection
+does not predict guard faults, since it executes no guards.
+
+### 12.2 Optional safe semantic inspection
+
+Semantic inspection follows §6.3 branch order and deferral precedence on the
+provided snapshot. It evaluates only guard slots reached along that path. It never
+simulates actions, choices, entry/exit, creation, cancellation, recall, or another
+RTC step. A successful semantic result is definitive and has one Boolean evidence
+record per evaluated guard, in evaluation order. Each record has exactly
+`state_id`, `branch_index`, `guard_locator`, `guard_binding_digest`, and `value`.
+Any guard enumerated in the active ancestry whose exact resolved provider closure
+lacks a separately proved bounded, nonmutating introspection entrypoint fails with
+`inspection_capability_unavailable` **before any guard evaluation**. A host MUST NOT
+substitute an ordinary evaluator on a purity claim. A guard evaluator failure returns
+`inspection_guard_failure`; exhaustion returns `inspection_limit_exceeded`. Neither
+returns a disposition or faults/mutates the supplied aggregate. A failed operation
+has exactly `code` and `source_locator`; the locator is null for request/capability
+failures and the exact guard pointer for evaluation failures. The operation returns
+no partial evidence on failure. Semantic inspection is an optional capability; a
+host that does not advertise it returns `inspection_capability_unavailable`.
+
+Portable CEL guards use the following shared abstract fuel, independently of a
+particular interpreter's instruction count. Before evaluation, reject any guard
+whose UTF-8 source exceeds 4096 bytes, checked AST exceeds 1024 nodes, or input
+snapshot (envelope plus all visible variable values) exceeds 65536 value units.
+One value unit is one scalar value, one Unicode scalar in a string, one list slot,
+or one map entry plus its key's Unicode scalar count, summed recursively. The
+request limits cannot exceed 64 guard evaluations or 1000000 evaluation steps.
+Larger limits are `invalid_inspection_request`, rather than a host-dependent
+extension of this profile. The exact pass/fail fuel boundaries are pinned in
+`examples/inspection/fuel-boundaries-v1.json`.
+Preflight failure is `inspection_limit_exceeded` with the first reached guard
+locator. All arithmetic below uses unbounded nonnegative counters and charges
+before an operation; a charge crossing the remaining budget fails immediately.
+
+| Evaluated operation | Abstract step charge in addition to child expressions |
+|---|---:|
+| every evaluated AST node, including literal, identifier, selection, index, operator, call, or conditional | 1 |
+| materialize a string/list/map literal | value units of the constructed value |
+| field or map selection, `has`, map index, or map membership | 1 + Unicode scalars in the key + sum over inspected map entries of (1 + Unicode scalars in each key); typed record selection has no entry sum |
+| list index or `size(list)` | 1 |
+| list membership | value units of the complete list and candidate value |
+| `size(map)` | value units of the complete map |
+| `size(string)`, string comparison, string equality, or string-to-string conversion | Unicode scalar count of each string operand |
+| string concatenation | sum of operand Unicode scalar counts and result count |
+| list concatenation | sum of operand slot counts and result slot count |
+| list/map equality or inequality | value units of both complete operands |
+| scalar comparison/equality, numeric arithmetic/conversion, Boolean operation, negation, or null test | 1 |
+| `string(bool|int|double)` conversion | Unicode scalar count of resulting canonical string |
+
+Map inspection sums the complete map regardless of lookup success or host hash
+layout. Nested collection equality uses the complete operand units once at that
+operator, with no recursive extra charge. A failed operation incurs its listed
+charge before returning its error. `?:` evaluates only its condition and selected
+arm. `&&`/`||` evaluate both operands in source order to preserve the §5 error
+absorption rule and deterministic fuel, even when the first Boolean alone could
+decide the result. No comprehension, iteration, receiver call, or other intrinsic
+is admitted by §5.2; adding one requires a corresponding exact fuel rule before
+semantic inspection can claim it. Guard-count budget is charged once immediately
+before each reached guard. Exhaustion takes precedence over a guard error at the
+operation whose charge cannot be paid. Native safe guard providers must expose a
+public deterministic work schedule and honor the same request limits through their
+separately proved entrypoint. Without that proved schedule their semantic inspection
+capability is unavailable.
+
+Neither mode changes aggregate bytes, counters, queues, receipts, audit records, or
+provider state. Inspection does not resolve a plugin route or read host backlog.
+The outcome belongs to the exact supplied snapshot; a subsequent mutation requires
+a fresh inspection and digest. Hosts may additionally expose presentation views,
+but MUST NOT label an implementation-specific enabled-event list as this contract.
 
 Mermaid `stateDiagram-v2` is a useful default exporter:
 
@@ -2456,7 +2735,7 @@ is a completeness boundary, not a compatibility promise for earlier drafts.
 | owned spawning | retained for same-bundle machines with nominal `instance_reference` values |
 | submachines and package imports | unsupported |
 | definition migration/hot-swap | explicit portable aggregate migration under §16; never implicit in ordinary processing |
-| observers and export | read-only inspection and visualization are recommended, not executable core behavior |
+| observers and export | exact-candidate structural inspection is core; safe semantic inspection is optional under §12 |
 | snapshots | closed portable aggregate-state envelope and package under §16 |
 | stores and CLI protocols | host/implementation concerns, not bundle grammar |
 
@@ -2475,7 +2754,6 @@ The pre-release format deliberately omits:
 - destructive reset as a migration fallback;
 - arbitrary executable migration code or author behavior during migration;
 - standardized CLI/store JSON shapes;
-- standardized enabled-event inspection;
 - root engine-fault recovery/reset;
 - reset or re-entry of the machine root by an ordinary transition;
 - distributed transactions, exactly-once delivery, or hard real-time guarantees;
@@ -4136,6 +4414,11 @@ compare-and-swap result. Lost updates are nonconformant.
 
 This specification defines adapter behavior, not a language API, binary interface,
 wire protocol, database schema, or cross-language dynamic-loading mechanism.
+Execution stores also obey the common §11.5 identity, direct-injection, descriptor,
+configured-report, and requirement rules. An adapter's URI scheme in this section is
+a lookup key distinct from its exact provider-reference identifier. The
+`duplicate_adapter_registration` and `adapter_capability_mismatch` codes below are
+the established execution-store-specific outcomes of those common rules.
 Applications SHOULD be able to inject an execution-store object directly without a
 registry, URI, discovery, or command-line interface. If an implementation offers any
 adapter identifier, URI, or scheme resolution, it MUST expose and use one public
