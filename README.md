@@ -88,9 +88,12 @@ public machine, client/host, checkpoint/archive, and conformance contracts; endp
 and credentials stay in deployment configuration. See [SPEC.md §11.5](SPEC.md#115-public-extension-identity-registration-and-capabilities).
 
 A host chooses queue and effect plugins appropriate to its deployment: for example,
-in-memory delivery, Redis, GCP Pub/Sub, or a transactional database inbox/outbox. Those
-plugins own ordering, retries, acknowledgements, discard, capacity, and dead-letter
-policy. Unhandled events do not accumulate in core state.
+in-memory delivery, Redis, GCP Pub/Sub, or a transactional database inbox/outbox. The
+optional [lossless delivery profile](SPEC.md#21-lossless-event-delivery-profile)
+defines source ownership, commit-before-acknowledgement, explicit retry and
+backpressure, durable ingress dead letters, and retained terminal evidence. Accepted
+events follow core mailbox order and disposition; an unhandled event has a terminal
+receipt. In-memory use returns every decision to the caller for persistence.
 
 The optional §22 archive profile snapshots selected complete checkpoints and exact
 immutable definition attachments with separately declared application or helper
@@ -124,6 +127,13 @@ extension determines its clock, durability, delivery, cancellation, and credenti
 This repository holds only the specification:
 
 - [`SPEC.md`](SPEC.md) — normative semantics;
+- [`schema/delivery-v1.schema.json`](schema/delivery-v1.schema.json) and
+  [`examples/delivery/delivery-v1-cases.json`](examples/delivery/delivery-v1-cases.json)
+  with [admission](examples/delivery/execution-checkpoint-transfer-v1.json),
+  [queue placement](examples/delivery/queue-placement-checkpoints-v1.json), and
+  [outbound](examples/delivery/outbound-checkpoint-lifecycle-v1.json) checkpoints
+  with [destination receipts](examples/delivery/outbound-destination-receipts-v1.json)
+  — closed ownership, replay, disposition, and delivery evidence vectors;
 - [`schema/machine.schema.json`](schema/machine.schema.json) — structural JSON Schema;
 - [`schema/provider-reference-v1.schema.json`](schema/provider-reference-v1.schema.json)
   — exact executable provider identity;
