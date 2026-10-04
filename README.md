@@ -121,7 +121,11 @@ claims require one proved native transaction covering those rows and the checkpo
 
 Time-based behavior uses an external event-producing extension. A machine emits a
 declared scheduling request and may later receive a declared correlated event. The
-extension determines its clock, durability, delivery, cancellation, and credentials.
+optional [external timer helper](SPEC.md#23-optional-external-timer-helper) specifies
+closed schedule, cancel, fire, clock, durability, and archive contracts. It is
+installed explicitly and is never part of core evaluation. Durable timer records
+join a complete §22 archive through a separately declared required participant
+when selected roots depend on them.
 
 ## Repository
 

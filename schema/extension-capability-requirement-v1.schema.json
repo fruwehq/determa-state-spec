@@ -146,7 +146,10 @@
         "properties": {
           "capability": {
             "enum": [
-              "durable_timer_helper"
+              "ephemeral_timer_helper",
+              "durable_timer_helper",
+              "independent_timer_delivery",
+              "coordinated_timer_admission"
             ]
           }
         }

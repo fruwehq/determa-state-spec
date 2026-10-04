@@ -1,0 +1,54 @@
+{
+  "timer_artifact_format": "determa.timer_records",
+  "timer_artifact_schema_version": 1,
+  "records": [
+    {
+      "scope_identity": "scope-archive-example",
+      "root_instance_id": "server-1",
+      "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+      "timer_id": "timer-A",
+      "schedule_request_digest": "sha256:a8558d591eb3f2e8a128d4b2ab4266ede95efe5c46f7a473dbada7ce99a544d9",
+      "clock_basis": "unix_nanoseconds",
+      "deadline_at": "110",
+      "event_name": "received",
+      "payload": [
+        "map",
+        []
+      ],
+      "correlation_id": "job-7",
+      "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+      "state": "pending",
+      "revision": "1",
+      "attempt_fence": "0",
+      "worker_principal": null,
+      "expires_at": null,
+      "admission_receipt_digest": null
+    }
+  ],
+  "operation_receipts": [
+    {
+      "operation_id": "schedule-A",
+      "request_digest": "sha256:a8558d591eb3f2e8a128d4b2ab4266ede95efe5c46f7a473dbada7ce99a544d9",
+      "result": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-archive-example",
+        "root_instance_id": "server-1",
+        "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "schedule-A",
+        "status": "accepted",
+        "record_revision": "1",
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+        "delivery_state": "none",
+        "error_code": null,
+        "result_digest": "sha256:7e8be2ff09bd80babb5e1296427701d6a7a3b5da961d4a55f59a8e11fb50a45c"
+      }
+    }
+  ],
+  "timer_artifact_digest": "sha256:96a1bce2a3a5c151350a24490e98d480a8200e3102796700dd21de9a19fa6394"
+}

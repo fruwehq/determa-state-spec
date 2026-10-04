@@ -1,0 +1,100 @@
+{
+  "timer_artifact_format": "determa.timer_records",
+  "timer_artifact_schema_version": 1,
+  "records": [
+    {
+      "scope_identity": "scope-archive-example",
+      "root_instance_id": "server-1",
+      "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+      "timer_id": "timer-A",
+      "schedule_request_digest": "sha256:a8558d591eb3f2e8a128d4b2ab4266ede95efe5c46f7a473dbada7ce99a544d9",
+      "clock_basis": "unix_nanoseconds",
+      "deadline_at": "110",
+      "event_name": "received",
+      "payload": [
+        "map",
+        []
+      ],
+      "correlation_id": "job-7",
+      "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+      "state": "fired",
+      "revision": "3",
+      "attempt_fence": "1",
+      "worker_principal": null,
+      "expires_at": null,
+      "admission_receipt_digest": "sha256:f19e08b5f1704b507d4eb15347ecdc4d711bd07422148d8f8bd752e86dfb8400"
+    }
+  ],
+  "operation_receipts": [
+    {
+      "operation_id": "schedule-A",
+      "request_digest": "sha256:a8558d591eb3f2e8a128d4b2ab4266ede95efe5c46f7a473dbada7ce99a544d9",
+      "result": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-archive-example",
+        "root_instance_id": "server-1",
+        "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+        "timer_id": "timer-A",
+        "operation": "schedule",
+        "operation_id": "schedule-A",
+        "status": "accepted",
+        "record_revision": "1",
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+        "delivery_state": "none",
+        "error_code": null,
+        "result_digest": "sha256:7e8be2ff09bd80babb5e1296427701d6a7a3b5da961d4a55f59a8e11fb50a45c"
+      }
+    },
+    {
+      "operation_id": "claim-A",
+      "request_digest": "sha256:0b7645670db191111b3b6cb590305b155ac93034355b382ed0255b551a575325",
+      "result": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-archive-example",
+        "root_instance_id": "server-1",
+        "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+        "timer_id": "timer-A",
+        "operation": "claim_fire",
+        "operation_id": "claim-A",
+        "status": "accepted",
+        "record_revision": "2",
+        "attempt_fence": "1",
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": "130",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+        "delivery_state": "none",
+        "error_code": null,
+        "result_digest": "sha256:1b1950196f4e289ddabd74a3d38730d3540db0a252fad5e8da4c90db7c77f9ce"
+      }
+    },
+    {
+      "operation_id": "complete-A",
+      "request_digest": "sha256:e6f9912dac1aa7b4dd1c514678b6f72f27a51b82001c9a03a90b135fa04e4503",
+      "result": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "scope_identity": "scope-archive-example",
+        "root_instance_id": "server-1",
+        "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+        "timer_id": "timer-A",
+        "operation": "complete_fire",
+        "operation_id": "complete-A",
+        "status": "accepted",
+        "record_revision": "3",
+        "attempt_fence": "1",
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+        "delivery_state": "admitted",
+        "error_code": null,
+        "result_digest": "sha256:5223989e7baa87b66db60c11fb703fe404367c2cbdbe63e9e4b40ed37d74fa27"
+      }
+    }
+  ],
+  "timer_artifact_digest": "sha256:47a0c8ae1b76c08bcc6406af9f338b80e98ababb013e4a6004b7b59331299dd8"
+}
