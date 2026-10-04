@@ -48,3 +48,8 @@ These are specification vectors. Engine/client/reference-host execution checks l
 the conformance and implementation repositories. `compatibility-change-v1.json`
 records this first public boundary; its fingerprints are recomputed when a recorded
 source changes.
+
+`source-order-compatibility-change-v1.json` records issue #104: the transport
+descriptor permits the already specified `source_ordered` capability. Request and
+response schema fingerprints are unchanged; the manifest records the corrected
+descriptor bytes. The ordering proof requirements in §21.3 remain mandatory.

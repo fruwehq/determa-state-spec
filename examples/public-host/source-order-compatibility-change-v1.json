@@ -1,32 +1,12 @@
 {
   "record_format": "determa.public_host_compatibility_change",
   "record_schema_version": 1,
-  "issue": "96",
-  "old_protocol_fingerprint": null,
+  "issue": "104",
+  "old_protocol_fingerprint": "sha256:b844d89c472954876ba54ff38511aeb9bfaa0c0bbf7546f3d35a089568315fe8",
   "proposed_protocol_fingerprint": "sha256:b844d89c472954876ba54ff38511aeb9bfaa0c0bbf7546f3d35a089568315fe8",
   "manifest_fingerprint": "sha256:ef77b71afcac55b57b3a9dab6f698572e2a8acb5fa24d86a6214700e11b7229c",
   "affected_capabilities": [
-    "structural_inspection",
-    "semantic_inspection",
-    "durable_embedded_processing",
-    "authoritative_scope_fencing",
-    "worker_fencing",
-    "safe_relocation",
-    "native_effect_results",
-    "lossless_projection",
-    "portable_archive",
-    "portable_checkpoint",
-    "normalized_definition",
-    "migration_descriptor",
-    "archive_participant",
-    "host_effect_journal",
-    "strict_quarantine_restore",
-    "fresh_scope_takeover",
-    "independent_clone",
-    "local_safe_relocation",
-    "external_timer_helper",
-    "saved_response_replay",
-    "deterministic_reexecution"
+    "source_ordered"
   ],
   "cross_language_fixture_matrix": [
     {
