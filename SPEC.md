@@ -5395,7 +5395,11 @@ The adapter MUST NOT ask the source broker to retry an admitted event because th
 machine did not handle it. Each terminal decision retains event identity, exact
 reason or fault, decision authority, receipt, and the profile's declared retention
 window. The base API returns that evidence to its caller even without durable storage.
-Each durable response names an exact committed checkpoint revision and digest.
+The checkpoint-backed `admitted`, `machine_disposition`,
+`mailbox_placement`, and `outbound_decision` responses each name an exact
+committed checkpoint revision and digest. A pre-commit `source_owned` response
+claims no checkpoint mutation; `ingress_dead_lettered` instead names its
+separately committed durable terminal record and source receipt under §21.4.
 `admitted.evidence.operation_kind` is `acceptance` and its
 `receipt_sequence` resolves only to an acceptance receipt at that revision.
 The receipt's event id, acceptance sequence, and request digest equal the response's
