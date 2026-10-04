@@ -105,6 +105,10 @@ reports its proven topology and refuses safe relocation when it cannot prove sou
 retirement and transaction fate. The pure core remains coordinator-free; an embedding
 application may commit its result in an application-owned transaction. Standalone
 checkpoint export and import remain available without claiming safe relocation.
+An optional [lossless application projection](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade)
+loads explicitly selected application rows, admits declared typed input, and maps the
+complete resulting state back into application-owned storage. Shared transaction
+claims require one proved native transaction covering those rows and the checkpoint.
 
 Time-based behavior uses an external event-producing extension. A machine emits a
 declared scheduling request and may later receive a declared correlated event. The
