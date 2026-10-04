@@ -5183,3 +5183,16 @@ ledger. `status: "partial"` means at least one scope succeeded and one refused;
 `atomic_across_scopes` is always false. The caller must authorize every scope
 independently. Batch failure never rolls back a committed per-scope result or turns
 one scope's proof into another's grant.
+
+The trusted authority ledger stores a closed
+`schema/recovery-transfer-proof-v1.schema.json` record for each prepared or consumed
+transfer. `proof_digest = hash(["determa-recovery-transfer-proof-1",
+proof_without_proof_digest])`. It binds the source and destination, archive and
+participant contract, freeze evidence, old and new epoch/generation, known transaction
+fate, revoked claims, old-write fence and single-use grant state. The public digest
+in a request is only a lookup key: the host resolves the record in its guarded
+ledger, checks its digest and all fields against current authority state, and consumes
+it atomically. A copied proof JSON or digest cannot grant authority. An uncertain
+fate cannot satisfy `known_committed`. No cross-authority host may advertise this
+profile unless its own topology proves the corresponding single-use and retirement
+properties across both domains.
