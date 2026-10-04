@@ -364,7 +364,16 @@
       "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"bindings\":[\"map\",[]],\"creation_id\":\"create-1\",\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_instance_id\":\"job-42\",\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"operation\":\"create\",\"operation_id\":\"op-create-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-new-alias-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
       "request_digest": "sha256:cd16edfaa8f09ec1ada2b75239f356f75e10810f513b98d3f25fb0645f34f29e",
       "expected_error": "client_binding_mismatch",
-      "expected_response": null
+      "expected_response": null,
+      "client_context": {
+        "saved_operation_id": "op-create-1",
+        "saved_request_digest": "sha256:ee59aecee759f5bd67d9d2191a71e4d476a4a5f3cc62f6bace3fc7157a22d71d",
+        "saved_scope_binding_identity": "binding-local-1",
+        "saved_endpoint_authority": "authority-local-1",
+        "configured_alias": "local",
+        "new_alias_binding_identity": "binding-new-alias-1",
+        "decision": "refuse_retarget_before_transport"
+      }
     },
     {
       "name": "lost_response_pinned_endpoint_unavailable",
@@ -396,7 +405,16 @@
       "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"bindings\":[\"map\",[]],\"creation_id\":\"create-1\",\"machine_id\":\"job\",\"machine_version\":\"1\",\"namespace\":\"example.persistence\",\"root_instance_id\":\"job-42\",\"validated_bundle_fingerprint\":\"sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413\"},\"operation\":\"create\",\"operation_id\":\"op-create-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"job-42\",\"runtime_id\":null,\"runtime_incarnation\":null}}]",
       "request_digest": "sha256:ee59aecee759f5bd67d9d2191a71e4d476a4a5f3cc62f6bace3fc7157a22d71d",
       "expected_error": "transport_outcome_unknown",
-      "expected_response": null
+      "expected_response": null,
+      "client_context": {
+        "saved_operation_id": "op-create-1",
+        "saved_request_digest": "sha256:ee59aecee759f5bd67d9d2191a71e4d476a4a5f3cc62f6bace3fc7157a22d71d",
+        "saved_scope_binding_identity": "binding-local-1",
+        "saved_endpoint_authority": "authority-local-1",
+        "configured_alias": "local",
+        "new_alias_binding_identity": "binding-new-alias-1",
+        "decision": "query_saved_endpoint_only_and_report_unknown_fate"
+      }
     },
     {
       "name": "unauthorized_absent_root_indistinguishable",
@@ -429,6 +447,62 @@
       "request_digest": "sha256:c007df80196276d53fd63a75bf9f7ce5a3b9168624a8122752f45cb07e475b39",
       "expected_error": "transport_access_denied",
       "expected_response": null
+    },
+    {
+      "name": "unauthorized_bootstrap_reveals_no_binding",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-bootstrap-unauthorized-1",
+        "scope_binding_identity": null,
+        "operation": "capabilities",
+        "target": {
+          "root_instance_id": null,
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "scope_alias": "scope-42"
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"scope_alias\":\"scope-42\"},\"operation\":\"capabilities\",\"operation_id\":\"op-bootstrap-unauthorized-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":null,\"target\":{\"root_instance_id\":null,\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:3e5613409fb55108657ee3f342994e3937d7fd969f9e2ab23c89e0ca988d955e",
+      "expected_error": "transport_access_denied",
+      "expected_response": null,
+      "transport_context": {
+        "configured_endpoint_name": "local",
+        "authenticated_principal": "stranger",
+        "authorized_scope": null
+      }
+    },
+    {
+      "name": "unauthorized_unknown_scope_indistinguishable",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-bootstrap-unknown-scope-1",
+        "scope_binding_identity": null,
+        "operation": "capabilities",
+        "target": {
+          "root_instance_id": null,
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "scope_alias": "unknown-scope"
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"scope_alias\":\"unknown-scope\"},\"operation\":\"capabilities\",\"operation_id\":\"op-bootstrap-unknown-scope-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":null,\"target\":{\"root_instance_id\":null,\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:e64452a6c5e526e4b79f82c9cbee9d74525625df99012077fa5cbf4a7779456c",
+      "expected_error": "transport_access_denied",
+      "expected_response": null,
+      "transport_context": {
+        "configured_endpoint_name": "local",
+        "authenticated_principal": "stranger",
+        "authorized_scope": null
+      }
     }
   ]
 }

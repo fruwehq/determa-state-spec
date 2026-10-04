@@ -433,7 +433,7 @@
               "levels": [],
               "guard_evidence": []
             },
-            "observed_checkpoint_digest": "sha256:edef3889145ce8597e8ba4b6605ced83822a581e9900b5d02880a4255f2e2d3f"
+            "observed_aggregate_state_digest": "sha256:c401a9a5534d2dc17520ac6c9d672e611c2baaf35f120a0ec00d4f608291a81e"
           }
         },
         "error": null
@@ -641,6 +641,254 @@
       }
     },
     {
+      "name": "inspect_resolved_structural_candidate",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-inspect-resolved-1",
+        "scope_binding_identity": "binding-local-1",
+        "operation": "inspect",
+        "target": {
+          "root_instance_id": "server-1",
+          "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+          "runtime_incarnation": {
+            "kind": "root",
+            "definition": {
+              "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+              "machine": {
+                "namespace": "example.transaction_server",
+                "machine_id": "transaction_server",
+                "machine_version": "1",
+                "root_definition_pointer": "/machines/0/root"
+              }
+            },
+            "root_instance_id": "server-1"
+          }
+        },
+        "precondition": null,
+        "arguments": {
+          "candidate": {
+            "mode": "structural",
+            "aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+            "runtime_incarnation": {
+              "kind": "root",
+              "definition": {
+                "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                "machine": {
+                  "namespace": "example.transaction_server",
+                  "machine_id": "transaction_server",
+                  "machine_version": "1",
+                  "root_definition_pointer": "/machines/0/root"
+                }
+              },
+              "root_instance_id": "server-1"
+            },
+            "envelope": {
+              "event": "received",
+              "event_id": "received-1",
+              "cause_id": "received-1",
+              "source": {
+                "host": true
+              },
+              "target": {
+                "root": {
+                  "root_instance_id": "server-1",
+                  "root_runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf"
+                }
+              },
+              "payload": [
+                "map",
+                []
+              ]
+            },
+            "limits": null
+          }
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"candidate\":{\"aggregate_state_digest\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"envelope\":{\"cause_id\":\"received-1\",\"event\":\"received\",\"event_id\":\"received-1\",\"payload\":[\"map\",[]],\"source\":{\"host\":true},\"target\":{\"root\":{\"root_instance_id\":\"server-1\",\"root_runtime_id\":\"sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf\"}}},\"limits\":null,\"mode\":\"structural\",\"runtime_id\":\"sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf\",\"runtime_incarnation\":{\"definition\":{\"machine\":{\"machine_id\":\"transaction_server\",\"machine_version\":\"1\",\"namespace\":\"example.transaction_server\",\"root_definition_pointer\":\"/machines/0/root\"},\"validated_bundle_fingerprint\":\"sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef\"},\"kind\":\"root\",\"root_instance_id\":\"server-1\"}}},\"operation\":\"inspect\",\"operation_id\":\"op-inspect-resolved-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-local-1\",\"target\":{\"root_instance_id\":\"server-1\",\"runtime_id\":\"sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf\",\"runtime_incarnation\":{\"definition\":{\"machine\":{\"machine_id\":\"transaction_server\",\"machine_version\":\"1\",\"namespace\":\"example.transaction_server\",\"root_definition_pointer\":\"/machines/0/root\"},\"validated_bundle_fingerprint\":\"sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef\"},\"kind\":\"root\",\"root_instance_id\":\"server-1\"}}}]",
+      "request_digest": "sha256:182c8b44cce3fd780765423526edb4415fb5fa4f324c714a385240b43725cdb5",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-inspect-resolved-1",
+        "status": "committed",
+        "receipt": null,
+        "value": {
+          "operation": "inspect",
+          "result": {
+            "outcome": {
+              "aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "definition_fingerprint": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+              "runtime_incarnation": {
+                "kind": "root",
+                "definition": {
+                  "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+                  "machine": {
+                    "namespace": "example.transaction_server",
+                    "machine_id": "transaction_server",
+                    "machine_version": "1",
+                    "root_definition_pointer": "/machines/0/root"
+                  }
+                },
+                "root_instance_id": "server-1"
+              },
+              "classification": "definitive",
+              "possible_dispositions": [
+                "handled_now"
+              ],
+              "disposition": "handled_now",
+              "reason": null,
+              "levels": [
+                {
+                  "state_id": "/machines/0/root/states/busy/states/receiving",
+                  "handler_branches": [
+                    {
+                      "branch_index": "0",
+                      "guard_locator": "/machines/0/root/states/busy/states/receiving/on_events/received/guard",
+                      "guard_binding_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                    },
+                    {
+                      "branch_index": "1",
+                      "guard_locator": null,
+                      "guard_binding_digest": null
+                    }
+                  ],
+                  "defers": true
+                },
+                {
+                  "state_id": "/machines/0/root/states/busy",
+                  "handler_branches": [],
+                  "defers": false
+                },
+                {
+                  "state_id": "/machines/0/root",
+                  "handler_branches": [],
+                  "defers": false
+                }
+              ],
+              "guard_evidence": []
+            },
+            "observed_aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        },
+        "error": null
+      },
+      "source_fixture": "examples/inspection/shape-and-precedence-v1.json#guard_followed_by_default"
+    },
+    {
+      "name": "bootstrap_named_endpoint_discovery",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-bootstrap-1",
+        "scope_binding_identity": null,
+        "operation": "capabilities",
+        "target": {
+          "root_instance_id": null,
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "scope_alias": "scope-42"
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"scope_alias\":\"scope-42\"},\"operation\":\"capabilities\",\"operation_id\":\"op-bootstrap-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":null,\"target\":{\"root_instance_id\":null,\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:9368d6c1f9e04deb9d14c2f62c228cc7f8c8136628ad4dc76aaa4d93b37a2ded",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-bootstrap-1",
+        "status": "committed",
+        "receipt": null,
+        "value": {
+          "operation": "capabilities",
+          "result": {
+            "scope_binding_identity": "binding-scope-42",
+            "supported_operations": [
+              "capabilities",
+              "create",
+              "admit",
+              "process",
+              "read",
+              "inspect",
+              "receipt",
+              "scope_operation"
+            ],
+            "profile_digest": "sha256:5a4740b40c5036a7287ef66d48ae686df08880786402d45715c06a8d7cd8ee80",
+            "extension_reports": [
+              {
+                "category": "authority",
+                "provider_reference": {
+                  "identifier": "reference.sqlite-authority",
+                  "version": "0.3.0",
+                  "content_digest": "sha256:5c4c1964340aca5b65393bbe9d3249cdd71be26665b3320ad694f034f2743283"
+                },
+                "instance_id": "local-authority",
+                "health": "healthy",
+                "claims": [
+                  "authoritative_scope_fencing",
+                  "consistent_scope_inventory"
+                ]
+              }
+            ],
+            "authority_profile": {
+              "profile_report_format": "determa.host_authority_profile_report",
+              "profile_report_schema_version": 1,
+              "scope_identity": "scope-42",
+              "authority_epoch": "2",
+              "scope_generation": "4",
+              "extension_report": {
+                "category": "authority",
+                "provider_reference": {
+                  "identifier": "reference.sqlite-authority",
+                  "version": "0.3.0",
+                  "content_digest": "sha256:5c4c1964340aca5b65393bbe9d3249cdd71be26665b3320ad694f034f2743283"
+                },
+                "instance_id": "local-authority",
+                "health": "healthy",
+                "claims": [
+                  "authoritative_scope_fencing",
+                  "consistent_scope_inventory"
+                ]
+              },
+              "authority_storage_boundary": "authority-db-1",
+              "topology": {
+                "identifier": "single-sqlite-database",
+                "configuration_digest": "sha256:881eeb99b1bd7671d1922ea9f433b1972a017adced05b209225fc29a16901ecc",
+                "process_boundary": "one configured authority database",
+                "host_boundary": "one local host"
+              },
+              "source_binding_digest": "sha256:b557d393e87ce7d6160a323bba5978ea2347f264308eef8b03c12d38bac2d2cd",
+              "destination_binding_digest": null,
+              "required_participants": [],
+              "guarantees": {
+                "guarded_local_writes": true,
+                "worker_fencing": false,
+                "complete_scope_inventory": true,
+                "safe_relocation": false
+              }
+            },
+            "guarantees": {
+              "inspection_structural": true,
+              "inspection_semantic": false,
+              "retained_history": false,
+              "saved_response_replay": false,
+              "deterministic_reexecution": false
+            }
+          }
+        },
+        "error": null
+      },
+      "transport_context": {
+        "configured_endpoint_name": "local",
+        "authenticated_principal": "operator-1",
+        "authorized_scope": "scope-42"
+      }
+    },
+    {
       "name": "configured_scope_capabilities",
       "request": {
         "protocol": "determa.execution_host",
@@ -654,10 +902,12 @@
           "runtime_incarnation": null
         },
         "precondition": null,
-        "arguments": {}
+        "arguments": {
+          "scope_alias": "scope-42"
+        }
       },
-      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{},\"operation\":\"capabilities\",\"operation_id\":\"op-capabilities-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-scope-42\",\"target\":{\"root_instance_id\":null,\"runtime_id\":null,\"runtime_incarnation\":null}}]",
-      "request_digest": "sha256:3c06b47f03d16c3c1dfdc732fa9d4bab2358f1f8743074295dd2377ce0bc5247",
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"scope_alias\":\"scope-42\"},\"operation\":\"capabilities\",\"operation_id\":\"op-capabilities-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-scope-42\",\"target\":{\"root_instance_id\":null,\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:7e5249b9cda8ef7e8b1c74c76f8eab4a74bb485bea55db93b59159cc0212ffc9",
       "response": {
         "protocol": "determa.execution_host",
         "protocol_version": 1,
@@ -667,6 +917,7 @@
         "value": {
           "operation": "capabilities",
           "result": {
+            "scope_binding_identity": "binding-scope-42",
             "supported_operations": [
               "capabilities",
               "create",
@@ -677,7 +928,7 @@
               "receipt",
               "scope_operation"
             ],
-            "profile_digest": "sha256:6b32749167938c28656d400c4d1bad2b582ce6ab32b008660badff530955d364",
+            "profile_digest": "sha256:5a4740b40c5036a7287ef66d48ae686df08880786402d45715c06a8d7cd8ee80",
             "extension_reports": [
               {
                 "category": "authority",

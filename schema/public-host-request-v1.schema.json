@@ -23,8 +23,15 @@
       "minLength": 1
     },
     "scope_binding_identity": {
-      "type": "string",
-      "minLength": 1
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        }
+      ]
     },
     "operation": {
       "enum": [
@@ -393,7 +400,6 @@
             "enum": [
               "admit",
               "process",
-              "inspect",
               "effect_result",
               "cancel_effect"
             ]
@@ -470,6 +476,24 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "capabilities"
+          }
+        }
+      },
+      "then": {},
+      "else": {
+        "properties": {
+          "scope_binding_identity": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
     }
   ],
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -478,9 +502,16 @@
   "$defs": {
     "capabilitiesArguments": {
       "type": "object",
-      "required": [],
+      "required": [
+        "scope_alias"
+      ],
       "additionalProperties": false,
-      "properties": {}
+      "properties": {
+        "scope_alias": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
     },
     "createArguments": {
       "type": "object",

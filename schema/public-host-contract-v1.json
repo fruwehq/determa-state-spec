@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:2436274daa90815a1757d670541b24757e9ae0fdbbfe0b8bdf2a05e242597aaa"
+      "sha256": "sha256:06e06196529f8719688476fbe5e1e5e235401c6dc9617b46a0f4a6e49a8263d2"
     },
     {
       "path": "VERSION",
@@ -108,11 +108,11 @@
     },
     {
       "path": "schema/public-host-request-v1.schema.json",
-      "sha256": "sha256:d0516b403cc44f5c9ffd344088d9614b676e1f4f895ca243faadbf7c43b49df8"
+      "sha256": "sha256:122b051cd754f21125696a292ba53c441f3f25d298d33ac1e7bc7f9757a45df2"
     },
     {
       "path": "schema/public-host-response-v1.schema.json",
-      "sha256": "sha256:27d94477e25204240da99544ef6ec1fd402906ad08597fe7ca1f0103af9976fb"
+      "sha256": "sha256:417797c1efd0983d2af0a7dc0bb87931b119df7787933e6daadaf0c4bfb2b560"
     },
     {
       "path": "schema/runtime-action-output-v1.schema.json",
@@ -140,11 +140,11 @@
     },
     {
       "path": "examples/public-host/positive-v1.json",
-      "sha256": "sha256:d4051f8b69b6f8b94fc8a375feb3d7fd53084cb84ce283d3498b52355401527f"
+      "sha256": "sha256:d118c46dea7120b578c2fb87437e8196981a8212e593a0c2a41f5b8ab2e36a27"
     },
     {
       "path": "examples/public-host/negative-v1.json",
-      "sha256": "sha256:2dcff163afa24bbc11431cd71335e60b975144eac59476cc746c82a582a54c1e"
+      "sha256": "sha256:751660230a08d4576538899b7d096188a5f51037807df97c987b2bb8525f49eb"
     },
     {
       "path": "examples/effects/effect-result-request-v1.json",

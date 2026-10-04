@@ -1153,6 +1153,7 @@
         "result": {
           "type": "object",
           "required": [
+            "scope_binding_identity",
             "supported_operations",
             "profile_digest",
             "extension_reports",
@@ -1161,6 +1162,10 @@
           ],
           "additionalProperties": false,
           "properties": {
+            "scope_binding_identity": {
+              "type": "string",
+              "minLength": 1
+            },
             "supported_operations": {
               "type": "array",
               "uniqueItems": true,
@@ -1442,14 +1447,14 @@
           "type": "object",
           "required": [
             "outcome",
-            "observed_checkpoint_digest"
+            "observed_aggregate_state_digest"
           ],
           "additionalProperties": false,
           "properties": {
             "outcome": {
               "$ref": "inspection-v1.schema.json#/$defs/outcome"
             },
-            "observed_checkpoint_digest": {
+            "observed_aggregate_state_digest": {
               "type": "string",
               "pattern": "^sha256:[0-9a-f]{64}$"
             }
