@@ -52,20 +52,10 @@
         "profile_report_format": "determa.host_authority_profile_report",
         "profile_report_schema_version": 1,
         "scope_identity": "scope-42",
-        "authority_epoch": "2",
-        "scope_generation": "4",
-        "extension_report": {
-          "category": "authority",
-          "provider_reference": {
-            "identifier": "reference.sqlite-authority",
-            "version": "0.3.0",
-            "content_digest": "sha256:5c4c1964340aca5b65393bbe9d3249cdd71be26665b3320ad694f034f2743283"
-          },
-          "instance_id": "local-authority",
-          "health": "healthy",
-          "claims": []
-        },
-        "authority_storage_boundary": "authority-db-1",
+        "authority_epoch": null,
+        "scope_generation": null,
+        "extension_report": null,
+        "authority_storage_boundary": null,
         "topology": {
           "identifier": "application-owned-transaction",
           "configuration_digest": "sha256:20548860eea3e0e8de95bca449544c4e8ad253aea21b205a362192e1d8b1999a",
@@ -130,6 +120,34 @@
         }
       },
       "reason": "Safe relocation requires its registry claim and an exact destination binding."
+    },
+    {
+      "name": "missing_authority_cannot_claim_guarded_writes",
+      "report": {
+        "profile_report_format": "determa.host_authority_profile_report",
+        "profile_report_schema_version": 1,
+        "scope_identity": "scope-42",
+        "authority_epoch": null,
+        "scope_generation": null,
+        "extension_report": null,
+        "authority_storage_boundary": null,
+        "topology": {
+          "identifier": "application-owned-transaction",
+          "configuration_digest": "sha256:20548860eea3e0e8de95bca449544c4e8ad253aea21b205a362192e1d8b1999a",
+          "process_boundary": "one configured authority database",
+          "host_boundary": "one local host"
+        },
+        "source_binding_digest": "sha256:b557d393e87ce7d6160a323bba5978ea2347f264308eef8b03c12d38bac2d2cd",
+        "destination_binding_digest": null,
+        "required_participants": [],
+        "guarantees": {
+          "guarded_local_writes": true,
+          "worker_fencing": false,
+          "complete_scope_inventory": false,
+          "safe_relocation": false
+        }
+      },
+      "reason": "An application transaction does not provide a scope fencing epoch or an authority provider."
     }
   ]
 }

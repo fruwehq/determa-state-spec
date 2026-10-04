@@ -4485,16 +4485,20 @@ An authority provider registered under §11.5 MAY claim
 configured instance and topology in which it proves them. A host also reports its
 effective, separately checked `guarded_local_writes`, `worker_fencing`,
 `complete_scope_inventory` and `safe_relocation` guarantees as explicit Booleans;
-absence means false. The first two registered capability names bind respectively to
+without a proved authority provider all four are false. The first two registered
+capability names bind respectively to
 §18.3 and §18.4. A `safe_relocation` registry claim is eligible for the corresponding
 host-profile guarantee only after the host verifies all §18.5 requirements for the
 specific source and destination; a generic instance report cannot prove a particular
 transfer. The closed `schema/host-authority-profile-report-v1.schema.json` composes
-the §11.5 extension report with the exact authenticated scope, epoch and generation,
+the §11.5 extension report, or null when no authority provider is configured, with
+the exact authenticated scope, epoch and generation when authority is present,
 a nonsecret authority-storage-boundary identifier, topology identifier and
 configuration digest, process and host boundaries, source and optional destination
 binding digests, required participant references, and the four effective guarantee
-Booleans. It is a host profile report, not an extension registration report or
+Booleans. With no authority provider, epoch, generation and authority storage
+boundary are null and every authority guarantee is false. It is a host profile
+report, not an extension registration report or
 authority credential. Descriptions and digests bind a configured topology but are
 not themselves proof of fencing. `safe_relocation: true` requires an exact
 destination binding and fresh verification of source retirement and all §18.5
