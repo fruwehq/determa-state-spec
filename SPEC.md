@@ -4769,8 +4769,8 @@ attempt_fence])`. Attempt reports remain separate evidence.
 Cancellation is null or exactly `operation_id`, `reason`, and `state`, where state is
 `requested`, `prevented_start`, `too_late`, or `reconciliation_required`. Cancellation
 and outcome recording serialize. A cancellation that wins before a claim sets `prevented_start` and forever
-forbids another claim or provider start for that effect. After a call might have occurred, cancellation cannot claim rollback
-or erase ambiguity. A recorded outcome wins over later cancellation; a late report
+forbids another claim or provider start for that effect. After a call might have
+occurred, cancellation cannot claim rollback or erase ambiguity. A recorded outcome wins over later cancellation; a late report
 cannot replace it. Equal cancellation replays; a changed request requires a distinct
 authorized operation and cannot rewrite an immutable outcome.
 
