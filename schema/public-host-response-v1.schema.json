@@ -1,0 +1,884 @@
+{
+  "type": "object",
+  "required": [
+    "protocol_version",
+    "operation",
+    "binding_id",
+    "scope_id",
+    "root_instance_id",
+    "operation_id",
+    "body"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "protocol_version": {
+      "const": 1
+    },
+    "operation": {
+      "enum": [
+        "capabilities",
+        "create",
+        "admit",
+        "process",
+        "read",
+        "inspect",
+        "receipt",
+        "effect_result",
+        "cancel_effect",
+        "timer_command",
+        "scope_operation"
+      ]
+    },
+    "binding_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "root_instance_id": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        }
+      ]
+    },
+    "operation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "body": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "result"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "const": "committed"
+            },
+            "result": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/capabilitiesResult"
+                },
+                {
+                  "$ref": "#/$defs/createResult"
+                },
+                {
+                  "$ref": "#/$defs/admitResult"
+                },
+                {
+                  "$ref": "#/$defs/processResult"
+                },
+                {
+                  "$ref": "#/$defs/readResult"
+                },
+                {
+                  "$ref": "#/$defs/inspectResult"
+                },
+                {
+                  "$ref": "#/$defs/receiptResult"
+                },
+                {
+                  "$ref": "#/$defs/effect_resultResult"
+                },
+                {
+                  "$ref": "#/$defs/cancel_effectResult"
+                },
+                {
+                  "$ref": "#/$defs/timer_commandResult"
+                },
+                {
+                  "$ref": "#/$defs/scope_operationResult"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "code"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "const": "rejected"
+            },
+            "code": {
+              "enum": [
+                "invalid_request",
+                "unsupported_operation",
+                "host_capability_mismatch",
+                "operation_id_conflict",
+                "checkpoint_revision_conflict",
+                "creation_id_conflict",
+                "event_id_conflict",
+                "invalid_inspection_request",
+                "invalid_scope_operation",
+                "binding_unavailable",
+                "outcome_unknown"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "acceptance_receipt_digest"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "const": "pending"
+            },
+            "acceptance_receipt_digest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "body": {
+            "properties": {
+              "status": {
+                "const": "committed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "operation": {
+            "const": "capabilities"
+          }
+        },
+        "required": [
+          "body",
+          "operation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "result": {
+                "$ref": "#/$defs/capabilitiesResult"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "body": {
+            "properties": {
+              "status": {
+                "const": "committed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "operation": {
+            "const": "create"
+          }
+        },
+        "required": [
+          "body",
+          "operation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "result": {
+                "$ref": "#/$defs/createResult"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "body": {
+            "properties": {
+              "status": {
+                "const": "committed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "operation": {
+            "const": "admit"
+          }
+        },
+        "required": [
+          "body",
+          "operation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "result": {
+                "$ref": "#/$defs/admitResult"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "body": {
+            "properties": {
+              "status": {
+                "const": "committed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "operation": {
+            "const": "process"
+          }
+        },
+        "required": [
+          "body",
+          "operation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "result": {
+                "$ref": "#/$defs/processResult"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "body": {
+            "properties": {
+              "status": {
+                "const": "committed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "operation": {
+            "const": "read"
+          }
+        },
+        "required": [
+          "body",
+          "operation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "result": {
+                "$ref": "#/$defs/readResult"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "body": {
+            "properties": {
+              "status": {
+                "const": "committed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "operation": {
+            "const": "inspect"
+          }
+        },
+        "required": [
+          "body",
+          "operation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "result": {
+                "$ref": "#/$defs/inspectResult"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "body": {
+            "properties": {
+              "status": {
+                "const": "committed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "operation": {
+            "const": "receipt"
+          }
+        },
+        "required": [
+          "body",
+          "operation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "result": {
+                "$ref": "#/$defs/receiptResult"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "body": {
+            "properties": {
+              "status": {
+                "const": "committed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "operation": {
+            "const": "effect_result"
+          }
+        },
+        "required": [
+          "body",
+          "operation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "result": {
+                "$ref": "#/$defs/effect_resultResult"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "body": {
+            "properties": {
+              "status": {
+                "const": "committed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "operation": {
+            "const": "cancel_effect"
+          }
+        },
+        "required": [
+          "body",
+          "operation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "result": {
+                "$ref": "#/$defs/cancel_effectResult"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "body": {
+            "properties": {
+              "status": {
+                "const": "committed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "operation": {
+            "const": "timer_command"
+          }
+        },
+        "required": [
+          "body",
+          "operation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "result": {
+                "$ref": "#/$defs/timer_commandResult"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "body": {
+            "properties": {
+              "status": {
+                "const": "committed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "operation": {
+            "const": "scope_operation"
+          }
+        },
+        "required": [
+          "body",
+          "operation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "result": {
+                "$ref": "#/$defs/scope_operationResult"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://determa.dev/state/schema/public-host-response-v1.schema.json",
+  "title": "Determa State public host response version 1",
+  "$defs": {
+    "capabilitiesResult": {
+      "type": "object",
+      "required": [
+        "supported_operations",
+        "profile_digest",
+        "extension_reports",
+        "authority_profile",
+        "guarantees"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "supported_operations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "capabilities",
+              "create",
+              "admit",
+              "process",
+              "read",
+              "inspect",
+              "receipt",
+              "effect_result",
+              "cancel_effect",
+              "timer_command",
+              "scope_operation"
+            ]
+          }
+        },
+        "profile_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "extension_reports": {
+          "type": "array",
+          "items": {
+            "$ref": "extension-capability-report-v1.schema.json"
+          }
+        },
+        "authority_profile": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "host-authority-profile-report-v1.schema.json"
+            }
+          ]
+        },
+        "guarantees": {
+          "type": "object",
+          "required": [
+            "inspection_structural",
+            "inspection_semantic",
+            "retained_history",
+            "saved_response_replay",
+            "deterministic_reexecution"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "inspection_structural": {
+              "type": "boolean"
+            },
+            "inspection_semantic": {
+              "type": "boolean"
+            },
+            "retained_history": {
+              "type": "boolean"
+            },
+            "saved_response_replay": {
+              "type": "boolean"
+            },
+            "deterministic_reexecution": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "createResult": {
+      "type": "object",
+      "required": [
+        "checkpoint",
+        "receipt",
+        "status",
+        "emissions",
+        "lifecycle_dispositions",
+        "fault"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint": {
+          "$ref": "execution-checkpoint-v1.schema.json"
+        },
+        "receipt": {
+          "$ref": "execution-checkpoint-v1.schema.json#/$defs/creationReceipt"
+        },
+        "status": {
+          "enum": [
+            "running",
+            "completed",
+            "faulted"
+          ]
+        },
+        "emissions": {
+          "type": "array",
+          "items": {
+            "$ref": "core-step-result-v1.schema.json#/$defs/emission"
+          }
+        },
+        "lifecycle_dispositions": {
+          "type": "array",
+          "items": {
+            "$ref": "core-step-result-v1.schema.json#/$defs/lifecycleDisposition"
+          }
+        },
+        "fault": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "aggregate-state-v1.schema.json#/$defs/fault"
+            }
+          ]
+        }
+      }
+    },
+    "admitResult": {
+      "type": "object",
+      "required": [
+        "checkpoint",
+        "receipts",
+        "status",
+        "accepted"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint": {
+          "$ref": "execution-checkpoint-v1.schema.json"
+        },
+        "receipts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
+          }
+        },
+        "status": {
+          "enum": [
+            "running",
+            "completed",
+            "faulted"
+          ]
+        },
+        "accepted": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "aggregate-state-v1.schema.json#/$defs/envelope"
+          }
+        }
+      }
+    },
+    "processResult": {
+      "type": "object",
+      "required": [
+        "checkpoint",
+        "core_result",
+        "receipt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint": {
+          "$ref": "execution-checkpoint-v1.schema.json"
+        },
+        "core_result": {
+          "$ref": "core-step-result-v1.schema.json"
+        },
+        "receipt": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "execution-checkpoint-v1.schema.json#/$defs/terminalEventReceipt"
+            }
+          ]
+        }
+      }
+    },
+    "readResult": {
+      "type": "object",
+      "required": [
+        "checkpoint",
+        "observed_checkpoint_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "execution-checkpoint-v1.schema.json"
+            }
+          ]
+        },
+        "observed_checkpoint_digest": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          ]
+        }
+      }
+    },
+    "inspectResult": {
+      "type": "object",
+      "required": [
+        "outcome",
+        "observed_checkpoint_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "outcome": {
+          "$ref": "inspection-v1.schema.json#/$defs/outcome"
+        },
+        "observed_checkpoint_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "receiptResult": {
+      "type": "object",
+      "required": [
+        "saved_response",
+        "retention"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "saved_response": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "public-host-response-v1.schema.json"
+            }
+          ]
+        },
+        "retention": {
+          "enum": [
+            "retained",
+            "expired",
+            "never_recorded",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "effect_resultResult": {
+      "type": "object",
+      "required": [
+        "result",
+        "checkpoint",
+        "journal"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "result": {
+          "$ref": "effect-result-response-v1.schema.json"
+        },
+        "checkpoint": {
+          "$ref": "execution-checkpoint-v1.schema.json"
+        },
+        "journal": {
+          "$ref": "host-effect-journal-v1.schema.json"
+        }
+      }
+    },
+    "cancel_effectResult": {
+      "type": "object",
+      "required": [
+        "checkpoint",
+        "journal"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint": {
+          "$ref": "execution-checkpoint-v1.schema.json"
+        },
+        "journal": {
+          "$ref": "host-effect-journal-v1.schema.json"
+        }
+      }
+    },
+    "timer_commandResult": {
+      "type": "object",
+      "required": [
+        "helper_receipt_digest",
+        "helper_revision"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "helper_receipt_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "helper_revision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        }
+      }
+    },
+    "scope_operationResult": {
+      "type": "object",
+      "required": [
+        "action",
+        "evidence_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "inventory",
+            "freeze",
+            "retire",
+            "relocate",
+            "archive_export",
+            "archive_import",
+            "standalone_takeover",
+            "clone"
+          ]
+        },
+        "evidence_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

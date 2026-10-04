@@ -1,0 +1,563 @@
+{
+  "type": "object",
+  "required": [
+    "protocol_version",
+    "operation",
+    "binding_id",
+    "scope_id",
+    "root_instance_id",
+    "operation_id",
+    "request_digest",
+    "body"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "protocol_version": {
+      "const": 1
+    },
+    "operation": {
+      "enum": [
+        "capabilities",
+        "create",
+        "admit",
+        "process",
+        "read",
+        "inspect",
+        "receipt",
+        "effect_result",
+        "cancel_effect",
+        "timer_command",
+        "scope_operation"
+      ]
+    },
+    "binding_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "root_instance_id": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        }
+      ]
+    },
+    "operation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "body": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/capabilitiesBody"
+        },
+        {
+          "$ref": "#/$defs/createBody"
+        },
+        {
+          "$ref": "#/$defs/admitBody"
+        },
+        {
+          "$ref": "#/$defs/processBody"
+        },
+        {
+          "$ref": "#/$defs/readBody"
+        },
+        {
+          "$ref": "#/$defs/inspectBody"
+        },
+        {
+          "$ref": "#/$defs/receiptBody"
+        },
+        {
+          "$ref": "#/$defs/effect_resultBody"
+        },
+        {
+          "$ref": "#/$defs/cancel_effectBody"
+        },
+        {
+          "$ref": "#/$defs/timer_commandBody"
+        },
+        {
+          "$ref": "#/$defs/scope_operationBody"
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "capabilities"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/capabilitiesBody"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "create"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/createBody"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "admit"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/admitBody"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "process"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/processBody"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "read"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/readBody"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "inspect"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/inspectBody"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "receipt"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/receiptBody"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "effect_result"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/effect_resultBody"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "cancel_effect"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/cancel_effectBody"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "timer_command"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/timer_commandBody"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "scope_operation"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/scope_operationBody"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "enum": [
+              "capabilities",
+              "scope_operation"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "root_instance_id": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "root_instance_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://determa.dev/state/schema/public-host-request-v1.schema.json",
+  "title": "Determa State public host request version 1",
+  "$defs": {
+    "capabilitiesBody": {
+      "type": "object",
+      "required": [],
+      "additionalProperties": false,
+      "properties": {}
+    },
+    "createBody": {
+      "type": "object",
+      "required": [
+        "validated_bundle_fingerprint",
+        "namespace",
+        "machine_id",
+        "machine_version",
+        "creation_id",
+        "bindings"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "validated_bundle_fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "machine_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "machine_version": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "creation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bindings": {
+          "$ref": "aggregate-state-v1.schema.json#/$defs/typedMap"
+        }
+      }
+    },
+    "admitBody": {
+      "type": "object",
+      "required": [
+        "ordered_deliveries",
+        "expected_revision",
+        "expected_checkpoint_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ordered_deliveries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "aggregate-state-v1.schema.json#/$defs/envelope"
+          }
+        },
+        "expected_revision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "expected_checkpoint_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "processBody": {
+      "type": "object",
+      "required": [
+        "target_runtime_id",
+        "expected_revision",
+        "expected_checkpoint_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "target_runtime_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_revision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "expected_checkpoint_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "readBody": {
+      "type": "object",
+      "required": [
+        "expected_checkpoint_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "expected_checkpoint_digest": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          ]
+        }
+      }
+    },
+    "inspectBody": {
+      "type": "object",
+      "required": [
+        "candidate"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "candidate": {
+          "$ref": "inspection-v1.schema.json#/$defs/request"
+        }
+      }
+    },
+    "receiptBody": {
+      "type": "object",
+      "required": [
+        "queried_operation_id",
+        "queried_request_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "queried_operation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "queried_request_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "effect_resultBody": {
+      "type": "object",
+      "required": [
+        "result",
+        "expected_journal_revision"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "result": {
+          "$ref": "effect-result-request-v1.schema.json"
+        },
+        "expected_journal_revision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        }
+      }
+    },
+    "cancel_effectBody": {
+      "type": "object",
+      "required": [
+        "effect_id",
+        "operation_token",
+        "expected_journal_revision",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "effect_id": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "operation_token": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_journal_revision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "timer_commandBody": {
+      "type": "object",
+      "required": [
+        "helper_id",
+        "command",
+        "intent_digest",
+        "expected_helper_revision"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "helper_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command": {
+          "enum": [
+            "schedule",
+            "cancel"
+          ]
+        },
+        "intent_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "expected_helper_revision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        }
+      }
+    },
+    "scope_operationBody": {
+      "type": "object",
+      "required": [
+        "action",
+        "authority_profile_digest",
+        "evidence_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "inventory",
+            "freeze",
+            "retire",
+            "relocate",
+            "archive_export",
+            "archive_import",
+            "standalone_takeover",
+            "clone"
+          ]
+        },
+        "authority_profile_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "evidence_digest": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

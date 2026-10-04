@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "same_operation_changed_body",
+      "request": {
+        "protocol_version": 1,
+        "binding_id": "local",
+        "scope_id": "scope-example",
+        "root_instance_id": "job-42",
+        "operation": "create",
+        "operation_id": "op-create-1",
+        "body": {
+          "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+          "namespace": "example.persistence",
+          "machine_id": "job",
+          "machine_version": "1",
+          "creation_id": "changed",
+          "bindings": [
+            "map",
+            []
+          ]
+        },
+        "request_digest": "sha256:dd2e46f4bfbef896943f147b9a26a0d3496aa378ebd34b502883b3763a71165f"
+      },
+      "expected_error": "request_digest_mismatch"
+    },
+    {
+      "name": "unknown_envelope_field",
+      "request": {
+        "protocol_version": 1,
+        "binding_id": "local",
+        "scope_id": "scope-example",
+        "root_instance_id": "job-42",
+        "operation": "create",
+        "operation_id": "op-create-1",
+        "body": {
+          "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+          "namespace": "example.persistence",
+          "machine_id": "job",
+          "machine_version": "1",
+          "creation_id": "create-1",
+          "bindings": [
+            "map",
+            []
+          ]
+        },
+        "request_digest": "sha256:dd2e46f4bfbef896943f147b9a26a0d3496aa378ebd34b502883b3763a71165f",
+        "extra": 1
+      },
+      "expected_error": "invalid_request"
+    },
+    {
+      "name": "unknown_protocol_version",
+      "request": {
+        "protocol_version": 2,
+        "binding_id": "local",
+        "scope_id": "scope-example",
+        "root_instance_id": "job-42",
+        "operation": "create",
+        "operation_id": "op-create-1",
+        "body": {
+          "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+          "namespace": "example.persistence",
+          "machine_id": "job",
+          "machine_version": "1",
+          "creation_id": "create-1",
+          "bindings": [
+            "map",
+            []
+          ]
+        },
+        "request_digest": "sha256:dd2e46f4bfbef896943f147b9a26a0d3496aa378ebd34b502883b3763a71165f"
+      },
+      "expected_error": "invalid_request"
+    },
+    {
+      "name": "invalid_typed_bindings",
+      "request": {
+        "protocol_version": 1,
+        "binding_id": "local",
+        "scope_id": "scope-example",
+        "root_instance_id": "job-42",
+        "operation": "create",
+        "operation_id": "op-create-1",
+        "body": {
+          "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+          "namespace": "example.persistence",
+          "machine_id": "job",
+          "machine_version": "1",
+          "creation_id": "create-1",
+          "bindings": [
+            "map",
+            [],
+            null
+          ]
+        },
+        "request_digest": "sha256:dd2e46f4bfbef896943f147b9a26a0d3496aa378ebd34b502883b3763a71165f"
+      },
+      "expected_error": "invalid_request"
+    },
+    {
+      "name": "unauthorized_scope_precedes_existence",
+      "request": {
+        "protocol_version": 1,
+        "binding_id": "local",
+        "scope_id": "another-scope",
+        "root_instance_id": "job-42",
+        "operation": "create",
+        "operation_id": "op-create-1",
+        "body": {
+          "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+          "namespace": "example.persistence",
+          "machine_id": "job",
+          "machine_version": "1",
+          "creation_id": "create-1",
+          "bindings": [
+            "map",
+            []
+          ]
+        },
+        "request_digest": "sha256:dd2e46f4bfbef896943f147b9a26a0d3496aa378ebd34b502883b3763a71165f"
+      },
+      "expected_error": "transport_access_denied"
+    }
+  ]
+}
