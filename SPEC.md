@@ -4585,11 +4585,12 @@ and every checkpoint remains permanently eligible. Restoring one checkpoint requ
 no other root checkpoint, but application-level cross-root invariants may require
 coordinated backup and restore.
 
-This section defines only checkpoint-collection completeness. Backup and restore
-operation protocols, cloning, transfer or rebinding, multi-scope archives, relocation,
-and fencing are not defined by this profile. Portable checkpoint bytes, identities, or
-digests MUST NOT authorize access to or movement across logical store scopes. A future
-host-profile contract is required before any such operation can claim conformance.
+This section defines only checkpoint-collection completeness. The optional host
+authority interface in §18 governs fencing and ownership; it does not turn a
+checkpoint collection into a scope archive or a relocation proof. Backup and restore
+operation protocols, cloning, transfer or rebinding, and multi-scope archives require
+their separate host-profile contracts. Portable checkpoint bytes, identities, or
+digests MUST NOT authorize access to or movement across logical store scopes.
 
 ### 17.14 Future timer durability
 
@@ -4604,6 +4605,257 @@ recovery boundary is stated explicitly.
 Adding non-empty timer state requires a later checkpoint schema version or a
 separately identified durable timer artifact.
 
+## 18. Optional host scope authority
+
+### 18.1 Boundary and capability claims
+
+Scope authority is an optional host or plugin interface. The pure foreground core
+accepts an exact definition, prior portable state and input, then returns the next
+state, dispositions and intents (§8). An embedding application may commit that result
+in its own transaction without an authority service. The core does not select a
+scope owner, allocate an epoch, fence a worker, coordinate hosts or create an
+authority grant. Hosts MUST NOT treat core evaluation or ordinary root
+compare-and-swap as evidence of any such operation.
+
+An authority provider registered under §11.5 MAY claim
+`authoritative_scope_fencing`, `consistent_scope_inventory` and `safe_relocation` only for the exact
+configured instance and topology in which it proves them. A host also reports its
+effective, separately checked `guarded_local_writes`, `worker_fencing`,
+`complete_scope_inventory` and `safe_relocation` guarantees as explicit Booleans;
+without a proved authority provider all four are false. The first two registered
+capability names bind respectively to
+§18.3 and §18.4. A `safe_relocation` registry claim and a true host-profile report
+mean the configured instance has proved support for the specified source,
+destination and topology. They do not assert that this transfer has already frozen
+the source, proved retirement or activated the destination. The host rechecks that
+support at each operation; activation additionally requires the transfer-specific
+§18.5 evidence. A generic instance report cannot authorize a particular transfer.
+The closed `schema/host-authority-profile-report-v1.schema.json` composes
+the §11.5 extension report, or null when no authority provider is configured, with
+the exact authenticated scope, epoch and generation when authority is present,
+a nonsecret authority-storage-boundary identifier, topology identifier and
+configuration digest, process and host boundaries, source and optional destination
+binding digests, required participant references, and the four effective guarantee
+Booleans. With no authority provider, epoch, generation and authority storage
+boundary are null and every authority guarantee is false. It is a host profile
+report, not an extension registration report or
+authority credential. Descriptions and digests bind a configured topology but are
+not themselves proof of fencing. `safe_relocation: true` requires an exact
+destination binding and verified support for all §18.5 predicates in that topology;
+their operation-specific evidence is checked before activation. The report MUST NOT contain credentials, live
+claims, retirement grants or secret connection strings. A host returns it only after
+authenticating and authorizing the caller for the scope; a request for another scope
+reveals no report or existence fact. A new configuration, health state, source or
+destination requires a new report.
+A profile MUST recheck these facts before an operation that depends on them. An
+unknown, unhealthy or unproved claim fails closed as `host_capability_mismatch`.
+
+The 0.3.0 public reference profile MAY implement the operations below within one
+tested SQLite authority database or one configured PostgreSQL authority database.
+It MUST advertise only behavior its actual transaction and crash tests prove. A
+copied SQLite file is inert data, not a second authority. A deployment using the
+same PostgreSQL database may support guarded local processes if that topology is
+proved. Neither topology by itself proves retirement across independent authority
+backends. Distributed coordination, leader election, independent-authority grant
+issuance and a managed control plane are outside this release. A third-party host
+MAY later supply those capabilities through this same public boundary.
+
+### 18.2 Identity, records and authorization
+
+An authority domain allocates each logical `scope_identity` exactly once and retains
+permanent no-reuse evidence, including after archive export, restore, tombstoning or
+deletion of portable checkpoints. An authority record contains the exact
+`scope_identity`, `ownership_binding_digest`, `authority_epoch`, `owner_binding`,
+`state`, `scope_generation`, `active_transfer_id` and operation receipts. The
+`authority_epoch` and `scope_generation` are monotonically increasing canonical
+decimal integers. `state` is `active`, `freezing`, `frozen`, `retired` or
+`transaction_in_doubt`. `active_transfer_id` is null unless a transfer is in
+progress. The owner binding and authority record are trusted host data. They are
+never imported from a portable checkpoint/archive as executable authority.
+
+The public version-1 authority operation envelope has exactly `interface`,
+`interface_version`, `operation`, `operation_id`, `scope_identity`,
+`expected_authority_epoch`, `expected_scope_generation`, `request_digest`, and
+`arguments`. `interface` is `determa.host_authority` and `interface_version` is `1`.
+`request_digest` is `hash(["determa-host-authority-request-1",
+request_without_request_digest])`, using §9's SHA-256/JCS construction. An operation
+ID is unique within its authenticated scope. The host authenticates the caller
+through trusted transport/invocation context,
+authorizes the operation and scope before revealing existence or replay evidence, and
+checks the current owner, epoch and state before mutation. Credentials, endpoint
+aliases and principal claims are not machine fields or portable archive members.
+Neither a scope ID, operation ID, digest, archive, root ID, effect ID nor an epoch
+number is a bearer credential.
+
+The closed interface operations in this section are `read_authority`,
+`guarded_commit`, `freeze_scope`, `fence_worker` and `prove_retirement`. A
+`guarded_commit` represents the host's native commit boundary; it is not a request
+for the core to perform storage I/O. Each operation's `arguments` is closed by
+`schema/host-authority-operation-v1.schema.json`. A result has exactly `interface`,
+`interface_version`, `operation`, `operation_id`, `status`, `scope_identity`,
+`authority_epoch`, `scope_generation`, `state`, `evidence_digest`, `error_code`, and
+`claim`. `claim` is the exact active worker claim only for a successful
+`fence_worker`; it is null otherwise. For success, `evidence_digest` is
+`hash(["determa-host-authority-evidence-1", request_digest,
+result_without_evidence_digest])`.
+It binds the exact request digest and response bytes for integrity and replay; it
+does not by itself prove a transaction committed, an inventory is complete or a
+source retired. The host retains the response with the actual committed operation
+receipt and linked authority/proof records in its trusted ledger. A safety decision
+MUST resolve that retained ledger record and verify its linked committed evidence;
+caller-supplied response bytes or a matching digest alone never authorize it. An
+authorized `read_authority` binds its returned snapshot without committing a new
+receipt.
+`error_code` is null; for rejection, the digest is null and `error_code` is one of
+the closed errors in that schema. Results expose no owner or scope details to an
+unauthorized caller. `read_authority` has null expected epoch and generation and is
+read-only; an authorized receipt read may
+return historical evidence without granting mutation rights.
+
+Request shape, known protocol name/version, closed arguments and request digest are
+validated before an operation result can be formed. Malformed, unknown-protocol or
+unsupported-version requests return the schema's closed `earlyError` with null
+operation, operation ID, scope, epoch, generation, state, evidence and claim. Its
+`error_code` is respectively `invalid_host_request`, `unsupported_host_protocol`
+or `unsupported_host_protocol_version`; no parsed request field is echoed.
+Authentication and scope authorization follow structural validation and precede
+scope lookup and replay; a valid but unauthorized request receives
+`unauthorized_scope` with null scope, epoch, generation, state, evidence and claim.
+Only after these checks does the host compare the request digest against the
+retained operation receipt. Unknown fields, invalid canonical values or a computed
+digest mismatch cause `invalid_host_request` before mutation. These early errors
+never reveal cross-scope existence or current authority metadata.
+
+For a mutation, the host stores `(scope_identity, operation_id, request_digest)` and
+the exact first result with the native authority change. Once current authentication
+and scope authorization pass, equal replay returns that result without mutation;
+unequal reuse returns `scope_operation_conflict`. A new operation with a stale epoch
+or generation returns `stale_scope_authority` or `scope_generation_conflict`. The
+host MUST NOT resolve current aliases to change an already recorded operation's
+identity or target. A request whose outcome is unknown retries/queries its same
+authenticated scope and operation ID; a timeout never licenses a new epoch or
+takeover. If replay evidence has expired under a declared bounded retention
+profile, the host reports `replay_evidence_expired`, not presumed rollback.
+
+### 18.3 Guarded commit, freeze and transaction fate
+
+For `authoritative_scope_fencing`, every hosted mutation of a checkpoint, host
+journal, operation receipt, worker claim or ingress acknowledgement obtains a scope
+operation guard and validates the current owner, epoch and active state. The guard
+MUST remain effective through the actual native transaction commit or rollback.
+`guarded_commit` binds the digest of the host's exact proposed native mutation, checks
+the expected generation, and advances it atomically with that mutation and receipt.
+The host MUST reject a mutation whose bytes do not match that digest. A check in a
+separate transaction followed by an unfenced root compare-and-swap does not conform.
+The authority domain serializes a
+freeze and all guarded commits; once `freezing` is visible, it grants no new writer
+guards. Freeze waits for existing guarded transactions to reach known commit or
+rollback, revokes current hosted worker claims and records unresolved external
+attempts as ambiguous, then may record `frozen` and a complete inventory consistency
+point. A root-level CAS, process lock, lease timeout,
+readable backup or disconnected client proves none of these facts.
+
+If the native transaction fate is unknown, the record enters or remains
+`transaction_in_doubt`; the host MUST refuse a frozen inventory, source retirement,
+new owner activation and a safe-relocation claim. It may clear that state only after
+the authoritative storage boundary proves the transaction's commit or rollback and
+the old session is unable to commit later. A lease expiry alone is insufficient.
+The host MUST bound and contain runtime-provider evaluation while it holds a writer
+guard if it advertises this capability. Committed external handlers run after the
+commit. A database rollback cannot undo native provider I/O already performed and a
+scope guard cannot fence an arbitrary external destination. Claims about external
+effect safety additionally require destination idempotency/fencing or explicit
+reconciliation under that helper's contract.
+
+### 18.4 Worker fences and scope inventory
+
+`fence_worker` is available only when the composed host proves `worker_fencing` for
+the actual worker and journal topology. Its request names the exact root, effect
+work identity and operation token, plus `expected_attempt_fence` (null only if no
+claim has ever been issued) and `expected_worker_principal`. The principal field is
+an equality precondition, never authentication: the host verifies it against the
+trusted authenticated caller and the authorized assignment. A mismatch returns
+`worker_principal_mismatch` without mutation; a stale attempt precondition returns
+`stale_attempt_fence`. The host allocates an attempt fence strictly greater than any
+previous fence for that work, chooses expiry from its own host clock and policy, and
+atomically commits the new active claim, journal state, generation and operation
+receipt under the §18.3 guard. The success result's closed `claim` contains the
+scope, root, work kind/identity, operation token, current scope authority epoch,
+new attempt fence, authenticated worker principal, `clock_basis`, `expires_at` and
+`active` state. `clock_basis` is exactly `unix_nanoseconds`; `expires_at` is a
+canonical signed decimal Unix-epoch nanosecond value in the signed 64-bit interval
+`[-9223372036854775808, 9223372036854775807]`. `-0`, floating values and values
+outside that range reject before a claim is issued. The host selects expiry using
+its trusted clock and configured policy, never an implicit core clock. A claim is
+expired at `now >= expires_at`; if current trusted time is unavailable, dispatch and
+result submission fail closed without treating a possible external call as undone.
+`examples/authority/host-authority-clock-cases-v1.json` gives normative boundary
+values. A
+worker claim is host authority data; neither its fields nor its result grant a
+different principal access. Dispatch and result submission recheck the
+authenticated principal, active claim, current epoch and attempt fence. A stale
+epoch/attempt or revoked claim cannot mutate the checkpoint, journal or ingress
+acknowledgement. Claim expiry may revoke mutation rights but never proves that an
+external call did not execute; unresolved attempts become ambiguous and require
+proved destination idempotency or reconciliation before retry. A portable archive
+MUST NOT activate a source worker claim at the destination.
+
+`consistent_scope_inventory` requires the host to enumerate every created root,
+retained checkpoint or root tombstone, receipt, pending/terminal intent and required
+host journal record at one proved frozen consistency point. It MUST discover these
+from authoritative storage, not accept a caller-supplied list as proof. The inventory
+references exact definition and migration artifacts and separately declared required
+application/helper participants. Missing required participant state is an explicit
+failure. A single portable checkpoint or a selected collection can still be exported
+for standalone inspection or restoration, but cannot claim complete scope inventory
+solely by being well formed. Portable snapshots remain usable without this optional
+capability.
+
+### 18.5 Retirement and relocation boundary
+
+`prove_retirement` requires a frozen, fate-known scope. It atomically records
+`retired`, advances the scope generation and returns retained,
+destination-bound, single-use evidence that the old owner cannot commit another
+guarded mutation. A later owner may advance the epoch only when that evidence, exact
+destination binding, generation and all required participant proofs are verified
+inside the same trusted authority domain. A transfer must also prove that the
+source can never resume and that no second destination can consume the grant. The
+archive supplies state, never that proof. A copied database, timeout, endpoint
+switch, credentials change or archive digest does not prove retirement.
+The `freeze_evidence_digest` input is the successful `freeze_scope` result's
+`evidence_digest`, not its request digest. The host resolves it to the retained
+committed freeze operation and checks its matching scope, epoch, generation, known
+transaction fate, revoked claims and inventory consistency point. A request digest,
+unretained response hash or mismatched freeze record returns `scope_fence_unproven`
+without retiring the scope. Retirement proof and any single-use grant likewise live
+in the trusted authority ledger; their response digest alone is never a grant.
+
+Future archive/transfer host operations may expose `prepare_transfer`,
+`stage_import`, `commit_transfer` and `activate_import` against this version-1
+authority boundary. A host claiming `safe_relocation` MUST prove source retirement,
+single-use destination-bound grant, transaction fate, complete import and absence of
+concurrent writers for its advertised topology. Equal operation replay retains its
+first result; stale generation, changed destination, consumed grant or uncertain
+source fate rejects. An import may be validated and staged inactive when safe
+relocation is unsupported, but MUST NOT become active as the same logical scope.
+Unsupported transfer returns `host_capability_mismatch` or
+`scope_fence_unproven`; no host may silently invoke a fresh-scope takeover instead.
+The archive/import contract separately defines the complete artifact and participant
+checks; this section neither requires a distributed grant service in 0.3.0 nor
+allows an implementation to claim safe relocation without one where its topology
+requires it.
+
+Strict fenced recovery remains read-only and inactive when old-owner retirement is
+unproved. A separately requested standalone takeover may create a never-used new
+scope and idempotency namespace from validated portable state, retaining source
+provenance and marking inherited unresolved external work ambiguous. It has
+`safe_relocation: false` and `no_duplicate_external_work: false`; source receipts
+and claims do not authorize new-scope requests. This operation requires its own
+explicit risk acknowledgement and import contract. It is never a fallback from a
+failed or unsupported safe relocation. `examples/authority/host-authority-cases-v1.json`
+contains normative positive and negative interface cases. The companion
+`examples/authority/host-authority-profile-cases-v1.json` fixes positive and
+negative report and capability combinations.
 ## 20. Lossless application projection and embedded transaction facade
 
 This optional host contract binds selected application rows to one root ownership
