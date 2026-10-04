@@ -725,6 +725,76 @@
         "claim": null
       },
       "reason": "Malformed request fields are never echoed and never reach scope lookup."
+    },
+    {
+      "name": "unknown_protocol_early_error",
+      "request": {
+        "interface": "another.protocol",
+        "interface_version": 1,
+        "operation": "guarded_commit",
+        "operation_id": "malformed-1",
+        "scope_identity": "scope-42",
+        "expected_authority_epoch": "2",
+        "expected_scope_generation": "4",
+        "arguments": {
+          "mutation_digest": "sha256:cd65ea2c2ad99e94a85b1b6df72efef9cb2ed0ae933a60c32ce16317f7d7d6aa"
+        },
+        "request_digest": "sha256:47556080267c76c4f8db1a3477295d77d8e70c28e205647fdd9120ed5faa07eb"
+      },
+      "context": {
+        "request_shape": "unknown_protocol_early_error",
+        "scope_lookup_performed": false
+      },
+      "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": null,
+        "operation_id": null,
+        "status": "rejected",
+        "scope_identity": null,
+        "authority_epoch": null,
+        "scope_generation": null,
+        "state": null,
+        "evidence_digest": null,
+        "error_code": "unsupported_host_protocol",
+        "claim": null
+      },
+      "reason": "Unsupported protocol identity is rejected without echoing request fields or looking up a scope."
+    },
+    {
+      "name": "unsupported_version_early_error",
+      "request": {
+        "interface": "determa.host_authority",
+        "interface_version": 2,
+        "operation": "guarded_commit",
+        "operation_id": "malformed-1",
+        "scope_identity": "scope-42",
+        "expected_authority_epoch": "2",
+        "expected_scope_generation": "4",
+        "arguments": {
+          "mutation_digest": "sha256:cd65ea2c2ad99e94a85b1b6df72efef9cb2ed0ae933a60c32ce16317f7d7d6aa"
+        },
+        "request_digest": "sha256:a55c1acc12a009764e47bb6051274ddd0dcc92a28a2a83278e12ec10e2936169"
+      },
+      "context": {
+        "request_shape": "unsupported_version_early_error",
+        "scope_lookup_performed": false
+      },
+      "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": null,
+        "operation_id": null,
+        "status": "rejected",
+        "scope_identity": null,
+        "authority_epoch": null,
+        "scope_generation": null,
+        "state": null,
+        "evidence_digest": null,
+        "error_code": "unsupported_host_protocol_version",
+        "claim": null
+      },
+      "reason": "Unsupported interface version is rejected before scope lookup."
     }
   ]
 }
