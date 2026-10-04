@@ -817,7 +817,11 @@
               "receipt",
               "scope_operation"
             ],
-            "profile_digest": "sha256:5a4740b40c5036a7287ef66d48ae686df08880786402d45715c06a8d7cd8ee80",
+            "supported_scope_actions": [
+              "authority"
+            ],
+            "supported_timer_commands": [],
+            "profile_digest": "sha256:d4007fa22b18863bc64a4373ad1f2d8fa20159bb0d36dc735270f6324f0a86e1",
             "extension_reports": [
               {
                 "category": "authority",
@@ -928,7 +932,11 @@
               "receipt",
               "scope_operation"
             ],
-            "profile_digest": "sha256:5a4740b40c5036a7287ef66d48ae686df08880786402d45715c06a8d7cd8ee80",
+            "supported_scope_actions": [
+              "authority"
+            ],
+            "supported_timer_commands": [],
+            "profile_digest": "sha256:d4007fa22b18863bc64a4373ad1f2d8fa20159bb0d36dc735270f6324f0a86e1",
             "extension_reports": [
               {
                 "category": "authority",

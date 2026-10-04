@@ -3,8 +3,8 @@
   "record_schema_version": 1,
   "issue": "96",
   "old_protocol_fingerprint": null,
-  "proposed_protocol_fingerprint": "sha256:eaee350d4bdc6d1f7f5bed9925889f7f1be3f49ac059923214a8d2e500b85b80",
-  "manifest_fingerprint": "sha256:648be07803d46bffb752fde48d7a340756009bb7cae68a4b3997762546878dad",
+  "proposed_protocol_fingerprint": "sha256:cbe80c00f4a5c17387b31f22e8d6254714ca265bbff8b1af717c2d7d96131ff7",
+  "manifest_fingerprint": "sha256:b521421876d2bb7d432a5b2e8398049040a08214438d64e0fb8f204be29bfb71",
   "affected_capabilities": [
     "structural_inspection",
     "semantic_inspection",

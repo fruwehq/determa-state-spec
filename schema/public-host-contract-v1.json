@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:06e06196529f8719688476fbe5e1e5e235401c6dc9617b46a0f4a6e49a8263d2"
+      "sha256": "sha256:34965097038e858b9be14b4e9b51ddba9932f361ea42e5510f98a6c39dcadb11"
     },
     {
       "path": "VERSION",
@@ -112,7 +112,7 @@
     },
     {
       "path": "schema/public-host-response-v1.schema.json",
-      "sha256": "sha256:417797c1efd0983d2af0a7dc0bb87931b119df7787933e6daadaf0c4bfb2b560"
+      "sha256": "sha256:b7ee1b7f824eade2471fc25ee2575f1e0f9c6f795e020826ea53c8f73c7bbae0"
     },
     {
       "path": "schema/runtime-action-output-v1.schema.json",
@@ -140,7 +140,7 @@
     },
     {
       "path": "examples/public-host/positive-v1.json",
-      "sha256": "sha256:d118c46dea7120b578c2fb87437e8196981a8212e593a0c2a41f5b8ab2e36a27"
+      "sha256": "sha256:12bb3a64db7e5b281732e832e1dd01fb458ba3fb2c6769f6ae45cb3ba63e324e"
     },
     {
       "path": "examples/public-host/negative-v1.json",

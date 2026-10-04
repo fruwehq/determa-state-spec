@@ -1155,6 +1155,8 @@
           "required": [
             "scope_binding_identity",
             "supported_operations",
+            "supported_scope_actions",
+            "supported_timer_commands",
             "profile_digest",
             "extension_reports",
             "authority_profile",
@@ -1182,6 +1184,31 @@
                   "cancel_effect",
                   "timer_command",
                   "scope_operation"
+                ]
+              }
+            },
+            "supported_scope_actions": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "authority",
+                  "archive_export",
+                  "archive_import",
+                  "recovery"
+                ]
+              }
+            },
+            "supported_timer_commands": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "schedule",
+                  "cancel",
+                  "claim_fire",
+                  "complete_fire",
+                  "read_timer"
                 ]
               }
             },
