@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:11aad99f05dc19c3ddee27169a208729a13d9bbcd802935a80b1248c457007cc"
+      "sha256": "sha256:7b1c47359357c3a3d644acc836f9863492cd79f36d9fcdbf4e9280ec2bd8e782"
     },
     {
       "path": "VERSION",
@@ -197,6 +197,118 @@
   ],
   "hash_domains": [
     {
+      "name": "determa-validated-bundle-fingerprint-1",
+      "source": "SPEC.md#2"
+    },
+    {
+      "name": "determa-root-runtime-identity-1",
+      "source": "SPEC.md#9"
+    },
+    {
+      "name": "determa-component-runtime-identity-1",
+      "source": "SPEC.md#9"
+    },
+    {
+      "name": "determa-spawned-runtime-identity-1",
+      "source": "SPEC.md#9"
+    },
+    {
+      "name": "determa-cause-identity-1",
+      "source": "SPEC.md#9"
+    },
+    {
+      "name": "determa-event-identity-1",
+      "source": "SPEC.md#9"
+    },
+    {
+      "name": "determa-effect-identity-1",
+      "source": "SPEC.md#9"
+    },
+    {
+      "name": "determa-guard-binding-1",
+      "source": "SPEC.md#12"
+    },
+    {
+      "name": "determa-aggregate-shape-fingerprint-1",
+      "source": "SPEC.md#16"
+    },
+    {
+      "name": "determa-aggregate-state-digest-1",
+      "source": "SPEC.md#16"
+    },
+    {
+      "name": "determa-migration-descriptor-1",
+      "source": "SPEC.md#16"
+    },
+    {
+      "name": "determa-inbox-envelope-digest-1",
+      "source": "SPEC.md#16.15"
+    },
+    {
+      "name": "determa-execution-checkpoint-digest-1",
+      "source": "SPEC.md#17.2"
+    },
+    {
+      "name": "determa-creation-request-digest-1",
+      "source": "SPEC.md#17.3"
+    },
+    {
+      "name": "determa-maintenance-migration-request-digest-1",
+      "source": "SPEC.md#17.5"
+    },
+    {
+      "name": "determa-outbox-intent-digest-1",
+      "source": "SPEC.md#17.6"
+    },
+    {
+      "name": "determa-host-authority-request-1",
+      "source": "SPEC.md#18.2"
+    },
+    {
+      "name": "determa-host-authority-evidence-1",
+      "source": "SPEC.md#18.2"
+    },
+    {
+      "name": "determa-host-operation-token-1",
+      "source": "SPEC.md#19.1"
+    },
+    {
+      "name": "determa-host-effect-journal-digest-1",
+      "source": "SPEC.md#19.2"
+    },
+    {
+      "name": "determa-host-operation-response-1",
+      "source": "SPEC.md#19.2"
+    },
+    {
+      "name": "determa-effect-attempt-report-1",
+      "source": "SPEC.md#19.3"
+    },
+    {
+      "name": "determa-effect-outcome-1",
+      "source": "SPEC.md#19.3"
+    },
+    {
+      "name": "determa-effect-result-event-1",
+      "source": "SPEC.md#19.4"
+    },
+    {
+      "name": "determa-delivery-source-content-digest-1",
+      "source": "SPEC.md#21"
+    },
+    {
+      "name": "determa-admission-binding-digest-1",
+      "source": "SPEC.md#21"
+    },
+    {
+      "name": "determa-ingress-dead-letter-digest-1",
+      "source": "SPEC.md#21"
+    },
+    {
+      "name": "determa-outbound-destination-receipt-digest-1",
+      "source": "SPEC.md#21"
+    },
+    {
       "name": "determa-public-host-request-digest-1",
       "source": "SPEC.md#25.2"
     },
@@ -211,22 +323,6 @@
     {
       "name": "determa-public-host-profile-1",
       "source": "SPEC.md#25.3"
-    },
-    {
-      "name": "determa-effect-identity-1",
-      "source": "SPEC.md#9"
-    },
-    {
-      "name": "determa-execution-checkpoint-digest-1",
-      "source": "SPEC.md#17.2"
-    },
-    {
-      "name": "determa-host-authority-request-1",
-      "source": "SPEC.md#18.2"
-    },
-    {
-      "name": "determa-host-effect-journal-digest-1",
-      "source": "SPEC.md#19.2"
     }
   ],
   "capability_meanings": [
