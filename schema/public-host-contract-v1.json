@@ -148,7 +148,7 @@
     },
     {
       "path": "examples/public-host/negative-v1.json",
-      "sha256": "sha256:751660230a08d4576538899b7d096188a5f51037807df97c987b2bb8525f49eb"
+      "sha256": "sha256:6313d8c0312ca93eb0e56f46064a70d6c9ddfcef08888a466b073462ea61cb46"
     },
     {
       "path": "examples/effects/effect-result-request-v1.json",
