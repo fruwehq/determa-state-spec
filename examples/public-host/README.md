@@ -58,3 +58,8 @@ descriptor bytes. The ordering proof requirements in §21.3 remain mandatory.
 completion replay and the archived schedule correlation now match their immutable
 requests. The request and response schema fingerprints are unchanged; the manifest
 tracks the corrected timer vectors and archive bytes.
+
+`provider-correlation-compatibility-change-v1.json` records issue #108: the
+positive native-provider examples now carry the required external-send correlation.
+The public request and response schemas are unchanged; the manifest fingerprints
+the corrected example bytes.

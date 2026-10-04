@@ -11,8 +11,13 @@ registration with `kind: actions` for that Boolean binding is invalid.
 
 `action-output.json` is a valid typed provider result: the engine checks its assign
 and send against the selected statechart scope and event declarations, then applies
-it before the following structured send. `invalid-action-output.json` has a dynamic
-`stop` and is rejected by the closed provider-output schema.
+it before the following structured send. Both external sends provide a
+non-empty portable correlation under §5.3; the CEL send uses a string literal
+expression, and the provider result uses a typed string value.
+`invalid-action-output.json` has a dynamic `stop` and is rejected by the closed
+provider-output schema.
+`invalid-missing-correlation-action-output.json` is structurally valid but fails
+the §5.3 external-send correlation check against the same declared output event.
 
 `invalid-guard-output-type.json` and `invalid-provider-digest.json` are structural
 negative bundles: a guard requires Boolean output and an exact lowercase SHA-256
