@@ -2976,7 +2976,7 @@ use exactly these five independent closed JSON artifacts:
 | migration descriptor | `migration_descriptor_format: "determa.aggregate_migration"` | `migration_descriptor_schema_version: 1` | `schema/migration-descriptor-v1.schema.json` |
 | transport package | `aggregate_state_package_format: "determa.aggregate_state_package"` | `aggregate_state_package_schema_version: 1` | `schema/aggregate-state-package-v1.schema.json` |
 | execution checkpoint | `execution_checkpoint_format: "determa.execution_checkpoint"` | `execution_checkpoint_schema_version: 1` | `schema/execution-checkpoint-v1.schema.json` |
-| portable archive | `archive_format: "determa.archive"` | `archive_schema_version: 1` | `schema/archive-v1.schema.json` |
+| portable archive | `archive_format: "determa.scope_archive"` | `archive_schema_version: 1` | `schema/archive-v1.schema.json` |
 
 Queue-bearing core results use `schema/core-step-result-v1.schema.json`. Artifact schema
 version 1 is the sole supported portable artifact version. No alternate artifact
@@ -5559,7 +5559,7 @@ rebinding, fencing, and scope transfer require a separate contract and are not a
 import operations.
 
 The version-1 archive is strict UTF-8 JSON with exact
-`archive_format: "determa.archive"` and `archive_schema_version: 1`; its closed schema
+`archive_format: "determa.scope_archive"` and `archive_schema_version: 1`; its closed schema
 is `schema/archive-v1.schema.json`. Its component is the closed
 `schema/archive-participant-v1.schema.json`. Unknown formats and versions fail before
 semantic validation with `unsupported_archive_format` and
@@ -5649,9 +5649,17 @@ credential, authority grant, or permission to resume an inherited attempt.
 
 ### 22.2 Closed content and digest rules
 
-The archive has exactly `archive_format`, `archive_schema_version`, `source`,
-`participant_contract`, `selection`, `checkpoints`, `normalized_definitions`,
-`migration_descriptors`, `participants`, and `archive_digest`.
+The version-1 archive root is its closed manifest and has exactly `archive_format`,
+`archive_schema_version`, `source`, `participant_contract`, `selection`,
+`checkpoints`, `normalized_definitions`, `migration_descriptors`, `participants`,
+`members`, `required_determa_capabilities`, `optional_participant_references`,
+`source_fence_reference`, `transfer_reference`, and `archive_digest`.
+`archive_format` is exactly `determa.scope_archive`; there is no reader for the
+earlier draft spelling. The outer `archive_digest` is the exact content identity of
+this archive, rather than a second mutable ID field. The manifest's `source` and
+`selection` bind logical scope, source binding and generation when present, profile,
+and consistency point. An explicit standalone source has null scope, binding,
+generation, fence, and transfer references.
 `source.profile_digest = hash(["determa-archive-source-profile-1",
 source_without_profile_digest])`. `participant_contract` lists the complete declared
 required and optional participant IDs, each sorted by UTF-8 bytes and disjoint. Its
@@ -5664,6 +5672,45 @@ contract is checked against an independently trusted configured requirement for 
 source profile and selection. A resealed archive cannot delete a required helper,
 host journal, or application participant by editing its own contract. The importer
 MUST refuse source profile or contract mismatch even when all archive hashes verify.
+
+`members` contains one entry for every checkpoint, normalized-definition attachment,
+migration descriptor, and included participant record, and no other entry. Identity
+is respectively `checkpoint:<root_instance_id>`,
+`definition:<validated_bundle_fingerprint>`,
+`migration_descriptor:<migration_descriptor_digest>`, or
+`participant:<participant_id>`. Entries are strictly sorted by identity UTF-8 bytes
+and unique. Each entry's `digest` is SHA-256 of the exact UTF-8 RFC 8785 JCS bytes of
+the whole member object; `byte_length` is the canonical positive decimal count of
+those same bytes. The importer verifies identity, length, digest, complete closure,
+and each member's own nested digest. The outer digest includes this member table;
+it is not a substitute for comparing it to actual member bytes. For an external
+participant the member object includes its external content reference, and staging
+additionally resolves and verifies the referenced typed payload bytes.
+
+`required_determa_capabilities` is the unique UTF-8 sorted exact minimum needed to
+decode and stage the included Determa-owned content. It includes `portable_archive`,
+plus `portable_checkpoint`, `normalized_definition`, `migration_descriptor`, and
+`archive_participant` when the corresponding members exist; a source claiming §19
+durable native results also requires `host_effect_journal`. These are destination
+requirements, distinct from `source.profile_claims`, which describe source behavior.
+The exporter computes them from the captured content and profile; the importer checks
+their exact closure and that its independently configured supported-capability set
+contains them before any staging write. A missing or invented requirement in an
+otherwise resealed manifest is `archive_manifest_mismatch`; an unsupported genuine
+requirement is `archive_capability_mismatch`.
+
+`optional_participant_references` is sorted by participant ID and contains one exact
+ID, §11.5 provider reference, and schema digest for each optional ID in the declared
+contract, even when its payload was absent at capture. Its complete list is checked
+against independently trusted configured references and source capture evidence;
+absence still appears in the result. `source_fence_reference` and
+`transfer_reference` are null unless the source has an applicable retained §18
+operation. A nonnull fence reference carries only the retained operation kind, ID,
+and response digest; a transfer reference additionally carries the destination
+binding digest. They are public provenance pointers, checked against exact source
+profile and trusted retained host evidence when used. A hash or operation ID in the
+archive cannot itself prove source retirement, convey a credential, consume a grant,
+or authorize activation; §18 and the separate recovery contract perform those checks.
 
 `selection` contains `root_instance_ids`, ordered strictly by UTF-8
 bytes, and `consistency_token`, an opaque non-empty exporter assertion. The token is
@@ -5749,7 +5796,8 @@ trusted source profile and participant-contract digests, expected source provena
 and staging identity are supplied by independent host policy, not copied from the
 untrusted archive. A caller cannot weaken that policy by changing request fields.
 The host verifies these values and authorized staging selection before any write.
-Import verifies the complete archive shape and digests, checkpoint and attachment
+Import verifies the complete archive manifest, member bytes and required Determa
+capabilities, checkpoint and attachment
 digests, trust policy, and each included participant's exact provider fingerprint,
 transitive executable dependencies, schema bytes/digest, payload, and configured-instance
 `portable_import` and `exact_reconstruction` claims before any write. An included
@@ -5777,7 +5825,8 @@ Activation and destination ownership are outside this section. A failed export o
 stage returns one closed refusal and leaves source and destination unchanged.
 
 The deterministic refusal precedence is unsupported archive format, unsupported
-archive version, invalid archive shape, archive digest mismatch, source provenance,
+archive version, invalid archive shape, archive digest mismatch, manifest closure,
+source provenance,
 source profile or participant contract mismatch, invalid checkpoint or attachment,
 invalid participant closure or payload, host-journal inventory mismatch, missing required artifact or
 provider, capability mismatch, then consistency or staging failure. The result uses
@@ -5790,6 +5839,9 @@ source claim, absent optional versus missing required, unresolved external paylo
 participant dependency cycle, and attempted activation during staging.
 
 An internally wrong source-profile or participant-contract digest is `invalid_archive`.
+An intact outer archive digest with a wrong member identity, order, byte length,
+digest, missing or extra member, or incorrect required-capability closure is
+`archive_manifest_mismatch`.
 An intact archive whose scope identity, binding, or generation differs from trusted
 source policy is `archive_source_provenance_mismatch`; a kind, claim, or profile digest
 difference is `archive_source_profile_mismatch`. An intact, differently declared

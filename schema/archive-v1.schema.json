@@ -10,12 +10,17 @@
     "normalized_definitions",
     "migration_descriptors",
     "participants",
-    "archive_digest"
+    "archive_digest",
+    "members",
+    "required_determa_capabilities",
+    "optional_participant_references",
+    "source_fence_reference",
+    "transfer_reference"
   ],
   "additionalProperties": false,
   "properties": {
     "archive_format": {
-      "const": "determa.archive"
+      "const": "determa.scope_archive"
     },
     "archive_schema_version": {
       "const": 1
@@ -91,6 +96,67 @@
     },
     "participant_contract": {
       "$ref": "#/$defs/participantContract"
+    },
+    "members": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "identity",
+          "digest",
+          "byte_length"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "identity": {
+            "type": "string",
+            "pattern": "^(checkpoint|definition|migration_descriptor|participant):.+"
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "byte_length": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          }
+        }
+      }
+    },
+    "required_determa_capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/capability"
+      }
+    },
+    "optional_participant_references": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/optionalParticipantReference"
+      }
+    },
+    "source_fence_reference": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/sourceFenceReference"
+        }
+      ]
+    },
+    "transfer_reference": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/transferReference"
+        }
+      ]
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -289,6 +355,149 @@
           "pattern": "^sha256:[0-9a-f]{64}$"
         }
       }
+    },
+    "capability": {
+      "enum": [
+        "portable_archive",
+        "portable_checkpoint",
+        "normalized_definition",
+        "migration_descriptor",
+        "archive_participant",
+        "host_effect_journal"
+      ]
+    },
+    "optionalParticipantReference": {
+      "type": "object",
+      "required": [
+        "participant_id",
+        "provider_reference",
+        "participant_schema_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "participant_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]*$"
+        },
+        "provider_reference": {
+          "$ref": "provider-reference-v1.schema.json"
+        },
+        "participant_schema_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "sourceFenceReference": {
+      "type": "object",
+      "required": [
+        "operation_kind",
+        "operation_id",
+        "response_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "operation_kind": {
+          "enum": [
+            "freeze_scope",
+            "prove_retirement"
+          ]
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "response_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "transferReference": {
+      "type": "object",
+      "required": [
+        "operation_kind",
+        "operation_id",
+        "response_digest",
+        "destination_binding_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "operation_kind": {
+          "const": "prove_retirement"
+        },
+        "operation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "response_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "destination_binding_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "source": {
+            "properties": {
+              "profile_kind": {
+                "const": "standalone"
+              }
+            },
+            "required": [
+              "profile_kind"
+            ]
+          }
+        },
+        "required": [
+          "source"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_fence_reference": {
+            "type": "null"
+          },
+          "transfer_reference": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "transfer_reference": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "transfer_reference"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_fence_reference": {
+            "$ref": "#/$defs/sourceFenceReference"
+          },
+          "source": {
+            "properties": {
+              "profile_claims": {
+                "contains": {
+                  "const": "safe_relocation"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

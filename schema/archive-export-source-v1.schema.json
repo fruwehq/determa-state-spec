@@ -6,7 +6,8 @@
     "normalized_definitions",
     "migration_descriptors",
     "participant_captures",
-    "inventory_evidence"
+    "inventory_evidence",
+    "declared_optional_participant_references"
   ],
   "additionalProperties": false,
   "properties": {
@@ -198,6 +199,12 @@
             }
           ]
         }
+      }
+    },
+    "declared_optional_participant_references": {
+      "type": "array",
+      "items": {
+        "$ref": "archive-v1.schema.json#/$defs/optionalParticipantReference"
       }
     }
   },

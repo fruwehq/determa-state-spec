@@ -8,6 +8,13 @@ maintenance receipt. `effect-1` has an ambiguous pending intent, a full terminal
 intent, and an effect tombstone, all anchored by its creation receipt. Each checkpoint
 has its own verified revision and digest. The five normalized definitions and one
 migration descriptor reproduce their declared fingerprints and digests.
+The root object is the `determa.scope_archive` manifest. Its `archive_digest` is the
+content identity; `members` lists every checkpoint, definition, descriptor, and
+participant by sorted identity with exact canonical UTF-8 byte length and SHA-256.
+`required_determa_capabilities` is the exact minimum for staging those members,
+checked independently of source profile claims. Optional participant references
+remain declared even when their payload is absent. Fence and transfer references
+are null in these vectors and confer no authority.
 
 The archive records nonsecret `source` provenance and a complete required/optional
 `participant_contract`. The source profile and contract digests are checked against
@@ -40,12 +47,16 @@ and inventory digests are pinned independently. Resealed missing and torn-journa
 vectors refuse staging, as do resealed deletions of a native record, attempt,
 outcome, or response reference.
 
-`stage-cases-v1.json` contains 35 complete import requests, complete input archives,
+`stage-cases-v1.json` contains 43 complete import requests, complete input archives,
 configured trusted policy and provider evidence, exact result objects, and the exact
 inert staged archive or null. Cases include external payload reconstruction; missing
 required and absent optional participants; a resealed omission or weakened contract;
 changed source provenance; and resealed omissions of deferred work, admission
 receipts, pending/terminal/compact outbox evidence, migration audit, and faults.
+It also has correctly resealed refusals for a wrong member byte length, identity, or
+digest, a missing or extra member, an omitted required capability or optional
+participant reference, and a destination that does not support a genuine required
+capability.
 `export-cases-v1.json` contains nine complete closed export requests, complete
 closed source captures, and exact archives/results or refusals. It exercises embedded and external payload capture, a scoped source,
 an explicit standalone source with and without participants, durable-native journal

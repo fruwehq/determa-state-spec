@@ -441,7 +441,10 @@ Relevant specification: [§22](SPEC.md#22-portable-archives-and-declared-partici
 **Decision.** A version-1 archive contains full selected checkpoints and exact
 immutable definition attachments. Application or helper data joins only through an
 explicit participant with a pinned provider, schema, dependency closure, and complete
-payload. The source provenance and full required/optional participant contract are
+payload. Its `determa.scope_archive` root is the closed manifest: content identity,
+sorted member identities, canonical-byte digests and lengths, required destination
+Determa capabilities, optional participant references, and inert source-fence or
+transfer pointers when applicable. The source provenance and full required/optional participant contract are
 compared to independent trusted host policy; a resealed omission or weaker profile
 cannot redefine completeness. Required missing data blocks staging; optional
 omissions are reported. A source claiming §19 durable native results requires a
