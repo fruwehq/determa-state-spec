@@ -4568,7 +4568,16 @@ secrets only to the handler, outside portable values and journal digests.
 ### 19.3 Invocation, claims, attempts, and cancellation
 
 `invocation_state` is exactly `unclaimed`, `leased`, `ambiguous`,
-`outcome_recorded`, `result_admitted`, or `closed`. These are business-invocation
+`outcome_recorded`, `result_admitted`, or `closed`. A new record begins
+`unclaimed` with attempt fence `"0"`, no reports and null outcome, result ID,
+admission receipt, and cancellation. Claiming changes it to `leased` at the next
+fence. A proved safe `retryable_failure` report returns it to `unclaimed`; an
+`ambiguous` report changes it to `ambiguous`. An authorized reconciliation MAY
+resolve ambiguity or issue a new fenced claim only with its recorded external
+evidence. A terminal report records the immutable outcome and changes it to
+`outcome_recorded`; successful admission changes it to `result_admitted`. `closed`
+may follow only after result admission and retains all identity and outcome
+evidence required by the declared replay policy. These are business-invocation
 states independent of the §17.6 outbox delivery state. Outbox `confirmed` proves only
 durable adapter acceptance; it does not prove the native provider succeeded. A remote
 worker may accept responsibility while invocation remains outstanding. Runtime/root
@@ -4622,8 +4631,8 @@ attempt_fence])`. Attempt reports remain separate evidence.
 
 Cancellation is null or exactly `operation_id`, `reason`, and `state`, where state is
 `requested`, `prevented_start`, `too_late`, or `reconciliation_required`. Cancellation
-and outcome recording serialize. A cancellation that wins before a claim prevents
-provider start. After a call might have occurred, cancellation cannot claim rollback
+and outcome recording serialize. A cancellation that wins before a claim sets `prevented_start` and forever
+forbids another claim or provider start for that effect. After a call might have occurred, cancellation cannot claim rollback
 or erase ambiguity. A recorded outcome wins over later cancellation; a late report
 cannot replace it. Equal cancellation replays; a changed request requires a distinct
 authorized operation and cannot rewrite an immutable outcome.
