@@ -1,0 +1,10 @@
+{
+  "status": "rejected",
+  "operation_id": "cancel-1",
+  "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "cancellation": null,
+  "outcome": null,
+  "result_event_id": null,
+  "journal_revision": null,
+  "error_code": "invalid_host_request"
+}
