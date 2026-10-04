@@ -1,0 +1,35 @@
+{
+  "clock_basis": "unix_nanoseconds",
+  "valid": [
+    {
+      "value": "0",
+      "reason": "zero epoch"
+    },
+    {
+      "value": "9223372036854775807",
+      "reason": "signed 64-bit maximum"
+    },
+    {
+      "value": "-9223372036854775808",
+      "reason": "signed 64-bit minimum"
+    }
+  ],
+  "invalid": [
+    {
+      "value": "-0",
+      "reason": "negative zero"
+    },
+    {
+      "value": "1.0",
+      "reason": "floating value"
+    },
+    {
+      "value": "9223372036854775808",
+      "reason": "above signed 64-bit maximum"
+    },
+    {
+      "value": "-9223372036854775809",
+      "reason": "below signed 64-bit minimum"
+    }
+  ]
+}

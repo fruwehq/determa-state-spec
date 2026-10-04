@@ -4781,7 +4781,16 @@ previous fence for that work, chooses expiry from its own host clock and policy,
 atomically commits the new active claim, journal state, generation and operation
 receipt under the §18.3 guard. The success result's closed `claim` contains the
 scope, root, work kind/identity, operation token, current scope authority epoch,
-new attempt fence, authenticated worker principal, expiry and `active` state. A
+new attempt fence, authenticated worker principal, `clock_basis`, `expires_at` and
+`active` state. `clock_basis` is exactly `unix_nanoseconds`; `expires_at` is a
+canonical signed decimal Unix-epoch nanosecond value in the signed 64-bit interval
+`[-9223372036854775808, 9223372036854775807]`. `-0`, floating values and values
+outside that range reject before a claim is issued. The host selects expiry using
+its trusted clock and configured policy, never an implicit core clock. A claim is
+expired at `now >= expires_at`; if current trusted time is unavailable, dispatch and
+result submission fail closed without treating a possible external call as undone.
+`examples/authority/host-authority-clock-cases-v1.json` gives normative boundary
+values. A
 worker claim is host authority data; neither its fields nor its result grant a
 different principal access. Dispatch and result submission recheck the
 authenticated principal, active claim, current epoch and attempt fence. A stale
