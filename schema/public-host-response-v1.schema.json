@@ -41,7 +41,7 @@
             "request_digest",
             "receipt_kind",
             "evidence_digest",
-            "acceptance_sequence"
+            "acceptance_receipt"
           ],
           "additionalProperties": false,
           "properties": {
@@ -67,14 +67,13 @@
               "type": "string",
               "pattern": "^sha256:[0-9a-f]{64}$"
             },
-            "acceptance_sequence": {
+            "acceptance_receipt": {
               "oneOf": [
                 {
                   "type": "null"
                 },
                 {
-                  "type": "string",
-                  "pattern": "^(0|[1-9][0-9]*)$"
+                  "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
                 }
               ]
             }
@@ -90,15 +89,14 @@
               },
               "then": {
                 "properties": {
-                  "acceptance_sequence": {
-                    "type": "string",
-                    "pattern": "^(0|[1-9][0-9]*)$"
+                  "acceptance_receipt": {
+                    "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
                   }
                 }
               },
               "else": {
                 "properties": {
-                  "acceptance_sequence": {
+                  "acceptance_receipt": {
                     "type": "null"
                   }
                 }
@@ -671,7 +669,7 @@
                   "request_digest",
                   "receipt_kind",
                   "evidence_digest",
-                  "acceptance_sequence"
+                  "acceptance_receipt"
                 ],
                 "additionalProperties": false,
                 "properties": {
@@ -697,14 +695,13 @@
                     "type": "string",
                     "pattern": "^sha256:[0-9a-f]{64}$"
                   },
-                  "acceptance_sequence": {
+                  "acceptance_receipt": {
                     "oneOf": [
                       {
                         "type": "null"
                       },
                       {
-                        "type": "string",
-                        "pattern": "^(0|[1-9][0-9]*)$"
+                        "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
                       }
                     ]
                   }
@@ -720,15 +717,14 @@
                     },
                     "then": {
                       "properties": {
-                        "acceptance_sequence": {
-                          "type": "string",
-                          "pattern": "^(0|[1-9][0-9]*)$"
+                        "acceptance_receipt": {
+                          "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
                         }
                       }
                     },
                     "else": {
                       "properties": {
-                        "acceptance_sequence": {
+                        "acceptance_receipt": {
                           "type": "null"
                         }
                       }

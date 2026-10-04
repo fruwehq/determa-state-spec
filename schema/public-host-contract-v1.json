@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:291f67babeb91fad6e158982c1005f5beb7fca4b8fb22ae3d04f1a59cf98f18c"
+      "sha256": "sha256:11aad99f05dc19c3ddee27169a208729a13d9bbcd802935a80b1248c457007cc"
     },
     {
       "path": "VERSION",
@@ -116,7 +116,7 @@
     },
     {
       "path": "schema/public-host-response-v1.schema.json",
-      "sha256": "sha256:98ebec02dd04d2763ea039b5262e02abd282c271b6a8b3fa3bdeee6a24688717"
+      "sha256": "sha256:c2648a1b9bdb22c564fc5f0956303ce8e4831a3cf52c360ccb44c2b44b1d37ac"
     },
     {
       "path": "schema/runtime-action-output-v1.schema.json",
@@ -144,11 +144,11 @@
     },
     {
       "path": "examples/public-host/positive-v1.json",
-      "sha256": "sha256:15716b547f93609c6b7febffa8b75ea73b95ddecb5bf0fae500c52eeb24847a3"
+      "sha256": "sha256:6e4219c72abd9e17019dd025bc495c18d6ade38a9f1b0db6492ed296b3f3c904"
     },
     {
       "path": "examples/public-host/negative-v1.json",
-      "sha256": "sha256:6313d8c0312ca93eb0e56f46064a70d6c9ddfcef08888a466b073462ea61cb46"
+      "sha256": "sha256:6e61ef848a89034f609bdd46340ae6ffaff9a29f7566face50768b575df8e437"
     },
     {
       "path": "examples/effects/effect-result-request-v1.json",

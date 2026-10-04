@@ -40,7 +40,7 @@
           "operation_id": "op-create-1",
           "request_digest": "sha256:ee59aecee759f5bd67d9d2191a71e4d476a4a5f3cc62f6bace3fc7157a22d71d",
           "receipt_kind": "committed",
-          "acceptance_sequence": null,
+          "acceptance_receipt": null,
           "evidence_digest": "sha256:43c548692bba1b63ad450099e5990a5c649e1def6441c6512b99f2ba4c61d6b5"
         },
         "value": {
@@ -498,7 +498,7 @@
           "operation_id": "op-effect-result-1",
           "request_digest": "sha256:a4ee1de42fa4c8104b2550de14cb65992cf3c519035ff3fb0a96cf40a0c40800",
           "receipt_kind": "committed",
-          "acceptance_sequence": null,
+          "acceptance_receipt": null,
           "evidence_digest": "sha256:7766bfcc3706054fa4a6d96058f39ec47cf16080b2d8946e796563733165dc31"
         },
         "value": {
@@ -602,7 +602,7 @@
           "operation_id": "cancel-1",
           "request_digest": "sha256:36ee7a49fae48f465b421cf040e6cfdf740f882fc64d49104d522f46aac19955",
           "receipt_kind": "committed",
-          "acceptance_sequence": null,
+          "acceptance_receipt": null,
           "evidence_digest": "sha256:c4b997b8e6e0278b256a6f44a4d3a162c44e3b8182a435eb1f686739a6b6bda0"
         },
         "value": {
@@ -1353,7 +1353,7 @@
                 "operation_id": "op-create-1",
                 "request_digest": "sha256:ee59aecee759f5bd67d9d2191a71e4d476a4a5f3cc62f6bace3fc7157a22d71d",
                 "receipt_kind": "committed",
-                "acceptance_sequence": null,
+                "acceptance_receipt": null,
                 "evidence_digest": "sha256:43c548692bba1b63ad450099e5990a5c649e1def6441c6512b99f2ba4c61d6b5"
               },
               "value": {

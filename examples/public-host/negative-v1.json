@@ -520,7 +520,7 @@
       "expected_error": "schema_validation"
     },
     {
-      "name": "pending_without_acceptance_sequence",
+      "name": "pending_without_durable_acceptance_receipt",
       "response": {
         "protocol": "determa.execution_host",
         "protocol_version": 1,
@@ -531,7 +531,7 @@
           "operation_id": "op-create-1",
           "request_digest": "sha256:ee59aecee759f5bd67d9d2191a71e4d476a4a5f3cc62f6bace3fc7157a22d71d",
           "receipt_kind": "accepted",
-          "acceptance_sequence": null,
+          "acceptance_receipt": null,
           "evidence_digest": "sha256:43c548692bba1b63ad450099e5990a5c649e1def6441c6512b99f2ba4c61d6b5"
         },
         "value": null,
@@ -699,7 +699,7 @@
           "operation_id": "op-create-1",
           "request_digest": "sha256:ee59aecee759f5bd67d9d2191a71e4d476a4a5f3cc62f6bace3fc7157a22d71d",
           "receipt_kind": "committed",
-          "acceptance_sequence": null,
+          "acceptance_receipt": null,
           "evidence_digest": "sha256:43c548692bba1b63ad450099e5990a5c649e1def6441c6512b99f2ba4c61d6b5"
         },
         "value": null,
