@@ -3,7 +3,7 @@
 `positive-v1.json` contains complete version-1 requests and responses, with the
 canonical JCS request-hash operand and digest for every case. `negative-v1.json`
 contains valid protocol requests that must be refused by operation semantics,
-invalid request shapes, and four invalid response shapes. A null
+invalid request shapes, and invalid response shapes. A null
 `expected_response` means that a malformed request, transport denial, or client
 binding refusal produces no valid public response. `transport_context` and
 `client_context` describe the surrounding invocation and are not protocol fields.
@@ -32,6 +32,10 @@ records from [`../recovery/recovery-cases-v1.json`](../recovery/recovery-cases-v
 They cover quarantine, fresh-scope takeover, clone, verified local activation,
 and exact refusals for active strict restore, weak clone isolation, and unsupported
 transfer topology.
+The timer cases copy the complete §23 helper requests and results from
+[`../timers/timer-helper-cases-v1.json`](../timers/timer-helper-cases-v1.json).
+They cover schedule, cancel, due claim, committed fire, read, and exact
+collision, early claim, stale fence, and clock-unavailable refusals.
 
 These are specification vectors. Engine/client/reference-host execution checks live in
 the conformance and implementation repositories. `compatibility-change-v1.json`

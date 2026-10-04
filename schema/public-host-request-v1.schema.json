@@ -671,30 +671,12 @@
     "timer_commandArguments": {
       "type": "object",
       "required": [
-        "helper_id",
-        "command",
-        "intent_digest",
-        "expected_helper_revision"
+        "timer_request"
       ],
       "additionalProperties": false,
       "properties": {
-        "helper_id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "command": {
-          "enum": [
-            "schedule",
-            "cancel"
-          ]
-        },
-        "intent_digest": {
-          "type": "string",
-          "pattern": "^sha256:[0-9a-f]{64}$"
-        },
-        "expected_helper_revision": {
-          "type": "string",
-          "pattern": "^(0|[1-9][0-9]*)$"
+        "timer_request": {
+          "$ref": "timer-helper-operation-v1.schema.json#/$defs/request"
         }
       }
     },

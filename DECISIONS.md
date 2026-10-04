@@ -540,3 +540,6 @@ configured destination decoder/staging features; source archive claims do not gr
 them. A definitive nested refusal is an outer rejection with its complete inner
 result, while a successful mutation requires a durable public receipt. Verified
 local transfer, fresh-scope takeover, and clone keep their separate safety claims.
+Timer commands wrap the exact §23 helper operation and result, including its own
+digest and fire-fence evidence. A successful helper mutation needs a durable public
+receipt; a helper refusal remains an outer rejection with the full helper result.

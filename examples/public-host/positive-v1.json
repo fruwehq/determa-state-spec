@@ -7735,6 +7735,498 @@
         "error": null
       },
       "source_fixture": "examples/recovery/recovery-cases-v1.json#local_activate"
+    },
+    {
+      "name": "timer_schedule_first",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "schedule-A",
+        "scope_binding_identity": "binding-timer-1",
+        "operation": "timer_command",
+        "target": {
+          "root_instance_id": "server-1",
+          "runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "timer_request": {
+            "interface": "determa.timer_helper",
+            "interface_version": 1,
+            "scope_identity": "scope-archive-example",
+            "root_instance_id": "server-1",
+            "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+            "timer_id": "timer-A",
+            "operation": "schedule",
+            "operation_id": "schedule-A",
+            "arguments": {
+              "clock_basis": "unix_nanoseconds",
+              "delay_nanoseconds": "10",
+              "event_name": "received",
+              "payload": [
+                "map",
+                []
+              ],
+              "correlation_id": null
+            },
+            "request_digest": "sha256:a8558d591eb3f2e8a128d4b2ab4266ede95efe5c46f7a473dbada7ce99a544d9"
+          }
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"timer_request\":{\"arguments\":{\"clock_basis\":\"unix_nanoseconds\",\"correlation_id\":null,\"delay_nanoseconds\":\"10\",\"event_name\":\"received\",\"payload\":[\"map\",[]]},\"interface\":\"determa.timer_helper\",\"interface_version\":1,\"operation\":\"schedule\",\"operation_id\":\"schedule-A\",\"request_digest\":\"sha256:a8558d591eb3f2e8a128d4b2ab4266ede95efe5c46f7a473dbada7ce99a544d9\",\"root_instance_id\":\"server-1\",\"root_runtime_id\":\"sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8\",\"scope_identity\":\"scope-archive-example\",\"timer_id\":\"timer-A\"}},\"operation\":\"timer_command\",\"operation_id\":\"schedule-A\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-timer-1\",\"target\":{\"root_instance_id\":\"server-1\",\"runtime_id\":\"sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8\",\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:7d78a3ee35eb4cee7e0c1b77f4d671fe690b3f8a8d2df384fd8fcd8837d0d2fe",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "schedule-A",
+        "status": "committed",
+        "receipt": {
+          "scope_binding_identity": "binding-timer-1",
+          "operation_id": "schedule-A",
+          "request_digest": "sha256:7d78a3ee35eb4cee7e0c1b77f4d671fe690b3f8a8d2df384fd8fcd8837d0d2fe",
+          "receipt_kind": "committed",
+          "acceptance_receipt": null,
+          "evidence_digest": "sha256:3a6a393f2a0499d6c88f4fab52d2564ef989ee2b2fa7f537d51de5e9a4d50772"
+        },
+        "value": {
+          "operation": "timer_command",
+          "result": {
+            "timer_result": {
+              "interface": "determa.timer_helper",
+              "interface_version": 1,
+              "scope_identity": "scope-archive-example",
+              "root_instance_id": "server-1",
+              "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+              "timer_id": "timer-A",
+              "operation": "schedule",
+              "operation_id": "schedule-A",
+              "status": "accepted",
+              "record_revision": "1",
+              "attempt_fence": null,
+              "clock_basis": "unix_nanoseconds",
+              "expires_at": null,
+              "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+              "delivery_state": "none",
+              "error_code": null,
+              "result_digest": "sha256:7e8be2ff09bd80babb5e1296427701d6a7a3b5da961d4a55f59a8e11fb50a45c"
+            }
+          }
+        },
+        "error": null
+      },
+      "source_fixture": "examples/timers/timer-helper-cases-v1.json#schedule_first"
+    },
+    {
+      "name": "timer_cancel_pending",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "cancel-A",
+        "scope_binding_identity": "binding-timer-1",
+        "operation": "timer_command",
+        "target": {
+          "root_instance_id": "server-1",
+          "runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "timer_request": {
+            "interface": "determa.timer_helper",
+            "interface_version": 1,
+            "scope_identity": "scope-archive-example",
+            "root_instance_id": "server-1",
+            "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+            "timer_id": "timer-A",
+            "operation": "cancel",
+            "operation_id": "cancel-A",
+            "arguments": {
+              "expected_revision": "1"
+            },
+            "request_digest": "sha256:d792f64dc38bccfbc30cc9785d6e426d449c06234b513658004bc17a87715430"
+          }
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"timer_request\":{\"arguments\":{\"expected_revision\":\"1\"},\"interface\":\"determa.timer_helper\",\"interface_version\":1,\"operation\":\"cancel\",\"operation_id\":\"cancel-A\",\"request_digest\":\"sha256:d792f64dc38bccfbc30cc9785d6e426d449c06234b513658004bc17a87715430\",\"root_instance_id\":\"server-1\",\"root_runtime_id\":\"sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8\",\"scope_identity\":\"scope-archive-example\",\"timer_id\":\"timer-A\"}},\"operation\":\"timer_command\",\"operation_id\":\"cancel-A\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-timer-1\",\"target\":{\"root_instance_id\":\"server-1\",\"runtime_id\":\"sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8\",\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:7f29d59b344ee33b06b2b1d82c6a726214ccc6e25a38543ee0eeb7affdf302a3",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "cancel-A",
+        "status": "committed",
+        "receipt": {
+          "scope_binding_identity": "binding-timer-1",
+          "operation_id": "cancel-A",
+          "request_digest": "sha256:7f29d59b344ee33b06b2b1d82c6a726214ccc6e25a38543ee0eeb7affdf302a3",
+          "receipt_kind": "committed",
+          "acceptance_receipt": null,
+          "evidence_digest": "sha256:586d2445d6a632d52fea970a044877e7d21ad703677e142eb94098e154b92b1c"
+        },
+        "value": {
+          "operation": "timer_command",
+          "result": {
+            "timer_result": {
+              "interface": "determa.timer_helper",
+              "interface_version": 1,
+              "scope_identity": "scope-archive-example",
+              "root_instance_id": "server-1",
+              "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+              "timer_id": "timer-A",
+              "operation": "cancel",
+              "operation_id": "cancel-A",
+              "status": "accepted",
+              "record_revision": "2",
+              "attempt_fence": null,
+              "clock_basis": "unix_nanoseconds",
+              "expires_at": null,
+              "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+              "delivery_state": "none",
+              "error_code": null,
+              "result_digest": "sha256:d0487f9109f183b1c535092a2c11838e65358acb7c6f1f5449ada78fc950c588"
+            }
+          }
+        },
+        "error": null
+      },
+      "source_fixture": "examples/timers/timer-helper-cases-v1.json#cancel_pending"
+    },
+    {
+      "name": "timer_claim_at_deadline",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "claim-A",
+        "scope_binding_identity": "binding-timer-1",
+        "operation": "timer_command",
+        "target": {
+          "root_instance_id": "server-1",
+          "runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "timer_request": {
+            "interface": "determa.timer_helper",
+            "interface_version": 1,
+            "scope_identity": "scope-archive-example",
+            "root_instance_id": "server-1",
+            "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+            "timer_id": "timer-A",
+            "operation": "claim_fire",
+            "operation_id": "claim-A",
+            "arguments": {
+              "expected_revision": "1",
+              "clock_basis": "unix_nanoseconds",
+              "worker_principal": "worker-A"
+            },
+            "request_digest": "sha256:0b7645670db191111b3b6cb590305b155ac93034355b382ed0255b551a575325"
+          }
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"timer_request\":{\"arguments\":{\"clock_basis\":\"unix_nanoseconds\",\"expected_revision\":\"1\",\"worker_principal\":\"worker-A\"},\"interface\":\"determa.timer_helper\",\"interface_version\":1,\"operation\":\"claim_fire\",\"operation_id\":\"claim-A\",\"request_digest\":\"sha256:0b7645670db191111b3b6cb590305b155ac93034355b382ed0255b551a575325\",\"root_instance_id\":\"server-1\",\"root_runtime_id\":\"sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8\",\"scope_identity\":\"scope-archive-example\",\"timer_id\":\"timer-A\"}},\"operation\":\"timer_command\",\"operation_id\":\"claim-A\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-timer-1\",\"target\":{\"root_instance_id\":\"server-1\",\"runtime_id\":\"sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8\",\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:d24dcb30a83a35d4888c0095f45750f8264f92125786d9581596036b8226e0d2",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "claim-A",
+        "status": "committed",
+        "receipt": {
+          "scope_binding_identity": "binding-timer-1",
+          "operation_id": "claim-A",
+          "request_digest": "sha256:d24dcb30a83a35d4888c0095f45750f8264f92125786d9581596036b8226e0d2",
+          "receipt_kind": "committed",
+          "acceptance_receipt": null,
+          "evidence_digest": "sha256:45fc34208ae4106bdf04ca75daf30d1e8b07da0201471b8901f4574294c76f12"
+        },
+        "value": {
+          "operation": "timer_command",
+          "result": {
+            "timer_result": {
+              "interface": "determa.timer_helper",
+              "interface_version": 1,
+              "scope_identity": "scope-archive-example",
+              "root_instance_id": "server-1",
+              "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+              "timer_id": "timer-A",
+              "operation": "claim_fire",
+              "operation_id": "claim-A",
+              "status": "accepted",
+              "record_revision": "2",
+              "attempt_fence": "1",
+              "clock_basis": "unix_nanoseconds",
+              "expires_at": "130",
+              "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+              "delivery_state": "none",
+              "error_code": null,
+              "result_digest": "sha256:1b1950196f4e289ddabd74a3d38730d3540db0a252fad5e8da4c90db7c77f9ce"
+            }
+          }
+        },
+        "error": null
+      },
+      "source_fixture": "examples/timers/timer-helper-cases-v1.json#claim_at_deadline"
+    },
+    {
+      "name": "timer_coordinated_fire_commits",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "complete-A",
+        "scope_binding_identity": "binding-timer-1",
+        "operation": "timer_command",
+        "target": {
+          "root_instance_id": "server-1",
+          "runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "timer_request": {
+            "interface": "determa.timer_helper",
+            "interface_version": 1,
+            "scope_identity": "scope-archive-example",
+            "root_instance_id": "server-1",
+            "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+            "timer_id": "timer-A",
+            "operation": "complete_fire",
+            "operation_id": "complete-A",
+            "arguments": {
+              "expected_revision": "2",
+              "attempt_fence": "1",
+              "worker_principal": "worker-A",
+              "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+              "admission_receipt_digest": "sha256:f19e08b5f1704b507d4eb15347ecdc4d711bd07422148d8f8bd752e86dfb8400"
+            },
+            "request_digest": "sha256:e6f9912dac1aa7b4dd1c514678b6f72f27a51b82001c9a03a90b135fa04e4503"
+          }
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"timer_request\":{\"arguments\":{\"admission_receipt_digest\":\"sha256:f19e08b5f1704b507d4eb15347ecdc4d711bd07422148d8f8bd752e86dfb8400\",\"attempt_fence\":\"1\",\"event_id\":\"sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118\",\"expected_revision\":\"2\",\"worker_principal\":\"worker-A\"},\"interface\":\"determa.timer_helper\",\"interface_version\":1,\"operation\":\"complete_fire\",\"operation_id\":\"complete-A\",\"request_digest\":\"sha256:e6f9912dac1aa7b4dd1c514678b6f72f27a51b82001c9a03a90b135fa04e4503\",\"root_instance_id\":\"server-1\",\"root_runtime_id\":\"sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8\",\"scope_identity\":\"scope-archive-example\",\"timer_id\":\"timer-A\"}},\"operation\":\"timer_command\",\"operation_id\":\"complete-A\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-timer-1\",\"target\":{\"root_instance_id\":\"server-1\",\"runtime_id\":\"sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8\",\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:1a238afe117965ed4d3d68a007a2b0e1602a1d66713ed44f0a2aaad42b3b462b",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "complete-A",
+        "status": "committed",
+        "receipt": {
+          "scope_binding_identity": "binding-timer-1",
+          "operation_id": "complete-A",
+          "request_digest": "sha256:1a238afe117965ed4d3d68a007a2b0e1602a1d66713ed44f0a2aaad42b3b462b",
+          "receipt_kind": "committed",
+          "acceptance_receipt": null,
+          "evidence_digest": "sha256:28e3461a4cf15cf26b15365b6000b5961f77c7e927c9c163972747296c206606"
+        },
+        "value": {
+          "operation": "timer_command",
+          "result": {
+            "timer_result": {
+              "interface": "determa.timer_helper",
+              "interface_version": 1,
+              "scope_identity": "scope-archive-example",
+              "root_instance_id": "server-1",
+              "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+              "timer_id": "timer-A",
+              "operation": "complete_fire",
+              "operation_id": "complete-A",
+              "status": "accepted",
+              "record_revision": "3",
+              "attempt_fence": "1",
+              "clock_basis": "unix_nanoseconds",
+              "expires_at": null,
+              "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+              "delivery_state": "admitted",
+              "error_code": null,
+              "result_digest": "sha256:5223989e7baa87b66db60c11fb703fe404367c2cbdbe63e9e4b40ed37d74fa27"
+            }
+          }
+        },
+        "error": null
+      },
+      "source_fixture": "examples/timers/timer-helper-cases-v1.json#coordinated_fire_commits"
+    },
+    {
+      "name": "timer_read_timer",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "read-A",
+        "scope_binding_identity": "binding-timer-1",
+        "operation": "timer_command",
+        "target": {
+          "root_instance_id": "server-1",
+          "runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "timer_request": {
+            "interface": "determa.timer_helper",
+            "interface_version": 1,
+            "scope_identity": "scope-archive-example",
+            "root_instance_id": "server-1",
+            "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+            "timer_id": "timer-A",
+            "operation": "read_timer",
+            "operation_id": "read-A",
+            "arguments": {},
+            "request_digest": "sha256:01b26f9fa5d286414f62cd0ae0dbe1ee429de9d20532be535c34b246d60b9a90"
+          }
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"timer_request\":{\"arguments\":{},\"interface\":\"determa.timer_helper\",\"interface_version\":1,\"operation\":\"read_timer\",\"operation_id\":\"read-A\",\"request_digest\":\"sha256:01b26f9fa5d286414f62cd0ae0dbe1ee429de9d20532be535c34b246d60b9a90\",\"root_instance_id\":\"server-1\",\"root_runtime_id\":\"sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8\",\"scope_identity\":\"scope-archive-example\",\"timer_id\":\"timer-A\"}},\"operation\":\"timer_command\",\"operation_id\":\"read-A\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-timer-1\",\"target\":{\"root_instance_id\":\"server-1\",\"runtime_id\":\"sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8\",\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:0a24d212a7b536ab734209727c882ef52398a9d5cf0e854f26856fc1ab1d9f94",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "read-A",
+        "status": "committed",
+        "receipt": null,
+        "value": {
+          "operation": "timer_command",
+          "result": {
+            "timer_result": {
+              "interface": "determa.timer_helper",
+              "interface_version": 1,
+              "scope_identity": "scope-archive-example",
+              "root_instance_id": "server-1",
+              "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
+              "timer_id": "timer-A",
+              "operation": "read_timer",
+              "operation_id": "read-A",
+              "status": "accepted",
+              "record_revision": "3",
+              "attempt_fence": "1",
+              "clock_basis": "unix_nanoseconds",
+              "expires_at": null,
+              "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+              "delivery_state": "admitted",
+              "error_code": null,
+              "result_digest": "sha256:65064ee000b20945ac3655b57e7a4677de0c3c5722393d7840df20b8c77d7b73"
+            }
+          }
+        },
+        "error": null
+      },
+      "source_fixture": "examples/timers/timer-helper-cases-v1.json#read_timer"
+    },
+    {
+      "name": "timer_scope_capabilities",
+      "request": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-timer-capabilities-1",
+        "scope_binding_identity": "binding-timer-1",
+        "operation": "capabilities",
+        "target": {
+          "root_instance_id": null,
+          "runtime_id": null,
+          "runtime_incarnation": null
+        },
+        "precondition": null,
+        "arguments": {
+          "scope_alias": "timer-scope"
+        }
+      },
+      "request_hash_operand_jcs": "[\"determa-public-host-request-digest-1\",\"1\",{\"arguments\":{\"scope_alias\":\"timer-scope\"},\"operation\":\"capabilities\",\"operation_id\":\"op-timer-capabilities-1\",\"precondition\":null,\"protocol\":\"determa.execution_host\",\"protocol_version\":1,\"scope_binding_identity\":\"binding-timer-1\",\"target\":{\"root_instance_id\":null,\"runtime_id\":null,\"runtime_incarnation\":null}}]",
+      "request_digest": "sha256:fda261dba8ef43f0329cb2865d2b768ea3cbbd0cbec46610408d540d758f6882",
+      "response": {
+        "protocol": "determa.execution_host",
+        "protocol_version": 1,
+        "operation_id": "op-timer-capabilities-1",
+        "status": "committed",
+        "receipt": null,
+        "value": {
+          "operation": "capabilities",
+          "result": {
+            "scope_binding_identity": "binding-timer-1",
+            "supported_operations": [
+              "capabilities",
+              "create",
+              "admit",
+              "process",
+              "read",
+              "inspect",
+              "receipt",
+              "scope_operation",
+              "timer_command"
+            ],
+            "supported_scope_actions": [
+              "authority"
+            ],
+            "supported_determa_capabilities": [],
+            "supported_timer_commands": [
+              "schedule",
+              "cancel",
+              "claim_fire",
+              "complete_fire",
+              "read_timer"
+            ],
+            "profile_digest": "sha256:3ccc3399dd02a14a6b33c670f4e2345294f92519092ccc43affb83cea1d2d44a",
+            "extension_reports": [
+              {
+                "category": "authority",
+                "provider_reference": {
+                  "identifier": "reference.sqlite-authority",
+                  "version": "0.3.0",
+                  "content_digest": "sha256:5c4c1964340aca5b65393bbe9d3249cdd71be26665b3320ad694f034f2743283"
+                },
+                "instance_id": "local-authority",
+                "health": "healthy",
+                "claims": [
+                  "authoritative_scope_fencing",
+                  "consistent_scope_inventory"
+                ]
+              }
+            ],
+            "authority_profile": {
+              "profile_report_format": "determa.host_authority_profile_report",
+              "profile_report_schema_version": 1,
+              "scope_identity": "scope-42",
+              "authority_epoch": "2",
+              "scope_generation": "4",
+              "extension_report": {
+                "category": "authority",
+                "provider_reference": {
+                  "identifier": "reference.sqlite-authority",
+                  "version": "0.3.0",
+                  "content_digest": "sha256:5c4c1964340aca5b65393bbe9d3249cdd71be26665b3320ad694f034f2743283"
+                },
+                "instance_id": "local-authority",
+                "health": "healthy",
+                "claims": [
+                  "authoritative_scope_fencing",
+                  "consistent_scope_inventory"
+                ]
+              },
+              "authority_storage_boundary": "authority-db-1",
+              "topology": {
+                "identifier": "single-sqlite-database",
+                "configuration_digest": "sha256:881eeb99b1bd7671d1922ea9f433b1972a017adced05b209225fc29a16901ecc",
+                "process_boundary": "one configured authority database",
+                "host_boundary": "one local host"
+              },
+              "source_binding_digest": "sha256:b557d393e87ce7d6160a323bba5978ea2347f264308eef8b03c12d38bac2d2cd",
+              "destination_binding_digest": null,
+              "required_participants": [],
+              "guarantees": {
+                "guarded_local_writes": true,
+                "worker_fencing": false,
+                "complete_scope_inventory": true,
+                "safe_relocation": false
+              }
+            },
+            "guarantees": {
+              "inspection_structural": true,
+              "inspection_semantic": false,
+              "retained_history": false,
+              "saved_response_replay": false,
+              "deterministic_reexecution": false
+            }
+          }
+        },
+        "error": null
+      }
     }
   ]
 }
