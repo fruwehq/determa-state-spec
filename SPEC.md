@@ -903,10 +903,16 @@ Action proposals execute in their returned order at that slot, among surrounding
 structured actions in author order. Dynamic `spawn`, `cancel`, `refresh` and `stop`
 are unsupported in a provider result; they remain available as ordinary structured
 actions. The provider cannot rewrite the containing transition, choose another slot,
-or gain arbitrary internal-state write authority. Invalid output yields
-`runtime_provider_output_invalid` and no tentative Determa state commits. A selected
-slot alone invokes its provider;
-an incoming event's provider-like string grants no invocation authority.
+or gain arbitrary internal-state write authority. Invalid output is a
+`runtime_provider_output_invalid` provider-boundary error and no tentative Determa
+state commits. A selected
+slot alone invokes its provider; an incoming event's provider-like string grants no
+invocation authority.
+An invoked provider's typed execution failure follows the ordinary `guard_fault` or
+`action_fault` rule at that exact slot locator (§10). An invalid output is mapped to
+the same closed core fault code according to slot kind, while its boundary diagnostic
+retains `runtime_provider_output_invalid`. Either result rolls back tentative Determa
+state, but cannot undo I/O already performed by a native provider.
 
 `capabilities` explicitly declares `deterministic`, `pure`, `portable`,
 `semantically_introspectable`, `process_contained`, and `external_io_capable` as
@@ -2187,7 +2193,7 @@ locators below. Engines MUST use this mapping:
 | fault code | exact `source_locator` |
 |---|---|
 | `guard_fault` | pointer to the failing event-transition or choice `guard` value |
-| `action_fault` | pointer to the failing CEL expression value inside the action, entry, exit, initial transition, choice branch, component binding, or spawn binding; for an absent `refresh.only` field, the pointer to the first absent list item |
+| `action_fault` | pointer to the failing CEL expression value inside the action, entry, exit, initial transition, choice branch, component binding, or spawn binding; for a provider action failure, the action-slot value; for an absent `refresh.only` field, the pointer to the first absent list item |
 | `invalid_instance_target` | pointer to the executing send action's `to`/`targets` member or, for a dynamic instance expression, that exact expression value |
 | `inactive_component_target` | pointer to the executing send action's `to`/`targets` member that names the component |
 | `binding_not_empty` | pointer to the executing spawn action's `bind_to` value |
