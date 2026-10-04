@@ -224,7 +224,7 @@ Relevant specification: [§16.1](SPEC.md#161-independent-artifact-identities) an
 [§17.1](SPEC.md#171-scope).
 
 **Decision.** Aggregate, package, migration, checkpoint, and core-result artifacts use
-schema version 2 as their sole supported portable representation. Machine document
+schema version 1 as their sole supported portable representation. Machine document
 format 1 is independent.
 
 **Rejected alternative.** Preserve an unused pre-alpha artifact representation through
