@@ -2192,7 +2192,7 @@ unless their own handling violates the engine contract.
 The specification defines no `dead_letter`, `dead_letters`, or `dead_letter_policy`
 field and no dead-letter storage shape.
 
-A transport or audit plugin may:
+A transport or audit plugin outside the §21 lossless profile may:
 
 - discard unhandled or faulting envelopes without retaining anything;
 - retain complete envelopes and fault metadata;
@@ -2202,7 +2202,8 @@ A transport or audit plugin may:
 - expose any other explicitly configured policy.
 
 Its property names, configuration schema, retention, privacy, and operational guarantees
-belong entirely to that plugin. These policies apply only after terminal machine
+belong entirely to that plugin. Under §21, an unhandled, faulted, or disposed event
+has an explicit terminal decision and retained evidence. These policies apply only after terminal machine
 disposition or before Determa acceptance; they cannot replace, reorder, expire, or cap a
 runtime's normative ready/deferred mailboxes.
 
@@ -2233,6 +2234,10 @@ Core determinism means that the same valid prior state and same accepted sequenc
 produce the same mailbox state and result. Different transport plugins may produce
 different admission traces, but after acceptance they cannot alter §6.7 deferral,
 recall, ordering, capacity, or disposition semantics.
+
+The normative ownership, acknowledgement, retry, ordering, and durable ingress
+dead-letter rules for a lossless delivery profile are in §21. A transport's ability
+to deliver or acknowledge is not an execution-store capability.
 
 ### 11.2 Timer extensions
 
@@ -4466,3 +4471,156 @@ recovery boundary is stated explicitly.
 
 Adding non-empty timer state requires a later checkpoint schema version or a
 separately identified durable timer artifact.
+
+## 21. Lossless event delivery profile
+
+### 21.1 Boundary and portable delivery values
+
+This optional profile composes an ingress source, the §8 foreground core, an optional
+§17 execution store, and an outbound destination. It changes no machine grammar or
+core clock behavior. Its closed wire values are
+`schema/delivery-v1.schema.json`; version 1 is the sole version. An application may
+use the base in-memory API without a broker, worker, coordinator, daemon, or timer.
+That API MUST return every admission rejection, ready/deferred placement, terminal
+machine disposition, lifecycle disposal, and emitted intent to its caller. The caller
+owns persistence and may claim only the guarantees it actually supplies. In a durable
+host, §17 receipts and records supply the machine evidence; §18 authority guards,
+§19 effect journals, and §20 application projections apply only when the host declares
+those optional profiles. A delivery adapter MUST NOT infer authority, durable
+processing, or application success from a portable envelope or provider name.
+
+Before ingress admission, a source item has an immutable `source_scope`,
+`source_delivery_id`, and original content. The content is exactly one of
+`original_bytes_base64` (RFC 4648 padded standard Base64 of the original bytes) or
+`canonical_transport_value` (a §16.2 typed value). A decoded transport value MUST
+be canonical before it is used; arbitrary SDK/protobuf/HTTP objects stay inside the
+adapter. Its content digest is exactly:
+
+```text
+source_content_digest = hash([
+  "determa-delivery-source-content-digest-1", "1",
+  source_scope, source_delivery_id, content_kind, content_value
+])
+```
+
+`hash` is the §9 SHA-256/JCS construction. The source identity is the pair
+(`source_scope`, `source_delivery_id`); it is distinct from the machine `event_id`.
+Adapters MUST retain the pair and digest across attempts. A replay of the pair with
+different content is `source_delivery_id_conflict` and cannot overwrite earlier
+evidence. A successfully normalized envelope retains its entire §6.1 value, projected
+with §16.2 typed payloads and decimal-string integer fields, through every accepted
+ready/deferred location. A durable adapter binds the source pair and digest to the
+checkpoint acceptance receipt or durable terminal-transfer record before source
+acknowledgement. The binding is host evidence outside the portable checkpoint; it
+MUST be restored with that checkpoint for a broker-integrated profile.
+
+### 21.2 Ingress decisions, acknowledgement, and replay
+
+The source retains ownership until either (a) §17.4 admission commits the complete
+envelope and acceptance receipt, or (b) a configured durable terminal transfer
+commits a §21.4 ingress dead-letter record. Only then may the adapter acknowledge
+the source. An acknowledgement lost after commit may be retried from the retained
+binding without re-admitting or re-dead-lettering. An adapter MUST NOT acknowledge
+on validation, reservation, remote call initiation, a returned uncommitted core
+result, or a write whose durability is weaker than its advertised profile.
+
+The closed pre-commit decision is `source_owned` with one reason:
+`backpressure`, `capacity_unavailable`, `malformed_delivery`,
+`invalid_delivery`, `target_unavailable`, `precommit_failure`,
+`authority_unavailable`, or `source_delivery_id_conflict`. It returns
+`acknowledge_source: false` and leaves source ownership intact. The adapter may
+pause consumption or request source redelivery according to its configured source
+contract; it MUST NOT turn a retry exhaustion, overflow, plugin failure, or target
+removal into implicit discard. A rejected admission is not a terminal machine
+disposition. An explicit poison policy may choose §21.4 instead, if its record can
+commit before acknowledgement. The decision response identifies event identity when
+normalization succeeded; otherwise it identifies source identity and content digest.
+
+Committed admission returns `admitted`, `acknowledge_source: true`, the exact
+`event_id`, source binding, acceptance receipt sequence, and checkpoint revision and
+digest. Equal source redelivery returns that evidence unchanged. Equal machine-event
+replay follows §17.3; unequal machine-event identity is `event_id_conflict`.
+Replay checks never bypass a hosted §18 current-authority gate: a stale claimant may
+read history through a separately authenticated read but cannot acknowledge,
+reactivate, or mutate delivery. An admission batch follows §17.4's atomic order; a
+failed member leaves the whole batch source-owned. Broker acknowledgement is per
+source item only after the batch commit is known durable.
+
+After admission, exactly one runtime ready/deferred mailbox owns the envelope until
+a terminal §17.4 receipt owns its outcome. `deferred` is a live placement and cannot
+trigger a source retry. `unhandled`, `faulted`, `disposed`, and
+`migration_disposed` are terminal machine outcomes, never admission failures.
+The adapter MUST NOT ask the source broker to retry an admitted event because the
+machine did not handle it. Each terminal decision retains event identity, exact
+reason or fault, decision authority, receipt, and the profile's declared retention
+window. The base API returns that evidence to its caller even without durable storage.
+
+### 21.3 Ordering, pressure, and restoration
+
+Within a runtime, committed admissions append in caller batch order and §6.7 owns
+ready/deferred order thereafter. The adapter publishes its pre-admission ordering
+capability separately: `source_ordered` means it admits one bound source stream in
+source order; `unordered` promises no source order. Neither implies ordering
+between roots, different sources, or an emitted outbound intent and a later external
+input. A source-order claim requires proof that concurrent workers, retry gaps,
+dead-letter transfer, and recovery cannot overtake an earlier owned source item.
+Backpressure stops or defers new admission while keeping the source item available;
+it cannot evict an accepted mailbox member. The core's deferred-capacity overflow
+produces the terminal fault receipt in §10.1 and is not a transport discard.
+
+A durable broker-integrated restore MUST restore checkpoint, source bindings,
+unacknowledged external backlog or committed dead-letter records, and unresolved
+outbox work at one valid consistency point. Missing any owned item or binding
+invalidates the claimed profile; the host MUST quarantine or refuse activation
+until repaired. A changed source item at a retained identity is a conflict. An
+authority-enabled host MUST guard admission, acknowledgement, replay-triggered
+activity, dead-letter transfer, and worker continuation with the current §18 epoch
+and fence. A lease alone does not prove retirement of an old worker. A standalone
+in-memory host declares no cross-host fencing guarantee.
+
+### 21.4 Durable ingress dead letters and terminal policy
+
+`durable_ingress_dead_letter` is an ingress-adapter capability, never an
+execution-store capability. It requires one immutable record with source scope,
+delivery id, original content, content digest, optional normalized event id and
+envelope digest, reason code, decision authority, retention profile, and terminal
+receipt identity. The record digest is:
+
+```text
+ingress_dead_letter_digest = hash([
+  "determa-ingress-dead-letter-digest-1", "1",
+  record_without_ingress_dead_letter_digest
+])
+```
+
+The dead-letter record and source binding MUST commit durably before the source is
+acknowledged. Its content is the original bytes or canonical transport value, never
+only a payload-free error string. Equal redelivery returns the same terminal receipt;
+unequal content conflicts. A dead-letter destination that merely accepted a send is
+insufficient unless it durably accepted responsibility and supplies a recoverable
+receipt. If durability cannot be established, the source remains owner. Retention
+MUST preserve content and replay/conflict evidence for the profile's declared window;
+compaction or expiry is allowed only under an explicitly weaker published policy
+that still preserves identity and digest evidence throughout its replay window.
+No lossless profile permits silent discard, including on fault, queue overflow,
+retry exhaustion, target deletion, or restore. A deliberate discard is a terminal
+decision only under an explicitly weaker policy and MUST have event/source identity,
+reason, decision authority, and retained receipt evidence before ownership transfer.
+
+### 21.5 Outbound responsibility
+
+Each committed external intent enters §17.6 pending outbox state, or the base API
+returns the complete intent for caller-owned persistence. A durable worker retries
+the same `effect_id` and scope after `retryable_failure` or `ambiguous`;
+uncertainty MUST NOT create a new effect identity. Terminal
+`confirmed` means the destination durably accepted responsibility under its
+configured contract. It does not prove execution or business success. A later
+declared input event is the only machine-visible remote result. Definitive rejection,
+operator cancellation, declared discard, and dead-letter transfer use §17.6's exact
+terminal states with reason and complete intent; a durable dead-letter claim also
+retains the destination's durable transfer receipt. Retrying after a terminal state
+returns the retained record and does not send again. A §19 invocation/effect journal,
+when present, records business outcome separately from destination acceptance and
+uses its own current authority and recovery rules. The lossless profile cannot
+silently remove unresolved outbound work on completion, cancellation, restore, or
+worker failure.

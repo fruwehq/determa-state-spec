@@ -1,0 +1,463 @@
+{
+  "description": "Normative delivery boundary responses. The checkpoint evidence in this boundary fixture is an opaque witness; full checkpoint receipts are validated by the checkpoint vectors. Identical first and replay outputs require no mutation. Source and dead-letter digests use exact RFC 8785 hashes.",
+  "cases": [
+    {
+      "name": "source_owned_backpressure",
+      "response": {
+        "delivery_message_kind": "source_owned",
+        "source_scope": "orders/inbox",
+        "source_delivery_id": "broker-42",
+        "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2",
+        "event_id": "event-42",
+        "reason": "backpressure",
+        "decision_authority": {
+          "kind": "host_profile",
+          "identifier": "orders-host"
+        },
+        "acknowledge_source": false
+      },
+      "source_owner_after": "source",
+      "checkpoint_mutation": false
+    },
+    {
+      "name": "first_committed_admission",
+      "request": {
+        "delivery_message_kind": "ingress_request",
+        "source": {
+          "source_scope": "orders/inbox",
+          "source_delivery_id": "broker-42",
+          "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2",
+          "content": {
+            "content_kind": "original_bytes_base64",
+            "content_value": "SGVsbG8="
+          }
+        },
+        "envelope": {
+          "event": "start",
+          "event_id": "event-42",
+          "cause_id": "event-42",
+          "source": {
+            "host": true
+          },
+          "target": {
+            "root": {
+              "root_instance_id": "order-1",
+              "root_runtime_id": "runtime-1"
+            }
+          },
+          "payload": [
+            "map",
+            []
+          ]
+        },
+        "delivery_mode": "input"
+      },
+      "response": {
+        "delivery_message_kind": "admitted",
+        "source_scope": "orders/inbox",
+        "source_delivery_id": "broker-42",
+        "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2",
+        "event_id": "event-42",
+        "evidence": {
+          "root_instance_id": "order-1",
+          "receipt_sequence": "1",
+          "committed_revision": "1",
+          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "retention": {
+          "profile": "permanent",
+          "minimum_replay_until": null
+        },
+        "decision_authority": {
+          "kind": "host_profile",
+          "identifier": "orders-host"
+        },
+        "acknowledge_source": true
+      },
+      "source_owner_after": "checkpoint",
+      "checkpoint_mutation": true
+    },
+    {
+      "name": "equal_redelivery_after_lost_ack",
+      "request": {
+        "delivery_message_kind": "ingress_request",
+        "source": {
+          "source_scope": "orders/inbox",
+          "source_delivery_id": "broker-42",
+          "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2",
+          "content": {
+            "content_kind": "original_bytes_base64",
+            "content_value": "SGVsbG8="
+          }
+        },
+        "envelope": {
+          "event": "start",
+          "event_id": "event-42",
+          "cause_id": "event-42",
+          "source": {
+            "host": true
+          },
+          "target": {
+            "root": {
+              "root_instance_id": "order-1",
+              "root_runtime_id": "runtime-1"
+            }
+          },
+          "payload": [
+            "map",
+            []
+          ]
+        },
+        "delivery_mode": "input"
+      },
+      "response": {
+        "delivery_message_kind": "admitted",
+        "source_scope": "orders/inbox",
+        "source_delivery_id": "broker-42",
+        "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2",
+        "event_id": "event-42",
+        "evidence": {
+          "root_instance_id": "order-1",
+          "receipt_sequence": "1",
+          "committed_revision": "1",
+          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "retention": {
+          "profile": "permanent",
+          "minimum_replay_until": null
+        },
+        "decision_authority": {
+          "kind": "host_profile",
+          "identifier": "orders-host"
+        },
+        "acknowledge_source": true
+      },
+      "source_owner_after": "checkpoint",
+      "checkpoint_mutation": false,
+      "same_response_as": "first_committed_admission"
+    },
+    {
+      "name": "deferred_stays_checkpoint_owned",
+      "response": {
+        "delivery_message_kind": "mailbox_placement",
+        "event_id": "event-42",
+        "placement": "deferred",
+        "acceptance_sequence": "0",
+        "queue_sequence": "1",
+        "decision_authority": {
+          "kind": "machine_core",
+          "identifier": "order-1"
+        },
+        "evidence": {
+          "root_instance_id": "order-1",
+          "receipt_sequence": "1",
+          "committed_revision": "2",
+          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "retention": {
+          "profile": "permanent",
+          "minimum_replay_until": null
+        }
+      },
+      "source_owner_after": "checkpoint",
+      "source_retry": false
+    },
+    {
+      "name": "machine_unhandled_after_admission",
+      "response": {
+        "delivery_message_kind": "machine_disposition",
+        "event_id": "event-42",
+        "disposition": "unhandled",
+        "reason_code": "no_enabled_handler",
+        "decision_authority": {
+          "kind": "machine_core",
+          "identifier": "order-1"
+        },
+        "evidence": {
+          "root_instance_id": "order-1",
+          "receipt_sequence": "2",
+          "committed_revision": "2",
+          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "retention": {
+          "profile": "permanent",
+          "minimum_replay_until": null
+        }
+      }
+    },
+    {
+      "name": "first_durable_poison_transfer",
+      "response": {
+        "delivery_message_kind": "ingress_dead_lettered",
+        "record": {
+          "delivery_message_kind": "ingress_dead_letter_record",
+          "source": {
+            "source_scope": "orders/inbox",
+            "source_delivery_id": "broker-42",
+            "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2",
+            "content": {
+              "content_kind": "original_bytes_base64",
+              "content_value": "SGVsbG8="
+            }
+          },
+          "event_id": null,
+          "envelope_digest": null,
+          "reason_code": "invalid_transport_shape",
+          "decision_authority": {
+            "kind": "source_policy",
+            "identifier": "orders-poison-policy"
+          },
+          "retention": {
+            "profile": "permanent",
+            "minimum_replay_until": null
+          },
+          "terminal_receipt_id": "dead-letter-42",
+          "ingress_dead_letter_digest": "sha256:59de7ab28a5e77c63e1eb756a9813960171cffa3e83d33832f5f5c5ed7e03f2d"
+        },
+        "acknowledge_source": true
+      },
+      "source_owner_after": "dead_letter_store",
+      "checkpoint_mutation": false
+    },
+    {
+      "name": "equal_poison_redelivery",
+      "response": {
+        "delivery_message_kind": "ingress_dead_lettered",
+        "record": {
+          "delivery_message_kind": "ingress_dead_letter_record",
+          "source": {
+            "source_scope": "orders/inbox",
+            "source_delivery_id": "broker-42",
+            "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2",
+            "content": {
+              "content_kind": "original_bytes_base64",
+              "content_value": "SGVsbG8="
+            }
+          },
+          "event_id": null,
+          "envelope_digest": null,
+          "reason_code": "invalid_transport_shape",
+          "decision_authority": {
+            "kind": "source_policy",
+            "identifier": "orders-poison-policy"
+          },
+          "retention": {
+            "profile": "permanent",
+            "minimum_replay_until": null
+          },
+          "terminal_receipt_id": "dead-letter-42",
+          "ingress_dead_letter_digest": "sha256:59de7ab28a5e77c63e1eb756a9813960171cffa3e83d33832f5f5c5ed7e03f2d"
+        },
+        "acknowledge_source": true
+      },
+      "source_owner_after": "dead_letter_store",
+      "checkpoint_mutation": false,
+      "same_response_as": "first_durable_poison_transfer"
+    },
+    {
+      "name": "unequal_source_identity_conflict",
+      "response": {
+        "delivery_message_kind": "source_owned",
+        "source_scope": "orders/inbox",
+        "source_delivery_id": "broker-42",
+        "source_content_digest": "sha256:9619d6200d2b43e23f2985ac1ca80b0651aeb69b7f865023f6c120c66504e752",
+        "event_id": null,
+        "reason": "source_delivery_id_conflict",
+        "decision_authority": {
+          "kind": "host_profile",
+          "identifier": "orders-host"
+        },
+        "acknowledge_source": false
+      },
+      "source_owner_after": "source",
+      "checkpoint_mutation": false,
+      "request": {
+        "delivery_message_kind": "ingress_request",
+        "source": {
+          "source_scope": "orders/inbox",
+          "source_delivery_id": "broker-42",
+          "source_content_digest": "sha256:9619d6200d2b43e23f2985ac1ca80b0651aeb69b7f865023f6c120c66504e752",
+          "content": {
+            "content_kind": "original_bytes_base64",
+            "content_value": "Qnl0ZXM="
+          }
+        },
+        "envelope": {
+          "event": "start",
+          "event_id": "event-42",
+          "cause_id": "event-42",
+          "source": {
+            "host": true
+          },
+          "target": {
+            "root": {
+              "root_instance_id": "order-1",
+              "root_runtime_id": "runtime-1"
+            }
+          },
+          "payload": [
+            "map",
+            []
+          ]
+        },
+        "delivery_mode": "input"
+      }
+    },
+    {
+      "name": "outbound_ambiguous_remains_pending",
+      "response": {
+        "delivery_message_kind": "outbound_decision",
+        "effect_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "outcome": "ambiguous",
+        "reason_code": "confirmation_lost",
+        "decision_authority": {
+          "kind": "host_profile",
+          "identifier": "orders-host"
+        },
+        "evidence": {
+          "root_instance_id": "order-1",
+          "receipt_sequence": "3",
+          "committed_revision": "3",
+          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "destination_receipt_id": null,
+        "retention": {
+          "profile": "permanent",
+          "minimum_replay_until": null
+        }
+      }
+    },
+    {
+      "name": "precommit_write_failure_keeps_source",
+      "response": {
+        "delivery_message_kind": "source_owned",
+        "source_scope": "orders/inbox",
+        "source_delivery_id": "broker-42",
+        "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2",
+        "event_id": "event-42",
+        "reason": "precommit_failure",
+        "decision_authority": {
+          "kind": "host_profile",
+          "identifier": "orders-host"
+        },
+        "acknowledge_source": false
+      },
+      "source_owner_after": "source",
+      "checkpoint_mutation": false
+    },
+    {
+      "name": "removed_target_keeps_source",
+      "response": {
+        "delivery_message_kind": "source_owned",
+        "source_scope": "orders/inbox",
+        "source_delivery_id": "broker-42",
+        "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2",
+        "event_id": "event-42",
+        "reason": "target_unavailable",
+        "decision_authority": {
+          "kind": "host_profile",
+          "identifier": "orders-host"
+        },
+        "acknowledge_source": false
+      },
+      "source_owner_after": "source",
+      "checkpoint_mutation": false
+    },
+    {
+      "name": "machine_fault_is_terminal_not_source_retry",
+      "response": {
+        "delivery_message_kind": "machine_disposition",
+        "event_id": "event-42",
+        "disposition": "faulted",
+        "reason_code": "action_fault",
+        "decision_authority": {
+          "kind": "machine_core",
+          "identifier": "order-1"
+        },
+        "evidence": {
+          "root_instance_id": "order-1",
+          "receipt_sequence": "2",
+          "committed_revision": "2",
+          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "retention": {
+          "profile": "permanent",
+          "minimum_replay_until": null
+        }
+      },
+      "source_owner_after": "checkpoint_terminal_receipt",
+      "source_retry": false
+    },
+    {
+      "name": "destination_acceptance_does_not_prove_business_success",
+      "response": {
+        "delivery_message_kind": "outbound_decision",
+        "effect_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "outcome": "confirmed",
+        "reason_code": null,
+        "decision_authority": {
+          "kind": "host_profile",
+          "identifier": "orders-host"
+        },
+        "evidence": {
+          "root_instance_id": "order-1",
+          "receipt_sequence": "3",
+          "committed_revision": "3",
+          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "destination_receipt_id": "destination-acceptance-7",
+        "retention": {
+          "profile": "permanent",
+          "minimum_replay_until": null
+        }
+      },
+      "business_success": null
+    }
+  ],
+  "invalid_cases": [
+    {
+      "name": "source_owned_cannot_ack",
+      "value": {
+        "delivery_message_kind": "source_owned",
+        "source_scope": "orders/inbox",
+        "source_delivery_id": "broker-42",
+        "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2",
+        "event_id": "event-42",
+        "reason": "backpressure",
+        "decision_authority": {
+          "kind": "host_profile",
+          "identifier": "orders-host"
+        },
+        "acknowledge_source": true
+      }
+    },
+    {
+      "name": "dead_letter_needs_original_content",
+      "value": {
+        "delivery_message_kind": "ingress_dead_lettered",
+        "record": {
+          "delivery_message_kind": "ingress_dead_letter_record",
+          "source": {
+            "source_scope": "orders/inbox",
+            "source_delivery_id": "broker-42",
+            "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2"
+          },
+          "event_id": null,
+          "envelope_digest": null,
+          "reason_code": "invalid_transport_shape",
+          "decision_authority": {
+            "kind": "source_policy",
+            "identifier": "orders-poison-policy"
+          },
+          "retention": {
+            "profile": "permanent",
+            "minimum_replay_until": null
+          },
+          "terminal_receipt_id": "dead-letter-42",
+          "ingress_dead_letter_digest": "sha256:59de7ab28a5e77c63e1eb756a9813960171cffa3e83d33832f5f5c5ed7e03f2d"
+        },
+        "acknowledge_source": true
+      }
+    }
+  ]
+}

@@ -341,3 +341,25 @@ versions, or a registration descriptor alone.
 the actual guarantees. Name-based inference could advertise safe relocation or durable
 processing without the authority or storage behavior that proves it. A future hosted
 service must pass the same public capability conformance tests as a local host.
+
+## Delivery ownership crosses only a committed boundary
+
+Relevant specification: [§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall),
+[§17.4](SPEC.md#174-aggregate-owned-admission-and-processing),
+[§17.6](SPEC.md#176-durable-outbox-lifecycle), and
+[§21](SPEC.md#21-lossless-event-delivery-profile).
+
+**Decision.** A source owns ingress backlog until complete machine admission and its
+receipt commit, or an explicitly configured durable ingress dead-letter transfer.
+Acknowledgement follows that commit. Accepted events belong to the runtime mailbox
+and then one terminal receipt; deferral and unhandled outcomes are never broker retry
+instructions. Every terminal policy retains identity, reason, authority, and receipt
+for its declared replay window. Outbound destination acceptance is delivery evidence,
+while a later declared input conveys business outcome.
+
+**Rejected alternative.** Acknowledge on validation, silently discard on overflow,
+retry an admitted event at the broker after unhandled disposition, or treat outbox
+confirmation as business success.
+
+**Reason.** Those shortcuts lose or duplicate responsibility across crashes and make
+replay unable to distinguish a committed decision from an abandoned attempt.
