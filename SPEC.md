@@ -5395,18 +5395,33 @@ The adapter MUST NOT ask the source broker to retry an admitted event because th
 machine did not handle it. Each terminal decision retains event identity, exact
 reason or fault, decision authority, receipt, and the profile's declared retention
 window. The base API returns that evidence to its caller even without durable storage.
-For a durable response, `evidence.receipt_sequence` MUST resolve to the exact
-checkpoint operation receipt at `evidence.committed_revision`; its event id,
-request digest, acceptance sequence, disposition, fault/reason, and resulting
-aggregate digest MUST agree with the checkpoint and response. The supplied
-`execution_checkpoint_digest` MUST be the digest of that committed checkpoint
-snapshot. An `admitted` response resolves to an acceptance receipt and one live
-mailbox entry with the same complete envelope and digest. A
-`machine_disposition` response resolves to one terminal event receipt, whose full
-`outcome` equals the response outcome and whose event is absent from live mailboxes.
-The exact first admission, equal replay, and terminal unhandled witnesses are
-`examples/delivery/delivery-v1-cases.json` and
-`examples/delivery/execution-checkpoint-transfer-v1.json`.
+Each durable response names an exact committed checkpoint revision and digest.
+`admitted.evidence.operation_kind` is `acceptance` and its
+`receipt_sequence` resolves only to an acceptance receipt at that revision.
+The receipt's event id, acceptance sequence, and request digest equal the response's
+event id, evidence acceptance sequence, and evidence envelope digest; the complete
+envelope occupies one ready mailbox entry at that snapshot. The admitted source
+binding names the same acceptance evidence. A `machine_disposition` instead
+requires `event_terminal` evidence resolving only to a terminal event receipt.
+Its event id, acceptance sequence, final queue sequence, request digest, complete
+outcome, and resulting aggregate digest equal the response and checkpoint; the event
+is absent from live mailboxes. Substituting a creation, acceptance, or other receipt
+kind is `invalid_delivery_evidence`. The exact first admission, equal replay,
+and terminal unhandled witnesses are `examples/delivery/delivery-v1-cases.json`
+and `examples/delivery/execution-checkpoint-transfer-v1.json`.
+
+`mailbox_placement` names the committed checkpoint and the exact live entry's
+event id, envelope digest, target runtime, acceptance sequence, current queue
+sequence, and ready/deferred location. Its `origin` resolves either to that host
+event's retained acceptance receipt or to its internal emission's producing
+operation receipt. A deferred move or structural recall allocates a new queue
+sequence but no operation receipt (§17.4). The origin receipt remains unchanged.
+No adapter may invent a terminal receipt for a live placement. Wrong origin kind,
+missing origin, or unequal entry identity is `invalid_delivery_evidence`.
+The complete before/deferred/recalled snapshots are
+`examples/delivery/queue-placement-checkpoints-v1.json`. Evidence mismatch
+rejects the response without acknowledging or dropping work; durable hosts
+quarantine a corrupt committed snapshot until its exact owner evidence is repaired.
 
 ### 21.3 Ordering, pressure, and restoration
 
@@ -5485,7 +5500,30 @@ permanent rejection, operator cancellation, discard, and dead-letter transfer.
 acceptance or durable dead-letter transfer. A `dead_lettered` decision with either
 field null is invalid and cannot end outbound responsibility. Retrying an outbox
 delivery after its terminal state returns its retained record and does not send
-that intent again. When §19's native-effect profile is selected, an outbox
+that intent again. `outbound_decision.evidence` names the exact committed
+checkpoint revision and digest plus the effect's §17.6 outbox location. A pending
+decision resolves to the complete pending intent, its `state_revision`, and the
+same `delivery_state`; a terminal decision resolves to one complete terminal
+outbox record, its `terminal_sequence` and `committed_revision`, and the same
+`outcome`. The effect id must resolve to the producing operation receipt's
+external-outbox emission reference, and the outbox record retains the complete
+intent. An outbox state update increments checkpoint revision but allocates no
+operation receipt; the destination acceptance or dead-letter receipt is
+provider-owned evidence, not a checkpoint operation receipt. For `confirmed`
+and `dead_lettered`, the host retains one closed
+`outbound_destination_receipt` whose root, effect id, terminal sequence, outcome,
+reason, destination receipt id, and checkpoint digest agree exactly with the
+terminal outbox record and response. Its digest is
+`hash(["determa-outbound-destination-receipt-digest-1", "1",
+record_without_outbound_destination_receipt_digest])`. The record binds the
+adapter's proof; the configured destination must actually durably accept
+responsibility for the claimed outcome. The two exact records are
+`examples/delivery/outbound-destination-receipts-v1.json`.
+Missing or wrong
+effect, location, state revision, terminal sequence, or destination receipt is
+`invalid_delivery_evidence`. Exact pending, confirmed, and dead-letter
+snapshots are `examples/delivery/outbound-checkpoint-lifecycle-v1.json`.
+When §19's native-effect profile is selected, an outbox
 `confirmed` record may coexist with an `unclaimed`, `leased`, or
 `ambiguous` invocation. It does not supply a terminal business outcome, cancel
 the invocation, or authorize a provider retry. The §19 journal retains the

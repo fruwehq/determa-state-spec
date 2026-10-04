@@ -30,6 +30,9 @@
     },
     {
       "$ref": "#/$defs/admission_binding"
+    },
+    {
+      "$ref": "#/$defs/outbound_destination_receipt"
     }
   ],
   "$defs": {
@@ -151,30 +154,6 @@
               "$ref": "#/$defs/string"
             }
           ]
-        }
-      }
-    },
-    "checkpoint_evidence": {
-      "type": "object",
-      "required": [
-        "root_instance_id",
-        "receipt_sequence",
-        "committed_revision",
-        "execution_checkpoint_digest"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "root_instance_id": {
-          "$ref": "#/$defs/string"
-        },
-        "receipt_sequence": {
-          "$ref": "#/$defs/decimal"
-        },
-        "committed_revision": {
-          "$ref": "#/$defs/decimal"
-        },
-        "execution_checkpoint_digest": {
-          "$ref": "#/$defs/digest"
         }
       }
     },
@@ -301,7 +280,7 @@
           "$ref": "#/$defs/string"
         },
         "evidence": {
-          "$ref": "#/$defs/checkpoint_evidence"
+          "$ref": "#/$defs/acceptance_evidence"
         },
         "retention": {
           "$ref": "#/$defs/retention"
@@ -427,7 +406,7 @@
           "$ref": "#/$defs/authority"
         },
         "evidence": {
-          "$ref": "#/$defs/checkpoint_evidence"
+          "$ref": "#/$defs/terminal_event_evidence"
         },
         "retention": {
           "$ref": "#/$defs/retention"
@@ -483,7 +462,7 @@
           "$ref": "#/$defs/authority"
         },
         "evidence": {
-          "$ref": "#/$defs/checkpoint_evidence"
+          "$ref": "#/$defs/outbound_evidence"
         },
         "destination_receipt_id": {
           "oneOf": [
@@ -561,6 +540,92 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "enum": [
+                  "not_attempted",
+                  "retryable_failure",
+                  "ambiguous"
+                ]
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "type": "object",
+                "required": [
+                  "checkpoint",
+                  "outbox_location"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "checkpoint": {
+                    "$ref": "#/$defs/checkpoint_state_evidence"
+                  },
+                  "outbox_location": {
+                    "type": "object",
+                    "required": [
+                      "kind",
+                      "state_revision"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "const": "pending"
+                      },
+                      "state_revision": {
+                        "$ref": "#/$defs/decimal"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "evidence": {
+                "type": "object",
+                "required": [
+                  "checkpoint",
+                  "outbox_location"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "checkpoint": {
+                    "$ref": "#/$defs/checkpoint_state_evidence"
+                  },
+                  "outbox_location": {
+                    "type": "object",
+                    "required": [
+                      "kind",
+                      "terminal_sequence",
+                      "committed_revision"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "const": "terminal"
+                      },
+                      "terminal_sequence": {
+                        "$ref": "#/$defs/decimal"
+                      },
+                      "committed_revision": {
+                        "$ref": "#/$defs/decimal"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       ]
     },
@@ -574,7 +639,10 @@
         "queue_sequence",
         "decision_authority",
         "evidence",
-        "retention"
+        "retention",
+        "origin",
+        "envelope_digest",
+        "target_runtime_id"
       ],
       "additionalProperties": false,
       "properties": {
@@ -600,10 +668,19 @@
           "$ref": "#/$defs/authority"
         },
         "evidence": {
-          "$ref": "#/$defs/checkpoint_evidence"
+          "$ref": "#/$defs/checkpoint_state_evidence"
         },
         "retention": {
           "$ref": "#/$defs/retention"
+        },
+        "origin": {
+          "$ref": "#/$defs/mailbox_origin"
+        },
+        "envelope_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "target_runtime_id": {
+          "$ref": "#/$defs/digest"
         }
       }
     },
@@ -640,12 +717,270 @@
           "$ref": "#/$defs/digest"
         },
         "evidence": {
-          "$ref": "#/$defs/checkpoint_evidence"
+          "$ref": "#/$defs/acceptance_evidence"
         },
         "admission_binding_digest": {
           "$ref": "#/$defs/digest"
         }
       }
+    },
+    "checkpoint_state_evidence": {
+      "type": "object",
+      "required": [
+        "root_instance_id",
+        "checkpoint_revision",
+        "execution_checkpoint_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "root_instance_id": {
+          "$ref": "#/$defs/string"
+        },
+        "checkpoint_revision": {
+          "$ref": "#/$defs/decimal"
+        },
+        "execution_checkpoint_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "acceptance_evidence": {
+      "type": "object",
+      "required": [
+        "operation_kind",
+        "checkpoint",
+        "receipt_sequence",
+        "acceptance_sequence",
+        "envelope_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "operation_kind": {
+          "const": "acceptance"
+        },
+        "checkpoint": {
+          "$ref": "#/$defs/checkpoint_state_evidence"
+        },
+        "receipt_sequence": {
+          "$ref": "#/$defs/decimal"
+        },
+        "acceptance_sequence": {
+          "$ref": "#/$defs/decimal"
+        },
+        "envelope_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "terminal_event_evidence": {
+      "type": "object",
+      "required": [
+        "operation_kind",
+        "checkpoint",
+        "receipt_sequence",
+        "acceptance_sequence",
+        "final_queue_sequence",
+        "request_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "operation_kind": {
+          "const": "event_terminal"
+        },
+        "checkpoint": {
+          "$ref": "#/$defs/checkpoint_state_evidence"
+        },
+        "receipt_sequence": {
+          "$ref": "#/$defs/decimal"
+        },
+        "acceptance_sequence": {
+          "$ref": "#/$defs/decimal"
+        },
+        "final_queue_sequence": {
+          "$ref": "#/$defs/decimal"
+        },
+        "request_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "mailbox_origin": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "origin_kind",
+            "acceptance_receipt_sequence"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "origin_kind": {
+              "const": "host_acceptance"
+            },
+            "acceptance_receipt_sequence": {
+              "$ref": "#/$defs/decimal"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "origin_kind",
+            "producer_operation_receipt_sequence"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "origin_kind": {
+              "const": "internal_emission"
+            },
+            "producer_operation_receipt_sequence": {
+              "$ref": "#/$defs/decimal"
+            }
+          }
+        }
+      ]
+    },
+    "outbox_location": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "state_revision"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "pending"
+            },
+            "state_revision": {
+              "$ref": "#/$defs/decimal"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "terminal_sequence",
+            "committed_revision"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "terminal"
+            },
+            "terminal_sequence": {
+              "$ref": "#/$defs/decimal"
+            },
+            "committed_revision": {
+              "$ref": "#/$defs/decimal"
+            }
+          }
+        }
+      ]
+    },
+    "outbound_evidence": {
+      "type": "object",
+      "required": [
+        "checkpoint",
+        "outbox_location"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint": {
+          "$ref": "#/$defs/checkpoint_state_evidence"
+        },
+        "outbox_location": {
+          "$ref": "#/$defs/outbox_location"
+        }
+      }
+    },
+    "outbound_destination_receipt": {
+      "type": "object",
+      "required": [
+        "delivery_message_kind",
+        "root_instance_id",
+        "effect_id",
+        "terminal_sequence",
+        "outcome",
+        "reason_code",
+        "destination_receipt_id",
+        "destination_authority",
+        "execution_checkpoint_digest",
+        "outbound_destination_receipt_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "delivery_message_kind": {
+          "const": "outbound_destination_receipt"
+        },
+        "root_instance_id": {
+          "$ref": "#/$defs/string"
+        },
+        "effect_id": {
+          "$ref": "#/$defs/digest"
+        },
+        "terminal_sequence": {
+          "$ref": "#/$defs/decimal"
+        },
+        "outcome": {
+          "enum": [
+            "confirmed",
+            "dead_lettered"
+          ]
+        },
+        "reason_code": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/string"
+            }
+          ]
+        },
+        "destination_receipt_id": {
+          "$ref": "#/$defs/string"
+        },
+        "destination_authority": {
+          "$ref": "#/$defs/authority"
+        },
+        "execution_checkpoint_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "outbound_destination_receipt_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "dead_lettered"
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason_code": {
+                "$ref": "#/$defs/string"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "reason_code": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

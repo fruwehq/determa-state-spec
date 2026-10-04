@@ -419,6 +419,10 @@ and then one terminal receipt; deferral and unhandled outcomes are never broker 
 instructions. Every terminal policy retains identity, reason, authority, and receipt
 for its declared replay window. Outbound destination acceptance is delivery evidence,
 while a later declared input conveys business outcome.
+Admission and terminal machine processing reference their respective §17 operation
+receipts. Deferred/ready movement and outbox state updates reference the committed
+checkpoint entry or outbox record at its exact revision; neither operation invents
+a new receipt.
 
 **Rejected alternative.** Acknowledge on validation, silently discard on overflow,
 retry an admitted event at the broker after unhandled disposition, or treat outbox
