@@ -4487,10 +4487,13 @@ effective, separately checked `guarded_local_writes`, `worker_fencing`,
 `complete_scope_inventory` and `safe_relocation` guarantees as explicit Booleans;
 without a proved authority provider all four are false. The first two registered
 capability names bind respectively to
-§18.3 and §18.4. A `safe_relocation` registry claim is eligible for the corresponding
-host-profile guarantee only after the host verifies all §18.5 requirements for the
-specific source and destination; a generic instance report cannot prove a particular
-transfer. The closed `schema/host-authority-profile-report-v1.schema.json` composes
+§18.3 and §18.4. A `safe_relocation` registry claim and a true host-profile report
+mean the configured instance has proved support for the specified source,
+destination and topology. They do not assert that this transfer has already frozen
+the source, proved retirement or activated the destination. The host rechecks that
+support at each operation; activation additionally requires the transfer-specific
+§18.5 evidence. A generic instance report cannot authorize a particular transfer.
+The closed `schema/host-authority-profile-report-v1.schema.json` composes
 the §11.5 extension report, or null when no authority provider is configured, with
 the exact authenticated scope, epoch and generation when authority is present,
 a nonsecret authority-storage-boundary identifier, topology identifier and
@@ -4501,8 +4504,8 @@ boundary are null and every authority guarantee is false. It is a host profile
 report, not an extension registration report or
 authority credential. Descriptions and digests bind a configured topology but are
 not themselves proof of fencing. `safe_relocation: true` requires an exact
-destination binding and fresh verification of source retirement and all §18.5
-transfer predicates for that pair. The report MUST NOT contain credentials, live
+destination binding and verified support for all §18.5 predicates in that topology;
+their operation-specific evidence is checked before activation. The report MUST NOT contain credentials, live
 claims, retirement grants or secret connection strings. A host returns it only after
 authenticating and authorizing the caller for the scope; a request for another scope
 reveals no report or existence fact. A new configuration, health state, source or
@@ -4553,13 +4556,32 @@ The closed interface operations in this section are `read_authority`,
 for the core to perform storage I/O. Each operation's `arguments` is closed by
 `schema/host-authority-operation-v1.schema.json`. A result has exactly `interface`,
 `interface_version`, `operation`, `operation_id`, `status`, `scope_identity`,
-`authority_epoch`, `scope_generation`, `state`, `evidence_digest`, and `error_code`.
-For success, `evidence_digest` binds the retained host operation receipt and
+`authority_epoch`, `scope_generation`, `state`, `evidence_digest`, `error_code`, and
+`claim`. `claim` is the exact active worker claim only for a successful
+`fence_worker`; it is null otherwise. For success, `evidence_digest` is
+`hash(["determa-host-authority-evidence-1", request_digest,
+result_without_evidence_digest])`.
+It binds the immutable result and its committed host evidence; an authorized
+`read_authority` binds its returned snapshot without committing a new receipt.
 `error_code` is null; for rejection, the digest is null and `error_code` is one of
 the closed errors in that schema. Results expose no owner or scope details to an
 unauthorized caller. `read_authority` has null expected epoch and generation and is
 read-only; an authorized receipt read may
 return historical evidence without granting mutation rights.
+
+Request shape, known protocol name/version, closed arguments and request digest are
+validated before an operation result can be formed. Malformed, unknown-protocol or
+unsupported-version requests return the schema's closed `earlyError` with null
+operation, operation ID, scope, epoch, generation, state, evidence and claim. Its
+`error_code` is respectively `invalid_host_request`, `unsupported_host_protocol`
+or `unsupported_host_protocol_version`; no parsed request field is echoed.
+Authentication and scope authorization follow structural validation and precede
+scope lookup and replay; a valid but unauthorized request receives
+`unauthorized_scope` with null scope, epoch, generation, state, evidence and claim.
+Only after these checks does the host compare the request digest against the
+retained operation receipt. Unknown fields, invalid canonical values or a computed
+digest mismatch cause `invalid_host_request` before mutation. These early errors
+never reveal cross-scope existence or current authority metadata.
 
 For a mutation, the host stores `(scope_identity, operation_id, request_digest)` and
 the exact first result with the native authority change. Once current authentication
@@ -4605,10 +4627,20 @@ reconciliation under that helper's contract.
 ### 18.4 Worker fences and scope inventory
 
 `fence_worker` is available only when the composed host proves `worker_fencing` for
-the actual worker and journal topology. A current authenticated worker claim binds
-the scope, root/work identity, operation token, epoch, attempt fence, worker
-principal, expiry and state. The host allocates a fresh attempt fence and updates its
-journal in the guarded transaction. Dispatch and result submission recheck the
+the actual worker and journal topology. Its request names the exact root, effect
+work identity and operation token, plus `expected_attempt_fence` (null only if no
+claim has ever been issued) and `expected_worker_principal`. The principal field is
+an equality precondition, never authentication: the host verifies it against the
+trusted authenticated caller and the authorized assignment. A mismatch returns
+`worker_principal_mismatch` without mutation; a stale attempt precondition returns
+`stale_attempt_fence`. The host allocates an attempt fence strictly greater than any
+previous fence for that work, chooses expiry from its own host clock and policy, and
+atomically commits the new active claim, journal state, generation and operation
+receipt under the §18.3 guard. The success result's closed `claim` contains the
+scope, root, work kind/identity, operation token, current scope authority epoch,
+new attempt fence, authenticated worker principal, expiry and `active` state. A
+worker claim is host authority data; neither its fields nor its result grant a
+different principal access. Dispatch and result submission recheck the
 authenticated principal, active claim, current epoch and attempt fence. A stale
 epoch/attempt or revoked claim cannot mutate the checkpoint, journal or ingress
 acknowledgement. Claim expiry may revoke mutation rights but never proves that an

@@ -77,6 +77,148 @@
         "safe_relocation": "host_capability_mismatch"
       },
       "reason": "A simple embedding can run and commit core results without authority claims."
+    },
+    {
+      "name": "guarded_local_worker_fencing",
+      "report": {
+        "profile_report_format": "determa.host_authority_profile_report",
+        "profile_report_schema_version": 1,
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "4",
+        "extension_report": {
+          "category": "authority",
+          "provider_reference": {
+            "identifier": "reference.sqlite-authority",
+            "version": "0.3.0",
+            "content_digest": "sha256:5c4c1964340aca5b65393bbe9d3249cdd71be26665b3320ad694f034f2743283"
+          },
+          "instance_id": "local-authority",
+          "health": "healthy",
+          "claims": [
+            "authoritative_scope_fencing",
+            "consistent_scope_inventory"
+          ]
+        },
+        "authority_storage_boundary": "authority-db-1",
+        "topology": {
+          "identifier": "single-sqlite-database",
+          "configuration_digest": "sha256:881eeb99b1bd7671d1922ea9f433b1972a017adced05b209225fc29a16901ecc",
+          "process_boundary": "one configured authority database",
+          "host_boundary": "one local host"
+        },
+        "source_binding_digest": "sha256:b557d393e87ce7d6160a323bba5978ea2347f264308eef8b03c12d38bac2d2cd",
+        "destination_binding_digest": null,
+        "required_participants": [
+          {
+            "role": "journal",
+            "provider_reference": {
+              "identifier": "reference.local-journal",
+              "version": "0.3.0",
+              "content_digest": "sha256:4fe7faea4e2ccb14584868aac57faa17924152aa64759a5bc3d315ad0cf79601"
+            },
+            "instance_id": "journal-1"
+          },
+          {
+            "role": "worker",
+            "provider_reference": {
+              "identifier": "reference.local-worker",
+              "version": "0.3.0",
+              "content_digest": "sha256:14d972487bb8d701e440a8e21fa39c65fe06d75e670f2fb19ed3378d961a005b"
+            },
+            "instance_id": "worker-1"
+          }
+        ],
+        "guarantees": {
+          "guarded_local_writes": true,
+          "worker_fencing": true,
+          "complete_scope_inventory": true,
+          "safe_relocation": false
+        }
+      },
+      "context": {
+        "journal_claim_issuance_commits_with_guard": true,
+        "worker_principal_and_fence_checked_at_dispatch_and_result": true,
+        "tested_topology": "one configured local authority database"
+      },
+      "expected": {
+        "fence_worker": "supported",
+        "safe_relocation": "host_capability_mismatch"
+      },
+      "reason": "Worker fencing requires a proved guarded journal and authenticated claim checks; it does not imply relocation."
+    },
+    {
+      "name": "proved_same_authority_local_relocation_support",
+      "report": {
+        "profile_report_format": "determa.host_authority_profile_report",
+        "profile_report_schema_version": 1,
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "4",
+        "extension_report": {
+          "category": "authority",
+          "provider_reference": {
+            "identifier": "example.postgresql-authority",
+            "version": "0.3.0",
+            "content_digest": "sha256:639ea56966779d730c8556860b115c5bb9e6974bf045e28a3d3d4e5c223f2582"
+          },
+          "instance_id": "same-db-authority",
+          "health": "healthy",
+          "claims": [
+            "authoritative_scope_fencing",
+            "consistent_scope_inventory",
+            "safe_relocation"
+          ]
+        },
+        "authority_storage_boundary": "postgresql-authority-db-1",
+        "topology": {
+          "identifier": "single-postgresql-authority-domain-local-transfer",
+          "configuration_digest": "sha256:f2797527a5bebe9bf7ef70c6800100136ac6fdb432f40697691da176474e9196",
+          "process_boundary": "two local host processes sharing one configured authoritative database",
+          "host_boundary": "one configured PostgreSQL authority database"
+        },
+        "source_binding_digest": "sha256:b557d393e87ce7d6160a323bba5978ea2347f264308eef8b03c12d38bac2d2cd",
+        "destination_binding_digest": "sha256:80e87bcfb0a487a65ceea01e87dca963eebadc24fb0eade9b6c40b011e0d9598",
+        "required_participants": [
+          {
+            "role": "journal",
+            "provider_reference": {
+              "identifier": "reference.local-journal",
+              "version": "0.3.0",
+              "content_digest": "sha256:4fe7faea4e2ccb14584868aac57faa17924152aa64759a5bc3d315ad0cf79601"
+            },
+            "instance_id": "journal-1"
+          },
+          {
+            "role": "worker",
+            "provider_reference": {
+              "identifier": "reference.local-worker",
+              "version": "0.3.0",
+              "content_digest": "sha256:14d972487bb8d701e440a8e21fa39c65fe06d75e670f2fb19ed3378d961a005b"
+            },
+            "instance_id": "worker-1"
+          }
+        ],
+        "guarantees": {
+          "guarded_local_writes": true,
+          "worker_fencing": true,
+          "complete_scope_inventory": true,
+          "safe_relocation": true
+        }
+      },
+      "context": {
+        "source_and_destination_in_same_authority_domain": true,
+        "native_transaction_fate_and_old_session_fence_proved": true,
+        "single_use_destination_bound_grant_proved_by_same_database": true,
+        "independent_authority_grant_service": false,
+        "source_retirement_completed": false,
+        "activation_permitted_now": false
+      },
+      "expected": {
+        "safe_relocation": "supported_for_exact_pair",
+        "activation": "requires_transfer_specific_retirement_and_import_proof"
+      },
+      "reason": "The configured local topology can support transfer; discovery does not retire a source or activate an import."
     }
   ],
   "invalid": [

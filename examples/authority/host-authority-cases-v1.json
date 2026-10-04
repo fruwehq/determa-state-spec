@@ -1,6 +1,39 @@
 {
   "valid": [
     {
+      "name": "authorized_read",
+      "request": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "read_authority",
+        "operation_id": "read-1",
+        "scope_identity": "scope-42",
+        "expected_authority_epoch": null,
+        "expected_scope_generation": null,
+        "arguments": {},
+        "request_digest": "sha256:02c2e86cd168c98e35d13eada78d0fba2b85de128755da1144b7479d90b328d9"
+      },
+      "context": {
+        "authenticated_principal": "operator-1",
+        "scope_authorized": true
+      },
+      "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "read_authority",
+        "operation_id": "read-1",
+        "status": "accepted",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "4",
+        "state": "active",
+        "evidence_digest": "sha256:546adb5bb972a8ca689ce4cb9a7f72ba5b1dbcb53ea7258a103d2c93cdf41b7d",
+        "error_code": null,
+        "claim": null
+      },
+      "reason": "Read returns an authorized snapshot without creating a mutation receipt."
+    },
+    {
       "name": "guarded_native_commit",
       "request": {
         "interface": "determa.host_authority",
@@ -16,45 +49,27 @@
         "request_digest": "sha256:280c85d5dd16fe3132dbb25f23f498319563c9e45c05f0bba2eedd9d9b42b78a"
       },
       "context": {
-        "authenticated": true,
+        "authenticated_principal": "owner-1",
+        "scope_authorized": true,
         "owner_current": true,
         "topology_proved": true,
         "native_transaction_fate": "committed"
       },
       "expected": {
-        "status": "accepted",
-        "state": "active",
-        "authority_epoch": "2",
-        "scope_generation": "5"
-      },
-      "reason": "Guard spans the actual native commit; mutation and authority generation advance together."
-    },
-    {
-      "name": "freeze_after_drain",
-      "request": {
         "interface": "determa.host_authority",
         "interface_version": 1,
-        "operation": "freeze_scope",
-        "operation_id": "freeze-1",
-        "scope_identity": "scope-42",
-        "expected_authority_epoch": "2",
-        "expected_scope_generation": "5",
-        "arguments": {},
-        "request_digest": "sha256:d822a5de52ebad90e7d658aaad37c166f650fab890aaf41264dd200b73c07f0e"
-      },
-      "context": {
-        "authenticated": true,
-        "owner_current": true,
-        "topology_proved": true,
-        "all_prior_transactions": "committed_or_rolled_back"
-      },
-      "expected": {
+        "operation": "guarded_commit",
+        "operation_id": "commit-1",
         "status": "accepted",
-        "state": "frozen",
+        "scope_identity": "scope-42",
         "authority_epoch": "2",
-        "scope_generation": "6"
+        "scope_generation": "5",
+        "state": "active",
+        "evidence_digest": "sha256:e64b5597437f406bc3d1f0a78c43f9bc0e81939cb1817b9e1fb6faef35bc399c",
+        "error_code": null,
+        "claim": null
       },
-      "reason": "Freeze stops new guards and waits for known transaction fate."
+      "reason": "Guard spans the native commit; mutation, receipt and generation advance together."
     },
     {
       "name": "same_operation_replay",
@@ -72,19 +87,115 @@
         "request_digest": "sha256:280c85d5dd16fe3132dbb25f23f498319563c9e45c05f0bba2eedd9d9b42b78a"
       },
       "context": {
-        "authenticated": true,
-        "owner_current": true,
-        "recorded_request_digest": "equal",
-        "recorded_result": "guarded_native_commit"
+        "authenticated_principal": "owner-1",
+        "scope_authorized": true,
+        "recorded_request_digest": "sha256:280c85d5dd16fe3132dbb25f23f498319563c9e45c05f0bba2eedd9d9b42b78a",
+        "current_generation": "5"
       },
       "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "guarded_commit",
+        "operation_id": "commit-1",
         "status": "accepted",
-        "state": "active",
+        "scope_identity": "scope-42",
         "authority_epoch": "2",
         "scope_generation": "5",
-        "no_mutation": true
+        "state": "active",
+        "evidence_digest": "sha256:e64b5597437f406bc3d1f0a78c43f9bc0e81939cb1817b9e1fb6faef35bc399c",
+        "error_code": null,
+        "claim": null
       },
-      "reason": "Equal replay returns the first retained result after current authorization."
+      "reason": "Equal replay returns the exact first retained result before stale mutation preconditions."
+    },
+    {
+      "name": "freeze_after_drain",
+      "request": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "freeze_scope",
+        "operation_id": "freeze-1",
+        "scope_identity": "scope-42",
+        "expected_authority_epoch": "2",
+        "expected_scope_generation": "5",
+        "arguments": {},
+        "request_digest": "sha256:d822a5de52ebad90e7d658aaad37c166f650fab890aaf41264dd200b73c07f0e"
+      },
+      "context": {
+        "authenticated_principal": "owner-1",
+        "scope_authorized": true,
+        "all_prior_transactions": "committed_or_rolled_back",
+        "unresolved_external_attempts": "marked_ambiguous"
+      },
+      "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "freeze_scope",
+        "operation_id": "freeze-1",
+        "status": "accepted",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "6",
+        "state": "frozen",
+        "evidence_digest": "sha256:259be5496362d1d2d14e356a67f493a1fa50ac75c721bf016f7578bc7a7c979d",
+        "error_code": null,
+        "claim": null
+      },
+      "reason": "Freeze blocks new guards and waits for known transaction fate."
+    },
+    {
+      "name": "fence_worker_allocates_new_claim",
+      "request": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "fence_worker",
+        "operation_id": "fence-1",
+        "scope_identity": "scope-42",
+        "expected_authority_epoch": "2",
+        "expected_scope_generation": "4",
+        "arguments": {
+          "root_instance_id": "root-7",
+          "work_kind": "effect",
+          "work_identity": "effect-17",
+          "operation_token": "token-17",
+          "expected_attempt_fence": "3",
+          "expected_worker_principal": "worker-1"
+        },
+        "request_digest": "sha256:fe90fe547cd99be6648402be1b3b186e6ff63352a3a7593d7978f6390abb2a72"
+      },
+      "context": {
+        "authenticated_principal": "worker-1",
+        "scope_authorized": true,
+        "assigned_worker_principal": "worker-1",
+        "current_attempt_fence": "3",
+        "host_expiry": "1760000000000000000"
+      },
+      "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "fence_worker",
+        "operation_id": "fence-1",
+        "status": "accepted",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "5",
+        "state": "active",
+        "evidence_digest": "sha256:a15b033510da3247fdf35f8e1dfc52141cee2e642a1284a1352bb37131fff9a8",
+        "error_code": null,
+        "claim": {
+          "scope_identity": "scope-42",
+          "root_instance_id": "root-7",
+          "work_kind": "effect",
+          "work_identity": "effect-17",
+          "operation_token": "token-17",
+          "scope_authority_epoch": "2",
+          "attempt_fence": "4",
+          "worker_principal": "worker-1",
+          "expires_at": "1760000000000000000",
+          "state": "active"
+        }
+      },
+      "reason": "The host allocates fence 4 and expiry under the guarded journal transaction."
     },
     {
       "name": "retirement_with_known_fate",
@@ -98,26 +209,72 @@
         "expected_scope_generation": "6",
         "arguments": {
           "destination_binding_digest": "sha256:5141cd2b3da81604aff6cd449b53b123ccba0c77ddea6c331971e933c63d3af5",
-          "freeze_evidence_digest": "sha256:67cefceb51e0a81e990e20a9b5a06bb1693fc644665450c048b115f1ff9b2a26"
+          "freeze_evidence_digest": "sha256:d822a5de52ebad90e7d658aaad37c166f650fab890aaf41264dd200b73c07f0e"
         },
-        "request_digest": "sha256:4ccbd84b307497de24a0e759a8276d214cf9dcdaf79fbad5b1cbc462b57415b8"
+        "request_digest": "sha256:5c5b3f370bfe75b530ab65a126fd061dc5e2ae08e767ac7528745ce5653fe28e"
       },
       "context": {
-        "authenticated": true,
-        "state": "frozen",
+        "authenticated_principal": "owner-1",
+        "scope_authorized": true,
         "all_prior_transactions": "committed_or_rolled_back",
         "old_owner_session_fenced": true,
-        "same_trusted_authority_domain": true
-      },
-      "expected": {
-        "status": "accepted",
-        "state": "retired",
-        "authority_epoch": "2",
-        "scope_generation": "7",
+        "same_trusted_authority_domain": true,
         "grant_single_use": true,
         "grant_destination_bound": true
       },
-      "reason": "Retirement records a durable single-use destination-bound proof only after the former owner cannot commit."
+      "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "prove_retirement",
+        "operation_id": "retire-1",
+        "status": "accepted",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "7",
+        "state": "retired",
+        "evidence_digest": "sha256:a2ddfd17f906914b0d499d9bfa0b4fb1117a655e6e4b82c77cc145eaa552d3e4",
+        "error_code": null,
+        "claim": null
+      },
+      "reason": "Retirement creates destination-bound single-use evidence after old writes are impossible."
+    },
+    {
+      "name": "retirement_equal_replay",
+      "request": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "prove_retirement",
+        "operation_id": "retire-1",
+        "scope_identity": "scope-42",
+        "expected_authority_epoch": "2",
+        "expected_scope_generation": "6",
+        "arguments": {
+          "destination_binding_digest": "sha256:5141cd2b3da81604aff6cd449b53b123ccba0c77ddea6c331971e933c63d3af5",
+          "freeze_evidence_digest": "sha256:d822a5de52ebad90e7d658aaad37c166f650fab890aaf41264dd200b73c07f0e"
+        },
+        "request_digest": "sha256:5c5b3f370bfe75b530ab65a126fd061dc5e2ae08e767ac7528745ce5653fe28e"
+      },
+      "context": {
+        "authenticated_principal": "owner-1",
+        "scope_authorized": true,
+        "recorded_request_digest": "sha256:5c5b3f370bfe75b530ab65a126fd061dc5e2ae08e767ac7528745ce5653fe28e",
+        "current_state": "retired"
+      },
+      "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "prove_retirement",
+        "operation_id": "retire-1",
+        "status": "accepted",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "7",
+        "state": "retired",
+        "evidence_digest": "sha256:a2ddfd17f906914b0d499d9bfa0b4fb1117a655e6e4b82c77cc145eaa552d3e4",
+        "error_code": null,
+        "claim": null
+      },
+      "reason": "A lost retirement response replays exact evidence without a second grant."
     }
   ],
   "rejected": [
@@ -137,16 +294,61 @@
         "request_digest": "sha256:9f5a6e9bfd43695b5b6c6615f584ba202b8437a89b4ec54be6ef78ef806d0be4"
       },
       "context": {
-        "authenticated": true,
-        "current_epoch": "2",
-        "topology_proved": true
+        "authenticated_principal": "old-owner",
+        "scope_authorized": true,
+        "current_epoch": "2"
       },
       "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "guarded_commit",
+        "operation_id": "commit-stale",
         "status": "rejected",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "4",
+        "state": "active",
+        "evidence_digest": null,
         "error_code": "stale_scope_authority",
-        "no_mutation": true
+        "claim": null
       },
-      "reason": "A former owner cannot commit by presenting a root CAS or old epoch."
+      "reason": "A root CAS cannot rescue an old owner."
+    },
+    {
+      "name": "stale_generation",
+      "request": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "guarded_commit",
+        "operation_id": "commit-gen",
+        "scope_identity": "scope-42",
+        "expected_authority_epoch": "2",
+        "expected_scope_generation": "4",
+        "arguments": {
+          "mutation_digest": "sha256:7d5741882b9b1ab5c7027ab0ed3ea0ca66be5aefae157127048a1c3710d5492c"
+        },
+        "request_digest": "sha256:437361bc705fb4e88e677aca93a0c110bac101cebd20744b69d285f27c28be3c"
+      },
+      "context": {
+        "authenticated_principal": "owner-1",
+        "scope_authorized": true,
+        "current_generation": "5"
+      },
+      "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "guarded_commit",
+        "operation_id": "commit-gen",
+        "status": "rejected",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "5",
+        "state": "active",
+        "evidence_digest": null,
+        "error_code": "scope_generation_conflict",
+        "claim": null
+      },
+      "reason": "A new operation cannot overwrite a later scope generation."
     },
     {
       "name": "separate_epoch_check_and_root_cas",
@@ -164,16 +366,26 @@
         "request_digest": "sha256:e6a90f380a13f53054c64723b8626da23e47818a687b0f25f9b7ea2a0821954f"
       },
       "context": {
-        "authenticated": true,
+        "authenticated_principal": "owner-1",
+        "scope_authorized": true,
         "epoch_check_transaction": "separate_from_root_commit",
         "root_cas_succeeded": true
       },
       "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "guarded_commit",
+        "operation_id": "commit-cas",
         "status": "rejected",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "4",
+        "state": "active",
+        "evidence_digest": null,
         "error_code": "host_capability_mismatch",
-        "no_authority_claim": true
+        "claim": null
       },
-      "reason": "A root CAS does not hold an authority guard through commit."
+      "reason": "Root CAS does not hold a scope guard through native commit."
     },
     {
       "name": "unknown_native_transaction_fate",
@@ -189,20 +401,29 @@
         "request_digest": "sha256:2a2bcd2c9cb27aea71eb24685b7c0fcab35ce1b31994c46c93cfa78a66e90bbf"
       },
       "context": {
-        "authenticated": true,
+        "authenticated_principal": "owner-1",
+        "scope_authorized": true,
         "writer_disconnected": true,
         "native_transaction_fate": "unknown"
       },
       "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "freeze_scope",
+        "operation_id": "freeze-unknown",
         "status": "rejected",
-        "error_code": "scope_transaction_in_doubt",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "4",
         "state": "transaction_in_doubt",
-        "no_promotion": true
+        "evidence_digest": null,
+        "error_code": "scope_transaction_in_doubt",
+        "claim": null
       },
-      "reason": "Disconnect and lease expiry do not establish transaction fate."
+      "reason": "Disconnection cannot prove commit or rollback."
     },
     {
-      "name": "stale_worker_claim",
+      "name": "stale_worker_attempt",
       "request": {
         "interface": "determa.host_authority",
         "interface_version": 1,
@@ -212,22 +433,77 @@
         "expected_authority_epoch": "2",
         "expected_scope_generation": "4",
         "arguments": {
+          "root_instance_id": "root-7",
+          "work_kind": "effect",
           "work_identity": "effect-17",
-          "attempt_fence": "3"
+          "operation_token": "token-17",
+          "expected_attempt_fence": "3",
+          "expected_worker_principal": "worker-1"
         },
-        "request_digest": "sha256:13f5141f3333ab42eeb81b31dd643193a9f1a21e24ecd46b550f5f32ee2987ab"
+        "request_digest": "sha256:712a1607ea27c08c39a7ed62aa52b6fe0a5abbbca5db73dedee9fa83f67094d3"
       },
       "context": {
-        "authenticated": true,
-        "current_attempt_fence": "4",
-        "current_epoch": "2"
+        "authenticated_principal": "worker-1",
+        "scope_authorized": true,
+        "current_attempt_fence": "4"
       },
       "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "fence_worker",
+        "operation_id": "worker-stale",
         "status": "rejected",
-        "error_code": "stale_scope_authority",
-        "no_mutation": true
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "4",
+        "state": "active",
+        "evidence_digest": null,
+        "error_code": "stale_attempt_fence",
+        "claim": null
       },
-      "reason": "An old attempt cannot update journal or checkpoint state."
+      "reason": "Old attempt precondition cannot allocate a new claim."
+    },
+    {
+      "name": "worker_principal_mismatch",
+      "request": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "fence_worker",
+        "operation_id": "worker-other",
+        "scope_identity": "scope-42",
+        "expected_authority_epoch": "2",
+        "expected_scope_generation": "4",
+        "arguments": {
+          "root_instance_id": "root-7",
+          "work_kind": "effect",
+          "work_identity": "effect-17",
+          "operation_token": "token-17",
+          "expected_attempt_fence": "3",
+          "expected_worker_principal": "worker-1"
+        },
+        "request_digest": "sha256:1964cf71d15409d41407aff5043de5a42eb5ad24f09b8f22838df9e181b26304"
+      },
+      "context": {
+        "authenticated_principal": "worker-2",
+        "scope_authorized": true,
+        "assigned_worker_principal": "worker-1",
+        "current_attempt_fence": "3"
+      },
+      "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "fence_worker",
+        "operation_id": "worker-other",
+        "status": "rejected",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "4",
+        "state": "active",
+        "evidence_digest": null,
+        "error_code": "worker_principal_mismatch",
+        "claim": null
+      },
+      "reason": "Supplied principal is only a precondition and cannot authorize another worker."
     },
     {
       "name": "copied_database_relocation",
@@ -238,26 +514,35 @@
         "operation_id": "retire-copy",
         "scope_identity": "scope-42",
         "expected_authority_epoch": "2",
-        "expected_scope_generation": "4",
+        "expected_scope_generation": "6",
         "arguments": {
           "destination_binding_digest": "sha256:2fdc8d6f002a705abde203762244caa7731535badc50502c92a0303f31f69fa8",
           "freeze_evidence_digest": "sha256:c9729e45ebc837d4d96812c0787148e94d8e98f3146053b0504f94f95331190f"
         },
-        "request_digest": "sha256:feed292b542365a36eb16dc39fbebeec229d2b140f80e0399ee591730568421e"
+        "request_digest": "sha256:2febeba3332301e5f15e394183cfd563fc687dec608ac32011ff7897f462f5eb"
       },
       "context": {
-        "authenticated": true,
+        "authenticated_principal": "owner-1",
+        "scope_authorized": true,
         "archive_valid": true,
         "source_retirement_proved": false,
         "destination_staged": "inactive"
       },
       "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "prove_retirement",
+        "operation_id": "retire-copy",
         "status": "rejected",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "6",
+        "state": "frozen",
+        "evidence_digest": null,
         "error_code": "scope_fence_unproven",
-        "destination_remains": "inactive",
-        "standalone_takeover_invoked": false
+        "claim": null
       },
-      "reason": "Readable copied bytes cannot retire the old authority."
+      "reason": "Copied bytes cannot retire the source; destination remains inactive."
     },
     {
       "name": "unsupported_safe_relocation",
@@ -268,25 +553,35 @@
         "operation_id": "retire-unsupported",
         "scope_identity": "scope-42",
         "expected_authority_epoch": "2",
-        "expected_scope_generation": "4",
+        "expected_scope_generation": "6",
         "arguments": {
           "destination_binding_digest": "sha256:2fdc8d6f002a705abde203762244caa7731535badc50502c92a0303f31f69fa8",
           "freeze_evidence_digest": "sha256:4bfce369404d74f12eb79e417c87ff7dc0208a5bc523655510be6a8cad5fb5f2"
         },
-        "request_digest": "sha256:7747e9caa448cadbaf8a428b4730e7b1031b3f5c051cfc963d0414ad33a8cef6"
+        "request_digest": "sha256:a6ba7de1edc794e37caa2244b786d4a1b9e21184c1d2b57cd081dad29d18b384"
       },
       "context": {
-        "authenticated": true,
-        "safe_relocation": false,
-        "destination_staged": "inactive"
-      },
-      "expected": {
-        "status": "rejected",
-        "error_code": "host_capability_mismatch",
-        "destination_remains": "inactive",
+        "authenticated_principal": "owner-1",
+        "scope_authorized": true,
+        "safe_relocation_supported_for_pair": false,
+        "destination_staged": "inactive",
         "standalone_takeover_invoked": false
       },
-      "reason": "Unsupported relocation fails closed."
+      "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "prove_retirement",
+        "operation_id": "retire-unsupported",
+        "status": "rejected",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "6",
+        "state": "frozen",
+        "evidence_digest": null,
+        "error_code": "host_capability_mismatch",
+        "claim": null
+      },
+      "reason": "Unsupported relocation stays inactive and never invokes takeover."
     },
     {
       "name": "unauthorized_scope",
@@ -302,18 +597,24 @@
         "request_digest": "sha256:e3dd5ee1368dc389e15fd550d49caa09426fde6f5b8f9be11fb5cc5bcbb37094"
       },
       "context": {
-        "authenticated": true,
-        "authorized_scope": false
+        "authenticated_principal": "operator-1",
+        "scope_authorized": false
       },
       "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "read_authority",
+        "operation_id": "read-other",
         "status": "rejected",
-        "error_code": "unauthorized_scope",
         "scope_identity": null,
         "authority_epoch": null,
         "scope_generation": null,
-        "state": null
+        "state": null,
+        "evidence_digest": null,
+        "error_code": "unauthorized_scope",
+        "claim": null
       },
-      "reason": "No cross-scope existence or owner details are returned."
+      "reason": "No cross-scope existence or owner detail is returned."
     },
     {
       "name": "conflicting_operation_reuse",
@@ -331,17 +632,99 @@
         "request_digest": "sha256:cc34333b7b927cab21c7490b6df627bd317159f6fe77ac2c853043fee5023c51"
       },
       "context": {
-        "authenticated": true,
-        "owner_current": true,
+        "authenticated_principal": "owner-1",
+        "scope_authorized": true,
         "recorded_operation_id": "commit-1",
-        "recorded_request_digest": "different"
+        "recorded_request_digest": "sha256:280c85d5dd16fe3132dbb25f23f498319563c9e45c05f0bba2eedd9d9b42b78a"
       },
       "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "guarded_commit",
+        "operation_id": "commit-1",
         "status": "rejected",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "5",
+        "state": "active",
+        "evidence_digest": null,
         "error_code": "scope_operation_conflict",
-        "no_mutation": true
+        "claim": null
       },
-      "reason": "An operation ID cannot be reused for a different request even if the caller has current authority."
+      "reason": "An operation ID cannot be reused with a different digest."
+    },
+    {
+      "name": "replay_evidence_expired",
+      "request": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "guarded_commit",
+        "operation_id": "commit-expired",
+        "scope_identity": "scope-42",
+        "expected_authority_epoch": "2",
+        "expected_scope_generation": "4",
+        "arguments": {
+          "mutation_digest": "sha256:7d4ce5421bfc70fa03d2bdeb7028e13a7871612273ebf15d46ce16196ea5cea6"
+        },
+        "request_digest": "sha256:b3bcd611f4d7792831433bfa94de18667af148529d796d57d0d42ffde69f6aa2"
+      },
+      "context": {
+        "authenticated_principal": "owner-1",
+        "scope_authorized": true,
+        "retention": "bounded",
+        "replay_evidence": "expired"
+      },
+      "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "guarded_commit",
+        "operation_id": "commit-expired",
+        "status": "rejected",
+        "scope_identity": "scope-42",
+        "authority_epoch": "2",
+        "scope_generation": "5",
+        "state": "active",
+        "evidence_digest": null,
+        "error_code": "replay_evidence_expired",
+        "claim": null
+      },
+      "reason": "Expired evidence cannot be interpreted as rollback."
+    },
+    {
+      "name": "malformed_request_early_error",
+      "request": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": "guarded_commit",
+        "operation_id": "malformed-1",
+        "scope_identity": "scope-42",
+        "expected_authority_epoch": "2",
+        "expected_scope_generation": "4",
+        "arguments": {
+          "mutation_digest": "sha256:cd65ea2c2ad99e94a85b1b6df72efef9cb2ed0ae933a60c32ce16317f7d7d6aa"
+        },
+        "request_digest": "sha256:3431878bde86652fa2826900d6bcfd3b562406523590a30faea3596c954d5f02",
+        "unexpected": true
+      },
+      "context": {
+        "request_shape": "unknown_field",
+        "scope_lookup_performed": false
+      },
+      "expected": {
+        "interface": "determa.host_authority",
+        "interface_version": 1,
+        "operation": null,
+        "operation_id": null,
+        "status": "rejected",
+        "scope_identity": null,
+        "authority_epoch": null,
+        "scope_generation": null,
+        "state": null,
+        "evidence_digest": null,
+        "error_code": "invalid_host_request",
+        "claim": null
+      },
+      "reason": "Malformed request fields are never echoed and never reach scope lookup."
     }
   ]
 }
