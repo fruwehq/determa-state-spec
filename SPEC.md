@@ -5304,6 +5304,9 @@ host, §17 receipts and records supply the machine evidence; §18 authority guar
 §19 effect journals, and §20 application projections apply only when the host declares
 those optional profiles. A delivery adapter MUST NOT infer authority, durable
 processing, or application success from a portable envelope or provider name.
+§19 result-event admission is a host-owned journal recovery operation. It uses the
+same §17 aggregate admission boundary but has no external source item to
+acknowledge under this section.
 
 Before ingress admission, a source item has an immutable `source_scope`,
 `source_delivery_id`, and original content. The content is exactly one of
@@ -5480,9 +5483,17 @@ decision, `reason_code` is non-null exactly for retryable failure, ambiguity,
 permanent rejection, operator cancellation, discard, and dead-letter transfer.
 `destination_receipt_id` is non-null exactly for confirmed durable destination
 acceptance or durable dead-letter transfer. A `dead_lettered` decision with either
-field null is invalid and cannot end outbound responsibility. Retrying after a terminal state
-returns the retained record and does not send again. A §19 invocation/effect journal,
-when present, records business outcome separately from destination acceptance and
-uses its own current authority and recovery rules. The lossless profile cannot
-silently remove unresolved outbound work on completion, cancellation, restore, or
-worker failure.
+field null is invalid and cannot end outbound responsibility. Retrying an outbox
+delivery after its terminal state returns its retained record and does not send
+that intent again. When §19's native-effect profile is selected, an outbox
+`confirmed` record may coexist with an `unclaimed`, `leased`, or
+`ambiguous` invocation. It does not supply a terminal business outcome, cancel
+the invocation, or authorize a provider retry. The §19 journal retains the
+business outcome, cancellation decision, and attempt evidence separately.
+An `outcome_recorded` result whose admission was interrupted remains host-owned
+recovery work: the host admits its exact pinned declared event under §19.4's
+current scope guard and checkpoint/journal transaction, without requiring the old
+worker claim or calling the provider again. A late or ineligible target follows
+§19.4's explicit reconciliation rule, never an ingress source retry or implicit
+discard. The lossless profile cannot silently remove unresolved outbound work on
+completion, cancellation, restore, or worker failure.
