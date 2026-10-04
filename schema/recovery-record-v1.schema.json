@@ -15,7 +15,11 @@
     "retained_checkpoint_digests",
     "risk_acknowledged",
     "isolation_evidence_digest",
-    "decisions"
+    "decisions",
+    "destination_binding_digest",
+    "authority_epoch",
+    "operation_ledger_identity",
+    "active_claims"
   ],
   "properties": {
     "record_format": {
@@ -29,8 +33,15 @@
       "minLength": 1
     },
     "external_idempotency_namespace": {
-      "type": "string",
-      "minLength": 1
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "mode": {
       "enum": [
@@ -154,6 +165,36 @@
         }
       ]
     },
+    "destination_binding_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "authority_epoch": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "operation_ledger_identity": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "active_claims": {
+      "type": "array",
+      "maxItems": 0
+    },
     "decisions": {
       "type": "array",
       "items": {
@@ -211,6 +252,12 @@
         "properties": {
           "state": {
             "const": "quarantined"
+          },
+          "external_idempotency_namespace": {
+            "type": "null"
+          },
+          "operation_ledger_identity": {
+            "type": "null"
           }
         }
       }
@@ -227,6 +274,38 @@
         "properties": {
           "risk_acknowledged": {
             "const": true
+          },
+          "external_idempotency_namespace": {
+            "type": "string",
+            "minLength": 1
+          },
+          "operation_ledger_identity": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "enum": [
+              "clone",
+              "relocation"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "external_idempotency_namespace": {
+            "type": "string",
+            "minLength": 1
+          },
+          "operation_ledger_identity": {
+            "type": "string",
+            "minLength": 1
           }
         }
       }

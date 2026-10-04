@@ -5140,7 +5140,9 @@ bodies, including stale workers, quarantine, ambiguity and clone isolation.
 `schema/recovery-record-v1.schema.json` is the closed durable destination record.
 It lists every inherited external work identity and source attempt disposition, the
 exact retained checkpoint digests, source provenance, fresh namespace, mode, current
-state, risk decision and isolation evidence. `record_digest = hash(["determa-recovery-record-1", record])`.
+state, destination binding, fresh operation-ledger identity, empty imported-claim
+set, risk decision and isolation evidence. A strict quarantine has null namespace
+and ledger identity; fresh-scope modes require both. `record_digest = hash(["determa-recovery-record-1", record])`.
 For an operation request, `request_digest = hash(["determa-recovery-request-1",
 request_without_request_digest])` using §16.2 JCS. The host verifies this before
 ledger lookup; a mismatch is `invalid_recovery_request`. A result's `record_digest`
