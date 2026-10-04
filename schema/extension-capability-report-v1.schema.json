@@ -322,7 +322,8 @@
             "items": {
               "enum": [
                 "authoritative_scope_fencing",
-                "consistent_scope_inventory"
+                "consistent_scope_inventory",
+                "safe_relocation"
               ]
             }
           }

@@ -2338,6 +2338,11 @@ MUST verify claims against its policy and actual topology; self-assertion is not
 proof. `degraded`, `unavailable`, or `unknown` health cannot satisfy a requirement
 unless the capability's separate contract explicitly proves safe operation at that
 health, which no common capability here does. A missing or unproved claim is false.
+This false-by-absence rule applies to requested **guarantees**. It does not assert
+the absence of a hazard: a healthy runtime-provider report that omits
+`external_io_capable` still leaves external I/O possible unless the exact provider
+and host policy independently prove it cannot occur (for example, through a verified
+`pure` guarantee). The host MUST treat unresolved I/O status as possible I/O.
 Provider families, URI schemes, installed packages, and a previously healthy report
 do not inherit capabilities. A changed configuration or relevant health requires
 reevaluation before a newly requested operation.
@@ -2350,9 +2355,19 @@ category sets reserve names for the corresponding projection, transport, timer,
 native-handler, runtime-provider, and authority contracts. A host MUST NOT advertise
 one of these reserved names until its defining public contract and applicable
 conformance cases exist and the configured instance passes them. In particular,
-`authoritative_scope_fencing` is not inferred from a durable store, a URI, a process
-lock, or a readable archive; unsupported safe relocation fails closed and cannot
-silently become standalone takeover.
+`authoritative_scope_fencing` means the configured authority rejects stale scope
+writers under its proved epoch and ownership boundary. It is not inferred from a
+durable store, a URI, a process lock, or a readable archive. `safe_relocation` is a
+distinct claim for the exact source, destination, and authority topology, supported
+only when the separate transfer contract proves old-owner retirement and destination
+activation. Local guarded writes or a successful export do not imply it. A host MUST
+check the actual operation's source and destination against that proved topology;
+a configured-instance report alone does not authorize a particular transfer. The host
+MUST report `safe_relocation` unavailable for an unproved topology, refuse relocation
+before activation,
+and leave any staged import inactive; it MUST NOT silently invoke the weaker
+standalone takeover. Multi-host coordination and managed control-plane operations
+are outside this common foundation.
 
 `schema/extension-capability-requirement-v1.schema.json` defines one exact requirement:
 `category`, `provider_reference`, `instance_id`, and `capability`. A host profile
@@ -2371,7 +2386,8 @@ For a composition, a guarantee such as `pure`, `deterministic`, `portable`,
 `semantically_introspectable`, or `process_contained` is effective only when **every**
 participating provider and the host policy prove it. `external_io_capable` is a hazard
 flag: it is effective when **any** participant may perform external I/O, including an
-unknown or unverified participant. Unknown I/O therefore requires explicit weak
+unknown or unverified participant. The absence of an `external_io_capable` claim is
+not a no-I/O attestation. Unknown I/O therefore requires explicit weak
 profile opt-in and prevents automatic retry or replay claims based on purity.
 Advertised `external_io_capable` grants no transactional safety. Runtime provider
 claims have the exact meanings in their dedicated provider contract; this section

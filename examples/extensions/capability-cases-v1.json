@@ -231,7 +231,7 @@
           "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         },
         "instance_id": "primary",
-        "capability": "safe_relocation"
+        "capability": "magic_transfer"
       }
     },
     {
@@ -381,9 +381,9 @@
       }
     },
     {
-      "name": "unknown_io_requires_opt_in",
+      "name": "healthy_report_omits_io_hazard",
       "expected": "extension_capability_mismatch",
-      "reason": "Unknown I/O capability is treated as possible I/O; a strong replay profile cannot accept it.",
+      "reason": "A healthy runtime provider report without a verified pure or no-I/O proof cannot imply absence of external I/O; a strong replay profile must reject it.",
       "participants": [
         {
           "descriptor": {
@@ -417,6 +417,47 @@
       "effective": {
         "external_io_capable": true,
         "weak_profile_opt_in_required": true
+      }
+    },
+    {
+      "name": "fencing_does_not_imply_safe_relocation",
+      "expected": "extension_capability_mismatch",
+      "reason": "An authority instance may prove guarded local writes without proving the transfer topology; safe relocation is a separate claim.",
+      "descriptor": {
+        "category": "authority",
+        "provider_reference": {
+          "identifier": "sample.authority",
+          "version": "1.0.0",
+          "content_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "interface_version": 1,
+        "supported_capabilities": [
+          "authoritative_scope_fencing",
+          "safe_relocation"
+        ]
+      },
+      "report": {
+        "category": "authority",
+        "provider_reference": {
+          "identifier": "sample.authority",
+          "version": "1.0.0",
+          "content_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "instance_id": "local",
+        "health": "healthy",
+        "claims": [
+          "authoritative_scope_fencing"
+        ]
+      },
+      "requirement": {
+        "category": "authority",
+        "provider_reference": {
+          "identifier": "sample.authority",
+          "version": "1.0.0",
+          "content_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "instance_id": "local",
+        "capability": "safe_relocation"
       }
     }
   ]
