@@ -24,24 +24,7 @@
       "$ref": "aggregate-state-v1.schema.json#/$defs/typedMap"
     },
     "handlerReference": {
-      "type": "object",
-      "required": [
-        "identifier",
-        "version",
-        "content_digest"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "identifier": {
-          "$ref": "#/$defs/nonEmptyString"
-        },
-        "version": {
-          "$ref": "#/$defs/nonEmptyString"
-        },
-        "content_digest": {
-          "$ref": "#/$defs/sha256"
-        }
-      }
+      "$ref": "provider-reference-v1.schema.json"
     },
     "operationTokenLocation": {
       "oneOf": [

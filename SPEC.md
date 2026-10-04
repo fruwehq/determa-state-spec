@@ -4538,9 +4538,8 @@ Each effect record contains exactly `effect_id`, `operation_token`, `intent_dige
 `idempotency_policy`, `attempt_fence`, `attempt_records`, `invocation_state`,
 `outcome`, `result_event_id`, `admission_receipt`, and `cancellation`. `effect_id`
 references exactly one committed checkpoint intent. `intent_digest` is the §17.6
-complete-intent digest, including its domain, root, and original intent. The handler
-reference is an exact identifier, version, and content digest, resolved against host
-allowlist and dependency policy. Its binding digest identifies the precise destination
+complete-intent digest, including its domain, root, and original intent. The `native_handler` reference is the exact §11.5 provider reference, resolved
+against host allowlist and dependency policy. Its binding digest identifies the precise destination
 and connector configuration without containing credentials. Configuration generation
 is a canonical decimal string. The target pins root instance ID, runtime ID, and
 exact runtime incarnation; a current alias or a later reactivation cannot redirect it.
