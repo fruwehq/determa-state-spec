@@ -133,19 +133,24 @@ model as universal conformance.
 **Reason.** Queue ownership, stepping, and serialized command results are host
 concerns. Standardizing the old fixtures would contradict the pure foreground core.
 
-## Enabled-event inspection remains undefined
+## Candidate inspection preserves guard uncertainty
 
 Relevant specification: [§12](SPEC.md#12-inspection-and-visualization).
 
-**Decision.** Format 1 does not define a portable enabled-event inspection result.
+**Decision.** Format 1 defines an exact-target candidate inspection result. Structural
+inspection is mandatory and returns the complete union of possible dispositions
+without evaluating a guard. Semantic inspection is optional and requires a separate
+proved, bounded, nonmutating guard entrypoint with a shared deterministic fuel model.
 
 **Rejected alternative.** Derive an enabled-event list from active configuration
 alone.
 
-**Reason.** A false guard is non-consuming and permits ancestor search. Enabledness is
-therefore a property of the configuration, current variables, and a candidate
-envelope—not the configuration alone. Any future inspection contract must preserve
-that dependency.
+**Reason.** A false guard is non-consuming and permits ancestor search. Same-state
+deferral can also preempt an ancestor. A configuration-only enabled-event list loses
+those distinctions. The exact candidate envelope, runtime incarnation and aggregate
+digest bind the question to one snapshot; a conditional structural answer stays honest
+about guard-dependent behavior. Semantic evaluation is safe only when the provider
+proves its separate introspection capability, not merely purity of ordinary execution.
 
 ## Portable scalar spellings are canonical
 

@@ -2431,11 +2431,150 @@ Runtime-local ready/deferred mailbox contents and their portable ordering identi
 core state and SHOULD be inspectable. External broker backlog, delivery attempts, dead
 letters, scheduled jobs, and broker acknowledgements remain plugin-owned.
 
-Enabled-event inspection is deliberately undefined in format 1. A configuration alone
-can reveal only structurally present handlers: whether a guarded handler is enabled is
-a property of the configuration together with a candidate envelope and current
-variables. Implementations MUST NOT present an implementation-specific enabled-event
-shape as a portable format-1 contract.
+### 12.1 Exact candidate inspection
+
+`inspect_candidate` is a read-only core operation over one validated executable
+definition, one valid portable aggregate, one exact runtime incarnation, and one
+normalized candidate envelope. Its closed request and outcome are defined by
+`schema/inspection-v1.schema.json`. The request has exactly `mode`,
+`aggregate_state_digest`, `runtime_id`, `runtime_incarnation`, `envelope`, and `limits`.
+`runtime_incarnation` is the runtime's exact portable `identity_origin` (§16.3),
+including its component activation or spawned sequence where applicable. A caller
+cannot substitute a matching machine or placement with a different incarnation.
+`structural` requires `limits: null`; `semantic` requires two positive canonical
+decimal limits, `maximum_guard_evaluations` and `maximum_evaluation_steps`.
+The caller supplies a complete normalized envelope; inspection validates it with
+the same declaration, direction, payload, target, and reserved-event rules as
+admission, but never admits it. The envelope's exact target must identify the
+requested runtime incarnation. The digest must match the supplied aggregate before
+inspection begins. Invalid request shape or digest is an operation failure,
+`invalid_inspection_request`, with no classification.
+
+A successful result has exactly `aggregate_state_digest`,
+`definition_fingerprint`, `runtime_id`, `runtime_incarnation`, `classification`,
+`possible_dispositions`, `disposition`, `reason`, `levels`, and `guard_evidence`.
+The fingerprint is the addressed runtime's exact current executable definition,
+including provider closure when applicable. For an absent or mismatched runtime,
+it is the aggregate root's exact current executable definition; this does not
+imply that an absent target was resolved. `possible_dispositions` is a nonempty
+duplicate-free subset
+in canonical order `handled_now`, `deferred`, `unhandled`, `invalid`. A
+`definitive` result has one possibility and the same non-null `disposition`; a
+`conditional` result has at least two possibilities and `disposition: null`.
+`reason` is null except for `invalid`, when it is exactly one of
+`target_not_found`, `target_incarnation_mismatch`, `invalid_envelope`, or
+`runtime_inactive`. Missing runtime and wrong incarnation take precedence over
+envelope validation; an inactive exact runtime takes precedence over envelope
+validation. Invalid envelope includes wrong target, visibility, direction, payload,
+and reserved failure-event usage. Invalid results have no levels or guard evidence.
+These classifications are predictions about dispatch, never admission receipts or
+promises that actions will complete. A guard error is not an `invalid` disposition.
+
+Each `levels` element has exactly `state_id`, `handler_branches`, and `defers`.
+Elements enumerate the active ancestry deepest state first, ending at the runtime
+root. `state_id` is the exact state-definition pointer; `defers` is the Boolean
+answer for this event at that level. Branches preserve declaration order and have
+exactly `branch_index`, `guard_locator`, and `guard_binding_digest`. The index is a
+zero-based canonical decimal string. An unguarded branch has both guard fields null.
+A guarded branch's locator is an exact pointer into the validated executable
+definition; its binding digest binds the normalized CEL guard or exact runtime
+provider reference and source/dependency closure under that definition fingerprint.
+It is `hash(["determa-guard-binding-1", definition_fingerprint, guard_locator,
+typed_guard_binding])` under §9. `typed_guard_binding` applies the §8 typed-tree
+projection to the exact validated guard member. For a CEL guard, this is
+`["string", source]`, where `source` is exactly the Unicode string value of that
+`guard` member in the §8 normalized validated bundle tree.
+Parsing and type checking do not rewrite, trim, pretty-print, case-fold, or otherwise
+canonicalize its source text; spaces and line breaks are retained as code points.
+For a runtime-provider guard, `typed_guard_binding` is the complete exact provider
+binding and source/dependency closure, encoded as the §8 typed tree under that provider
+contract. Its object-member order is canonicalized by §8 and §9; exact string/source
+values are preserved. Recompilation cannot substitute a different binding at the
+same locator. For example, `"event.payload.amount > 1"` and
+`"event.payload.amount  > 1"` have distinct guard bindings and distinct digests,
+even though both evaluate the same way for every numeric amount.
+Structural inspection enumerates branches without invoking CEL, providers, actions,
+helper routes, or host delivery. `guard_evidence` is empty.
+
+Structural `possible_dispositions` is the union of every outcome reachable by
+assigning true/false to each guarded branch while obeying §6.3 branch order and
+same-state deferral precedence. At a level, any true branch or final unguarded
+default handles; only the all-false path tests same-state deferral, then continues
+to the parent when no deferral exists. A child deferral blocks all ancestors. Thus a
+guarded branch followed by an unguarded default is definitively `handled_now`;
+a guard-only handler with same-state deferral may be `handled_now` or `deferred`;
+and the same handler without deferral may be `handled_now` or the ancestor outcome.
+No reachable declaration means definitively `unhandled`. Structural inspection
+does not predict guard faults, since it executes no guards.
+
+### 12.2 Optional safe semantic inspection
+
+Semantic inspection follows §6.3 branch order and deferral precedence on the
+provided snapshot. It evaluates only guard slots reached along that path. It never
+simulates actions, choices, entry/exit, creation, cancellation, recall, or another
+RTC step. A successful semantic result is definitive and has one Boolean evidence
+record per evaluated guard, in evaluation order. Each record has exactly
+`state_id`, `branch_index`, `guard_locator`, `guard_binding_digest`, and `value`.
+Any guard enumerated in the active ancestry whose exact resolved provider closure
+lacks a separately proved bounded, nonmutating introspection entrypoint fails with
+`inspection_capability_unavailable` **before any guard evaluation**. A host MUST NOT
+substitute an ordinary evaluator on a purity claim. A guard evaluator failure returns
+`inspection_guard_failure`; exhaustion returns `inspection_limit_exceeded`. Neither
+returns a disposition or faults/mutates the supplied aggregate. A failed operation
+has exactly `code` and `source_locator`; the locator is null for request/capability
+failures and the exact guard pointer for evaluation failures. The operation returns
+no partial evidence on failure. Semantic inspection is an optional capability; a
+host that does not advertise it returns `inspection_capability_unavailable`.
+
+Portable CEL guards use the following shared abstract fuel, independently of a
+particular interpreter's instruction count. Before evaluation, reject any guard
+whose UTF-8 source exceeds 4096 bytes, checked AST exceeds 1024 nodes, or input
+snapshot (envelope plus all visible variable values) exceeds 65536 value units.
+One value unit is one scalar value, one Unicode scalar in a string, one list slot,
+or one map entry plus its key's Unicode scalar count, summed recursively. The
+request limits cannot exceed 64 guard evaluations or 1000000 evaluation steps.
+Larger limits are `invalid_inspection_request`, rather than a host-dependent
+extension of this profile. The exact pass/fail fuel boundaries are pinned in
+`examples/inspection/fuel-boundaries-v1.json`.
+Preflight failure is `inspection_limit_exceeded` with the first reached guard
+locator. All arithmetic below uses unbounded nonnegative counters and charges
+before an operation; a charge crossing the remaining budget fails immediately.
+
+| Evaluated operation | Abstract step charge in addition to child expressions |
+|---|---:|
+| every evaluated AST node, including literal, identifier, selection, index, operator, call, or conditional | 1 |
+| materialize a string/list/map literal | value units of the constructed value |
+| field or map selection, `has`, map index, or map membership | 1 + Unicode scalars in the key + sum over inspected map entries of (1 + Unicode scalars in each key); typed record selection has no entry sum |
+| list index or `size(list)` | 1 |
+| list membership | value units of the complete list and candidate value |
+| `size(map)` | value units of the complete map |
+| `size(string)`, string comparison, string equality, or string-to-string conversion | Unicode scalar count of each string operand |
+| string concatenation | sum of operand Unicode scalar counts and result count |
+| list concatenation | sum of operand slot counts and result slot count |
+| list/map equality or inequality | value units of both complete operands |
+| scalar comparison/equality, numeric arithmetic/conversion, Boolean operation, negation, or null test | 1 |
+| `string(bool|int|double)` conversion | Unicode scalar count of resulting canonical string |
+
+Map inspection sums the complete map regardless of lookup success or host hash
+layout. Nested collection equality uses the complete operand units once at that
+operator, with no recursive extra charge. A failed operation incurs its listed
+charge before returning its error. `?:` evaluates only its condition and selected
+arm. `&&`/`||` evaluate both operands in source order to preserve the §5 error
+absorption rule and deterministic fuel, even when the first Boolean alone could
+decide the result. No comprehension, iteration, receiver call, or other intrinsic
+is admitted by §5.2; adding one requires a corresponding exact fuel rule before
+semantic inspection can claim it. Guard-count budget is charged once immediately
+before each reached guard. Exhaustion takes precedence over a guard error at the
+operation whose charge cannot be paid. Native safe guard providers must expose a
+public deterministic work schedule and honor the same request limits through their
+separately proved entrypoint. Without that proved schedule their semantic inspection
+capability is unavailable.
+
+Neither mode changes aggregate bytes, counters, queues, receipts, audit records, or
+provider state. Inspection does not resolve a plugin route or read host backlog.
+The outcome belongs to the exact supplied snapshot; a subsequent mutation requires
+a fresh inspection and digest. Hosts may additionally expose presentation views,
+but MUST NOT label an implementation-specific enabled-event list as this contract.
 
 Mermaid `stateDiagram-v2` is a useful default exporter:
 
@@ -2473,7 +2612,7 @@ is a completeness boundary, not a compatibility promise for earlier drafts.
 | owned spawning | retained for same-bundle machines with nominal `instance_reference` values |
 | submachines and package imports | unsupported |
 | definition migration/hot-swap | explicit portable aggregate migration under §16; never implicit in ordinary processing |
-| observers and export | read-only inspection and visualization are recommended, not executable core behavior |
+| observers and export | exact-candidate structural inspection is core; safe semantic inspection is optional under §12 |
 | snapshots | closed portable aggregate-state envelope and package under §16 |
 | stores and CLI protocols | host/implementation concerns, not bundle grammar |
 
@@ -2492,7 +2631,6 @@ The pre-release format deliberately omits:
 - destructive reset as a migration fallback;
 - arbitrary executable migration code or author behavior during migration;
 - standardized CLI/store JSON shapes;
-- standardized enabled-event inspection;
 - root engine-fault recovery/reset;
 - reset or re-entry of the machine root by an ordinary transition;
 - distributed transactions, exactly-once delivery, or hard real-time guarantees;
