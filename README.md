@@ -41,6 +41,14 @@ remain subject to ordinary current validation. Repository/package versions and m
 formats are separate; loaders never guess either from document shape. See
 [SPEC.md §2](SPEC.md#2-conformance-parsing-and-format-identity).
 
+## Release 0.3.0
+
+This alpha release adds portable event deferral and resumable runtime mailboxes,
+version-2 maintenance migration receipts, and exact operation-receipt emission index
+rules. Portable persistence artifacts use schema version 2 exclusively; earlier draft
+artifact representations are no longer supported. Machine documents still use
+`format: 1`, independently of the release and artifact schema versions.
+
 ## Core model
 
 - hierarchical states, entry/exit behavior, choices, and shallow/deep history;
