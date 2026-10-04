@@ -1,5 +1,5 @@
 {
-  "archive_format": "determa.archive",
+  "archive_format": "determa.scope_archive",
   "archive_schema_version": 1,
   "source": {
     "profile_kind": "guarded_scope",
@@ -2281,5 +2281,76 @@
       ]
     }
   ],
-  "archive_digest": "sha256:e9de03141ebe32e6048a0692653ea39a2722b5c13e8a7f8db30d327ad62a5c71"
+  "members": [
+    {
+      "identity": "checkpoint:effect-1",
+      "digest": "sha256:627757ddac10c57ebf1b4ac1365f09da5f9b34bed3f04ef3b16e5fee9da9e73a",
+      "byte_length": "4293"
+    },
+    {
+      "identity": "checkpoint:fault-1",
+      "digest": "sha256:d17adff30dd289da48d3bdd34208027b94fceaab872078db2137c82c617830a4",
+      "byte_length": "4827"
+    },
+    {
+      "identity": "checkpoint:job-42",
+      "digest": "sha256:09a9581cf0b671ecbde1145bda902c59fc35f8fc8a2150f28357f077f792c036",
+      "byte_length": "4377"
+    },
+    {
+      "identity": "checkpoint:server-1",
+      "digest": "sha256:067ae27cc1423241c581a2e95f290d4b5bea75667b0ff5243338db6b7ae903e8",
+      "byte_length": "4915"
+    },
+    {
+      "identity": "definition:sha256:69614f5c10828364f93960fa5347d212750e67f0c37b8056d8fd0966e334c74f",
+      "digest": "sha256:738fc1a924c63291f89404c998dfcccd8cd48392d952229e830bd211e7dcdcec",
+      "byte_length": "1147"
+    },
+    {
+      "identity": "definition:sha256:a4458940ab5bc76a120889379294fa4df840465f8e05b97fa368587e3167cb86",
+      "digest": "sha256:5ff39256730ef29f0077f62bcecd8ee57f73edac76032769c0aacac7966555bc",
+      "byte_length": "2105"
+    },
+    {
+      "identity": "definition:sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+      "digest": "sha256:ad2099453fee3b1dd6a69a9368187a9c3b0389cd9b3f76eef1b9505f8e4ce339",
+      "byte_length": "435"
+    },
+    {
+      "identity": "definition:sha256:d9c63e89dac38aedbd3d439a9049158d39e8f3791dd55f7856540f684d16ffcc",
+      "digest": "sha256:af18d7cf7fddaccb632bd3b284b8b5e155e42de2462f90475a05e536f9782710",
+      "byte_length": "2104"
+    },
+    {
+      "identity": "definition:sha256:eeec154ca64b619fe802af811b942073a2bc988b669429d7d08748dd72ab6cfc",
+      "digest": "sha256:d51914056b84e5ecef1b07e7cb904ea04035cf1577307b70dd79835becb52d27",
+      "byte_length": "484"
+    },
+    {
+      "identity": "migration_descriptor:sha256:9e0ca69f03366de7c5cb92dea67d8b7bd7979c117a22ea9de37e6c6f73a8e7d9",
+      "digest": "sha256:a3daa4a486fb1e80edf2c0576cf2d8b9f7430d6a5b0a497a5f1e36ddbcf20bfd",
+      "byte_length": "1169"
+    },
+    {
+      "identity": "participant:helper-state",
+      "digest": "sha256:7b171c70cad4975f2ca779528ac739203f116c3a615668e290dccc7ba74fb85c",
+      "byte_length": "609"
+    }
+  ],
+  "required_determa_capabilities": [
+    "archive_participant",
+    "migration_descriptor",
+    "normalized_definition",
+    "portable_archive",
+    "portable_checkpoint"
+  ],
+  "optional_participant_references": [],
+  "source_fence_reference": {
+    "operation_kind": "freeze_scope",
+    "operation_id": "freeze-local-1",
+    "response_digest": "sha256:e8bcb4dd41a0f64278d75472ccfe544206ebb6b8ff7bfc94292ff7709dc3965d"
+  },
+  "transfer_reference": null,
+  "archive_digest": "sha256:009579a6e6b2fd58382079b3d524df23e92e79a797df8d847f3ab1987c51078c"
 }

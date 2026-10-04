@@ -465,7 +465,8 @@ remaining inert; destination authority and relocation are separate concerns.
 
 Relevant specification: [§24](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation).
 
-**Decision.** A strict restore stays inert without proof of retirement. A standalone
+**Decision.** A strict restore always remains an inert read-only quarantine.
+Proved continuation uses the separate guarded transfer activation path. A standalone
 operator may instead create a fresh scope and namespace, retaining ambiguous work and
 source provenance with an explicit old-owner risk acknowledgement. A clone is separate
 independent execution and needs proved provider isolation. Safe relocation is an

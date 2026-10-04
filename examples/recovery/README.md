@@ -27,8 +27,11 @@ scope fields because parsing failed before a durable operation identity existed.
 
 `archive-local-transfer-v1.json` is a complete resealed derivative of the same
 four-root producer under a separately negotiated guarded local test profile. Its
-source profile and participant contract digests are recomputed and pinned by the
-trusted local stage request and result in the cases file. This test topology has one
+source profile, participant contract and outer archive digests are recomputed and
+pinned by the trusted local stage request and result in the cases file. The sorted
+member manifest and required Determa capability set match the final §22 producer.
+The archive carries only a retained `freeze_scope` response pointer; its null
+transfer reference grants no retirement or activation authority. This test topology has one
 authority domain; it asserts no distributed grant service. Its prepared proof binds
 a frozen source and reserved destination. Only the committed proof binds §18 source
 retirement and consumed grant. The positive sequence covers prepare, stage, commit
