@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:a4ea50c4a0c2dff2b14b22b29ee8e9c8bfa01d3571e411442c809cc273a305a0"
+      "sha256": "sha256:045bcdd456984f61797b596e7e08e108374ed2b094c5d0effe070fcaaffde4a5"
     },
     {
       "path": "VERSION",
@@ -169,6 +169,26 @@
     {
       "path": "examples/effects/effect-cancellation-committed-response-v1.json",
       "sha256": "sha256:6d876212efc531cfa4dac0caaeb7d66b5b240d57913fde69cb64ff2fe13ee8e4"
+    },
+    {
+      "path": "examples/delivery/delivery-v1-cases.json",
+      "sha256": "sha256:02953f3ebc9bcc319ff91ea23a728f6ec9b6f71a9d66bc3dd0e68618dc42e6a4"
+    },
+    {
+      "path": "examples/delivery/execution-checkpoint-transfer-v1.json",
+      "sha256": "sha256:3cb005157173fe89fe227c0f41484d09d9e2fd32bbb70655ded84878d6f25204"
+    },
+    {
+      "path": "examples/delivery/outbound-checkpoint-lifecycle-v1.json",
+      "sha256": "sha256:919aa21e2b0fe862933b583821fc60a9cf5a1aadb7557be09c77cc763d28e8c7"
+    },
+    {
+      "path": "examples/delivery/outbound-destination-receipts-v1.json",
+      "sha256": "sha256:1cd3342a46d8b2f3496da112ced08e4bb89ee09d624398513cd589ec17de6b65"
+    },
+    {
+      "path": "examples/delivery/queue-placement-checkpoints-v1.json",
+      "sha256": "sha256:98546a09ab9455fba0b1ffe748a14f7190cae0a9e73533a40ccf975324dd9d56"
     }
   ],
   "hash_domains": [
