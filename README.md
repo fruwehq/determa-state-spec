@@ -95,6 +95,13 @@ This repository holds only the specification:
 
 - [`SPEC.md`](SPEC.md) — normative semantics;
 - [`schema/machine.schema.json`](schema/machine.schema.json) — structural JSON Schema;
+- [`schema/provider-reference-v1.schema.json`](schema/provider-reference-v1.schema.json)
+  — exact executable provider identity;
+- [`schema/runtime-action-output-v1.schema.json`](schema/runtime-action-output-v1.schema.json)
+  — checked native action proposals;
+- [`schema/language-source-v1.schema.json`](schema/language-source-v1.schema.json) and
+  [`schema/compilation-manifest-v1.schema.json`](schema/compilation-manifest-v1.schema.json)
+  — optional exact source compilation and provenance;
 - [`schema/aggregate-state-v2.schema.json`](schema/aggregate-state-v2.schema.json) —
   portable queue-bearing aggregate-state envelope;
 - [`schema/migration-descriptor-v2.schema.json`](schema/migration-descriptor-v2.schema.json)
@@ -106,6 +113,8 @@ This repository holds only the specification:
 - [`schema/core-step-result-v2.schema.json`](schema/core-step-result-v2.schema.json) —
   closed core step result schema;
 - [`examples/`](examples/) — schema-valid machine documents and normative vectors; and
+- [`examples/providers/`](examples/providers/) — mixed CEL/native slots, source
+  compilation and output validation examples;
 - [`VERSION`](VERSION) — synchronized specification/package SemVer.
 
 The executable correctness target lives in
