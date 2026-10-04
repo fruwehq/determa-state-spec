@@ -860,8 +860,9 @@ exactly `{provider_actions: binding}`. Each binding is a closed object with
 exactly `{identifier, version, content_digest}` with a lowercase SHA-256 digest and
 exact SemVer version. The `source_digest` is the SHA-256 digest of the UTF-8 `source`
 bytes when source is present; otherwise it identifies the separately resolved source
-or binary. Dependencies are an ordered, duplicate-free exact reference closure,
-including transitive dependencies. A provider must be installed or injected with
+or binary. Dependencies are a complete transitive, duplicate-free exact reference
+closure sorted by `(identifier, version, content_digest)` UTF-8 bytes. A provider
+must be installed or injected with
 matching code, source, closure, declared types and verified capabilities. A mutable
 name, installed package version, or callback with the same name is insufficient.
 Resolution and trust checks occur for the *whole* executable definition before
@@ -876,7 +877,9 @@ fingerprints therefore also bind exact provider closures.
 `event: event_envelope`, `variables: typed_variables`, `owner: owner_reference`, and
 `env: external_values`. Event visibility still follows §5.3. The engine presents
 machine-visible inputs as the exact §16.2 typed values; native SDK, HTTP, protobuf,
-socket and other host objects remain inside the provider. A guard binding has
+socket and other host objects remain inside the provider. The input is an immutable
+value snapshot, never a live reference to engine state; mutation of a provider's
+local copy cannot mutate a tentative or prior aggregate. A guard binding has
 `output_type: bool` and returns one Boolean or a typed failure. An action binding has
 `output_type: structured_actions` and returns an ordered finite list of concrete
 `assign` and `send` action proposals or a typed failure. Their closed result schema
@@ -934,13 +937,13 @@ and manifest envelopes each contain exactly `artifact_format`,
 `artifact_schema_version: 1`, `content`, and `artifact_digest`. Their digest is
 `hash([artifact_format, "1", typed(content)])` using §9 SHA-256/JCS and the §16.2
 recursive typed projection; a digest mismatch rejects. The compiler list is the
-duplicate-free exact ordered closure used by the regions, including transitive
-dependencies. A manifest with a fingerprint unequal to the strict generated bundle
+duplicate-free exact closure used by the regions, including transitive dependencies,
+sorted by `(identifier, version, content_digest)` UTF-8 bytes. A manifest with a
+fingerprint unequal to the strict generated bundle
 rejects before creation or activation. Source-region locators and dependencies are
 validated before compiling; `language_compilation_failed` and
-`language_compilation_limit_exceeded` are distinct failures.
-Source compilation
-is optional: direct runtime slots are first-class, and restoring a complete generated
+`language_compilation_limit_exceeded` are distinct failures. Source compilation is
+optional: direct runtime slots are first-class, and restoring a complete generated
 definition requires its executable runtime closure but no compiler. Fresh compilation
 requires exact compiler closure. Restoration never silently recompiles or substitutes
 a mutable alias. Source-level inspection provenance additionally requires the exact

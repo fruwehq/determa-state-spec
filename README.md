@@ -48,6 +48,11 @@ version-1 maintenance migration receipts, and exact operation-receipt emission i
 rules. Portable persistence artifacts use schema version 1 exclusively; earlier draft
 artifact representations are no longer supported. Machine documents still use
 `format: 1`, independently of the release and artifact schema versions.
+The format-1 grammar also accepts exact runtime guard/action provider slots beside
+CEL and structured actions. Optional source compilers generate strict format-1
+definitions with a version-1 provenance manifest. Native I/O during evaluation is
+an explicit weak embedded profile; provider guarantees and missing capabilities are
+reported rather than inferred.
 
 ## Core model
 
