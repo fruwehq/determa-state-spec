@@ -204,7 +204,7 @@
     },
     {
       "path": "examples/public-host/README.md",
-      "sha256": "sha256:453d9d8cb172fe2b7c929f90f225ee384330d242736a007d53378116893e8a1e"
+      "sha256": "sha256:4e1e8c40d248c794d14c2e2965123477e3282d1af914d1a9cfbd4feb00a86a16"
     },
     {
       "path": "examples/effects/active-effect-claim-v1.json",
@@ -393,6 +393,22 @@
     {
       "path": "examples/extensions/capability-cases-v1.json",
       "sha256": "sha256:ae8dc3f1d5d24911daf803326275f2b32db6d541ea59c7489e1c359410650e0a"
+    },
+    {
+      "path": "examples/providers/action-output.json",
+      "sha256": "sha256:bb814d9e28f905a13e41250ef2e140c6b64454fe48256f6b3e48cd8c366cca52"
+    },
+    {
+      "path": "examples/providers/mixed-cel-native.yaml",
+      "sha256": "sha256:f4ccac15b347a095c560622c78436c88326ef939ae4546092f392ad63ecd543c"
+    },
+    {
+      "path": "examples/providers/invalid-missing-correlation-action-output.json",
+      "sha256": "sha256:9b0ec3e93cb79c3d60a9c779c01379cc70c881c3502b50299d162fb2ed6654af"
+    },
+    {
+      "path": "examples/providers/README.md",
+      "sha256": "sha256:6a8a34c81ead0c609e84dee64d9fd9fb8a2a5f6e0b720b3f349541d13d375e7f"
     }
   ],
   "hash_domains": [
