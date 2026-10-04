@@ -3981,7 +3981,7 @@ Successful host admission allocates one aggregate-wide `acceptance_sequence` and
 tail, creates one input acceptance receipt, advances revision once, and recomputes both
 digests. Only then may an adapter acknowledge transfer of ownership.
 An adapter claiming §21 MUST retain the exact source-to-acceptance binding and prove
-that it survived the same ownership transfer.
+that it committed atomically with this admission under §21.1.
 
 Processing explicitly targets one runtime and selects only its ready head. A deferred
 result atomically moves the entry to that runtime's deferred tail with a new queue
@@ -4806,6 +4806,11 @@ ready/deferred location. A durable adapter binds the source pair and digest to t
 checkpoint acceptance receipt or durable terminal-transfer record before source
 acknowledgement. The binding is host evidence outside the portable checkpoint; it
 MUST be restored with that checkpoint for a broker-integrated profile.
+For that profile, an admitted binding and its checkpoint admission MUST commit in
+one atomic host transaction. If the host cannot commit both, it cannot claim
+lossless broker-integrated ingress. The source may continue to hold an
+unacknowledged copy after commit, but replay then returns the already committed
+binding and never repeats admission.
 The admitted binding's exact digest is
 `hash(["determa-admission-binding-digest-1", "1",
 binding_without_admission_binding_digest])`. Its `envelope_digest` MUST equal
@@ -4816,7 +4821,7 @@ the exact admitted binding.
 ### 21.2 Ingress decisions, acknowledgement, and replay
 
 The source retains ownership until either (a) §17.4 admission commits the complete
-envelope and acceptance receipt, or (b) a configured durable terminal transfer
+envelope, acceptance receipt, and admitted binding, or (b) a configured durable terminal transfer
 commits a §21.4 ingress dead-letter record. Only then may the adapter acknowledge
 the source. An acknowledgement lost after commit may be retried from the retained
 binding without re-admitting or re-dead-lettering. An adapter MUST NOT acknowledge
