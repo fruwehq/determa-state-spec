@@ -687,9 +687,9 @@ A bundle is rejected before any runtime is created when it has:
 - a transition inside entry, exit, or initial behavior;
 - a `spawn` action in exit behavior;
 - a `stop` action in exit behavior;
-- a `stop` action that is not last in its action list; or
+- a `stop` action that is not last in its action list;
 - a provider binding with duplicate dependencies, wrong slot output type, a declared
-  input unavailable at that slot, or a source digest that does not match present source;
+  input unavailable at that slot, or a source digest that does not match present source; or
 - a CEL parsing, name-resolution, or type-checking failure.
 
 For the destroyed-destination rules above, exits performed by root, component, or
@@ -862,8 +862,8 @@ exact SemVer version. The `source_digest` is the SHA-256 digest of the UTF-8 `so
 bytes when source is present; otherwise it identifies the separately resolved source
 or binary. Dependencies are a complete transitive, duplicate-free exact reference
 closure sorted by `(identifier, version, content_digest)` UTF-8 bytes. A provider
-must be installed or injected with
-matching code, source, closure, declared types and verified capabilities. A mutable
+must be installed or injected with matching code, source, closure, declared types
+and verified capabilities. A mutable
 name, installed package version, or callback with the same name is insufficient.
 Resolution and trust checks occur for the *whole* executable definition before
 creation, evaluation, migration target activation or checkpoint/archive restoration.
@@ -893,8 +893,8 @@ structured actions in author order. Dynamic `spawn`, `cancel`, `refresh` and `st
 are unsupported in a provider result; they remain available as ordinary structured
 actions. The provider cannot rewrite the containing transition, choose another slot,
 or gain arbitrary internal-state write authority. Invalid output yields
-`runtime_provider_output_invalid`
-and no tentative Determa state commits. A selected slot alone invokes its provider;
+`runtime_provider_output_invalid` and no tentative Determa state commits. A selected
+slot alone invokes its provider;
 an incoming event's provider-like string grants no invocation authority.
 
 `capabilities` explicitly declares `deterministic`, `pure`, `portable`,
@@ -939,8 +939,8 @@ and manifest envelopes each contain exactly `artifact_format`,
 recursive typed projection; a digest mismatch rejects. The compiler list is the
 duplicate-free exact closure used by the regions, including transitive dependencies,
 sorted by `(identifier, version, content_digest)` UTF-8 bytes. A manifest with a
-fingerprint unequal to the strict generated bundle
-rejects before creation or activation. Source-region locators and dependencies are
+fingerprint unequal to the strict generated bundle rejects before creation or
+activation. Source-region locators and dependencies are
 validated before compiling; `language_compilation_failed` and
 `language_compilation_limit_exceeded` are distinct failures. Source compilation is
 optional: direct runtime slots are first-class, and restoring a complete generated
