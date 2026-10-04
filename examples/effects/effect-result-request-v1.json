@@ -1,0 +1,25 @@
+{
+  "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "operation_token": "business-order-42",
+  "attempt_fence": "1",
+  "outcome_kind": "succeeded",
+  "payload": [
+    "map",
+    [
+      [
+        "operation_token",
+        [
+          "string",
+          "business-order-42"
+        ]
+      ],
+      [
+        "provider_reference",
+        [
+          "string",
+          "accepted-42"
+        ]
+      ]
+    ]
+  ]
+}

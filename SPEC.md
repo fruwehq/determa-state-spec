@@ -4791,8 +4791,8 @@ previous fence for that work, chooses expiry from its own host clock and policy,
 atomically commits the new active claim, journal state, generation and operation
 receipt under the §18.3 guard. The success result's closed `claim` contains the
 scope, root, work kind/identity, operation token, current scope authority epoch,
-new attempt fence, authenticated worker principal, `clock_basis`, `expires_at` and
-`active` state. `clock_basis` is exactly `unix_nanoseconds`; `expires_at` is a
+new attempt fence, authenticated worker principal, `expires_at` and `active`
+state. The fixed host clock basis is `unix_nanoseconds`; `expires_at` is a
 canonical signed decimal Unix-epoch nanosecond value in the signed 64-bit interval
 `[-9223372036854775808, 9223372036854775807]`. `-0`, floating values and values
 outside that range reject before a claim is issued. The host selects expiry using
@@ -4866,6 +4866,277 @@ failed or unsupported safe relocation. `examples/authority/host-authority-cases-
 contains normative positive and negative interface cases. The companion
 `examples/authority/host-authority-profile-cases-v1.json` fixes positive and
 negative report and capability combinations.
+
+## 19. Committed native effects and authenticated results
+
+### 19.1 Scope and distinct identities
+
+This optional host profile executes only a selected, committed §17 external outbox
+intent. It does not execute an uncommitted core result, a merely proposed intent, or a
+request inferred from a pending journal row. The pure §8 core needs no journal,
+worker, scheduler, coordinator, or native handler. A host claiming durable native
+results MUST supply an atomic checkpoint, outbox, pinned-route, and journal-outcome
+boundary and the authority capability required for every claim it advertises (§18).
+An embedded callback without those capabilities MUST report its weaker guarantees; it
+MUST NOT advertise durable worker claims, safe relocation, or exactly-once external
+execution. This profile defines no distributed authority service.
+
+Ingress `event_id`, host request `operation_id`, durable business `operation_token`,
+and deterministic §9 `effect_id` have separate lifetimes and MUST NOT be interchanged.
+The nonempty opaque `operation_token` identifies one outstanding business invocation
+through request replay, attempts, and its result. It is chosen before the producing
+transaction commits. A workflow that checks the token at machine level carries it in
+a declared initiating input, retained variables, and a declared emitted payload. The
+pinned route copies that exact value into its declared result location. This adds no
+reserved machine field. For host-only use a host MAY derive
+`hash(["determa-host-operation-token-1", scope_identity, root_instance_id, effect_id])`;
+that value is host metadata and cannot be presented as a token already known by the
+machine. Correlation may express a declared business link but never authenticates a
+worker, claim, result, or scope. External destination idempotency is scoped by
+`(logical_scope_identity, effect_id)`; scope is not added to the portable intent.
+
+### 19.2 Closed host journal and pinned route
+
+`schema/host-effect-journal-v1.schema.json` is the closed version-1 host journal.
+Its fields are exactly `host_effect_journal_format`,
+`host_effect_journal_schema_version`, `scope_identity`, `root_instance_id`,
+`checkpoint_revision`, `checkpoint_digest`, `journal_revision`, `effect_records`,
+`operation_response_references`, and `host_effect_journal_digest`. The digest is
+`hash(["determa-host-effect-journal-digest-1",
+journal_without_host_effect_journal_digest])`. The journal is host-owned and scoped;
+it is not part of the portable aggregate or checkpoint digest. Its checkpoint pair
+MUST match an extant committed checkpoint at the same root and revision. Inserting an
+intent and its effect record, recording an outcome, result admission, and every
+checkpoint/outbox mutation that changes their joint facts MUST commit atomically.
+Recovery MUST reject a torn checkpoint/journal pair. A metadata-only journal mutation
+MAY advance `journal_revision` without a core step and MUST retain the unchanged
+checkpoint reference. Journal revision starts at `"0"` and advances exactly once per
+changing journal transaction; equal replay does not advance it.
+
+`effect_records` are strictly ordered by effect ID UTF-8 bytes and contain no
+duplicate ID. `operation_response_references` are strictly ordered by operation ID
+and contain no duplicate ID. Each reference binds a retained host
+operation ID to `hash(["determa-host-operation-response-1", normalized_response])`.
+The normalized response is the exact public result returned for the committed
+operation, excluding transport-only headers, credentials and redacted views. The
+host MUST retain or be able to reconstruct those exact bytes while it claims equal
+operation replay; a digest alone is not the response. A referenced intent MUST exist
+in exactly one pending, terminal, or compact checkpoint outbox location, and its
+recomputed digest MUST
+match `intent_digest`. Attempt records are strictly ordered by numeric fence,
+contain no duplicate fence, and no fence exceeds the record's `attempt_fence`.
+`unclaimed`, `leased`, and `ambiguous` have null outcome, result ID, and admission
+receipt; `outcome_recorded` has a terminal outcome and result ID but null admission
+receipt; `result_admitted` and `closed` have all three, with the receipt's event ID
+equal to the result ID. A terminal outcome's fence MUST name its corresponding immutable attempt report,
+except the §19.3 host-finalized preclaim `cancelled` outcome: it has fence `"0"`,
+no attempt report, and `cancellation.state: prevented_start`. No other terminal
+outcome may omit its attempt report. Schema validity alone is insufficient for
+these checks.
+Unknown journal format/version, unequal digest, dangling checkpoint reference, or
+semantic inconsistency fails closed before any dispatch or result admission.
+
+Each effect record contains exactly `effect_id`, `operation_token`, `intent_digest`,
+`handler_reference`, `destination_binding_digest`,
+`route_configuration_generation`, `result_mapping`, `target`,
+`idempotency_policy`, `attempt_fence`, `attempt_records`, `invocation_state`,
+`outcome`, `result_event_id`, `admission_receipt`, and `cancellation`. `effect_id`
+references exactly one committed checkpoint intent. `intent_digest` is the §17.6
+complete-intent digest, including its domain, root, and original intent. The
+`native_handler` reference is the exact §11.5 provider reference, resolved against
+host allowlist and dependency policy. Its binding digest identifies the precise
+destination and connector configuration without containing credentials. Configuration generation
+is a canonical decimal string. The target pins root instance ID, runtime ID, and
+exact runtime incarnation; a current alias or a later reactivation cannot redirect it.
+The ordered result mapping entries contain exactly `outcome_kind`, `event`,
+`result_slot`, and `operation_token_location`. Every permitted terminal business
+outcome has one declared result event and a distinct nonempty slot. Token location is
+`null` for host-only tokens, `{"kind":"correlation_id"}`, or
+`{"kind":"payload","pointer":canonical_json_pointer}` into the decoded logical
+declared payload map, before §16.2 typed projection. A token location MUST
+resolve to a declared string field; the host, not the worker, inserts the pinned
+value. A result is admitted only in the event's declared input mode to the pinned
+runtime incarnation. Rebinding to a new target or route requires new work, never a
+mutation of this record.
+
+Route resolution and authorization occur before the producing core call. The host
+revalidates the route generation and exact binding under the producing transaction's
+commit guard. A changed generation fails before commit; an equal operation replay
+returns its saved binding without resolving current aliases. Later configuration edits
+apply only to new intents. Every dispatch checks current scope, worker, handler, and
+destination authorization. Revocation retains work for cancellation or reconciliation;
+it never silently reroutes the pinned intent. Current authorized configuration supplies
+secrets only to the handler, outside portable values and journal digests.
+
+### 19.3 Invocation, claims, attempts, and cancellation
+
+`invocation_state` is exactly `unclaimed`, `leased`, `ambiguous`,
+`outcome_recorded`, `result_admitted`, or `closed`. A new record begins
+`unclaimed` with attempt fence `"0"`, no reports and null outcome, result ID,
+admission receipt, and cancellation. Claiming changes it to `leased` at the next
+fence. A proved safe `retryable_failure` report returns it to `unclaimed`; an
+`ambiguous` report changes it to `ambiguous`. An authorized reconciliation MAY
+resolve ambiguity or issue a new fenced claim only with its recorded external
+evidence. A terminal report records the immutable outcome and changes it to
+`outcome_recorded`; successful admission changes it to `result_admitted`. `closed`
+may follow only after result admission and retains all identity and outcome
+evidence required by the declared replay policy. These are business-invocation
+states independent of the §17.6 outbox delivery state. Outbox `confirmed` proves only
+durable adapter acceptance; it does not prove the native provider succeeded. A remote
+worker may accept responsibility while invocation remains outstanding. Runtime/root
+completion does not silently erase that outstanding record or late-result policy.
+
+The closed claim shape is `schema/host-effect-claim-v1.schema.json`. A claim has
+exactly `scope_identity`, `root_instance_id`, `work_kind`,
+`work_identity`, `operation_token`, `scope_authority_epoch`, `attempt_fence`,
+`worker_principal`, `expires_at`, and `state`. The active form MUST match
+the closed ten-field §18.4 `workerClaim` with canonical signed 64-bit Unix-epoch
+nanosecond expiry. Negative zero, float, or overflow is invalid; expiration is determined from
+trusted host time at `now >= expires_at`, and unavailable trusted time fails closed.
+`scope_authority_epoch` MUST equal the current §18 `authority_epoch`; a numeric
+match alone is not a credential. For this journal `work_kind` is
+`effect`, `work_identity` is its effect ID, and state is `active`, `revoked`, or
+`expired`. The current claim is an authority record outside the archive; historic
+claim evidence MAY be retained for audit but grants no authority. Issuing a claim
+increments the effect's canonical decimal `attempt_fence`, changes it to `leased`,
+and commits both facts under the host authority guard. Only the authenticated current
+worker principal, active unexpired claim, current scope authority epoch, and exact
+attempt fence authorize dispatch or result submission. Expiry/revocation and new
+claims serialize under that guard. The authenticated principal and matching active
+scope epoch and attempt fence MUST still hold at the journal transaction commit.
+Lease expiry can revoke host writes but cannot
+prove whether external work happened. Import never restores a live claim; an
+unresolved inherited attempt becomes ambiguous before any new attempt.
+
+Native handlers receive a declared §16.2 typed portable input, immutable invocation
+metadata, and an attempt context. They may build arbitrary SDK, protobuf, or other
+native objects internally. Such objects are not portable input, result, checkpoint,
+or journal values. A handler has no direct aggregate mutation or host transaction
+capability. Its report kind is `succeeded`, `domain_rejected`,
+`retryable_failure`, `terminal_failure`, `cancelled`, or `ambiguous`.
+`retryable_failure` requires evidence that another attempt is safe; unknown provider
+acceptance, unclassified exception, worker disappearance, or expired attempt is
+`ambiguous` unless definitive evidence proves no call occurred. A report is immutable
+and contains exactly `attempt_fence`, `report_kind`, `report_digest`, and `reason`.
+`report_digest` is `hash(["determa-effect-attempt-report-1", effect_id,
+operation_token, attempt_fence, report_kind, payload, reason])`, with the exact
+§16.2 typed payload and `null` or a stable nonempty reason code. The host retains
+external evidence separately under access policy; its digest can be included in the
+portable payload only when declared. A duplicate equal report replays and an unequal
+report for the same fence conflicts. Reports do not consume the final outcome slot.
+
+Retry after ambiguity requires proved destination deduplication under the same scoped
+`effect_id`, or explicit authorized reconciliation. A new attempt always receives a
+new fence; an old worker cannot overwrite current journal or checkpoint state.
+Neither a lease nor a journal row proves a provider call did or did not occur. No
+universal exactly-once claim follows from a host transaction. `outcome` is null until
+a terminal business outcome and then is immutable with exactly `kind`, `payload`,
+`digest`, and `attempt_fence`. Its typed portable payload and digest use §16.2 and
+`hash(["determa-effect-outcome-1", effect_id, operation_token, kind, payload,
+attempt_fence])`. Attempt reports remain separate evidence.
+
+Cancellation is null or exactly `operation_id`, `reason`, and `state`, where state is
+`requested`, `prevented_start`, `too_late`, or `reconciliation_required`. Cancellation
+and outcome recording serialize. The closed
+`schema/effect-cancellation-request-v1.schema.json` has exactly `operation_id`,
+`effect_id`, `reason`, and typed `payload`; authenticated scope and principal are
+transport context. The closed response is
+`schema/effect-cancellation-response-v1.schema.json`. It serializes
+with claim issuance and outcome recording under the current §18 scope guard. The
+`operation_id` and exact normalized request are retained for equal replay or
+`operation_id_conflict`; equal replay returns the exact retained response bytes
+without mutation. The host validates the request payload against the pinned
+`cancelled` event declaration and inserts or verifies the exact pinned token. If it wins before any claim, the host MUST require an exact
+pinned `cancelled` result mapping and a valid declared result payload. In one durable
+journal transaction it records `cancellation.state: prevented_start`, an immutable
+`cancelled` outcome with fence `"0"`, and the deterministic mapped result event ID;
+invocation state becomes `outcome_recorded`. No worker attempt or provider call is
+made, and no later claim may issue for this effect. The host then admits the pinned
+`cancelled` event through §19.4, in an independent atomic checkpoint/journal
+transaction. Crash recovery resumes that admission from the stored outcome. If no
+declared `cancelled` mapping exists, cancellation fails before mutation; the host
+MUST NOT invent an event or leave an unclaimable `unclaimed` invocation. After a call might have occurred, cancellation records
+`reconciliation_required` and returns the closed response status of the same name
+with null outcome and result ID. Its request and response digest are retained in
+`operation_response_references`; equal replay returns identical bytes. The host
+cannot claim rollback or erase ambiguity. A recorded outcome wins over later
+cancellation; a late report cannot replace it. Equal cancellation returns retained
+operation evidence without mutation; a changed request cannot rewrite an immutable
+outcome.
+
+### 19.4 Authenticated result submission and admission
+
+The closed request shape is `schema/effect-result-request-v1.schema.json`; the
+closed response shape is `schema/effect-result-response-v1.schema.json`. The
+result request contains exactly `effect_id`, `operation_token`,
+`attempt_fence`, `outcome_kind`, and `payload`. The authenticated transport context
+supplies principal and scope independently of those fields. Before a fresh worker report or outcome commit the host validates the current
+authority epoch, live unexpired claim and fence at trusted host time, authenticated
+worker principal, exact scope and pinned route, outstanding invocation, exact token,
+allowed outcome and declared portable payload. It computes the immutable attempt
+report digest from the normalized request and reason, then records that report with
+the outcome when terminal. The worker check remains true through the outcome commit;
+an expired or revoked claim cannot create a fresh outcome. A subsequent equal replay requires current scope and principal
+authorization, exact retained request/outcome evidence, and the original authenticated
+claim principal; it does not require reviving an expired claim or admitting again.
+An old authority epoch never gains replay rights across a scope transfer. An expired or revoked worker claim returns `stale_attempt_fence` before any
+worker-originated outcome commit or core admission. A wrong business token or
+unknown/closed unrelated invocation returns
+`effect_not_outstanding`; a stale fence returns `stale_attempt_fence`; conflicting
+content for an already recorded outcome returns `effect_result_conflict`. Validation
+failure performs no core call and changes no checkpoint, journal, or outbox bytes.
+
+A response has exactly `status`, `effect_id`, `attempt_fence`, `attempt_report`,
+`outcome`, `result_event_id`, `admission_receipt`, `checkpoint_revision`,
+`journal_revision`, and `error_code`. `status: committed` returns the exact terminal
+outcome and acceptance receipt; equal replay returns the same response bytes and
+revisions. `status: report_recorded` returns the immutable retry or ambiguity attempt
+report with null outcome, result ID, and receipt. `status: rejected` returns only the
+request effect ID/fence and one closed error code; all evidence and revisions are
+null, so unauthorized callers cannot infer whether another scope contains work.
+Rejected requests allocate no revision. A retry or ambiguity report leaves the
+checkpoint revision unchanged. The journal revision advances only on a fresh report.
+
+For a terminal mapped outcome, result event identity is
+`hash(["determa-effect-result-event-1", effect_id, result_slot])`. The host builds
+the full normalized input envelope from the pinned event, target and token mapping,
+including the declared result payload. Its identity and bytes are immutable across
+transport retry or response loss. The host persists the outcome first.
+Admission of an already committed
+`outcome_recorded` result is a host-owned recovery operation: it requires the current
+authorized scope and §18 guarded commit, validates the immutable journal outcome,
+pinned route, target incarnation, declared result schema, token mapping, deterministic
+event ID and complete envelope against the stored evidence, and admits that exact
+event. It does not require the old worker claim to remain live, create a new claim,
+or call the provider. A host-finalized preclaim `cancelled` outcome uses the same
+path. After a crash, even if the old claim expired, recovery resumes this operation
+from the stored outcome. Admission and journal `admission_receipt` commit
+atomically. The receipt is the exact
+§17 accepted event receipt; it records the result event identity. Processing is a
+later independent core operation. Equal submission returns retained outcome/admission
+evidence without new core admission; unequal envelope or outcome is
+`effect_result_conflict`. If admission fails because the pinned runtime is now
+ineligible, the outcome remains durable and is explicitly reconciled; the host MUST
+NOT redirect it. `result_admitted` and `closed` never permit another result admission.
+
+### 19.5 Required conformance evidence
+
+A host claiming this profile MUST pass positive and negative cases for route generation
+change before commit; exact route replay after configuration change; revoked dispatch;
+SDK-native objects remaining inside a handler; scope/token/principal/epoch/fence
+validation before admission; equal replay versus unequal conflict; stale and duplicate
+worker reports; cancellation before claim and after possible call; and terminal outbox
+acceptance with business outcome still pending. Crash cases MUST cover intent commit
+before dispatch, provider acceptance before outcome commit, outcome commit before
+admission, and admission commit before response. The first ambiguous window retains
+uncertainty; it is not converted to failure. Retrying ambiguous work requires the
+stated idempotency or reconciliation proof. Tests MUST compare checkpoint and journal
+bytes before and after every rejected operation and prove no unauthorized provider
+call or core admission. Optional relocation tests run only when the host advertises
+its §18 authority capability; otherwise safe relocation is explicitly refused and
+staged imports remain inactive. These are public conformance obligations for any
+future hosted service claiming the same capability.
+
 ## 20. Lossless application projection and embedded transaction facade
 
 This optional host contract binds selected application rows to one root ownership
