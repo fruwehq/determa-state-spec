@@ -5039,7 +5039,13 @@ Before ingress admission, a source item has an immutable `source_scope`,
 `original_bytes_base64` (RFC 4648 padded standard Base64 of the original bytes) or
 `canonical_transport_value` (a §16.2 typed value). A decoded transport value MUST
 be canonical before it is used; arbitrary SDK/protobuf/HTTP objects stay inside the
-adapter. Its content digest is exactly:
+adapter. Base64 is canonical only when strict decoding followed by RFC 4648 standard
+encoding reproduces the exact input string, including padding. Non-zero unused pad
+bits, missing or excess padding, whitespace, alternate alphabets, and nonalphabet
+characters are `malformed_delivery` before digest comparison, admission, or source
+acknowledgement. An adapter encoding original bytes MUST produce this canonical
+form; it cannot hash a different spelling that decodes to the same bytes. Its content
+digest is exactly:
 
 ```text
 source_content_digest = hash([
@@ -5198,7 +5204,12 @@ configured contract. It does not prove execution or business success. A later
 declared input event is the only machine-visible remote result. Definitive rejection,
 operator cancellation, declared discard, and dead-letter transfer use §17.6's exact
 terminal states with reason and complete intent; a durable dead-letter claim also
-retains the destination's durable transfer receipt. Retrying after a terminal state
+retains the destination's durable transfer receipt. In the closed §21 outbound
+decision, `reason_code` is non-null exactly for retryable failure, ambiguity,
+permanent rejection, operator cancellation, discard, and dead-letter transfer.
+`destination_receipt_id` is non-null exactly for confirmed durable destination
+acceptance or durable dead-letter transfer. A `dead_lettered` decision with either
+field null is invalid and cannot end outbound responsibility. Retrying after a terminal state
 returns the retained record and does not send again. A §19 invocation/effect journal,
 when present, records business outcome separately from destination acceptance and
 uses its own current authority and recovery rules. The lossless profile cannot
