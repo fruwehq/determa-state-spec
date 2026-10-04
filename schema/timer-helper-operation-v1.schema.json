@@ -8,6 +8,9 @@
     },
     {
       "$ref": "#/$defs/result"
+    },
+    {
+      "$ref": "#/$defs/earlyError"
     }
   ],
   "$defs": {
@@ -491,6 +494,86 @@
           }
         }
       ]
+    },
+    "earlyError": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "type": "null"
+        },
+        "operation_id": {
+          "type": "null"
+        },
+        "scope_identity": {
+          "type": "null"
+        },
+        "root_instance_id": {
+          "type": "null"
+        },
+        "root_runtime_id": {
+          "type": "null"
+        },
+        "timer_id": {
+          "type": "null"
+        },
+        "interface": {
+          "const": "determa.timer_helper"
+        },
+        "interface_version": {
+          "const": 1
+        },
+        "status": {
+          "const": "rejected"
+        },
+        "record_revision": {
+          "type": "null"
+        },
+        "attempt_fence": {
+          "type": "null"
+        },
+        "clock_basis": {
+          "const": "unix_nanoseconds"
+        },
+        "expires_at": {
+          "type": "null"
+        },
+        "event_id": {
+          "type": "null"
+        },
+        "delivery_state": {
+          "const": "none"
+        },
+        "error_code": {
+          "enum": [
+            "invalid_timer_request",
+            "unsupported_timer_protocol",
+            "unsupported_timer_protocol_version"
+          ]
+        },
+        "result_digest": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "operation",
+        "operation_id",
+        "scope_identity",
+        "root_instance_id",
+        "root_runtime_id",
+        "timer_id",
+        "interface",
+        "interface_version",
+        "status",
+        "record_revision",
+        "attempt_fence",
+        "clock_basis",
+        "expires_at",
+        "event_id",
+        "delivery_state",
+        "error_code",
+        "result_digest"
+      ],
+      "additionalProperties": false
     }
   }
 }

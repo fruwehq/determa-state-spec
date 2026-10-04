@@ -95,6 +95,11 @@ backpressure, durable ingress dead letters, and retained terminal evidence. Acce
 events follow core mailbox order and disposition; an unhandled event has a terminal
 receipt. In-memory use returns every decision to the caller for persistence.
 
+The optional §22 archive profile snapshots selected complete checkpoints and exact
+immutable definition attachments with separately declared application or helper
+participants. Import verifies the closure and stages it inertly; activation and scope
+transfer require separate protocols.
+
 The optional execution-checkpoint profile standardizes the durable transaction boundary
 around one root aggregate: accepted host/internal deliveries, operation receipts,
 pending/terminal/compact outbox work, replay retention, root tombstones, migration
@@ -117,7 +122,9 @@ Time-based behavior uses an external event-producing extension. A machine emits 
 declared scheduling request and may later receive a declared correlated event. The
 optional [external timer helper](SPEC.md#23-optional-external-timer-helper) specifies
 closed schedule, cancel, fire, clock, durability, and archive contracts. It is
-installed explicitly and is never part of core evaluation.
+installed explicitly and is never part of core evaluation. Durable timer records
+join a complete §22 archive through a separately declared required participant
+when selected roots depend on them.
 
 ## Repository
 
@@ -151,6 +158,15 @@ This repository holds only the specification:
   — self-contained transfer package;
 - [`schema/execution-checkpoint-v1.schema.json`](schema/execution-checkpoint-v1.schema.json)
   — portable durable-host checkpoint;
+- [`schema/archive-v1.schema.json`](schema/archive-v1.schema.json),
+  [`schema/archive-participant-v1.schema.json`](schema/archive-participant-v1.schema.json),
+  and [`schema/archive-result-v1.schema.json`](schema/archive-result-v1.schema.json)
+  — closed portable archive, participant, and result;
+- [`schema/archive-export-request-v1.schema.json`](schema/archive-export-request-v1.schema.json),
+  [`schema/archive-import-request-v1.schema.json`](schema/archive-import-request-v1.schema.json),
+  and [`schema/archive-export-source-v1.schema.json`](schema/archive-export-source-v1.schema.json)
+  — closed archive requests and export-source evidence;
+- [`examples/archives/`](examples/archives/) — complete staged and refusal vectors;
 - [`schema/core-step-result-v1.schema.json`](schema/core-step-result-v1.schema.json) —
   closed core step result schema;
 - [`schema/provider-reference-v1.schema.json`](schema/provider-reference-v1.schema.json)

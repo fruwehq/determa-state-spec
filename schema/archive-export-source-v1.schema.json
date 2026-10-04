@@ -1,0 +1,259 @@
+{
+  "type": "object",
+  "required": [
+    "source",
+    "checkpoints",
+    "normalized_definitions",
+    "migration_descriptors",
+    "participant_captures",
+    "inventory_evidence",
+    "declared_optional_participant_references"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "source": {
+      "$ref": "archive-v1.schema.json#/$defs/source"
+    },
+    "checkpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "execution-checkpoint-v1.schema.json"
+      }
+    },
+    "normalized_definitions": {
+      "type": "array",
+      "items": {
+        "$ref": "archive-v1.schema.json#/properties/normalized_definitions/items"
+      }
+    },
+    "migration_descriptors": {
+      "type": "array",
+      "items": {
+        "$ref": "migration-descriptor-v1.schema.json"
+      }
+    },
+    "participant_captures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "participant_id",
+          "required",
+          "dependencies",
+          "storage",
+          "provider_reference",
+          "participant_schema_digest",
+          "payload_digest",
+          "payload",
+          "external_payload",
+          "capability_report"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "participant_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9.-]*$"
+          },
+          "provider_reference": {
+            "$ref": "provider-reference-v1.schema.json"
+          },
+          "participant_schema_digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "payload_digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "payload": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "aggregate-state-v1.schema.json#/$defs/typedValue"
+              }
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9.-]*$"
+            },
+            "uniqueItems": true
+          },
+          "storage": {
+            "enum": [
+              "embedded",
+              "external"
+            ]
+          },
+          "external_payload": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "aggregate-state-v1.schema.json#/$defs/typedValue"
+              }
+            ]
+          },
+          "capability_report": {
+            "$ref": "extension-capability-report-v1.schema.json"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "storage": {
+                  "const": "embedded"
+                }
+              },
+              "required": [
+                "storage"
+              ]
+            },
+            "then": {
+              "properties": {
+                "payload": {
+                  "$ref": "aggregate-state-v1.schema.json#/$defs/typedValue"
+                },
+                "external_payload": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "storage": {
+                  "const": "external"
+                }
+              },
+              "required": [
+                "storage"
+              ]
+            },
+            "then": {
+              "properties": {
+                "payload": {
+                  "type": "null"
+                },
+                "external_payload": {
+                  "$ref": "aggregate-state-v1.schema.json#/$defs/typedValue"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "inventory_evidence": {
+      "type": "object",
+      "required": [
+        "authorized_source",
+        "committed_consistency_token",
+        "selected_checkpoint_digests",
+        "trusted_required_participant_ids",
+        "host_journal_inventory"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "authorized_source": {
+          "$ref": "archive-v1.schema.json#/$defs/source"
+        },
+        "committed_consistency_token": {
+          "type": "string",
+          "minLength": 1
+        },
+        "selected_checkpoint_digests": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "trusted_required_participant_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9.-]*$"
+          }
+        },
+        "host_journal_inventory": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "archive-host-journal-inventory-v1.schema.json"
+            }
+          ]
+        }
+      }
+    },
+    "declared_optional_participant_references": {
+      "type": "array",
+      "items": {
+        "$ref": "archive-v1.schema.json#/$defs/optionalParticipantReference"
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://determa.dev/state/schema/archive-export-source-v1.schema.json",
+  "title": "Determa archive export source evidence fixture version 1",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "source": {
+            "properties": {
+              "profile_claims": {
+                "contains": {
+                  "const": "durable_native_results"
+                }
+              }
+            },
+            "required": [
+              "profile_claims"
+            ]
+          }
+        },
+        "required": [
+          "source"
+        ]
+      },
+      "then": {
+        "properties": {
+          "inventory_evidence": {
+            "properties": {
+              "host_journal_inventory": {
+                "$ref": "archive-host-journal-inventory-v1.schema.json"
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "inventory_evidence": {
+            "properties": {
+              "host_journal_inventory": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

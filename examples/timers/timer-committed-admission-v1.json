@@ -1,9 +1,9 @@
 {
   "machine_source": "examples/portable-event-deferral.yaml",
   "prior_checkpoint_digest": "sha256:383e0db6d1adcdfcd3915871e27828ec5163a1449400031f77ee8370cc0ae3fa",
-  "fire_event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
-  "envelope_digest": "sha256:23270848f4796ffd2cc133d5ea02591ce61b65140bb936253ce34588780f2393",
-  "admission_receipt_digest": "sha256:411e2b5d59fe15fc5635b319d384398969201ca7b58cebd557b53cbb7fb0b871",
+  "fire_event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+  "envelope_digest": "sha256:0b59cfe0449c33ff94c08f0cd8a54754c0e1a7c4e3b46ab94c0c2b57b33c5bc7",
+  "admission_receipt_digest": "sha256:f19e08b5f1704b507d4eb15347ecdc4d711bd07422148d8f8bd752e86dfb8400",
   "committed_checkpoint": {
     "execution_checkpoint_format": "determa.execution_checkpoint",
     "execution_checkpoint_schema_version": 1,
@@ -96,8 +96,8 @@
                 "delivery_mode": "input",
                 "envelope": {
                   "event": "received",
-                  "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
-                  "cause_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+                  "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+                  "cause_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
                   "source": {
                     "host": true
                   },
@@ -112,7 +112,7 @@
                     []
                   ]
                 },
-                "envelope_digest": "sha256:23270848f4796ffd2cc133d5ea02591ce61b65140bb936253ce34588780f2393",
+                "envelope_digest": "sha256:0b59cfe0449c33ff94c08f0cd8a54754c0e1a7c4e3b46ab94c0c2b57b33c5bc7",
                 "deferral_count": "0"
               }
             ],
@@ -120,7 +120,7 @@
             "fault": null
           }
         ],
-        "aggregate_state_digest": "sha256:acd7a3031cad1219d2bd2a9463945df75f19eebda0e166769a8ceea1e2cf36dd"
+        "aggregate_state_digest": "sha256:2288e997af708ca6ac83918e12080af90577926f2656f24a64260b2005969744"
       }
     },
     "replay_retention": {
@@ -145,8 +145,8 @@
       {
         "operation_kind": "acceptance",
         "receipt_sequence": "1",
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
-        "request_digest": "sha256:23270848f4796ffd2cc133d5ea02591ce61b65140bb936253ce34588780f2393",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+        "request_digest": "sha256:0b59cfe0449c33ff94c08f0cd8a54754c0e1a7c4e3b46ab94c0c2b57b33c5bc7",
         "acceptance_sequence": "0",
         "accepted_revision": "1",
         "delivery_mode": "input"
@@ -158,6 +158,6 @@
     "terminal_outbox_records": [],
     "outbox_effect_tombstones": [],
     "migration_audit_records": [],
-    "execution_checkpoint_digest": "sha256:605256bd69aad90fa041c74b85994e5864275abe1d76b7bf8196239b93e34075"
+    "execution_checkpoint_digest": "sha256:071479dd8ffb5f8e96a3e7a944f895c4785faa4b9438a402980ae87f2f23675e"
   }
 }

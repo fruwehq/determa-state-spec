@@ -3,11 +3,11 @@
   "timer_artifact_schema_version": 1,
   "records": [
     {
-      "scope_identity": "scope-A",
+      "scope_identity": "scope-archive-example",
       "root_instance_id": "server-1",
       "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
       "timer_id": "timer-A",
-      "schedule_request_digest": "sha256:99913eb88d372a77d2d63da0c4ed2e8dbe2a5f711a05acc9977d18a3628bb53d",
+      "schedule_request_digest": "sha256:a8558d591eb3f2e8a128d4b2ab4266ede95efe5c46f7a473dbada7ce99a544d9",
       "clock_basis": "unix_nanoseconds",
       "deadline_at": "110",
       "event_name": "received",
@@ -16,7 +16,7 @@
         []
       ],
       "correlation_id": "job-7",
-      "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+      "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
       "state": "cancelled",
       "revision": "2",
       "attempt_fence": "0",
@@ -28,11 +28,11 @@
   "operation_receipts": [
     {
       "operation_id": "schedule-A",
-      "request_digest": "sha256:99913eb88d372a77d2d63da0c4ed2e8dbe2a5f711a05acc9977d18a3628bb53d",
+      "request_digest": "sha256:a8558d591eb3f2e8a128d4b2ab4266ede95efe5c46f7a473dbada7ce99a544d9",
       "result": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -43,19 +43,19 @@
         "attempt_fence": null,
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": null,
-        "result_digest": "sha256:706f1b1260a8d8488288fc96fc1f77fcb3aab3d688cde8bf5a003cf3bde553ea"
+        "result_digest": "sha256:7e8be2ff09bd80babb5e1296427701d6a7a3b5da961d4a55f59a8e11fb50a45c"
       }
     },
     {
       "operation_id": "cancel-A",
-      "request_digest": "sha256:f67101382c857be0b5df21bbe77478d5b90c5560efe5f40ec6bbd5579b272a14",
+      "request_digest": "sha256:d792f64dc38bccfbc30cc9785d6e426d449c06234b513658004bc17a87715430",
       "result": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -66,12 +66,12 @@
         "attempt_fence": null,
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": null,
-        "result_digest": "sha256:a7cd6de14bc30c4d44e5c2ed57422fd9abc46796b98c24ff4f05d47f2eea74b3"
+        "result_digest": "sha256:d0487f9109f183b1c535092a2c11838e65358acb7c6f1f5449ada78fc950c588"
       }
     }
   ],
-  "timer_artifact_digest": "sha256:0edffe039e7a6ff30e499aa90fd5604cf7046a95baf12d9c470cbdaa249d941d"
+  "timer_artifact_digest": "sha256:3047ac73dbeacde13000eec685948ba5dfa4eea4656ff631358afe6eab5fc07f"
 }

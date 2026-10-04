@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://determa.dev/state/schema/archive-host-journal-inventory-v1.schema.json",
+  "title": "Determa archive authoritative host-journal inventory version 1",
+  "type": "object",
+  "required": ["source_profile_digest", "consistency_token", "root_inventories", "inventory_digest"],
+  "additionalProperties": false,
+  "$defs": {"sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}},
+  "properties": {
+    "source_profile_digest": {"$ref": "#/$defs/sha256"},
+    "consistency_token": {"type": "string", "minLength": 1},
+    "root_inventories": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "required": ["root_instance_id", "checkpoint_revision", "checkpoint_digest", "journal_revision", "journal_digest", "record_commitments", "response_commitments"],
+        "additionalProperties": false,
+        "properties": {
+          "root_instance_id": {"type": "string", "minLength": 1},
+          "checkpoint_revision": {"type": "string", "pattern": "^(0|[1-9][0-9]*)$"},
+          "checkpoint_digest": {"$ref": "#/$defs/sha256"},
+          "journal_revision": {"type": "string", "pattern": "^(0|[1-9][0-9]*)$"},
+          "journal_digest": {"$ref": "#/$defs/sha256"},
+          "record_commitments": {
+            "type": "array", "items": {
+              "type": "object", "required": ["effect_id", "intent_digest", "attempt_report_digests", "outcome_digest", "result_event_id"], "additionalProperties": false,
+              "properties": {
+                "effect_id": {"$ref": "#/$defs/sha256"},
+                "intent_digest": {"$ref": "#/$defs/sha256"},
+                "attempt_report_digests": {"type": "array", "items": {"$ref": "#/$defs/sha256"}},
+                "outcome_digest": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/sha256"}]},
+                "result_event_id": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/sha256"}]}
+              }
+            }
+          },
+          "response_commitments": {"type": "array", "items": {"$ref": "host-effect-journal-v1.schema.json#/$defs/operationResponseReference"}}
+        }
+      }
+    },
+    "inventory_digest": {"$ref": "#/$defs/sha256"}
+  }
+}

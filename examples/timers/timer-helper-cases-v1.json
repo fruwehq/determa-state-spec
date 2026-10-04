@@ -7,7 +7,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -23,7 +23,7 @@
           ],
           "correlation_id": null
         },
-        "request_digest": "sha256:99913eb88d372a77d2d63da0c4ed2e8dbe2a5f711a05acc9977d18a3628bb53d"
+        "request_digest": "sha256:a8558d591eb3f2e8a128d4b2ab4266ede95efe5c46f7a473dbada7ce99a544d9"
       },
       "prior": {
         "trusted_now": "100",
@@ -32,7 +32,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -43,10 +43,10 @@
         "attempt_fence": null,
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": null,
-        "result_digest": "sha256:706f1b1260a8d8488288fc96fc1f77fcb3aab3d688cde8bf5a003cf3bde553ea"
+        "result_digest": "sha256:7e8be2ff09bd80babb5e1296427701d6a7a3b5da961d4a55f59a8e11fb50a45c"
       },
       "assertions": "Accept only after separate record and result receipt persist; computed deadline 110."
     },
@@ -55,7 +55,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -71,18 +71,18 @@
           ],
           "correlation_id": null
         },
-        "request_digest": "sha256:99913eb88d372a77d2d63da0c4ed2e8dbe2a5f711a05acc9977d18a3628bb53d"
+        "request_digest": "sha256:a8558d591eb3f2e8a128d4b2ab4266ede95efe5c46f7a473dbada7ce99a544d9"
       },
       "prior": {
         "trusted_now": "999",
         "record_state": "claimed",
         "record_revision": "2",
-        "retained_request_digest": "sha256:99913eb88d372a77d2d63da0c4ed2e8dbe2a5f711a05acc9977d18a3628bb53d"
+        "retained_request_digest": "sha256:a8558d591eb3f2e8a128d4b2ab4266ede95efe5c46f7a473dbada7ce99a544d9"
       },
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -93,10 +93,10 @@
         "attempt_fence": null,
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": null,
-        "result_digest": "sha256:706f1b1260a8d8488288fc96fc1f77fcb3aab3d688cde8bf5a003cf3bde553ea"
+        "result_digest": "sha256:7e8be2ff09bd80babb5e1296427701d6a7a3b5da961d4a55f59a8e11fb50a45c"
       },
       "assertions": "Exact retained first result; no deadline recomputation or second record."
     },
@@ -105,7 +105,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -121,15 +121,15 @@
           ],
           "correlation_id": null
         },
-        "request_digest": "sha256:d39b00f14ef4bea5cb1df134729efabc5c3bfd77f6643e51668aaf476830bbdb"
+        "request_digest": "sha256:73f79dc18da365a2326d0fc2c49d87f0e5e11df14cf118ad644f3ec8080a0b9c"
       },
       "prior": {
-        "retained_request_digest": "sha256:99913eb88d372a77d2d63da0c4ed2e8dbe2a5f711a05acc9977d18a3628bb53d"
+        "retained_request_digest": "sha256:a8558d591eb3f2e8a128d4b2ab4266ede95efe5c46f7a473dbada7ce99a544d9"
       },
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -140,7 +140,7 @@
         "attempt_fence": null,
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": "timer_operation_conflict",
         "result_digest": null
@@ -152,7 +152,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -168,16 +168,16 @@
           ],
           "correlation_id": null
         },
-        "request_digest": "sha256:bbdf4b7b9d91f54d66a164f6c4634f3f3376a436280463416895d7eff62823ac"
+        "request_digest": "sha256:abb1caf09852dcc91672393e96590dc03e2353565802a7b3f3e7727dd2779c6b"
       },
       "prior": {
         "record_state": "pending",
-        "record_schedule_request_digest": "sha256:99913eb88d372a77d2d63da0c4ed2e8dbe2a5f711a05acc9977d18a3628bb53d"
+        "record_schedule_request_digest": "sha256:a8558d591eb3f2e8a128d4b2ab4266ede95efe5c46f7a473dbada7ce99a544d9"
       },
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -188,7 +188,7 @@
         "attempt_fence": null,
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": "timer_id_conflict",
         "result_digest": null
@@ -200,7 +200,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -209,7 +209,7 @@
         "arguments": {
           "expected_revision": "1"
         },
-        "request_digest": "sha256:f67101382c857be0b5df21bbe77478d5b90c5560efe5f40ec6bbd5579b272a14"
+        "request_digest": "sha256:d792f64dc38bccfbc30cc9785d6e426d449c06234b513658004bc17a87715430"
       },
       "prior": {
         "record_state": "pending",
@@ -218,7 +218,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -229,10 +229,10 @@
         "attempt_fence": null,
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": null,
-        "result_digest": "sha256:a7cd6de14bc30c4d44e5c2ed57422fd9abc46796b98c24ff4f05d47f2eea74b3"
+        "result_digest": "sha256:d0487f9109f183b1c535092a2c11838e65358acb7c6f1f5449ada78fc950c588"
       },
       "assertions": "Cancel wins atomic race and persists terminal state."
     },
@@ -241,7 +241,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -250,7 +250,7 @@
         "arguments": {
           "expected_revision": "1"
         },
-        "request_digest": "sha256:f67101382c857be0b5df21bbe77478d5b90c5560efe5f40ec6bbd5579b272a14"
+        "request_digest": "sha256:d792f64dc38bccfbc30cc9785d6e426d449c06234b513658004bc17a87715430"
       },
       "prior": {
         "record_state": "claimed",
@@ -259,7 +259,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -270,7 +270,7 @@
         "attempt_fence": "1",
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": "timer_fire_in_progress",
         "result_digest": null
@@ -282,7 +282,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -293,7 +293,7 @@
           "clock_basis": "unix_nanoseconds",
           "worker_principal": "worker-A"
         },
-        "request_digest": "sha256:c34d0db96b2961bf88f00c29362de35449d5225e9217b6ec3a23550bb654655f"
+        "request_digest": "sha256:0b7645670db191111b3b6cb590305b155ac93034355b382ed0255b551a575325"
       },
       "prior": {
         "record_state": "pending",
@@ -306,7 +306,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -317,10 +317,10 @@
         "attempt_fence": "1",
         "clock_basis": "unix_nanoseconds",
         "expires_at": "130",
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": null,
-        "result_digest": "sha256:14f3c94695115f8e2b0ae6a692bb19193103aaa4188f0a44830a0488a73821fa"
+        "result_digest": "sha256:1b1950196f4e289ddabd74a3d38730d3540db0a252fad5e8da4c90db7c77f9ce"
       },
       "assertions": "Equality is due; claim and incremented fence persist atomically."
     },
@@ -329,7 +329,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -340,7 +340,7 @@
           "clock_basis": "unix_nanoseconds",
           "worker_principal": "worker-A"
         },
-        "request_digest": "sha256:e5b69c1b3f605f7f39e4fde4f094be5ea3ff97c7c7e39c359ef7a7370751a382"
+        "request_digest": "sha256:acb60cfc79602d43f485261439968a33acf36af30f07cf263df11488f56eea32"
       },
       "prior": {
         "record_state": "pending",
@@ -351,7 +351,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -362,7 +362,7 @@
         "attempt_fence": null,
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": "timer_not_due",
         "result_digest": null
@@ -374,7 +374,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -384,10 +384,10 @@
           "expected_revision": "2",
           "attempt_fence": "1",
           "worker_principal": "worker-A",
-          "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
-          "admission_receipt_digest": "sha256:411e2b5d59fe15fc5635b319d384398969201ca7b58cebd557b53cbb7fb0b871"
+          "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+          "admission_receipt_digest": "sha256:f19e08b5f1704b507d4eb15347ecdc4d711bd07422148d8f8bd752e86dfb8400"
         },
-        "request_digest": "sha256:aeadaa19750e2362f30fae2c1b7111494ad855821a1e2d84d40895dbadb922f9"
+        "request_digest": "sha256:e6f9912dac1aa7b4dd1c514678b6f72f27a51b82001c9a03a90b135fa04e4503"
       },
       "prior": {
         "record_state": "claimed",
@@ -401,7 +401,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -412,10 +412,10 @@
         "attempt_fence": "1",
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "admitted",
         "error_code": null,
-        "result_digest": "sha256:63d9d00207a9e0de6011ed63baeaff3f4e1188ecf949070da12954175fe7d108"
+        "result_digest": "sha256:5223989e7baa87b66db60c11fb703fe404367c2cbdbe63e9e4b40ed37d74fa27"
       },
       "assertions": "Timer, checkpoint acceptance receipt, and source binding share commit."
     },
@@ -424,7 +424,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -434,20 +434,20 @@
           "expected_revision": "2",
           "attempt_fence": "1",
           "worker_principal": "worker-A",
-          "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
-          "admission_receipt_digest": "sha256:411e2b5d59fe15fc5635b319d384398969201ca7b58cebd557b53cbb7fb0b871"
+          "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+          "admission_receipt_digest": "sha256:f19e08b5f1704b507d4eb15347ecdc4d711bd07422148d8f8bd752e86dfb8400"
         },
-        "request_digest": "sha256:aeadaa19750e2362f30fae2c1b7111494ad855821a1e2d84d40895dbadb922f9"
+        "request_digest": "sha256:e6f9912dac1aa7b4dd1c514678b6f72f27a51b82001c9a03a90b135fa04e4503"
       },
       "prior": {
         "record_state": "fired",
         "record_revision": "3",
-        "retained_request_digest": "sha256:2b2c2cfe726837fa77f6e05a6593ffc81ce9815b419b0fa3cbf2366a36d20302"
+        "retained_request_digest": "sha256:dfb1a5869d8a2559f934cc0e75d8805febd008faf5534c94ec57ec2ad018f3fe"
       },
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -458,10 +458,10 @@
         "attempt_fence": "1",
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "admitted",
         "error_code": null,
-        "result_digest": "sha256:63d9d00207a9e0de6011ed63baeaff3f4e1188ecf949070da12954175fe7d108"
+        "result_digest": "sha256:5223989e7baa87b66db60c11fb703fe404367c2cbdbe63e9e4b40ed37d74fa27"
       },
       "assertions": "Return retained result without a second admission."
     },
@@ -470,7 +470,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -480,10 +480,10 @@
           "expected_revision": "2",
           "attempt_fence": "1",
           "worker_principal": "worker-A",
-          "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+          "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
           "admission_receipt_digest": null
         },
-        "request_digest": "sha256:cfa8233cbd0878409181a5001fa7586f6309115073b97951b8109a2a7765eda1"
+        "request_digest": "sha256:63fe6f1458d0cd1100675dbfdf6f55ef3c1c55f5d79b281973af23932511b8f5"
       },
       "prior": {
         "record_state": "claimed",
@@ -494,7 +494,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -505,7 +505,7 @@
         "attempt_fence": "2",
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": "timer_stale_fence",
         "result_digest": null
@@ -517,7 +517,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -528,7 +528,7 @@
           "clock_basis": "unix_nanoseconds",
           "worker_principal": "worker-B"
         },
-        "request_digest": "sha256:214366325e11e282de3e47ca8d3db451e309b980038018a7e26620c46280a83e"
+        "request_digest": "sha256:35dabfedca6660f8503a8a85fd8fd280380b2a085b9208b618002cd3a69cc4ba"
       },
       "prior": {
         "record_state": "claimed",
@@ -542,7 +542,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -553,10 +553,10 @@
         "attempt_fence": "2",
         "clock_basis": "unix_nanoseconds",
         "expires_at": "151",
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": null,
-        "result_digest": "sha256:74d80c9f7676d34b1d2c742772d0a215563bf45f091a29c521c1d3ea31daf314"
+        "result_digest": "sha256:b61fcd8a9219d5517d9f5a4274a298551519424454e9e5ed5636c248715c6c8d"
       },
       "assertions": "New fence reuses same event ID only after old transaction is proved uncommitted."
     },
@@ -565,7 +565,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -576,7 +576,7 @@
           "clock_basis": "unix_nanoseconds",
           "worker_principal": "worker-B"
         },
-        "request_digest": "sha256:214366325e11e282de3e47ca8d3db451e309b980038018a7e26620c46280a83e"
+        "request_digest": "sha256:35dabfedca6660f8503a8a85fd8fd280380b2a085b9208b618002cd3a69cc4ba"
       },
       "prior": {
         "record_state": "claimed",
@@ -589,7 +589,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -600,7 +600,7 @@
         "attempt_fence": "1",
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": "delivery_ambiguous",
         "result_digest": null
@@ -612,14 +612,14 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
         "operation": "read_timer",
         "operation_id": "read-A",
         "arguments": {},
-        "request_digest": "sha256:083533fa8d97900184722a3af32994ddb523d27185bfcbd4352322b759afb058"
+        "request_digest": "sha256:01b26f9fa5d286414f62cd0ae0dbe1ee429de9d20532be535c34b246d60b9a90"
       },
       "prior": {
         "record_state": "fired",
@@ -629,7 +629,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -640,10 +640,10 @@
         "attempt_fence": "1",
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "admitted",
         "error_code": null,
-        "result_digest": "sha256:a1da8eb5ff7030425721096c047dde474861d1d2025c0e3a4c7ab8f03559c7d0"
+        "result_digest": "sha256:65064ee000b20945ac3655b57e7a4677de0c3c5722393d7840df20b8c77d7b73"
       },
       "assertions": "Authorized read reports record without mutation."
     },
@@ -652,7 +652,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -668,7 +668,7 @@
           ],
           "correlation_id": null
         },
-        "request_digest": "sha256:9650ef6e223dc0df037405f35c809eabe5b5ea2b3646680436ff122cf4771ea8"
+        "request_digest": "sha256:6294d5df7494fcdf4dabbd8b6e3e2ab5ddb7eb8e3072f0f2126c2ac03cadcc55"
       },
       "prior": {
         "trusted_now": "0",
@@ -677,7 +677,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -700,7 +700,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -716,7 +716,7 @@
           ],
           "correlation_id": null
         },
-        "request_digest": "sha256:86d46c8e4aebe511aa275e07f6001547072a49ea0310d5b4f89c4a8d757f5225"
+        "request_digest": "sha256:dbab0d2caaaf3c7b0fa78bac24d1fd7f8dcb66097d35a72e8b0d9abf6a862790"
       },
       "prior": {
         "trusted_now": "0",
@@ -725,7 +725,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -748,7 +748,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -764,7 +764,7 @@
           ],
           "correlation_id": null
         },
-        "request_digest": "sha256:f3bb35e59ea77ec8ed7ae82d5a8dea598d0ed1613ad2e6ccd394bf58f90aa559"
+        "request_digest": "sha256:4978aae477d0bd65d868f6a370d9da3300919c1b55c0b59ee359ca5d2000b7ad"
       },
       "prior": {
         "trusted_now": "0",
@@ -773,7 +773,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -796,7 +796,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -812,7 +812,7 @@
           ],
           "correlation_id": null
         },
-        "request_digest": "sha256:df0371f00d859ed63a200824202d4f697a74eaa9ff1edd7376678449bdb3f20f"
+        "request_digest": "sha256:9958fa691627ac9fdf3764ae5370950407dc23c0b982573c013961a0587a2b94"
       },
       "prior": {
         "trusted_now": "0",
@@ -821,7 +821,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -844,7 +844,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -860,7 +860,7 @@
           ],
           "correlation_id": null
         },
-        "request_digest": "sha256:4945fc032690e5fd1066207934dd91d9f28a7d666f41019c39ef1fd27da0c5db"
+        "request_digest": "sha256:95e87ecd6070736067b84e7ed287c83bde6edb90785f09ba0c2311aa19c58b1e"
       },
       "prior": {
         "trusted_now": "9223372036854775807",
@@ -869,7 +869,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -892,7 +892,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -908,7 +908,7 @@
           ],
           "correlation_id": null
         },
-        "request_digest": "sha256:4969d3547a2eb862c7890c4c36698fdf4fe8c6eb1b2625a1a1f2db7d7b012ac4"
+        "request_digest": "sha256:ed5c1c76712275bce919a343f3effbd3b80a4437c35f536f00a7123d6a1d0b59"
       },
       "prior": {
         "trusted_now": null,
@@ -917,7 +917,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -940,7 +940,7 @@
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -950,10 +950,10 @@
           "expected_revision": "2",
           "attempt_fence": "1",
           "worker_principal": "worker-A",
-          "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
-          "admission_receipt_digest": "sha256:411e2b5d59fe15fc5635b319d384398969201ca7b58cebd557b53cbb7fb0b871"
+          "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
+          "admission_receipt_digest": "sha256:f19e08b5f1704b507d4eb15347ecdc4d711bd07422148d8f8bd752e86dfb8400"
         },
-        "request_digest": "sha256:7c6ee77b297bcc0cfacfe8201310383eea485dcd472895045e11fa1f801dfd8a"
+        "request_digest": "sha256:98554c1922696220951636934f2e1523392f05194388ec807ed4e83c5ed79130"
       },
       "prior": {
         "record_state": "claimed",
@@ -966,7 +966,7 @@
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
+        "scope_identity": "scope-archive-example",
         "root_instance_id": "server-1",
         "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
         "timer_id": "timer-A",
@@ -977,61 +977,96 @@
         "attempt_fence": "1",
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
         "delivery_state": "none",
         "error_code": "timer_admission_rejected",
         "result_digest": null
       },
       "assertions": "No acceptance receipt, source binding, timer fire receipt, checkpoint change, or source acknowledgement; same immutable event remains retryable."
+    }
+  ],
+  "early_errors": [
+    {
+      "name": "unsupported_interface",
+      "request": {
+        "interface": "other.timer",
+        "interface_version": 1
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "operation": null,
+        "operation_id": null,
+        "scope_identity": null,
+        "root_instance_id": null,
+        "root_runtime_id": null,
+        "timer_id": null,
+        "status": "rejected",
+        "record_revision": null,
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": null,
+        "delivery_state": "none",
+        "error_code": "unsupported_timer_protocol",
+        "result_digest": null
+      },
+      "assertions": "No scope lookup, clock read, or mutation."
     },
     {
-      "name": "admission_rejected_before_commit",
+      "name": "unsupported_version",
+      "request": {
+        "interface": "determa.timer_helper",
+        "interface_version": 2
+      },
+      "expected": {
+        "interface": "determa.timer_helper",
+        "interface_version": 1,
+        "operation": null,
+        "operation_id": null,
+        "scope_identity": null,
+        "root_instance_id": null,
+        "root_runtime_id": null,
+        "timer_id": null,
+        "status": "rejected",
+        "record_revision": null,
+        "attempt_fence": null,
+        "clock_basis": "unix_nanoseconds",
+        "expires_at": null,
+        "event_id": null,
+        "delivery_state": "none",
+        "error_code": "unsupported_timer_protocol_version",
+        "result_digest": null
+      },
+      "assertions": "No scope lookup, clock read, or mutation."
+    },
+    {
+      "name": "invalid_request_shape",
       "request": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
-        "root_instance_id": "server-1",
-        "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
-        "timer_id": "timer-A",
-        "operation": "complete_fire",
-        "operation_id": "complete-admission-rejected",
-        "arguments": {
-          "expected_revision": "2",
-          "attempt_fence": "1",
-          "worker_principal": "worker-A",
-          "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
-          "admission_receipt_digest": "sha256:411e2b5d59fe15fc5635b319d384398969201ca7b58cebd557b53cbb7fb0b871"
-        },
-        "request_digest": "sha256:7c6ee77b297bcc0cfacfe8201310383eea485dcd472895045e11fa1f801dfd8a"
-      },
-      "prior": {
-        "record_state": "claimed",
-        "record_revision": "2",
-        "attempt_fence": "1",
-        "trusted_now": "120",
-        "checkpoint_revision": "0",
-        "admission_result": "capacity_unavailable"
+        "operation": "schedule"
       },
       "expected": {
         "interface": "determa.timer_helper",
         "interface_version": 1,
-        "scope_identity": "scope-A",
-        "root_instance_id": "server-1",
-        "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8",
-        "timer_id": "timer-A",
-        "operation": "complete_fire",
-        "operation_id": "complete-admission-rejected",
+        "operation": null,
+        "operation_id": null,
+        "scope_identity": null,
+        "root_instance_id": null,
+        "root_runtime_id": null,
+        "timer_id": null,
         "status": "rejected",
-        "record_revision": "2",
-        "attempt_fence": "1",
+        "record_revision": null,
+        "attempt_fence": null,
         "clock_basis": "unix_nanoseconds",
         "expires_at": null,
-        "event_id": "sha256:5e172b1eaed17a722f484488de757bf90d22c795b9e066971016434f3163e446",
+        "event_id": null,
         "delivery_state": "none",
-        "error_code": "timer_admission_rejected",
+        "error_code": "invalid_timer_request",
         "result_digest": null
       },
-      "assertions": "No acceptance receipt, source binding, timer fire receipt, checkpoint change, or source acknowledgement; same immutable event remains retryable."
+      "assertions": "No scope lookup, clock read, or mutation."
     }
   ]
 }
