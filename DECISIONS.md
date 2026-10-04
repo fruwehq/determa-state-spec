@@ -366,6 +366,24 @@ the actual guarantees. Name-based inference could advertise safe relocation or d
 processing without the authority or storage behavior that proves it. A future hosted
 service must pass the same public capability conformance tests as a local host.
 
+## Application projection is a lossless view of selected rows
+
+Relevant specification: [§20](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade).
+
+**Decision.** A configured projection selects application rows explicitly, admits
+their values only through declared typed input or external-refresh boundaries, and
+round-trips the entire Determa aggregate or checkpoint. The application owns its
+transaction and table mapping. A shared native transaction is claimed only when the
+configured store proves it and the application actually uses it.
+
+**Rejected alternative.** Treat an application status column as the engine state or
+let a mapper overwrite runtime internals directly.
+
+**Reason.** A status summary cannot reconstruct deferred work, history, identities,
+receipts, and pending effects. Direct internal writes bypass declaration validation
+and the atomic checkpoint boundary. A failed projection must leave both application
+rows and Determa evidence unchanged.
+
 ## Delivery ownership crosses only a committed boundary
 
 Relevant specification: [§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall),
