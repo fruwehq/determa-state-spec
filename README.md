@@ -102,6 +102,12 @@ audit, and revision. Built-in and third-party execution stores use the same regi
 path and advertise only capabilities their configured instance can prove; broker
 integration is a composed host profile, not a storage capability.
 
+The optional [host authority interface](SPEC.md#18-optional-host-scope-authority)
+defines scope ownership, epochs and guards for configured hosts and plugins. A host
+reports its proven topology and refuses safe relocation when it cannot prove source
+retirement and transaction fate. The pure core remains coordinator-free; an embedding
+application may commit its result in an application-owned transaction. Standalone
+checkpoint export and import remain available without claiming safe relocation.
 An optional [lossless application projection](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade)
 loads explicitly selected application rows, admits declared typed input, and maps the
 complete resulting state back into application-owned storage. Shared transaction
