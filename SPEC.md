@@ -871,18 +871,25 @@ Missing, changed or untrusted closure returns `runtime_provider_unavailable`; it
 never falls back to CEL, another provider, or recompilation. The normalized validated
 bundle fingerprint (§8) includes every complete binding, including source and
 dependency digests, type contract and capability flags. Descriptor source/target
-fingerprints therefore also bind exact provider closures.
+fingerprints therefore also bind exact provider closures. The §12
+`guard_binding_digest` encodes the entire validated `guard` member, including its
+`provider` key and full binding, with the §8 typed projection; it does not hash only
+the three-field reference or a resolved callback name.
+Configured-instance health, authorization and host policy remain separate §11.5
+checks at use time; a stored fingerprint or a source manifest never proves that a
+currently configured instance still has a capability.
 
-A runtime provider registration carries the closed
+A runtime provider registration under the common §11.5 `runtime_provider` category
+also carries the closed
 `schema/runtime-provider-descriptor-v1.schema.json` descriptor with `kind` (`guard`
 or `actions`) and the same complete binding. Its installed implementation exposes
 the kind-specific evaluator and, only when separately proved, `inspect_guard`.
-Implementations support direct injection; an adapter using names supports explicit
-`register`, `validate_configuration`, `capabilities`, and `health`. Duplicate exact
-registrations fail. Discovery is explicit or host-allowlisted, never triggered by
-an incoming event value. Descriptor, installed implementation and slot binding must
-match exactly. A compiler provider uses the same exact reference and resolver rules
-but is registered distinctly from runtime guards/actions.
+Direct injection, registration, duplicate refusal, configuration validation,
+capability reporting, health, discovery and authorization follow §11.5. The common
+extension descriptor's `provider_reference` must equal this kind-specific binding's
+reference. The registered implementation, kind-specific descriptor and slot binding
+must match exactly. A compiler provider uses the same exact reference and resolver
+rules but registers under the distinct `compiler` category.
 
 `input_types` names only the read-only context portions a provider receives:
 `event: event_envelope`, `variables: typed_variables`, `owner: owner_reference`, and
@@ -2609,9 +2616,9 @@ projection to the exact validated guard member. For a CEL guard, this is
 `guard` member in the §8 normalized validated bundle tree.
 Parsing and type checking do not rewrite, trim, pretty-print, case-fold, or otherwise
 canonicalize its source text; spaces and line breaks are retained as code points.
-For a runtime-provider guard, `typed_guard_binding` is the complete exact provider
-binding and source/dependency closure, encoded as the §8 typed tree under that provider
-contract. Its object-member order is canonicalized by §8 and §9; exact string/source
+For a runtime-provider guard, `typed_guard_binding` is the complete exact
+`{provider: binding}` guard member, including its source/dependency closure, encoded
+as the §8 typed tree. Its object-member order is canonicalized by §8 and §9; exact string/source
 values are preserved. Recompilation cannot substitute a different binding at the
 same locator. For example, `"event.payload.amount > 1"` and
 `"event.payload.amount  > 1"` have distinct guard bindings and distinct digests,
