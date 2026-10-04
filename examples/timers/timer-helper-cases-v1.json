@@ -442,7 +442,7 @@
       "prior": {
         "record_state": "fired",
         "record_revision": "3",
-        "retained_request_digest": "sha256:dfb1a5869d8a2559f934cc0e75d8805febd008faf5534c94ec57ec2ad018f3fe"
+        "retained_request_digest": "sha256:e6f9912dac1aa7b4dd1c514678b6f72f27a51b82001c9a03a90b135fa04e4503"
       },
       "expected": {
         "interface": "determa.timer_helper",

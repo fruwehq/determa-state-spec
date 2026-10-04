@@ -7,7 +7,7 @@
       "input_request": {
         "request_format": "determa.archive_import_request",
         "request_schema_version": 1,
-        "archive_digest": "sha256:1b605df343ab332c926309fbfed43b4ae327aa31978f40781ee577da8927578f",
+        "archive_digest": "sha256:8d0038ee0fd440ba703949bb920fb84d16cd69cac9ff191a8c3e6eee20c56b90",
         "trusted_source_profile_digest": "sha256:5fe87d8725e1b78ab7790c88ef109228e58e980871cad215aa4203bc618b32d2",
         "trusted_participant_contract_digest": "sha256:2632ccc9decb50faa9323940e67db5ef8637869d4a2519af67d45b9945aa1875",
         "expected_source": {
@@ -787,7 +787,7 @@
             "participant_schema_digest": "sha256:85e12c0cb736560f103f8fb645a1a4e74d9d257c2165ea8c474fd7e19e834ee4",
             "dependencies": [],
             "storage": "embedded",
-            "payload_digest": "sha256:7ece74895c96f11e454ed24d3b5aa968558ffe0edc9c866dea3fcd9c2261bd02",
+            "payload_digest": "sha256:d6f382e2aa10f6bbef3f3f6c0d75492ed05a32187ac658d258852bee152f7975",
             "payload": [
               "map",
               [
@@ -973,8 +973,7 @@
                           [
                             "correlation_id",
                             [
-                              "string",
-                              "job-7"
+                              "null"
                             ]
                           ],
                           [
@@ -1084,7 +1083,7 @@
                   "timer_artifact_digest",
                   [
                     "string",
-                    "sha256:96a1bce2a3a5c151350a24490e98d480a8200e3102796700dd21de9a19fa6394"
+                    "sha256:4b1f8a3266bbe721bc778ddfe67996a319d09f05aa9d4f9400104fce737d3109"
                   ]
                 ],
                 [
@@ -1118,8 +1117,8 @@
           },
           {
             "identity": "participant:timer-state",
-            "digest": "sha256:c360bac174bbdfa21ea3e1e07385c24b0fba5b4656caeac47f6cd81c19327430",
-            "byte_length": "2677"
+            "digest": "sha256:51a0494348619a2774c8006ff621465f7aac2fd6318ce0a1bbdb1a05672e21ca",
+            "byte_length": "2667"
           }
         ],
         "required_determa_capabilities": [
@@ -1131,7 +1130,7 @@
         "optional_participant_references": [],
         "source_fence_reference": null,
         "transfer_reference": null,
-        "archive_digest": "sha256:1b605df343ab332c926309fbfed43b4ae327aa31978f40781ee577da8927578f"
+        "archive_digest": "sha256:8d0038ee0fd440ba703949bb920fb84d16cd69cac9ff191a8c3e6eee20c56b90"
       },
       "configured_import": {
         "available_provider_references": [
@@ -1196,7 +1195,7 @@
         "result_format": "determa.archive_result",
         "result_schema_version": 1,
         "status": "staged",
-        "archive_digest": "sha256:1b605df343ab332c926309fbfed43b4ae327aa31978f40781ee577da8927578f",
+        "archive_digest": "sha256:8d0038ee0fd440ba703949bb920fb84d16cd69cac9ff191a8c3e6eee20c56b90",
         "staged": true,
         "included_participant_ids": [
           "timer-state"
@@ -1967,7 +1966,7 @@
             "participant_schema_digest": "sha256:85e12c0cb736560f103f8fb645a1a4e74d9d257c2165ea8c474fd7e19e834ee4",
             "dependencies": [],
             "storage": "embedded",
-            "payload_digest": "sha256:7ece74895c96f11e454ed24d3b5aa968558ffe0edc9c866dea3fcd9c2261bd02",
+            "payload_digest": "sha256:d6f382e2aa10f6bbef3f3f6c0d75492ed05a32187ac658d258852bee152f7975",
             "payload": [
               "map",
               [
@@ -2153,8 +2152,7 @@
                           [
                             "correlation_id",
                             [
-                              "string",
-                              "job-7"
+                              "null"
                             ]
                           ],
                           [
@@ -2264,7 +2262,7 @@
                   "timer_artifact_digest",
                   [
                     "string",
-                    "sha256:96a1bce2a3a5c151350a24490e98d480a8200e3102796700dd21de9a19fa6394"
+                    "sha256:4b1f8a3266bbe721bc778ddfe67996a319d09f05aa9d4f9400104fce737d3109"
                   ]
                 ],
                 [
@@ -2298,8 +2296,8 @@
           },
           {
             "identity": "participant:timer-state",
-            "digest": "sha256:c360bac174bbdfa21ea3e1e07385c24b0fba5b4656caeac47f6cd81c19327430",
-            "byte_length": "2677"
+            "digest": "sha256:51a0494348619a2774c8006ff621465f7aac2fd6318ce0a1bbdb1a05672e21ca",
+            "byte_length": "2667"
           }
         ],
         "required_determa_capabilities": [
@@ -2311,7 +2309,7 @@
         "optional_participant_references": [],
         "source_fence_reference": null,
         "transfer_reference": null,
-        "archive_digest": "sha256:1b605df343ab332c926309fbfed43b4ae327aa31978f40781ee577da8927578f"
+        "archive_digest": "sha256:8d0038ee0fd440ba703949bb920fb84d16cd69cac9ff191a8c3e6eee20c56b90"
       },
       "expected_host_effects": {
         "active_scope_created": false,

@@ -204,7 +204,7 @@
     },
     {
       "path": "examples/public-host/README.md",
-      "sha256": "sha256:58f5598bad8e54afd66545c698ca41f663ba8f233ace6c84384211208d912f3e"
+      "sha256": "sha256:453d9d8cb172fe2b7c929f90f225ee384330d242736a007d53378116893e8a1e"
     },
     {
       "path": "examples/effects/active-effect-claim-v1.json",
@@ -360,15 +360,15 @@
     },
     {
       "path": "examples/timers/timer-archive-export-v1.json",
-      "sha256": "sha256:99d324adb44a541c729f6f695956134e146a30460dfe7e0d0cd237fa991e7596"
+      "sha256": "sha256:22758a582a561e720bc6183181529dcdf4d0955fa6c2206c85455c4796815a58"
     },
     {
       "path": "examples/timers/timer-archive-stage-v1.json",
-      "sha256": "sha256:443d47a466fea3137dc7fc788d69ec838361c7c14854152f715430b87d726c81"
+      "sha256": "sha256:7e993bd505938aef95d79d7b773fb01ad7fd012c9f57dd85614a01887449ebce"
     },
     {
       "path": "examples/timers/timer-cancelled-records-v1.json",
-      "sha256": "sha256:d667e12daa3ef7f11e122d9fc01835c816715f01fbf109c84cb06daafd4c3346"
+      "sha256": "sha256:dd040969a5f93e2c2601bdf42a1f10f833b7fd982c612ae3d18c39f14518b373"
     },
     {
       "path": "examples/timers/timer-clock-cases-v1.json",
@@ -380,15 +380,15 @@
     },
     {
       "path": "examples/timers/timer-fired-records-v1.json",
-      "sha256": "sha256:5bde01e53d48ce3923bc3078507ac93b86a5739ab2bea325992ddf0f0b18f282"
+      "sha256": "sha256:d2fbcdbc276d2c9d3cda7f7358a44be5fb593fd91b64790b91703d99c0bf481e"
     },
     {
       "path": "examples/timers/timer-helper-cases-v1.json",
-      "sha256": "sha256:80ab5c55e82d47e6d89f74233d28369127ec8659c6d79caefb9750fc107577d1"
+      "sha256": "sha256:6b8e8a2154dcc84dfb8291e911ca2d43676e0af23b0459b21b260de4fa8bfb86"
     },
     {
       "path": "examples/timers/timer-records-v1.json",
-      "sha256": "sha256:219acf99920dd75645f5194a3ef2d4723aed23a6851570148e014a97cf585afb"
+      "sha256": "sha256:d5d4244b46a4f58300c908dcf5e34df6f247211e8c72a085ff17373f3c39eb40"
     },
     {
       "path": "examples/extensions/capability-cases-v1.json",
