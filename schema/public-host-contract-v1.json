@@ -92,7 +92,7 @@
     },
     {
       "path": "schema/extension-descriptor-v1.schema.json",
-      "sha256": "sha256:0f59874141dbd8781a2837095a5e889a681cf55e8bbb434880613c77d594f73c"
+      "sha256": "sha256:ba6ed9d8d7025d39b5b24c91fcba8d7331334c0f58c93837a9bae44e7fb5ddd7"
     },
     {
       "path": "schema/host-authority-operation-v1.schema.json",
@@ -204,7 +204,7 @@
     },
     {
       "path": "examples/public-host/README.md",
-      "sha256": "sha256:027038a9f27eb7a7c3a0bb6674545955c7cafbeb54b6e79464d05a20a01040f0"
+      "sha256": "sha256:58f5598bad8e54afd66545c698ca41f663ba8f233ace6c84384211208d912f3e"
     },
     {
       "path": "examples/effects/active-effect-claim-v1.json",
@@ -389,6 +389,10 @@
     {
       "path": "examples/timers/timer-records-v1.json",
       "sha256": "sha256:219acf99920dd75645f5194a3ef2d4723aed23a6851570148e014a97cf585afb"
+    },
+    {
+      "path": "examples/extensions/capability-cases-v1.json",
+      "sha256": "sha256:ae8dc3f1d5d24911daf803326275f2b32db6d541ea59c7489e1c359410650e0a"
     }
   ],
   "hash_domains": [

@@ -459,6 +459,86 @@
         "instance_id": "local",
         "capability": "safe_relocation"
       }
+    },
+    {
+      "name": "configured_transport_source_order_satisfied",
+      "expected": "accept",
+      "reason": "Exact healthy transport claim backed by independent source-order proof satisfies the declared requirement; descriptor support alone is insufficient.",
+      "descriptor": {
+        "category": "transport",
+        "provider_reference": {
+          "identifier": "sample.ordered-transport",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "interface_version": 1,
+        "supported_capabilities": [
+          "source_ordered"
+        ]
+      },
+      "report": {
+        "category": "transport",
+        "provider_reference": {
+          "identifier": "sample.ordered-transport",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "instance_id": "primary",
+        "health": "healthy",
+        "claims": [
+          "source_ordered"
+        ]
+      },
+      "requirement": {
+        "category": "transport",
+        "provider_reference": {
+          "identifier": "sample.ordered-transport",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "instance_id": "primary",
+        "capability": "source_ordered"
+      }
+    },
+    {
+      "name": "unknown_transport_capability",
+      "expected": "schema_invalid",
+      "reason": "An undeclared transport capability is rejected by the descriptor schema.",
+      "descriptor": {
+        "category": "transport",
+        "provider_reference": {
+          "identifier": "sample.ordered-transport",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "interface_version": 1,
+        "supported_capabilities": [
+          "invented_source_order"
+        ]
+      },
+      "report": {
+        "category": "transport",
+        "provider_reference": {
+          "identifier": "sample.ordered-transport",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "instance_id": "primary",
+        "health": "healthy",
+        "claims": [
+          "source_ordered"
+        ]
+      },
+      "requirement": {
+        "category": "transport",
+        "provider_reference": {
+          "identifier": "sample.ordered-transport",
+          "version": "1.2.3",
+          "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "instance_id": "primary",
+        "capability": "source_ordered"
+      }
     }
   ]
 }
