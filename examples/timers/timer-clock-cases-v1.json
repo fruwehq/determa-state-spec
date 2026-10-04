@@ -1,0 +1,63 @@
+{
+  "clock_basis": "unix_nanoseconds",
+  "valid_absolute": [
+    "0",
+    "-9223372036854775808",
+    "9223372036854775807"
+  ],
+  "valid_duration": [
+    "0",
+    "9223372036854775807"
+  ],
+  "invalid_absolute": [
+    "-0",
+    "01",
+    "+1",
+    "1.0",
+    "1e0",
+    "9223372036854775808",
+    "-9223372036854775809",
+    1
+  ],
+  "invalid_duration": [
+    "-0",
+    "-1",
+    "01",
+    "+1",
+    "1.0",
+    "9223372036854775808",
+    1
+  ],
+  "cases": [
+    {
+      "name": "duration_addition",
+      "now": "-5",
+      "duration": "10",
+      "expected_deadline": "5"
+    },
+    {
+      "name": "duration_zero",
+      "now": "0",
+      "duration": "0",
+      "expected_deadline": "0"
+    },
+    {
+      "name": "positive_overflow",
+      "now": "9223372036854775807",
+      "duration": "1",
+      "expected_error": "timer_deadline_overflow"
+    },
+    {
+      "name": "negative_boundary",
+      "now": "-9223372036854775808",
+      "duration": "9223372036854775807",
+      "expected_deadline": "-1"
+    },
+    {
+      "name": "unavailable_clock",
+      "now": null,
+      "duration": "1",
+      "expected_error": "timer_clock_unavailable"
+    }
+  ]
+}

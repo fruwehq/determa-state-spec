@@ -2385,9 +2385,11 @@ Time is modeled through external event-producing extensions, never through core 
 state. A machine may emit a declared scheduling request and later receive a declared,
 correlated elapsed, rejected, failed, or cancelled event.
 
-The timer extension is a black box. It need not know which state or business process
-uses the event. Its request payload, cancellation behavior, delivery reliability,
-duplicate policy, clock source, persistence, and credentials are extension concerns.
+Without the optional §23 helper profile, the timer extension is a black box. It need
+not know which state or business process uses the event. Its request payload,
+cancellation behavior, delivery reliability, duplicate policy, clock source,
+persistence, and credentials are extension concerns. An installed §23 helper follows
+that profile's closed contract.
 
 Different timer extensions may provide best-effort in-memory behavior, durable
 at-least-once delivery, database integration, or real-time-oriented scheduling. Core
@@ -4605,15 +4607,16 @@ operation protocols, cloning, transfer or rebinding, and multi-scope archives re
 their separate host-profile contracts. Portable checkpoint bytes, identities, or
 digests MUST NOT authorize access to or movement across logical store scopes.
 
-### 17.14 Future timer durability
+### 17.14 External timer durability
 
 Machine format 1 introduces no timer semantics and the checkpoint has no timer member.
 A host therefore MUST NOT advertise accepted timer work as covered by a durable
-checkpoint while retaining that work only in process memory. A future timer contract
+checkpoint while retaining that work only in process memory. A timer contract
 that participates in durable processing MUST add a versioned checkpoint representation
 for accepted scheduling requests, deadlines, cancellation state, and deterministic
-delivery identity, or use an external durable service whose accepted ownership and
-recovery boundary is stated explicitly.
+delivery identity, or use a separately identified durable timer artifact or an
+external durable service whose accepted ownership and recovery boundary is stated
+explicitly. The optional §23 helper uses a separate artifact.
 
 Adding non-empty timer state requires a later checkpoint schema version or a
 separately identified durable timer artifact.
@@ -5861,6 +5864,217 @@ host-asserted consistency point. The closed stage cases supply complete import r
 trusted-policy fixtures, exact staged bytes or refusal, and JSON-pointer differences
 from the positive archive. Conformance verifies the source/contract pins and every
 nested digest and causal link, not merely the outer archive hash.
+
+## 23. Optional external timer helper
+
+### 23.1 Boundary and clock
+
+This optional version-1 helper implements the §11.2 external timer role. It changes
+neither machine format 1 nor core state, checkpoint, `step`, or admission rules. A
+host with no timer installation performs no timer record read, due poll, heartbeat,
+clock call, scheduler start, daemon start, or background work. The foreground API
+remains usable without this helper. Installation uses the §11.5 `timer` provider
+reference and configured-instance capability report. An endpoint scheme, provider
+name, or event name confers no authority. Credentials, trusted clock, worker identity,
+storage binding, scope authorization, and polling policy are host configuration.
+
+Every absolute time in this interface has `clock_basis: "unix_nanoseconds"` and is a
+canonical decimal string in signed-64-bit Unix-epoch nanoseconds
+`[-9223372036854775808, 9223372036854775807]`. Every duration is a canonical
+nonnegative decimal string of nanoseconds at most `9223372036854775807`.
+`-0`, a plus sign, a leading zero, fractions, exponents, JSON numbers, and values
+outside the range fail `invalid_timer_time` before mutation. A duration schedule
+samples the trusted host clock at acceptance and adds with checked arithmetic;
+overflow fails `timer_deadline_overflow`. An absolute deadline may already be due.
+Equality is due: `now >= deadline`. An unavailable or untrusted clock stops claiming
+and firing with `timer_clock_unavailable`; the core never reads it.
+
+### 23.2 Commands, identity, and cancellation
+
+The closed `schema/timer-helper-operation-v1.schema.json` defines requests and
+results. Each request has `interface: "determa.timer_helper"`,
+`interface_version: 1`, `operation` (`schedule`, `cancel`, `claim_fire`,
+`complete_fire`, or `read_timer`), `operation_id`, `scope_identity`,
+`root_instance_id`, `root_runtime_id`, `timer_id`, `request_digest`, and closed
+operation-specific `arguments`. `root_runtime_id` is the immutable §9 root identity
+of the target incarnation. The helper verifies it against the authorized target;
+a recycled root name cannot receive a prior timer. `operation_id` is unique within
+the authorized scope. `timer_id` is unique within the scope/root/incarnation tuple
+and cannot be reused after a retained terminal record. The request digest is
+`hash(["determa-timer-request-1", request_without_request_digest])` using §9.
+Before scope lookup or clock access, an unknown interface returns the closed
+`unsupported_timer_protocol` early result, then an unknown version returns
+`unsupported_timer_protocol_version`, then an invalid recognized request returns
+`invalid_timer_request`. These early results have null operation and identities,
+no record or result digest, and no mutation.
+An equal replay returns the exact retained first result before current preconditions;
+a different digest fails `timer_operation_conflict`. The host authenticates and
+authorizes the scope and target before revealing existence or replay evidence.
+Unauthorized requests return `unauthorized_timer_scope` without existence detail.
+A successful result has `result_digest = hash(["determa-timer-result-1",
+request_digest, result_without_result_digest])`. The helper retains the exact result
+with its committed operation receipt; this hash alone proves no transaction fate.
+
+`schedule` supplies exactly one of `deadline_at` or `delay_nanoseconds`, a declared
+root event name, its complete §16.2 typed payload map, and a nullable correlation
+ID. A machine emits scheduling/cancellation intent through ordinary declared `send`
+or an external effect integration selected by the host. No new action keyword exists.
+The host validates the event declaration on scheduling and again at admission.
+Acceptance persists the complete immutable request, computed deadline, target
+incarnation, and stable fire identity before acknowledging the intent. The one-shot
+`event_id` is `hash(["determa-timer-fire-event-1", "1", scope_identity,
+root_instance_id, root_runtime_id, timer_id])`; deadline, attempt, fence, worker,
+and clock time do not enter it. A different schedule for an existing timer ID fails
+`timer_id_conflict`.
+
+The independent `schema/timer-record-v1.schema.json` artifact has exact
+`timer_artifact_format: "determa.timer_records"`, version 1, ordered records,
+retained operation receipts, and `timer_artifact_digest =
+hash(["determa-timer-artifact-1", artifact_without_timer_artifact_digest])`.
+Records are `pending`, `claimed`, `fired`, or `cancelled`, with monotonically
+increasing decimal revision and attempt fence. It is never a checkpoint member.
+`cancel` supplies expected revision. It atomically changes only `pending` to
+`cancelled`. Claimed returns `timer_fire_in_progress`; fired returns
+`timer_already_fired`; cancelled returns the unchanged terminal result. A cancel
+cannot retract an admitted event. A conflicting cancel and fire resolve through one
+record compare-and-swap or native transaction; the loser cannot claim success.
+Independent transport may already hold a copied event.
+
+### 23.3 Fire, recovery, and delivery limits
+
+`claim_fire` requires current revision and an authenticated worker. The helper
+samples its trusted clock to determine due status, then atomically changes
+`pending` to `claimed` and allocates a strictly increasing canonical decimal
+`attempt_fence`. A retry after expiration or revocation may allocate a new fence
+only after resolving the previous attempt's commit fate. A caller-supplied time
+never makes a timer due.
+Cancellation before claim retains attempt fence `"0"` and no fire attempt, analogous
+to §19's proven preclaim cancellation boundary. Once claimed, cancellation cannot
+assert that no event was admitted; claim expiration alone gives no such proof.
+The host selects `expires_at` in signed-64-bit Unix nanoseconds. At `now >=
+expires_at`, the claim cannot mutate; expiry does not prove that an external fire
+was absent. `complete_fire` requires the current fence, principal, revision, and
+exact event ID. A stale or unauthorized claim changes nothing. If §18 authority is
+installed and its guarded local write capability is proved, the current scope epoch
+and `guarded_commit` protect the timer mutation alongside the helper's own fence.
+The §18 `fence_worker`/ten-field `workerClaim` is effect-specific and is never
+serialized as a timer claim; no `clock_basis` is added to it. An archived or expired
+helper claim is never portable authority.
+
+For coordinated admission, `admission_receipt_digest` is non-null and equals
+`hash(["determa-timer-admission-receipt-1", acceptance_receipt])` for the exact
+candidate §17 acceptance receipt with matching event ID and `request_digest` equal
+to the fired envelope digest. A rejected candidate commits neither receipt nor
+digest; a successful completion verifies and commits both. For independent delivery
+the field is null until that receipt is actually obtained; it cannot stand for a pending
+source item. `examples/timers/timer-committed-admission-v1.json` carries the full
+committed checkpoint and this digest for the positive fire case.
+
+A host claiming `coordinated_timer_admission` MUST commit transition to `fired`,
+timer receipt, complete §17 acceptance receipt/checkpoint, and any §21 source binding
+in one native transaction, or prove a recoverable protocol that reaches the same
+result after every crash. It acknowledges only after that boundary. A precommit
+admission rejection leaves timer and checkpoint unchanged, returns
+`timer_admission_rejected`, and preserves the immutable event for authorized retry.
+It creates no §17 admission receipt or §21 admitted binding. Recovery after
+an uncommitted attempt reuses the same event ID under a newly proved fence. After
+a committed fire, replay returns retained evidence and cannot admit it again.
+The same event ID with different envelope content fails `timer_event_conflict`.
+A §21 adapter uses `source_scope = scope_identity` and
+`source_delivery_id = hash(["determa-timer-source-delivery-1", root_instance_id,
+root_runtime_id, timer_id])`, retains the same canonical event content and source
+content digest across attempts, and acknowledges its source only after §21's
+committed ownership transfer. Direct §17 admission is also valid and has no §21
+source receipt to invent. Both paths apply ordinary
+declaration, target, payload, capacity, deferral, fault, and receipt rules.
+
+`independent_timer_delivery` commits fire independently and hands the immutable
+event to a configured delivery source. A crash gap is `delivery_ambiguous` until
+source or admission evidence resolves it. This profile cannot claim atomic
+admission, no loss, exactly-once delivery, destination success, or deadline
+precision. A durable helper guarantees recoverable accepted records and stable
+identities only within its proved topology. It does not guarantee a live target or
+handled event. An ephemeral helper may lose schedules on process loss. Closed timer
+claims are `ephemeral_timer_helper`, `durable_timer_helper`,
+`independent_timer_delivery`, and `coordinated_timer_admission`. Coordinated
+admission requires durable storage and proved transaction/recovery integration.
+The configured instance and composed host prove claims; a descriptor alone cannot.
+A configured helper declares exactly one of `ephemeral_timer_helper` and
+`durable_timer_helper`, and exactly one of `independent_timer_delivery` and
+`coordinated_timer_admission`. A missing or contradictory combination fails
+`timer_capability_mismatch` before schedule acceptance.
+
+### 23.4 Archives and conformance
+
+For §22, a durable helper declares a separate `archive_participant` with its exact
+provider reference and a schema digest for `schema/timer-record-v1.schema.json`.
+The archive participant reference is pinned independently of the installed `timer`
+provider reference. Its configured report must prove `portable_export`,
+`exact_reconstruction`, and `consistent_archive_capture` at export, then
+`portable_import` and `exact_reconstruction` at staging. Timer capability claims
+alone satisfy none of these checks.
+Its payload is the complete §16.2 typed projection of the timer artifact: records,
+terminal identity, and replay receipts needed by its retention policy. The declared
+schema digest is §22's `hash(schema_json)` of the exact timer-record schema bytes.
+The §22 participant's `payload_digest` binds its ID, schema digest, and typed
+payload. Its `participant:<participant_id>` manifest member binds canonical bytes,
+SHA-256, and byte length; `required_determa_capabilities` includes
+`archive_participant` when it is included. Source provenance, required/optional
+participant contract, and any optional participant reference are checked against
+independent host policy, so a resealed omission cannot make outstanding timer work
+optional. Capture uses the same proved consistency point as selected checkpoints
+and delivery bindings. The helper must enumerate complete timer identities and
+retained replay evidence from authoritative storage for the selected roots; a
+caller-provided list or artifact self-description alone is not completeness proof.
+If outstanding timers must resume with a selected root, the participant is required
+in the §22 export request and trusted source contract; its absence fails export or
+staging as `missing_required_artifact` or `missing_required_provider` according to
+the §22 boundary. External
+payload storage must reconstruct the exact bytes. Import stages inert data; it
+never activates a clock, worker, claim, scope authority, or pending delivery.
+The host authorizes and reconciles staged records before resumption. Unresolved
+fire fate blocks resumption. A helper is optional when no selected root depends on
+its records. A base §16 aggregate or §17 checkpoint export remains available for
+inspection independently of timer installation; it MUST NOT be represented as a
+resumable complete archive for a root whose outstanding timer participant was
+omitted. Debug inspection reports timer records only through the separately
+authorized helper view and reports no timer state in a base aggregate.
+`examples/timers/timer-archive-export-v1.json` pins the positive scoped export
+request, source capture, required timer participant, complete
+`determa.scope_archive` manifest, member hashes and lengths, and result. The §22
+standalone base export remains applicable with no timer provider or participant.
+`examples/timers/timer-archive-stage-v1.json` pins successful inert staging and
+a correctly resealed missing-required-timer refusal against independent trusted
+source and participant-contract digests. Staging issues no timer claim or fire.
+
+Under §24, timer participation is conditional on the trusted source contract:
+neither a base aggregate nor a source with no installed timer gains a timer
+participant. Strict restore keeps imported timer records inert and performs no due
+poll, clock-triggered fire, cancellation, or delivery. A standalone takeover treats
+each inherited pending or claimed timer and each independent fire without proved
+admission/source ownership as ambiguous if the old owner may still act. A retained
+`pending` state proves no claim had occurred at capture, but does not prove the old
+owner stayed inactive afterward. Reconciliation or explicit abandonment under §24
+precedes any helper resumption; the source record remains immutable evidence. A new
+scope cannot reuse the old scope's fire event ID or treat its old timer receipt as a
+new-scope operation receipt. Any authorized new timer intent uses the new scope and
+therefore a new §23.2 fire identity. A clone likewise resolves or explicitly
+cancels inherited pending/ambiguous timer work and proves provider isolation before
+activation. A proved same-authority transfer preserves the logical scope and stable
+fire identity only after revoking active helper claims, resolving prior fire commit
+fate, and completing §24's retirement and guarded activation. A committed admitted
+fire remains terminal in every mode and is never automatically admitted again.
+
+`examples/timers/timer-helper-cases-v1.json`,
+`examples/timers/timer-clock-cases-v1.json`,
+`examples/timers/timer-records-v1.json`, and
+`examples/timers/timer-cancelled-records-v1.json`,
+`examples/timers/timer-fired-records-v1.json`, and
+`examples/timers/timer-committed-admission-v1.json` are normative cases
+for first execution, replay, collision, cancellation/fire races, clock boundaries,
+stale claims, crash recovery, and delivery limits. A helper passes all cases
+applicable to its advertised claims. An implementation without the profile needs
+no background timer or store.
 
 ## 24. Recovery, fresh-scope takeover, cloning, and optional relocation
 
