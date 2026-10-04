@@ -48,6 +48,11 @@ version-1 maintenance migration receipts, and exact operation-receipt emission i
 rules. Portable persistence artifacts use schema version 1 exclusively; earlier draft
 artifact representations are no longer supported. Machine documents still use
 `format: 1`, independently of the release and artifact schema versions.
+The format-1 grammar also accepts exact runtime guard/action provider slots beside
+CEL and structured actions. Optional source compilers generate strict format-1
+definitions with a version-1 provenance manifest. Native I/O during evaluation is
+an explicit weak embedded profile; provider guarantees and missing capabilities are
+reported rather than inferred.
 
 ## Core model
 
@@ -69,9 +74,11 @@ guard, and transition action, but not to entry or exit actions.
 
 ## Host and plugin boundary
 
-The core is a pure foreground transform from prior logical state plus one envelope to
-new logical state plus ordered emissions. It has no built-in queue, clock, timer,
+The default core evaluation is a pure foreground transform from prior logical state
+plus one envelope to new logical state plus ordered emissions. It has no built-in queue, clock, timer,
 dead-letter store, broker, database, background worker, or external I/O.
+An explicitly installed native runtime provider may perform external I/O during an
+embedded evaluation under the weaker capability profile in §5.4.
 
 The public extension boundary uses exact provider references and configured-instance
 capability reports. Hosts may inject objects directly or register bundled and third-party
@@ -108,6 +115,15 @@ This repository holds only the specification:
   [`examples/delivery/delivery-v1-cases.json`](examples/delivery/delivery-v1-cases.json)
   — closed delivery boundary and first/replay/failure vectors;
 - [`schema/machine.schema.json`](schema/machine.schema.json) — structural JSON Schema;
+- [`schema/provider-reference-v1.schema.json`](schema/provider-reference-v1.schema.json)
+  — exact executable provider identity;
+- [`schema/runtime-provider-descriptor-v1.schema.json`](schema/runtime-provider-descriptor-v1.schema.json)
+  — exact registration and slot-kind contract;
+- [`schema/runtime-action-output-v1.schema.json`](schema/runtime-action-output-v1.schema.json)
+  — checked native action proposals;
+- [`schema/language-source-v1.schema.json`](schema/language-source-v1.schema.json) and
+  [`schema/compilation-manifest-v1.schema.json`](schema/compilation-manifest-v1.schema.json)
+  — optional exact source compilation and provenance;
 - [`schema/inspection-v1.schema.json`](schema/inspection-v1.schema.json) — exact candidate inspection request and outcome;
 - [`examples/inspection/`](examples/inspection/) — precedence, invalid-shape, and fuel-boundary vectors;
 - [`schema/aggregate-state-v1.schema.json`](schema/aggregate-state-v1.schema.json) —
@@ -127,6 +143,8 @@ This repository holds only the specification:
   and [`schema/extension-capability-requirement-v1.schema.json`](schema/extension-capability-requirement-v1.schema.json)
   — configured-instance claims and exact requirements;
 - [`examples/`](examples/) — schema-valid machine documents and normative vectors; and
+- [`examples/providers/`](examples/providers/) — mixed CEL/native slots, source
+  compilation and output validation examples;
 - [`VERSION`](VERSION) — synchronized specification/package SemVer.
 
 The executable correctness target lives in

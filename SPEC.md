@@ -287,7 +287,9 @@ constraints, visibility across packages, and version resolution are unsupported.
 
 In format 1, `languages.guard` is exactly `cel` and `languages.action` is exactly
 `determa`; those are also the defaults when omitted. A transition `lang`, when present,
-is exactly `cel`. Other executable languages are unsupported in the portable core.
+is exactly `cel`. These defaults govern CEL strings and structured actions. An exact
+runtime-provider slot (§5.4) may coexist in the same machine; it does not change the
+machine-wide language identifiers or make arbitrary language names valid here.
 
 ### 4.4 Event declarations
 
@@ -483,7 +485,7 @@ State types are `simple` (default), `composite`, `parallel`, and `final`.
 Common state fields:
 
 - `variables` — state-scoped declarations.
-- `entry`, `exit` — ordered structured action lists.
+- `entry`, `exit` — ordered structured actions and runtime action slots (§5.4).
 - `on_events` — event name to transition or ordered transition list.
 - `deferred_events` — optional non-empty unique list of declared events that this state
   defers under §6.7 when no enabled handler exists in the active hierarchy.
@@ -513,8 +515,9 @@ A transition may contain:
 
 - `transition_to` — either a target state path or
   `{ history: path.to.composite }`; omit for an internal reaction.
-- `guard` — CEL Boolean.
-- `action` — ordered structured actions.
+- `guard` — a CEL Boolean string or `{provider: provider_binding}` (§5.4).
+- `action` — ordered structured actions and/or `{provider_actions: provider_binding}`
+  slots (§5.4).
 - `local: true` — for a non-root composite source targeting its strict descendant,
   preserve the source instead of applying the unmarked transition's source reset
   (§6.4).
@@ -684,7 +687,9 @@ A bundle is rejected before any runtime is created when it has:
 - a transition inside entry, exit, or initial behavior;
 - a `spawn` action in exit behavior;
 - a `stop` action in exit behavior;
-- a `stop` action that is not last in its action list; or
+- a `stop` action that is not last in its action list;
+- a provider binding with duplicate dependencies, wrong slot output type, a declared
+  input unavailable at that slot, or a source digest that does not match present source; or
 - a CEL parsing, name-resolution, or type-checking failure.
 
 For the destroyed-destination rules above, exits performed by root, component, or
@@ -844,6 +849,133 @@ It does not exist in:
 
 The engine retains causal identity internally for deterministic tracing and emission
 identity, but lifecycle CEL cannot inspect the triggering envelope or its payload.
+
+### 5.4 Exact runtime providers and optional source compilation
+
+CEL guards and structured actions remain the portable default. A guard slot may
+instead contain exactly `{provider: binding}`; an action-list element may contain
+exactly `{provider_actions: binding}`. Each binding is a closed object with
+`provider_reference`, `source_media_type`, `source_digest`, optional `source`,
+`dependencies`, `capabilities`, `input_types`, and `output_type`. The reference is
+exactly `{identifier, version, content_digest}` with a lowercase SHA-256 digest and
+exact SemVer version. The `source_digest` is the SHA-256 digest of the UTF-8 `source`
+bytes when source is present; otherwise it identifies the separately resolved source
+or binary. Dependencies are a complete transitive, duplicate-free exact reference
+closure sorted by `(identifier, version, content_digest)` UTF-8 bytes. A provider
+must be installed or injected with matching code, source, closure, declared types
+and verified capabilities. A mutable
+name, installed package version, or callback with the same name is insufficient.
+Resolution and trust checks occur for the *whole* executable definition before
+creation, evaluation, migration target activation or checkpoint/archive restoration.
+Missing, changed or untrusted closure returns `runtime_provider_unavailable`; it
+never falls back to CEL, another provider, or recompilation. The normalized validated
+bundle fingerprint (§8) includes every complete binding, including source and
+dependency digests, type contract and capability flags. Descriptor source/target
+fingerprints therefore also bind exact provider closures. The §12
+`guard_binding_digest` encodes the entire validated `guard` member, including its
+`provider` key and full binding, with the §8 typed projection; it does not hash only
+the three-field reference or a resolved callback name.
+Configured-instance health, authorization and host policy remain separate §11.5
+checks at use time; a stored fingerprint or a source manifest never proves that a
+currently configured instance still has a capability.
+
+A runtime provider registration under the common §11.5 `runtime_provider` category
+also carries the closed
+`schema/runtime-provider-descriptor-v1.schema.json` descriptor with `kind` (`guard`
+or `actions`) and the same complete binding. Its installed implementation exposes
+the kind-specific evaluator and, only when separately proved, `inspect_guard`.
+Direct injection, registration, duplicate refusal, configuration validation,
+capability reporting, health, discovery and authorization follow §11.5. The common
+extension descriptor's `provider_reference` must equal this kind-specific binding's
+reference. The registered implementation, kind-specific descriptor and slot binding
+must match exactly. A compiler provider uses the same exact reference and resolver
+rules but registers under the distinct `compiler` category.
+
+`input_types` names only the read-only context portions a provider receives:
+`event: event_envelope`, `variables: typed_variables`, `owner: owner_reference`, and
+`env: external_values`. Event visibility still follows §5.3. The engine presents
+machine-visible inputs as the exact §16.2 typed values; native SDK, HTTP, protobuf,
+socket and other host objects remain inside the provider. The input is an immutable
+value snapshot, never a live reference to engine state; mutation of a provider's
+local copy cannot mutate a tentative or prior aggregate. A guard binding has
+`output_type: bool` and returns one Boolean or a typed failure. An action binding has
+`output_type: structured_actions` and returns an ordered finite list of concrete
+`assign` and `send` action proposals or a typed failure. Their closed result schema
+is `schema/runtime-action-output-v1.schema.json`. A proposal contains §16.2 typed
+operands and is never a direct mutation of an aggregate, mailbox, counter, receipt or
+host journal. The engine validates every destination, value type, event declaration,
+target and complete emission against the same statechart rules before applying it.
+It also rejects a write to a destination destroyed by the selected transition.
+Action proposals execute in their returned order at that slot, among surrounding
+structured actions in author order. Dynamic `spawn`, `cancel`, `refresh` and `stop`
+are unsupported in a provider result; they remain available as ordinary structured
+actions. The provider cannot rewrite the containing transition, choose another slot,
+or gain arbitrary internal-state write authority. Invalid output is a
+`runtime_provider_output_invalid` provider-boundary error and no tentative Determa
+state commits. A selected
+slot alone invokes its provider; an incoming event's provider-like string grants no
+invocation authority.
+An invoked provider's typed execution failure follows the ordinary `guard_fault` or
+`action_fault` rule at that exact slot locator (§10). An invalid output is mapped to
+the same closed core fault code according to slot kind, while its boundary diagnostic
+retains `runtime_provider_output_invalid`. Either result rolls back tentative Determa
+state, but cannot undo I/O already performed by a native provider.
+
+`capabilities` explicitly declares `deterministic`, `pure`, `portable`,
+`semantically_introspectable`, `process_contained`, and `external_io_capable` as
+Booleans, independently verified against the exact provider closure and host policy.
+Self-assertion is insufficient. Effective guarantees in the first five categories
+hold only if *every* participating CEL/compiler/runtime provider and applicable host
+policy supplies them. Effective `external_io_capable` is true if *any* participating
+provider may perform external I/O; unknown/unverified I/O is treated as possible I/O.
+An embedding API returns the effective profile alongside the closed §8 core result;
+the profile is not a member of that portable result or checkpoint. The §11.5 host
+capability report also discloses the configured provider claims. Missing
+guarantees are false for an explicitly opted-in embedded weak profile; a host profile
+requiring them rejects at load. A native provider may deliberately perform I/O during
+evaluation, before commit. Such I/O survives a rolled-back transaction, failed CAS,
+or engine fault. This profile makes no automatic CAS reevaluation, deterministic
+replay, purity, portable execution or crash-safe exactly-once claim. A host authority
+guard protects Determa writes only; external safety needs separately proved
+destination fencing, idempotency or reconciliation. Committed effect handlers (§11)
+remain the recommended external I/O boundary.
+
+Semantic inspection (§12) calls a guard only through its separately proved, bounded,
+nonmutating `inspect_guard` entrypoint, which preserves ordinary guard truth for the
+given snapshot and charges the shared deterministic inspection fuel. The ordinary
+evaluator is never used as an inspection shortcut, even when `pure` is true. The
+engine preflights all potentially reached guards; if any exact closure lacks this
+entrypoint it returns `inspection_capability_unavailable` before invoking a guard.
+Structural inspection only identifies bindings and never calls providers.
+
+Optional source compilation uses `determa.language_source` version 1 and
+`determa.compilation_manifest` version 1 (`schema/language-source-v1.schema.json`
+and `schema/compilation-manifest-v1.schema.json`). Source content has exactly
+`template`, `regions`, and `dependencies`. A region gives its `kind` (`guard` or
+`actions`), canonical JSON Pointer `locator`, exact compiler `provider_reference`,
+`source_media_type`, and `source`. Locators name disjoint guard strings or complete
+action lists in the template; duplicate, overlapping or wrong-kind regions reject.
+Bounded compilers resolve exact dependency closure and translate regions in array
+order into CEL or structured actions. The generated format-1 definition then passes
+the ordinary strict loader. The manifest binds source digest, exact compiler closure,
+generated validated-bundle fingerprint and source capabilities. Source compilation
+and manifest envelopes each contain exactly `artifact_format`,
+`artifact_schema_version: 1`, `content`, and `artifact_digest`. Their digest is
+`hash([artifact_format, "1", typed(content)])` using §9 SHA-256/JCS and the §16.2
+recursive typed projection; a digest mismatch rejects. The compiler list is the
+duplicate-free exact closure used by the regions, including transitive dependencies,
+sorted by `(identifier, version, content_digest)` UTF-8 bytes. A manifest with a
+fingerprint unequal to the strict generated bundle rejects before creation or
+activation. Source-region locators and dependencies are
+validated before compiling; `language_compilation_failed` and
+`language_compilation_limit_exceeded` are distinct failures. Source compilation is
+optional: direct runtime slots are first-class, and restoring a complete generated
+definition requires its executable runtime closure but no compiler. Fresh compilation
+requires exact compiler closure. Restoration never silently recompiles or substitutes
+a mutable alias. Source-level inspection provenance additionally requires the exact
+source and manifest; executable structural inspection needs only the validated
+definition. No source or manifest embeds endpoint, scope credentials or SaaS-specific
+machine semantics.
 
 ## 6. Event and transition semantics
 
@@ -1534,7 +1666,7 @@ For the aggregate root, the engine retains terminal identity/status, history, co
 and fault-history diagnostics and returns `completed`; it retains no component or
 spawned descendant. No new ordinary envelope may target it.
 
-## 8. Pure foreground interface and logical state
+## 8. Foreground interface and logical state
 
 Language APIs may use idiomatic names, but every implementation must provide behavior
 equivalent to:
@@ -1549,6 +1681,11 @@ admit(bundle, prior_state, ordered_deliveries)
 step(bundle, prior_state, target_runtime_id)
   -> { status, disposition, state, emissions, lifecycle_dispositions, fault, rejection }
 ```
+
+With CEL and pure structured actions this is a pure foreground state transform.
+An explicitly installed impure runtime provider (§5.4) weakens that invocation as
+declared by its effective capability report; the API shape and state ownership are
+unchanged.
 
 `admit` validates its complete ordered batch before mutation, then appends each envelope
 to its exact target runtime's ready tail in caller order. It allocates immutable
@@ -2070,7 +2207,7 @@ locators below. Engines MUST use this mapping:
 | fault code | exact `source_locator` |
 |---|---|
 | `guard_fault` | pointer to the failing event-transition or choice `guard` value |
-| `action_fault` | pointer to the failing CEL expression value inside the action, entry, exit, initial transition, choice branch, component binding, or spawn binding; for an absent `refresh.only` field, the pointer to the first absent list item |
+| `action_fault` | pointer to the failing CEL expression value inside the action, entry, exit, initial transition, choice branch, component binding, or spawn binding; for a provider action failure, the action-slot value; for an absent `refresh.only` field, the pointer to the first absent list item |
 | `invalid_instance_target` | pointer to the executing send action's `to`/`targets` member or, for a dynamic instance expression, that exact expression value |
 | `inactive_component_target` | pointer to the executing send action's `to`/`targets` member that names the component |
 | `binding_not_empty` | pointer to the executing spawn action's `bind_to` value |
@@ -2491,9 +2628,9 @@ projection to the exact validated guard member. For a CEL guard, this is
 `guard` member in the §8 normalized validated bundle tree.
 Parsing and type checking do not rewrite, trim, pretty-print, case-fold, or otherwise
 canonicalize its source text; spaces and line breaks are retained as code points.
-For a runtime-provider guard, `typed_guard_binding` is the complete exact provider
-binding and source/dependency closure, encoded as the §8 typed tree under that provider
-contract. Its object-member order is canonicalized by §8 and §9; exact string/source
+For a runtime-provider guard, `typed_guard_binding` is the complete exact
+`{provider: binding}` guard member, including its source/dependency closure, encoded
+as the §8 typed tree. Its object-member order is canonicalized by §8 and §9; exact string/source
 values are preserved. Recompilation cannot substitute a different binding at the
 same locator. For example, `"event.payload.amount > 1"` and
 `"event.payload.amount  > 1"` have distinct guard bindings and distinct digests,
