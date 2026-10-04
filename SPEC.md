@@ -4520,8 +4520,9 @@ operation ID to `hash(["determa-host-operation-response-1", normalized_response]
 The normalized response is the exact public result returned for the committed
 operation, excluding transport-only headers, credentials and redacted views. The
 host MUST retain or be able to reconstruct those exact bytes while it claims equal
-operation replay; a digest alone is not the response. A referenced intent MUST exist in exactly one pending,
-terminal, or compact checkpoint outbox location, and its recomputed digest MUST
+operation replay; a digest alone is not the response. A referenced intent MUST exist
+in exactly one pending, terminal, or compact checkpoint outbox location, and its
+recomputed digest MUST
 match `intent_digest`. Attempt records are strictly ordered by numeric fence,
 contain no duplicate fence, and no fence exceeds the record's `attempt_fence`.
 `unclaimed`, `leased`, and `ambiguous` have null outcome, result ID, and admission
@@ -4538,16 +4539,18 @@ Each effect record contains exactly `effect_id`, `operation_token`, `intent_dige
 `idempotency_policy`, `attempt_fence`, `attempt_records`, `invocation_state`,
 `outcome`, `result_event_id`, `admission_receipt`, and `cancellation`. `effect_id`
 references exactly one committed checkpoint intent. `intent_digest` is the §17.6
-complete-intent digest, including its domain, root, and original intent. The `native_handler` reference is the exact §11.5 provider reference, resolved
-against host allowlist and dependency policy. Its binding digest identifies the precise destination
-and connector configuration without containing credentials. Configuration generation
+complete-intent digest, including its domain, root, and original intent. The
+`native_handler` reference is the exact §11.5 provider reference, resolved against
+host allowlist and dependency policy. Its binding digest identifies the precise
+destination and connector configuration without containing credentials. Configuration generation
 is a canonical decimal string. The target pins root instance ID, runtime ID, and
 exact runtime incarnation; a current alias or a later reactivation cannot redirect it.
 The ordered result mapping entries contain exactly `outcome_kind`, `event`,
 `result_slot`, and `operation_token_location`. Every permitted terminal business
 outcome has one declared result event and a distinct nonempty slot. Token location is
 `null` for host-only tokens, `{"kind":"correlation_id"}`, or
-`{"kind":"payload","pointer":canonical_json_pointer}`. A token location MUST
+`{"kind":"payload","pointer":canonical_json_pointer}` into the decoded logical
+declared payload map, before §16.2 typed projection. A token location MUST
 resolve to a declared string field; the host, not the worker, inserts the pinned
 value. A result is admitted only in the event's declared input mode to the pinned
 runtime incarnation. Rebinding to a new target or route requires new work, never a
@@ -4585,7 +4588,8 @@ and commits both facts under the host authority guard. Only the authenticated cu
 worker principal, active unexpired claim, current scope authority epoch, and exact
 attempt fence authorize dispatch or result submission. Expiry/revocation and new
 claims serialize under that guard. The authenticated principal and matching active
-scope epoch and attempt fence MUST still hold at the journal transaction commit. Lease expiry can revoke host writes but cannot
+scope epoch and attempt fence MUST still hold at the journal transaction commit.
+Lease expiry can revoke host writes but cannot
 prove whether external work happened. Import never restores a live claim; an
 unresolved inherited attempt becomes ambiguous before any new attempt.
 
@@ -4599,8 +4603,11 @@ capability. Its report kind is `succeeded`, `domain_rejected`,
 acceptance, unclassified exception, worker disappearance, or expired attempt is
 `ambiguous` unless definitive evidence proves no call occurred. A report is immutable
 and contains exactly `attempt_fence`, `report_kind`, `report_digest`, and `reason`.
-`report_digest` hashes the normalized submitted report and its evidence under
-`determa-effect-attempt-report-1`; a duplicate equal report replays and an unequal
+`report_digest` is `hash(["determa-effect-attempt-report-1", effect_id,
+operation_token, attempt_fence, report_kind, payload, reason])`, with the exact
+§16.2 typed payload and `null` or a stable nonempty reason code. The host retains
+external evidence separately under access policy; its digest can be included in the
+portable payload only when declared. A duplicate equal report replays and an unequal
 report for the same fence conflicts. Reports do not consume the final outcome slot.
 
 Retry after ambiguity requires proved destination deduplication under the same scoped
@@ -4623,18 +4630,35 @@ authorized operation and cannot rewrite an immutable outcome.
 
 ### 19.4 Authenticated result submission and admission
 
-The closed request shape is `schema/effect-result-request-v1.schema.json`. The
+The closed request shape is `schema/effect-result-request-v1.schema.json`; the
+closed response shape is `schema/effect-result-response-v1.schema.json`. The
 result request contains exactly `effect_id`, `operation_token`,
 `attempt_fence`, `outcome_kind`, and `payload`. The authenticated transport context
-supplies principal and scope independently of those fields. Before mutation or core
-admission the host validates the current authority epoch, active claim and fence,
-worker principal, exact scope and pinned route, outstanding invocation, exact token,
-allowed terminal outcome and declared portable payload. The claimed attempt's
-normalized report digest MUST agree with the submitted outcome evidence. A wrong
+supplies principal and scope independently of those fields. Before a fresh report,
+outcome, or core admission the host validates the current
+authority epoch, active claim and fence, authenticated worker principal, exact scope
+and pinned route, outstanding invocation, exact token, allowed outcome and declared
+portable payload. It computes the immutable attempt report digest from the
+normalized request and reason, then records that report with the outcome when
+terminal. A subsequent equal replay requires current scope and principal
+authorization, exact retained request/outcome evidence, and the original authenticated
+claim principal; it does not require reviving an expired claim or admitting again.
+An old authority epoch never gains replay rights across a scope transfer. A wrong
 business token or unknown/closed unrelated invocation returns
 `effect_not_outstanding`; a stale fence returns `stale_attempt_fence`; conflicting
 content for an already recorded outcome returns `effect_result_conflict`. Validation
 failure performs no core call and changes no checkpoint, journal, or outbox bytes.
+
+A response has exactly `status`, `effect_id`, `attempt_fence`, `attempt_report`,
+`outcome`, `result_event_id`, `admission_receipt`, `checkpoint_revision`,
+`journal_revision`, and `error_code`. `status: committed` returns the exact terminal
+outcome and acceptance receipt; equal replay returns the same response bytes and
+revisions. `status: report_recorded` returns the immutable retry or ambiguity attempt
+report with null outcome, result ID, and receipt. `status: rejected` returns only the
+request effect ID/fence and one closed error code; all evidence and revisions are
+null, so unauthorized callers cannot infer whether another scope contains work.
+Rejected requests allocate no revision. A retry or ambiguity report leaves the
+checkpoint revision unchanged. The journal revision advances only on a fresh report.
 
 For a terminal mapped outcome, result event identity is
 `hash(["determa-effect-result-event-1", effect_id, result_slot])`. The host builds

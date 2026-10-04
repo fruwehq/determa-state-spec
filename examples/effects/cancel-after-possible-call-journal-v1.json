@@ -1,0 +1,99 @@
+{
+  "host_effect_journal_format": "determa.host_effect_journal",
+  "host_effect_journal_schema_version": 1,
+  "scope_identity": "local-example",
+  "root_instance_id": "job-42",
+  "checkpoint_revision": "0",
+  "checkpoint_digest": "sha256:975901b9ae81ae5eb78b0379adf596c8828911c5b793e5fbbfdf2acf504bfde4",
+  "journal_revision": "3",
+  "effect_records": [
+    {
+      "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "operation_token": "business-order-42",
+      "intent_digest": "sha256:d7a28a6f476ed085ffdb85460dddfba4691e85ea407faa38669d7fc53fc1858e",
+      "handler_reference": {
+        "identifier": "example.native-handler",
+        "version": "1.0.0",
+        "content_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "destination_binding_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "route_configuration_generation": "7",
+      "result_mapping": [
+        {
+          "outcome_kind": "succeeded",
+          "event": "submit_succeeded",
+          "result_slot": "success",
+          "operation_token_location": {
+            "kind": "payload",
+            "pointer": "/operation_token"
+          }
+        },
+        {
+          "outcome_kind": "domain_rejected",
+          "event": "submit_rejected",
+          "result_slot": "domain_rejection",
+          "operation_token_location": {
+            "kind": "payload",
+            "pointer": "/operation_token"
+          }
+        },
+        {
+          "outcome_kind": "terminal_failure",
+          "event": "submit_failed",
+          "result_slot": "terminal_failure",
+          "operation_token_location": {
+            "kind": "payload",
+            "pointer": "/operation_token"
+          }
+        },
+        {
+          "outcome_kind": "cancelled",
+          "event": "submit_cancelled",
+          "result_slot": "cancelled",
+          "operation_token_location": {
+            "kind": "payload",
+            "pointer": "/operation_token"
+          }
+        }
+      ],
+      "target": {
+        "root_instance_id": "job-42",
+        "runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
+        "runtime_incarnation": {
+          "kind": "root",
+          "definition": {
+            "validated_bundle_fingerprint": "sha256:cf1429c9cc0ecfb62e406bff29c9b537d668fad6601e30f0da0210986b7f6413",
+            "machine": {
+              "namespace": "example.persistence",
+              "machine_id": "job",
+              "machine_version": "1",
+              "root_definition_pointer": "/machines/0/root"
+            }
+          },
+          "root_instance_id": "job-42"
+        }
+      },
+      "idempotency_policy": "destination_deduplicates",
+      "attempt_fence": "1",
+      "attempt_records": [
+        {
+          "attempt_fence": "1",
+          "report_kind": "ambiguous",
+          "report_digest": "sha256:a42d7103ee3d8154833be3c6181c7d34334b127f66760e0df678b5114e35501e",
+          "reason": "provider_acceptance_unknown"
+        }
+      ],
+      "invocation_state": "ambiguous",
+      "outcome": null,
+      "result_event_id": null,
+      "admission_receipt": null,
+      "cancellation": {
+        "operation_id": "cancel-2",
+        "reason": "operator_request",
+        "state": "reconciliation_required"
+      }
+    }
+  ],
+  "operation_response_references": [],
+  "host_effect_journal_digest": "sha256:d053d55f22b99b2bb4894eb29ee86be8f3eac92f957ef094c7b1694e11f8defa"
+}

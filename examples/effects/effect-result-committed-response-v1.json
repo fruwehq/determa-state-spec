@@ -1,0 +1,43 @@
+{
+  "status": "committed",
+  "effect_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "attempt_fence": "1",
+  "attempt_report": null,
+  "outcome": {
+    "kind": "succeeded",
+    "payload": [
+      "map",
+      [
+        [
+          "operation_token",
+          [
+            "string",
+            "business-order-42"
+          ]
+        ],
+        [
+          "provider_reference",
+          [
+            "string",
+            "accepted-42"
+          ]
+        ]
+      ]
+    ],
+    "digest": "sha256:411adfe14a88d2a4b5efa9fca68f83f20da5590d49ffc95ebbd2cdcb9380f888",
+    "attempt_fence": "1"
+  },
+  "result_event_id": "sha256:8035d712d2080d33173551a8d278ea27f7e3373b18c042cc67c657589bc0574c",
+  "admission_receipt": {
+    "operation_kind": "acceptance",
+    "receipt_sequence": "1",
+    "event_id": "sha256:8035d712d2080d33173551a8d278ea27f7e3373b18c042cc67c657589bc0574c",
+    "request_digest": "sha256:c9f201a383042214477b1142b54719b90b70c0cb359a9dfc2861794d185e2d12",
+    "acceptance_sequence": "2",
+    "accepted_revision": "1",
+    "delivery_mode": "input"
+  },
+  "checkpoint_revision": "1",
+  "journal_revision": "3",
+  "error_code": null
+}
