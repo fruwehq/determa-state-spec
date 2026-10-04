@@ -4,8 +4,12 @@
   "title": "Determa State exact candidate inspection version 1",
   "description": "Closed request and result shapes; inspect_candidate performs the semantic checks in SPEC.md section 12.",
   "oneOf": [
-    {"$ref": "#/$defs/request"},
-    {"$ref": "#/$defs/outcome"}
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/outcome"
+    }
   ],
   "$defs": {
     "sha256": {
@@ -266,13 +270,37 @@
           ]
         },
         "possible_dispositions": {
-          "type": "array",
-          "minItems": 1,
-          "maxItems": 4,
-          "uniqueItems": true,
-          "items": {
-            "$ref": "#/$defs/disposition"
-          }
+          "enum": [
+            [
+              "handled_now"
+            ],
+            [
+              "deferred"
+            ],
+            [
+              "unhandled"
+            ],
+            [
+              "handled_now",
+              "deferred"
+            ],
+            [
+              "handled_now",
+              "unhandled"
+            ],
+            [
+              "deferred",
+              "unhandled"
+            ],
+            [
+              "handled_now",
+              "deferred",
+              "unhandled"
+            ],
+            [
+              "invalid"
+            ]
+          ]
         },
         "disposition": {
           "oneOf": [

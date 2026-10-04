@@ -2313,8 +2313,11 @@ inspection begins. Invalid request shape or digest is an operation failure,
 A successful result has exactly `aggregate_state_digest`,
 `definition_fingerprint`, `runtime_id`, `runtime_incarnation`, `classification`,
 `possible_dispositions`, `disposition`, `reason`, `levels`, and `guard_evidence`.
-The fingerprint is the resolved exact executable definition, including provider
-closure when applicable. `possible_dispositions` is a nonempty duplicate-free subset
+The fingerprint is the addressed runtime's exact current executable definition,
+including provider closure when applicable. For an absent or mismatched runtime,
+it is the aggregate root's exact current executable definition; this does not
+imply that an absent target was resolved. `possible_dispositions` is a nonempty
+duplicate-free subset
 in canonical order `handled_now`, `deferred`, `unhandled`, `invalid`. A
 `definitive` result has one possibility and the same non-null `disposition`; a
 `conditional` result has at least two possibilities and `disposition: null`.
@@ -2413,9 +2416,10 @@ decide the result. No comprehension, iteration, receiver call, or other intrinsi
 is admitted by §5.2; adding one requires a corresponding exact fuel rule before
 semantic inspection can claim it. Guard-count budget is charged once immediately
 before each reached guard. Exhaustion takes precedence over a guard error at the
-operation whose charge cannot be paid. Limits apply equally to native safe guard
-providers, which must report the same abstract work or a separately standardized
-equivalent bound; until then their semantic inspection capability is unavailable.
+operation whose charge cannot be paid. Native safe guard providers must expose a
+public deterministic work schedule and honor the same request limits through their
+separately proved entrypoint. Without that proved schedule their semantic inspection
+capability is unavailable.
 
 Neither mode changes aggregate bytes, counters, queues, receipts, audit records, or
 provider state. Inspection does not resolve a plugin route or read host backlog.
