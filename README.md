@@ -99,6 +99,11 @@ audit, and revision. Built-in and third-party execution stores use the same regi
 path and advertise only capabilities their configured instance can prove; broker
 integration is a composed host profile, not a storage capability.
 
+An optional [lossless application projection](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade)
+loads explicitly selected application rows, admits declared typed input, and maps the
+complete resulting state back into application-owned storage. Shared transaction
+claims require one proved native transaction covering those rows and the checkpoint.
+
 Time-based behavior uses an external event-producing extension. A machine emits a
 declared scheduling request and may later receive a declared correlated event. The
 extension determines its clock, durability, delivery, cancellation, and credentials.

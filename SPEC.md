@@ -4837,3 +4837,149 @@ call or core admission. Optional relocation tests run only when the host adverti
 its §18 authority capability; otherwise safe relocation is explicitly refused and
 staged imports remain inactive. These are public conformance obligations for any
 future hosted service claiming the same capability.
+
+## 20. Lossless application projection and embedded transaction facade
+
+This optional host contract binds selected application rows to one root ownership
+aggregate. It does not change machine grammar, the §8 foreground result, the §16
+portable aggregate, or the §17 execution checkpoint. An application owns row selection,
+its object-relational mapping, transaction, and response. A projection extension uses
+the §11.5 `projection` category and MAY claim `lossless_projection` only for a
+configured mapping whose complete supported domain satisfies this section. Direct
+injection and named registration have the same validation and capability rules.
+
+### 20.1 Selected rows and exact reconstruction
+
+The mapping identifies an explicit finite set of application rows for one selected
+root. Other application rows are outside the projection. The mapping MUST define a
+total decode from its selected rows and permitted supplemental storage to exactly one
+schema-valid aggregate or checkpoint, and an encode of every reachable committed
+result back to those locations. For every supported state `s`, decoding the encoding
+of `s` MUST reconstruct all logical fields and their exact canonical typed values,
+identities, ordering, references, and digests. Physical bytes may differ only where
+the portable decoder explicitly permits equivalent encodings; the reconstructed
+portable artifact MUST have the canonical §16/§17 bytes and digest. A mapped enum such
+as `pending` or `done` cannot replace other state. Supplemental JSON or related rows
+MAY retain information that domain columns cannot express, but they participate in
+the same reconstruction and atomic commit.
+
+The reconstruction obligation includes definition and runtime identities, active
+configuration, variables and typed values, counters, history, faults, every ready and
+deferred entry with its complete envelope and placement, and, when a checkpoint is
+used, revision, receipts, migration audit, replay/retention evidence, root tombstone,
+pending and terminal effects, effect tombstones, and outbox ordering. It applies to
+completed, faulted, unhandled, deferred, migrated, and tombstoned results as well as
+the happy path. An application row is never silently archived, deleted, or rewritten
+because it is outside the selected set or cannot fit a domain enum. An application
+archive participant, if later declared, is separately identified; this contract does
+not include application rows in a Determa-owned archive.
+
+A configured mapping MUST validate its selected row identities, expected shape,
+declaration/type correspondence, and lossless capacity before constructing a new
+caller input from mapped row values or mutating a row. It MUST verify exact round-trip
+reconstruction of each proposed result
+before commit. If a value or field cannot be represented or reconstructed, it returns
+`projection_not_lossless`. Truncation, lossy number conversion, default insertion,
+sorting of an accepted noncanonical artifact, omission of an unknown required field,
+or substituting an enum summary is forbidden. Concrete table names, ORM models,
+column layouts, indices, and helper rows are host configuration, not portable format.
+
+### 20.2 Typed input and external refresh
+
+The application supplies an explicit selected-row snapshot and typed caller request.
+The projection MAY read mapped application fields as §16.2 typed values and submit
+them only through a declaration-supported create binding, declared input envelope, or
+the reserved §6 `env` envelope for declared root external variables. The selected
+definition determines the accepted name, type, target, and timing. `env` is the sole
+undeclared host-input exception. Its selected handler's `refresh` action copies only
+the requested fields; a missing `refresh.only` field can produce a committed
+`action_fault` under the ordinary RTC rule. A projection cannot edit a variable,
+active state, history, fault, mailbox, identity, receipt, effect, or checkpoint field
+directly. A mapping MUST reject an undeclared mapped field, type mismatch, or
+unsupported boundary before constructing a new core request or writing a row.
+Native ORM objects, database handles, SDK objects, and credentials are never machine
+values. Mapping a host numeric value MUST preserve integer versus float identity;
+converting through an untyped JSON number is insufficient. Once an immutable caller
+delivery exists, §17.4 admission precedence applies: after batch shape/root/duplicate
+checks, retained `event_id` replay or conflict is decided from the exact request
+digest before declaration and payload validation. A changed payload reusing a retained
+`event_id` returns `event_id_conflict` even if its type is wrong for the current
+declaration; an equal replay returns its retained receipt without core evaluation or
+row mutation. Mapping validation of row-derived values cannot reorder those checks.
+
+### 20.3 Application-owned transaction
+
+An embedded facade invocation selects one root and mapping, validates the supplied
+typed request and configured capability, then reads the selected rows and complete
+prior Determa artifact under the application's transaction or an explicitly weaker
+ephemeral arrangement. It reconstructs and validates the prior artifact before any
+core call. It calls the applicable §8 `create`, `admit`, or `step` operation on an
+in-memory candidate; external refresh uses an admitted `env` envelope and subsequent
+`step`. It stages the exact operation-specific §8 result: `create` has state,
+emissions, lifecycle dispositions, fault, and rejection; `admit` has accepted,
+state, and rejection; `step` has disposition, state, emissions, lifecycle dispositions,
+fault, and rejection. Each also retains its status. The facade also stages the
+corresponding complete checkpoint evidence when used and selected application-row
+changes. It verifies the proposed round trip before one commit. The result exposed as
+committed is returned
+only after that commit; a precommit result is a candidate, not a durable receipt.
+
+When the configured execution store proves `shared_application_transaction` and the
+application uses its one native transaction, selected row changes and the complete
+§17 checkpoint replacement (including receipts and outbox) MUST commit atomically.
+The root's exact revision/digest guard and §17 replay/conflict ordering still apply.
+If the application cannot join the store transaction, the facade MUST NOT claim
+`shared_application_transaction` or exactly-once committed application-row effects;
+an explicit application inbox/outbox coordination protocol may make a different,
+separately proved claim. `lossless_projection` alone implies neither durability,
+compare-and-swap, shared transactions, transport acknowledgement, nor authority over
+a scope. Projected rows grant no access to another root or scope.
+
+Any failed validation, projection, core invocation, transaction, or revision guard
+before commit leaves selected application rows and the prior checkpoint, receipts, and
+outbox unchanged under the claimed atomic transaction. A committed `faulted` or
+`unhandled` core disposition remains an ordinary complete result under §17 and MUST
+NOT be mistaken for an invocation failure. A conflict is reported with the
+existing `checkpoint_revision_conflict`; the caller may start a new invocation from
+the newly committed state. The facade does not automatically reevaluate or retry. An
+explicitly installed impure native runtime provider may perform external I/O during
+evaluation, before commit. A database rollback or conflict cannot undo that I/O, so
+such an invocation cannot claim pure evaluation, deterministic replay, or safe
+automatic retry without a separately proved provider and caller policy (§11.5).
+Committed intents are delivered only according to the separately selected outbox and
+transport profile.
+
+The closed projection-specific failures are `invalid_projection_selection` (missing,
+ambiguous, or mismatched selected rows or mapping identity),
+`invalid_projection_input` (undeclared field, invalid typed value, or type mismatch),
+`unsupported_projection_boundary` (no declared create/input/refresh path for the
+requested change), `projection_not_lossless` (prior or proposed artifact cannot be
+exactly reconstructed), and `projection_transaction_unavailable` (a requested shared
+transaction cannot be provided by this configured composition). These errors have no
+application-row, checkpoint, receipt, or outbox commit. Existing core, artifact,
+capability, and checkpoint codes retain their meanings and precedence: selection and
+capability validation precede decode; new row-derived value validation precedes
+constructing a caller request; an already constructed caller delivery follows §17.4
+identity replay/conflict ordering before declaration/payload checks; candidate
+round-trip validation precedes commit; the revision guard is checked at commit.
+Storage or provider exceptions are surfaced as host failures without relabeling them
+as successful dispositions.
+
+The following cases are normative. `typed` denotes the exact §16.2 projection, and
+`prior` denotes a valid complete aggregate or checkpoint for the selected root.
+
+| selected application mapping and invocation | required outcome |
+|---|---|
+| `status = pending`, supplemental complete `prior`; new declared `amount` input mapped from a row as `typed = ["integer", "7"]` | Construct the valid caller request; preserve the applicable operation-specific §8 result and complete artifact; commit selected row and checkpoint together only when one native transaction is proved. |
+| A valid `create` or `admit` completes through the facade | Return its exact §8 result fields; do not invent a `disposition` for either operation or `emissions` for `admit`. Preserve any emissions from `create` and subsequent `step` in their own results and committed evidence. |
+| Same mapping reads `typed = ["float", "401c000000000000"]` from a row for a new integer input | `invalid_projection_input` before constructing a caller request; no core call or commit. |
+| A valid selected-row snapshot and prior checkpoint retain an `event_id`; its equal complete delivery is presented again after a declaration change | Return its retained §17 receipt read-only before new declaration/payload checks; no core call or row mutation. |
+| A retained `event_id` is reused with a changed `amount` payload `typed = ["float", "401c000000000000"]` that is invalid for the current integer declaration | `event_id_conflict` under §17.4 before payload validation; no core call or commit. |
+| An admitted `env` envelope has `changed.amount = ["integer", "7"]` for a declared external root variable; the selected handler executes `refresh: {}` | Apply the §6 refresh action during `step` and preserve the exact §8 step result, including any disposition and emissions. |
+| An admitted valid `env` envelope omits a field named by the selected handler's `refresh.only` | Preserve the §6 committed `action_fault` step result and its checkpoint evidence; do not recast it as pre-step `invalid_projection_input`. |
+| Mapping asks to set `active_state = done` without a declared input/refresh transition | `unsupported_projection_boundary`; no core call or commit. |
+| Enum-only `status = pending` has no storage for a deferred envelope, receipt, or pending effect present in `prior` | `projection_not_lossless`; retain `prior` and every row unchanged. |
+| Proposed result contains a deferred envelope but configured supplemental storage truncates its payload | `projection_not_lossless`; no row, checkpoint, receipt, or outbox commit. |
+| Selected row belongs to a different root or is ambiguous | `invalid_projection_selection`; no core call or commit. |
+| Mapping requests one native application/checkpoint transaction from a store without that proved capability | `projection_transaction_unavailable`; no core call or commit. |
+| Concurrent writer changes the checkpoint revision after candidate evaluation | `checkpoint_revision_conflict`; roll back all selected rows and checkpoint changes, with no automatic retry. |
