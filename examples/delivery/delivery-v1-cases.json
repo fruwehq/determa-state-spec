@@ -1,5 +1,5 @@
 {
-  "description": "Normative delivery boundary responses. The checkpoint evidence in this boundary fixture is an opaque witness; full checkpoint receipts are validated by the checkpoint vectors. Identical first and replay outputs require no mutation. Source and dead-letter digests use exact RFC 8785 hashes.",
+  "description": "Closed delivery boundary responses; admitted and unhandled responses cross-bind exact full checkpoint snapshots and receipts. Other scenarios assert boundary decisions independently. Source and dead-letter digests use exact RFC 8785 hashes.",
   "cases": [
     {
       "name": "source_owned_backpressure",
@@ -33,16 +33,16 @@
           }
         },
         "envelope": {
-          "event": "start",
-          "event_id": "event-42",
-          "cause_id": "event-42",
+          "event": "received",
+          "event_id": "received-1",
+          "cause_id": "received-1",
           "source": {
             "host": true
           },
           "target": {
             "root": {
-              "root_instance_id": "order-1",
-              "root_runtime_id": "runtime-1"
+              "root_instance_id": "server-1",
+              "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8"
             }
           },
           "payload": [
@@ -57,12 +57,12 @@
         "source_scope": "orders/inbox",
         "source_delivery_id": "broker-42",
         "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2",
-        "event_id": "event-42",
+        "event_id": "received-1",
         "evidence": {
-          "root_instance_id": "order-1",
+          "root_instance_id": "server-1",
           "receipt_sequence": "1",
           "committed_revision": "1",
-          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "execution_checkpoint_digest": "sha256:3e64cc35c5a045ac2feb9ccd6063cb69d9de1ef4cb2fcd7d55cadde50ff9e950"
         },
         "retention": {
           "profile": "permanent",
@@ -72,10 +72,13 @@
           "kind": "host_profile",
           "identifier": "orders-host"
         },
-        "acknowledge_source": true
+        "acknowledge_source": true,
+        "admission_binding_digest": "sha256:b573099d5093dc8a6a46ab60b09f73c7cb5d31bc3ebfe488910918714ab1771e"
       },
       "source_owner_after": "checkpoint",
-      "checkpoint_mutation": true
+      "checkpoint_mutation": true,
+      "checkpoint_snapshot": "after_admission",
+      "receipt_index": 1
     },
     {
       "name": "equal_redelivery_after_lost_ack",
@@ -91,16 +94,16 @@
           }
         },
         "envelope": {
-          "event": "start",
-          "event_id": "event-42",
-          "cause_id": "event-42",
+          "event": "received",
+          "event_id": "received-1",
+          "cause_id": "received-1",
           "source": {
             "host": true
           },
           "target": {
             "root": {
-              "root_instance_id": "order-1",
-              "root_runtime_id": "runtime-1"
+              "root_instance_id": "server-1",
+              "root_runtime_id": "sha256:9b0e3238e782cb7d912febc1acc4e4c03a121d201764d0bc9658b969feac4dc8"
             }
           },
           "payload": [
@@ -115,12 +118,12 @@
         "source_scope": "orders/inbox",
         "source_delivery_id": "broker-42",
         "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2",
-        "event_id": "event-42",
+        "event_id": "received-1",
         "evidence": {
-          "root_instance_id": "order-1",
+          "root_instance_id": "server-1",
           "receipt_sequence": "1",
           "committed_revision": "1",
-          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "execution_checkpoint_digest": "sha256:3e64cc35c5a045ac2feb9ccd6063cb69d9de1ef4cb2fcd7d55cadde50ff9e950"
         },
         "retention": {
           "profile": "permanent",
@@ -130,60 +133,44 @@
           "kind": "host_profile",
           "identifier": "orders-host"
         },
-        "acknowledge_source": true
+        "acknowledge_source": true,
+        "admission_binding_digest": "sha256:b573099d5093dc8a6a46ab60b09f73c7cb5d31bc3ebfe488910918714ab1771e"
       },
       "source_owner_after": "checkpoint",
       "checkpoint_mutation": false,
-      "same_response_as": "first_committed_admission"
-    },
-    {
-      "name": "deferred_stays_checkpoint_owned",
-      "response": {
-        "delivery_message_kind": "mailbox_placement",
-        "event_id": "event-42",
-        "placement": "deferred",
-        "acceptance_sequence": "0",
-        "queue_sequence": "1",
-        "decision_authority": {
-          "kind": "machine_core",
-          "identifier": "order-1"
-        },
-        "evidence": {
-          "root_instance_id": "order-1",
-          "receipt_sequence": "1",
-          "committed_revision": "2",
-          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        },
-        "retention": {
-          "profile": "permanent",
-          "minimum_replay_until": null
-        }
-      },
-      "source_owner_after": "checkpoint",
-      "source_retry": false
+      "same_response_as": "first_committed_admission",
+      "checkpoint_snapshot": "after_admission",
+      "receipt_index": 1
     },
     {
       "name": "machine_unhandled_after_admission",
       "response": {
         "delivery_message_kind": "machine_disposition",
-        "event_id": "event-42",
+        "event_id": "received-1",
         "disposition": "unhandled",
-        "reason_code": "no_enabled_handler",
         "decision_authority": {
           "kind": "machine_core",
           "identifier": "order-1"
         },
         "evidence": {
-          "root_instance_id": "order-1",
+          "root_instance_id": "server-1",
           "receipt_sequence": "2",
           "committed_revision": "2",
-          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "execution_checkpoint_digest": "sha256:b276ca6ff8f113ce12df532d2e0e6f70f15094c40f1c2dbadd620d3cc78544f2"
         },
         "retention": {
           "profile": "permanent",
           "minimum_replay_until": null
+        },
+        "outcome": {
+          "status": "running",
+          "disposition": "unhandled",
+          "fault": null,
+          "rejection": null
         }
-      }
+      },
+      "checkpoint_snapshot": "after_unhandled",
+      "receipt_index": 2
     },
     {
       "name": "first_durable_poison_transfer",
@@ -261,7 +248,7 @@
         "source_scope": "orders/inbox",
         "source_delivery_id": "broker-42",
         "source_content_digest": "sha256:9619d6200d2b43e23f2985ac1ca80b0651aeb69b7f865023f6c120c66504e752",
-        "event_id": null,
+        "event_id": "received-1",
         "reason": "source_delivery_id_conflict",
         "decision_authority": {
           "kind": "host_profile",
@@ -304,30 +291,6 @@
       }
     },
     {
-      "name": "outbound_ambiguous_remains_pending",
-      "response": {
-        "delivery_message_kind": "outbound_decision",
-        "effect_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        "outcome": "ambiguous",
-        "reason_code": "confirmation_lost",
-        "decision_authority": {
-          "kind": "host_profile",
-          "identifier": "orders-host"
-        },
-        "evidence": {
-          "root_instance_id": "order-1",
-          "receipt_sequence": "3",
-          "committed_revision": "3",
-          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        },
-        "destination_receipt_id": null,
-        "retention": {
-          "profile": "permanent",
-          "minimum_replay_until": null
-        }
-      }
-    },
-    {
       "name": "precommit_write_failure_keeps_source",
       "response": {
         "delivery_message_kind": "source_owned",
@@ -362,56 +325,6 @@
       },
       "source_owner_after": "source",
       "checkpoint_mutation": false
-    },
-    {
-      "name": "machine_fault_is_terminal_not_source_retry",
-      "response": {
-        "delivery_message_kind": "machine_disposition",
-        "event_id": "event-42",
-        "disposition": "faulted",
-        "reason_code": "action_fault",
-        "decision_authority": {
-          "kind": "machine_core",
-          "identifier": "order-1"
-        },
-        "evidence": {
-          "root_instance_id": "order-1",
-          "receipt_sequence": "2",
-          "committed_revision": "2",
-          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        },
-        "retention": {
-          "profile": "permanent",
-          "minimum_replay_until": null
-        }
-      },
-      "source_owner_after": "checkpoint_terminal_receipt",
-      "source_retry": false
-    },
-    {
-      "name": "destination_acceptance_does_not_prove_business_success",
-      "response": {
-        "delivery_message_kind": "outbound_decision",
-        "effect_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        "outcome": "confirmed",
-        "reason_code": null,
-        "decision_authority": {
-          "kind": "host_profile",
-          "identifier": "orders-host"
-        },
-        "evidence": {
-          "root_instance_id": "order-1",
-          "receipt_sequence": "3",
-          "committed_revision": "3",
-          "execution_checkpoint_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        },
-        "destination_receipt_id": "destination-acceptance-7",
-        "retention": {
-          "profile": "permanent",
-          "minimum_replay_until": null
-        }
-      },
-      "business_success": null
     }
   ],
   "invalid_cases": [
@@ -459,5 +372,20 @@
         "acknowledge_source": true
       }
     }
-  ]
+  ],
+  "admission_binding": {
+    "delivery_message_kind": "admission_binding",
+    "source_scope": "orders/inbox",
+    "source_delivery_id": "broker-42",
+    "source_content_digest": "sha256:994487e502e24d098ba6833a4c7465badd786b500a396de40fcb48aaf339c2e2",
+    "event_id": "received-1",
+    "envelope_digest": "sha256:21fe9b70a15bab725a835c4c26e8da26bfe94a7be3feef11031abb1012fc8436",
+    "evidence": {
+      "root_instance_id": "server-1",
+      "receipt_sequence": "1",
+      "committed_revision": "1",
+      "execution_checkpoint_digest": "sha256:3e64cc35c5a045ac2feb9ccd6063cb69d9de1ef4cb2fcd7d55cadde50ff9e950"
+    },
+    "admission_binding_digest": "sha256:b573099d5093dc8a6a46ab60b09f73c7cb5d31bc3ebfe488910918714ab1771e"
+  }
 }

@@ -1020,6 +1020,9 @@ Rejection returns the prior state unchanged, allocates no logical identity, and 
 the envelope caller-owned. After committed admission the envelope exists in exactly one
 engine-owned lifecycle location: one runtime's ready mailbox, that same runtime's
 deferred mailbox, or a terminal/disposal receipt under §17.3.
+Under the optional §21 lossless delivery profile, source ownership and acknowledgement
+follow the committed admission or durable terminal-transfer boundary; a later machine
+disposition never becomes a source-broker retry.
 
 `input` mode MUST name a bundle `input` event and may supply only the `root` or
 `spawned_instance` target member for a running runtime. Direct use of the `component`
@@ -3977,6 +3980,8 @@ Successful host admission allocates one aggregate-wide `acceptance_sequence` and
 `queue_sequence` per new envelope in caller order, appends it to its exact target ready
 tail, creates one input acceptance receipt, advances revision once, and recomputes both
 digests. Only then may an adapter acknowledge transfer of ownership.
+An adapter claiming §21 MUST retain the exact source-to-acceptance binding and prove
+that it survived the same ownership transfer.
 
 Processing explicitly targets one runtime and selects only its ready head. A deferred
 result atomically moves the entry to that runtime's deferred tail with a new queue
@@ -4620,7 +4625,12 @@ core clock behavior. Its closed wire values are
 use the base in-memory API without a broker, worker, coordinator, daemon, or timer.
 That API MUST return every admission rejection, ready/deferred placement, terminal
 machine disposition, lifecycle disposal, and emitted intent to its caller. The caller
-owns persistence and may claim only the guarantees it actually supplies. In a durable
+owns persistence and may claim only the guarantees it actually supplies. The complete
+core `step` result in §8 and `schema/core-step-result-v1.schema.json` is the base
+result shape: its state, disposition, fault/rejection, emissions, and every
+`lifecycle_dispositions` member are mandatory fields. A caller MUST preserve or
+explicitly decide every returned external intent and lifecycle disposition before
+claiming lossless delivery. In a durable
 host, §17 receipts and records supply the machine evidence; §18 authority guards,
 §19 effect journals, and §20 application projections apply only when the host declares
 those optional profiles. A delivery adapter MUST NOT infer authority, durable
@@ -4650,6 +4660,12 @@ ready/deferred location. A durable adapter binds the source pair and digest to t
 checkpoint acceptance receipt or durable terminal-transfer record before source
 acknowledgement. The binding is host evidence outside the portable checkpoint; it
 MUST be restored with that checkpoint for a broker-integrated profile.
+The admitted binding's exact digest is
+`hash(["determa-admission-binding-digest-1", "1",
+binding_without_admission_binding_digest])`. Its `envelope_digest` MUST equal
+the matching mailbox entry and acceptance receipt request digest. A dead-letter
+record itself is the terminal source binding. The first/replay vectors contain
+the exact admitted binding.
 
 ### 21.2 Ingress decisions, acknowledgement, and replay
 
@@ -4664,7 +4680,8 @@ result, or a write whose durability is weaker than its advertised profile.
 The closed pre-commit decision is `source_owned` with one reason:
 `backpressure`, `capacity_unavailable`, `malformed_delivery`,
 `invalid_delivery`, `target_unavailable`, `precommit_failure`,
-`authority_unavailable`, or `source_delivery_id_conflict`. It returns
+`authority_unavailable`, `source_delivery_id_conflict`, or
+`event_id_conflict`. It returns
 `acknowledge_source: false` and leaves source ownership intact. The adapter may
 pause consumption or request source redelivery according to its configured source
 contract; it MUST NOT turn a retry exhaustion, overflow, plugin failure, or target
@@ -4691,13 +4708,26 @@ The adapter MUST NOT ask the source broker to retry an admitted event because th
 machine did not handle it. Each terminal decision retains event identity, exact
 reason or fault, decision authority, receipt, and the profile's declared retention
 window. The base API returns that evidence to its caller even without durable storage.
+For a durable response, `evidence.receipt_sequence` MUST resolve to the exact
+checkpoint operation receipt at `evidence.committed_revision`; its event id,
+request digest, acceptance sequence, disposition, fault/reason, and resulting
+aggregate digest MUST agree with the checkpoint and response. The supplied
+`execution_checkpoint_digest` MUST be the digest of that committed checkpoint
+snapshot. An `admitted` response resolves to an acceptance receipt and one live
+mailbox entry with the same complete envelope and digest. A
+`machine_disposition` response resolves to one terminal event receipt, whose full
+`outcome` equals the response outcome and whose event is absent from live mailboxes.
+The exact first admission, equal replay, and terminal unhandled witnesses are
+`examples/delivery/delivery-v1-cases.json` and
+`examples/delivery/execution-checkpoint-transfer-v1.json`.
 
 ### 21.3 Ordering, pressure, and restoration
 
 Within a runtime, committed admissions append in caller batch order and §6.7 owns
 ready/deferred order thereafter. The adapter publishes its pre-admission ordering
 capability separately: `source_ordered` means it admits one bound source stream in
-source order; `unordered` promises no source order. Neither implies ordering
+source order; absence of that claim means `unordered` and promises no source order.
+Neither implies ordering
 between roots, different sources, or an emitted outbound intent and a later external
 input. A source-order claim requires proof that concurrent workers, retry gaps,
 dead-letter transfer, and recovery cannot overtake an earlier owned source item.

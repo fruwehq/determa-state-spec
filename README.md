@@ -113,6 +113,7 @@ This repository holds only the specification:
 - [`SPEC.md`](SPEC.md) — normative semantics;
 - [`schema/delivery-v1.schema.json`](schema/delivery-v1.schema.json) and
   [`examples/delivery/delivery-v1-cases.json`](examples/delivery/delivery-v1-cases.json)
+  with [exact checkpoint transfer fixtures](examples/delivery/execution-checkpoint-transfer-v1.json)
   — closed delivery boundary and first/replay/failure vectors;
 - [`schema/machine.schema.json`](schema/machine.schema.json) — structural JSON Schema;
 - [`schema/provider-reference-v1.schema.json`](schema/provider-reference-v1.schema.json)

@@ -27,6 +27,9 @@
     },
     {
       "$ref": "#/$defs/mailbox_placement"
+    },
+    {
+      "$ref": "#/$defs/admission_binding"
     }
   ],
   "$defs": {
@@ -277,7 +280,8 @@
         "evidence",
         "retention",
         "decision_authority",
-        "acknowledge_source"
+        "acknowledge_source",
+        "admission_binding_digest"
       ],
       "additionalProperties": false,
       "properties": {
@@ -307,6 +311,9 @@
         },
         "acknowledge_source": {
           "const": true
+        },
+        "admission_binding_digest": {
+          "$ref": "#/$defs/digest"
         }
       }
     },
@@ -394,10 +401,10 @@
         "delivery_message_kind",
         "event_id",
         "disposition",
-        "reason_code",
         "decision_authority",
         "evidence",
-        "retention"
+        "retention",
+        "outcome"
       ],
       "additionalProperties": false,
       "properties": {
@@ -416,16 +423,6 @@
             "migration_disposed"
           ]
         },
-        "reason_code": {
-          "oneOf": [
-            {
-              "type": "null"
-            },
-            {
-              "$ref": "#/$defs/string"
-            }
-          ]
-        },
         "decision_authority": {
           "$ref": "#/$defs/authority"
         },
@@ -434,6 +431,9 @@
         },
         "retention": {
           "$ref": "#/$defs/retention"
+        },
+        "outcome": {
+          "$ref": "execution-checkpoint-v1.schema.json#/$defs/terminalEventOutcome"
         }
       }
     },
@@ -540,6 +540,46 @@
         },
         "retention": {
           "$ref": "#/$defs/retention"
+        }
+      }
+    },
+    "admission_binding": {
+      "type": "object",
+      "required": [
+        "delivery_message_kind",
+        "source_scope",
+        "source_delivery_id",
+        "source_content_digest",
+        "event_id",
+        "envelope_digest",
+        "evidence",
+        "admission_binding_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "delivery_message_kind": {
+          "const": "admission_binding"
+        },
+        "source_scope": {
+          "$ref": "#/$defs/string"
+        },
+        "source_delivery_id": {
+          "$ref": "#/$defs/string"
+        },
+        "source_content_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "event_id": {
+          "$ref": "#/$defs/string"
+        },
+        "envelope_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "evidence": {
+          "$ref": "#/$defs/checkpoint_evidence"
+        },
+        "admission_binding_digest": {
+          "$ref": "#/$defs/digest"
         }
       }
     }
