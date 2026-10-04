@@ -1,0 +1,91 @@
+{
+  "type": "object",
+  "required": [
+    "archive_format",
+    "archive_schema_version",
+    "selection",
+    "checkpoints",
+    "normalized_definitions",
+    "migration_descriptors",
+    "participants",
+    "archive_digest"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "archive_format": {
+      "const": "determa.archive"
+    },
+    "archive_schema_version": {
+      "const": 1
+    },
+    "selection": {
+      "type": "object",
+      "required": [
+        "root_instance_ids",
+        "consistency_token"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "root_instance_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "consistency_token": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "checkpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "execution-checkpoint-v1.schema.json"
+      }
+    },
+    "normalized_definitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "validated_bundle_fingerprint",
+          "normalized_bundle"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "validated_bundle_fingerprint": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "normalized_bundle": {
+            "$ref": "aggregate-state-v1.schema.json#/$defs/typedValue"
+          }
+        }
+      }
+    },
+    "migration_descriptors": {
+      "type": "array",
+      "items": {
+        "$ref": "migration-descriptor-v1.schema.json"
+      }
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "$ref": "archive-participant-v1.schema.json"
+      }
+    },
+    "archive_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://determa.dev/state/schema/archive-v1.schema.json",
+  "title": "Determa portable archive version 1"
+}

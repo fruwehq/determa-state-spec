@@ -404,3 +404,21 @@ let a mapper overwrite runtime internals directly.
 receipts, and pending effects. Direct internal writes bypass declaration validation
 and the atomic checkpoint boundary. A failed projection must leave both application
 rows and Determa evidence unchanged.
+
+## Archives stage complete Determa snapshots and declared participants
+
+Relevant specification: [§22](SPEC.md#22-portable-archives-and-declared-participants),
+[§17.13](SPEC.md#1713-cluster-checkpoint-composition), and
+[§20](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade).
+
+**Decision.** A version-1 archive contains full selected checkpoints and exact
+immutable definition attachments. Application or helper data joins only through an
+explicit participant with a pinned provider, schema, dependency closure, and complete
+payload. Required missing data blocks staging; optional omissions are reported.
+
+**Rejected alternative.** Reconstruct state by replaying event journals or collect
+arbitrary database rows under an archive label.
+
+**Reason.** Replay can repeat effects or lose accepted deferred work, and undeclared
+rows have no portable reconstruction proof. Staging must validate exact bytes while
+remaining inert; destination authority and relocation are separate concerns.

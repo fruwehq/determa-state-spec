@@ -2423,9 +2423,10 @@ registry, daemon, clock, coordinator, or network endpoint is needed to evaluate 
 pure core. If a host offers named registration, both bundled and third-party
 extensions MUST use the same public `register` operation and lookup rules. A named
 extension's category is exactly one of `execution_store`, `projection`, `transport`,
-`timer`, `http`, `native_handler`, `compiler`, `runtime_provider`, `resolver`, and
-`authority`. These categories are distinct: a store claim does not grant authority,
-and a transport or timer claim does not imply a durable host profile.
+`timer`, `http`, `native_handler`, `compiler`, `runtime_provider`, `resolver`,
+`authority`, and `archive_participant`. These categories are distinct: a store claim
+does not grant authority, and a transport or timer claim does not imply a durable
+host profile.
 The public registration path exposes `register`, `validate_configuration`,
 `capabilities`, and `health`; category-specific setup is separate. Registration
 validates a descriptor before making a factory visible. Configuration validation
@@ -2489,7 +2490,7 @@ contracts may add versioned category-specific capabilities; implementations MUST
 invent a meaning under this version-1 vocabulary.
 The execution-store names have the meanings in §17.11. The remaining nonempty
 category sets reserve names for the corresponding projection, transport, timer,
-native-handler, runtime-provider, and authority contracts. A host MUST NOT advertise
+native-handler, runtime-provider, authority, and archive-participant contracts. A host MUST NOT advertise
 one of these reserved names until its defining public contract and applicable
 conformance cases exist and the configured instance passes them. In particular,
 `authoritative_scope_fencing` means the configured authority rejects stale scope
@@ -2958,8 +2959,8 @@ specification-only change.
 
 ### 16.1 Independent artifact identities
 
-Machine documents remain numeric `format: 1`. Portable persistence uses exactly these
-four independent closed JSON artifacts:
+Machine documents remain numeric `format: 1`. Portable persistence and archives
+use exactly these five independent closed JSON artifacts:
 
 | artifact | exact format field | exact schema-version field | schema |
 |---|---|---|---|
@@ -2967,6 +2968,7 @@ four independent closed JSON artifacts:
 | migration descriptor | `migration_descriptor_format: "determa.aggregate_migration"` | `migration_descriptor_schema_version: 1` | `schema/migration-descriptor-v1.schema.json` |
 | transport package | `aggregate_state_package_format: "determa.aggregate_state_package"` | `aggregate_state_package_schema_version: 1` | `schema/aggregate-state-package-v1.schema.json` |
 | execution checkpoint | `execution_checkpoint_format: "determa.execution_checkpoint"` | `execution_checkpoint_schema_version: 1` | `schema/execution-checkpoint-v1.schema.json` |
+| portable archive | `archive_format: "determa.archive"` | `archive_schema_version: 1` | `schema/archive-v1.schema.json` |
 
 Queue-bearing core results use `schema/core-step-result-v1.schema.json`. Artifact schema
 version 1 is the sole supported portable artifact version. No alternate artifact
@@ -4889,7 +4891,7 @@ pending and terminal effects, effect tombstones, and outbox ordering. It applies
 completed, faulted, unhandled, deferred, migrated, and tombstoned results as well as
 the happy path. An application row is never silently archived, deleted, or rewritten
 because it is outside the selected set or cannot fit a domain enum. An application
-archive participant, if later declared, is separately identified; this contract does
+archive participant under §22 is separately identified and declared; this contract does
 not include application rows in a Determa-owned archive.
 
 A configured mapping MUST validate its selected row identities, expected shape,
@@ -5001,3 +5003,162 @@ The following cases are normative. `typed` denotes the exact §16.2 projection, 
 | Selected row belongs to a different root or is ambiguous | `invalid_projection_selection`; no core call or commit. |
 | Mapping requests one native application/checkpoint transaction from a store without that proved capability | `projection_transaction_unavailable`; no core call or commit. |
 | Concurrent writer changes the checkpoint revision after candidate evaluation | `checkpoint_revision_conflict`; roll back all selected rows and checkpoint changes, with no automatic retry. |
+
+## 22. Portable archives and declared participants
+
+### 22.1 Boundary and identity
+
+An archive is a complete snapshot of selected Determa-owned root checkpoints, their
+referenced immutable definitions, and the declared participant closure at one
+host-established consistency point. It is not an arbitrary database export. Sections
+18 (authority), 19 (effects), 20 (application projection), and 21 (delivery) own their
+respective active protocols; this section specifies only their explicitly declared
+portable archive data. An application projection under §20 is a participant only when
+its separate archive contract is declared. No core helper, timer, database service, or
+network worker is made mandatory here. Standalone takeover, cloning, relocation,
+rebinding, fencing, and scope transfer require a separate contract and are not archive
+import operations.
+
+The version-1 archive is strict UTF-8 JSON with exact
+`archive_format: "determa.archive"` and `archive_schema_version: 1`; its closed schema
+is `schema/archive-v1.schema.json`. Its component is the closed
+`schema/archive-participant-v1.schema.json`. Unknown formats and versions fail before
+semantic validation with `unsupported_archive_format` and
+`unsupported_archive_schema_version`. Unknown participant formats and versions fail
+with `unsupported_archive_participant_format` and
+`unsupported_archive_participant_schema_version`. A recognized malformed artifact
+fails `invalid_archive`; a wrong digest fails `archive_digest_mismatch`. There is no
+version-1 compatibility conversion or best-effort unknown-field preservation.
+
+The selection names an ordered set of root identities within one host-authorized
+logical source scope. That scope and the authorizing principal are host metadata, not
+portable archive fields. The exporter MUST prove that every root in the selection has
+exactly one checkpoint, including tombstones, and that every owned runtime and
+component is represented by its checkpoint aggregate under §§7.1–7.2. The archive
+contains the exact complete §17 checkpoint for each selected root. Thus active
+configurations, typed variables, histories, owned identities, ready and deferred
+mailboxes, counters, faults, external intents, pending and terminal outbox work,
+receipts, replay retention, migration audit, and root tombstones survive without
+inference. An empty root selection is invalid. Selection completeness is relative to
+its declared roots; it does not claim a complete deployment or unrelated application
+data. The exporter records the checkpoint revision/digest it read and MUST abort if any
+selected checkpoint changes before the consistency point is secured. Application and
+host-journal participants needing a shared point MUST join the same verified boundary;
+a readable snapshot alone does not prove that boundary. When the optional §18
+`consistent_scope_inventory` profile is claimed, its inventory and frozen point MUST
+be proved against authoritative storage, including required host journal records.
+A freeze response or evidence digest is checked by resolving the linked retained
+§18 authority-ledger record and its committed evidence; the response hash alone is
+never a grant. The archive records no active worker claim, epoch authority, retirement
+proof, credential, or destination-bound grant. Import cannot mint or restore any of
+these from `consistency_token`, checkpoint bytes, or an authority response.
+
+### 22.2 Closed content and digest rules
+
+The archive has exactly `archive_format`, `archive_schema_version`, `selection`,
+`checkpoints`, `normalized_definitions`, `migration_descriptors`, `participants`, and
+`archive_digest`. `selection` contains `root_instance_ids`, ordered strictly by UTF-8
+bytes, and `consistency_token`, an opaque non-empty exporter assertion. The token is
+not authority, a lease, or a transaction credential. Checkpoints are ordered by
+`root_instance_id`, match selection exactly, pass §17 validation and their own digests.
+The definitions array uses the exact §16.13 attachment shape and is ordered by
+fingerprint; descriptors are ordered by digest. Every referenced definition, including origin/current definitions and fault anchors, every descriptor named by
+a retained migration audit record, and every descriptor needed by the exporter's
+declared recovery route MUST be attached. Attachments are independently
+hash-checked and trust-admitted before import. Digest-equal attachments may appear
+once; conflicting or missing attachments invalidate the archive. The archive does not
+invent a route or migrate a checkpoint while exporting or staging.
+
+Participant records are ordered by `participant_id` and are unique. Each has exactly
+`participant_format`, `participant_schema_version`, `participant_id`,
+`required`, `provider_reference`, `participant_schema_digest`, `dependencies`,
+`storage`, `payload_digest`, and `payload`. `provider_reference` is
+§11.5 exact identifier/version/content digest. Dependencies are unique participant IDs
+in ascending UTF-8 order, must exist in the archive, and must form an acyclic graph.
+A required participant makes all its dependencies required in effect. `storage` is
+`embedded` or `external`. Embedded payload is the complete typed §16.2 projection;
+external payload is null and names immutable bytes by `payload_digest` through the
+importer's configured content-addressed resolver. Both modes must reconstruct the
+same declared typed value exactly; an external reference is never a permission to omit
+required bytes. The payload is participant-owned and may represent application rows,
+a helper, or a host journal only under its separately versioned closed schema and
+provider contract. The archive itself does not interpret that data or confer authority.
+
+All JSON uses §16.2 strict parsing and RFC 8785 JCS serialization. Typed payloads use
+exactly its seven typed forms, canonical map ordering, and numeric constraints.
+`hash(value)` is the lowercase `sha256:` prefix plus SHA-256 of the UTF-8 JCS bytes of
+`value`, as in §16. Participant `payload_digest = hash(["determa-archive-payload-1",
+participant_id, participant_schema_digest, typed_payload])`; an external resolver
+must return the typed payload bytes that reproduce this digest. The provider's exact
+schema bytes reproduce `participant_schema_digest` using `hash(schema_json)` and its
+registered schema validates the decoded payload. The outer
+`archive_digest = hash(["determa-archive-digest-1",
+archive_without_archive_digest])`. Digest checks do not replace schema, semantic,
+provenance, or authorization checks. The archive's schema bytes are pinned by the
+importer's supported version-1 schema registry; a changed shape with the same version
+is unsupported, even if a JSON parser accepts it.
+
+### 22.3 Export, staging, and declared capability
+
+Export requests select one authorized scope and exact roots, required participant IDs,
+and optional participant IDs. Before reading data, the host resolves every selected
+participant's exact `archive_participant` provider and checks its healthy
+configured-instance `portable_export`, `exact_reconstruction`, and
+`consistent_archive_capture` claims. The `consistent_archive_capture` claim
+means this configured participant can capture its complete declared payload at the host-selected checkpoint consistency point; it
+does not establish that point or provide scope authority. `portable_export` and
+`portable_import` mean exact closed payload production and staging, respectively;
+`exact_reconstruction` means all declared participant state can be recovered from
+that payload and its verified external bytes. A participant MUST declare its
+dependencies, schema digest, capture and reconstruction method, and whether its payload includes external bytes. The host expands dependencies
+and rejects cycles, duplicate identities, missing required providers, unsupported
+schemas, unprovable completeness, or an inconsistent boundary. An optional participant
+that is absent is listed in the export result's `absent_optional_participants`; it is
+never silently treated as included. A present but unsupported optional participant is
+reported as `unsupported_optional_participants` and excluded only when no included
+required participant depends on it. The closed result schema is
+`schema/archive-result-v1.schema.json`. A success result has exact format/version,
+`status` (`exported` or `staged`), `archive_digest`, `staged`,
+`included_participant_ids`, `absent_optional_participants`, and
+`unsupported_optional_participants`. A refusal has exact format/version, `status: "refused"`, one `code`, nullable `participant_id`, `staged: false`, empty
+`included_participant_ids`, and the two optional-report arrays. Reports contain exact
+`participant_id` and one closed `reason`. All ID arrays are UTF-8 ordered and unique.
+Export success is `exported` with `staged: false`; import success is `staged` with
+`staged: true`.
+
+Import verifies the complete archive shape and digests, checkpoint and attachment
+digests, trust policy, and each included participant's exact provider fingerprint,
+transitive executable dependencies, schema bytes/digest, payload, and configured-instance
+`portable_import` and `exact_reconstruction` claims before any write. An included external payload must be resolved and hash-verified during staging;
+required missing bytes,
+providers, schemas, dependencies, or capabilities block the entire import. Optional
+participants may be absent only when the request explicitly permits their omission;
+the result names each absence or unsupported participant. If a present optional
+participant is omitted, no dependent participant may be staged. An importer MUST NOT
+substitute a provider with the same name and a different digest or infer that a helper
+is disposable. An unsupported helper is reported by ID, with its required/optional
+status, and cannot disappear without a result record.
+
+Successful import produces an inert staged archive with exact source bytes and verified
+attachments. Included participants are fully verified. An omitted optional
+participant remains an identified inert record whose provider-dependent data is not
+available for reconstruction until separately validated; omission never authorizes
+activation or deletion of its bytes. Staging creates no active execution-store scope, root identity claim,
+credential, ingress subscription, outbox worker, broker acknowledgement, effect
+delivery, or authority grant. It does not invoke core `create`, `admit`, `step`, or
+migration, and does not replay a journal or event deltas to reconstruct state. An
+event journal or incremental delta MAY supplement a complete snapshot for provenance
+or later synchronization, but cannot replace any checkpoint or participant snapshot.
+Activation and destination ownership are outside this section. A failed export or
+stage returns one closed refusal and leaves source and destination unchanged.
+
+The deterministic refusal precedence is unsupported archive format, unsupported
+archive version, invalid archive shape, archive digest mismatch, invalid checkpoint or
+attachment, invalid participant closure or payload, missing required artifact or
+provider, capability mismatch, then consistency or staging failure. The result uses
+one exact code from `schema/archive-result-v1.schema.json`; implementations may attach
+nonportable diagnostics outside the result. Required absence is never downgraded to an
+optional report. Conformance MUST compare complete results and staged bytes, including
+negative cases for changed checkpoint/mailbox, receipt/outbox omission, wrong schema or
+provider digest, absent optional versus missing required, unresolved external payload,
+participant dependency cycle, and attempted activation during staging.

@@ -92,6 +92,11 @@ in-memory delivery, Redis, GCP Pub/Sub, or a transactional database inbox/outbox
 plugins own ordering, retries, acknowledgements, discard, capacity, and dead-letter
 policy. Unhandled events do not accumulate in core state.
 
+The optional §22 archive profile snapshots selected complete checkpoints and exact
+immutable definition attachments with separately declared application or helper
+participants. Import verifies the closure and stages it inertly; activation and scope
+transfer require separate protocols.
+
 The optional execution-checkpoint profile standardizes the durable transaction boundary
 around one root aggregate: accepted host/internal deliveries, operation receipts,
 pending/terminal/compact outbox work, replay retention, root tombstones, migration
@@ -139,6 +144,11 @@ This repository holds only the specification:
   — self-contained transfer package;
 - [`schema/execution-checkpoint-v1.schema.json`](schema/execution-checkpoint-v1.schema.json)
   — portable durable-host checkpoint;
+- [`schema/archive-v1.schema.json`](schema/archive-v1.schema.json),
+  [`schema/archive-participant-v1.schema.json`](schema/archive-participant-v1.schema.json),
+  and [`schema/archive-result-v1.schema.json`](schema/archive-result-v1.schema.json)
+  — closed portable archive, participant, and stage result;
+- [`examples/archives/`](examples/archives/) — complete staged and refusal vectors;
 - [`schema/core-step-result-v1.schema.json`](schema/core-step-result-v1.schema.json) —
   closed core step result schema;
 - [`schema/provider-reference-v1.schema.json`](schema/provider-reference-v1.schema.json)

@@ -1,0 +1,10 @@
+{
+  "archive_schema_digest": "sha256:d5e3aadba3dd0df59ece4fa10238aa3118c8f757d7ea1bfc00a49e7cc1d2f7d1",
+  "participant_schema_digest": "sha256:629a0772e49440d4c5c4c2130ecd7f366817a0a48a1ee2ab0575bb4d9423e73c",
+  "result_schema_digest": "sha256:5533a78cef5b54b0023d227f48b35df999678d8d61b9244e856f37133a038ba6",
+  "helper_payload_schema_digest": "sha256:bdf0bc0a1ad1991fbc78dd7ba91c0dc9c9c44297fa419d9ef7333b6679040850",
+  "provider_closure_digest": "sha256:db53fa5c8190bb2c847324efb8bd4d8c3de6490f834ab4d8e1a1252eed727e8a",
+  "normalized_definition_fingerprint": "sha256:a4458940ab5bc76a120889379294fa4df840465f8e05b97fa368587e3167cb86",
+  "checkpoint_digest": "sha256:9aab07243e93507e23e99e2a7c9c3001a14335a280022199c6bcb2a686fe273b",
+  "archive_digest": "sha256:7ec91ef0fe2b8b8db3c74afbd7f082539d0915d9a41448902c6b004374c6a450"
+}
