@@ -5097,9 +5097,13 @@ Committed admission returns `admitted`, `acknowledge_source: true`, the exact
 `event_id`, source binding, acceptance receipt sequence, and checkpoint revision and
 digest. Equal source redelivery returns that evidence unchanged. Equal machine-event
 replay follows §17.3; unequal machine-event identity is `event_id_conflict`.
-Replay checks never bypass a hosted §18 current-authority gate: a stale claimant may
-read history through a separately authenticated read but cannot acknowledge,
-reactivate, or mutate delivery. An admission batch follows §17.4's atomic order; a
+For a host claiming §18 `authoritative_scope_fencing`, replay checks never bypass
+the current-authority operation guard: a stale claimant may read history through a
+separately authenticated read but cannot acknowledge, reactivate, or mutate delivery.
+Authentication, authorization, and §18's exact guard failures retain their §18
+result codes; a delivery response MUST NOT replace them with
+`authority_unavailable`. That delivery reason covers only an unavailable required
+guard before a guarded operation begins. An admission batch follows §17.4's atomic order; a
 failed member leaves the whole batch source-owned. Broker acknowledgement is per
 source item only after the batch commit is known durable.
 
@@ -5143,9 +5147,15 @@ unacknowledged external backlog or committed dead-letter records, and unresolved
 outbox work at one valid consistency point. Missing any owned item or binding
 invalidates the claimed profile; the host MUST quarantine or refuse activation
 until repaired. A changed source item at a retained identity is a conflict. An
-authority-enabled host MUST guard admission, acknowledgement, replay-triggered
-activity, dead-letter transfer, and worker continuation with the current §18 epoch
-and fence. A lease alone does not prove retirement of an old worker. A standalone
+authority provider alone grants no guard. When the host claims §18
+`authoritative_scope_fencing`, it MUST hold the §18.3 scope operation guard through
+the native commit of admission, source binding, ingress dead-letter transfer, and
+acknowledgement evidence. Replay-triggered acknowledgement requires the same current
+guard. If its §18 host profile reports `worker_fencing: true`, continuation by a hosted worker checks
+its active claim, authenticated principal, epoch, attempt fence, and expiry under
+§18.4. The trusted host clock is used only for that optional claim expiry; it is
+never a core clock or delivery retry timer. A lease alone does not prove retirement
+of an old worker. A standalone
 in-memory host declares no cross-host fencing guarantee.
 
 ### 21.4 Durable ingress dead letters and terminal policy
