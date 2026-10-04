@@ -5204,7 +5204,8 @@ transfer. `proof_digest = hash(["determa-recovery-transfer-proof-1",
 proof_without_proof_digest])`. The `prepared` phase binds frozen source state,
 revoked active claims, known freeze transaction fate, one transfer ID, destination
 reservation, archive and participant contract, and the exact old epoch/generation.
-It is not a retirement proof or activation grant. The `committed` phase binds the
+Its destination epoch and generation are reserved proposed values, not active
+authority. It is not a retirement proof or activation grant. The `committed` phase binds the
 §18 retired source, consumed single-use grant, known commit fate, old-write fence,
 and new destination epoch/generation. A request's public proof digest is only a
 lookup key: the host resolves the phase-correct record in its guarded ledger, checks
