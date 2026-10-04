@@ -17,6 +17,18 @@
     "participant_contract_digest": "sha256:aaaa646b4554c25e3c8c5ef95ef86a71bafa0fd97fe183ef6057fbe89011df65"
   },
   "stage_receipt_path": "../archives/stage-cases-v1.json#complete_embedded_snapshot",
+  "stage_receipt": {
+    "result_format": "determa.archive_result",
+    "result_schema_version": 1,
+    "status": "staged",
+    "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac",
+    "staged": true,
+    "included_participant_ids": [
+      "helper-state"
+    ],
+    "absent_optional_participants": [],
+    "unsupported_optional_participants": []
+  },
   "configured_safe_relocation": false,
   "trusted_clone_isolation_evidence": {
     "source_environment_identity": "source-production",
@@ -444,7 +456,7 @@
         "destination_scope_identity": "scope-quarantine-1",
         "expected_destination_generation": null,
         "arguments": {
-          "staging_identity": "stage-archive-1",
+          "staging_identity": "staging-1",
           "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac",
           "source": {
             "logical_scope_identity": "scope-archive-example",
@@ -455,14 +467,14 @@
           },
           "activate": false
         },
-        "request_digest": "sha256:b7072fa99094bbc8ba7929ab7e7eee122736311357eb2359c1d750a6da146257"
+        "request_digest": "sha256:80161e0c772ab4375e42cd9b95113079f6f55c72e5683725a7c03132a46f35b8"
       },
       "expected_result": {
         "result_format": "determa.recovery_result",
         "result_schema_version": 1,
         "operation": "strict_restore",
         "operation_id": "strict_quarantine",
-        "request_digest": "sha256:b7072fa99094bbc8ba7929ab7e7eee122736311357eb2359c1d750a6da146257",
+        "request_digest": "sha256:80161e0c772ab4375e42cd9b95113079f6f55c72e5683725a7c03132a46f35b8",
         "status": "succeeded",
         "code": null,
         "destination_scope_identity": "scope-quarantine-1",
@@ -540,7 +552,7 @@
         "destination_scope_identity": "scope-strict-active-1",
         "expected_destination_generation": null,
         "arguments": {
-          "staging_identity": "stage-archive-1",
+          "staging_identity": "staging-1",
           "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac",
           "source": {
             "logical_scope_identity": "scope-archive-example",
@@ -551,14 +563,14 @@
           },
           "activate": true
         },
-        "request_digest": "sha256:31dc131d9596c0c6198a2553141670f4b6b7a79f9727ccc1ceb5c553f9844a58"
+        "request_digest": "sha256:28bbc8bf5399597feecd2aabdceac8d9fcfc41c2e8c1cba18c421b8c54883eba"
       },
       "expected_result": {
         "result_format": "determa.recovery_result",
         "result_schema_version": 1,
         "operation": "strict_restore",
         "operation_id": "strict_active_unproved",
-        "request_digest": "sha256:31dc131d9596c0c6198a2553141670f4b6b7a79f9727ccc1ceb5c553f9844a58",
+        "request_digest": "sha256:28bbc8bf5399597feecd2aabdceac8d9fcfc41c2e8c1cba18c421b8c54883eba",
         "status": "refused",
         "code": "scope_restore_requires_quarantine",
         "destination_scope_identity": "scope-strict-active-1",
@@ -958,7 +970,7 @@
         "destination_scope_identity": "scope-takeover-1",
         "expected_destination_generation": null,
         "arguments": {
-          "staging_identity": "stage-archive-1",
+          "staging_identity": "staging-1",
           "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac",
           "source": {
             "logical_scope_identity": "scope-archive-example",
@@ -970,14 +982,14 @@
           "external_idempotency_namespace": "namespace-takeover-1",
           "acknowledge_old_owner_risk": true
         },
-        "request_digest": "sha256:d47a652d2831ec896145258a6958dd27ad5e513725eb82a939c778f618a06c9e"
+        "request_digest": "sha256:c6c39f0ea623cf73c6427c8ba1631f231d0b74733fed8cd9166dcff472b6fbd2"
       },
       "expected_result": {
         "result_format": "determa.recovery_result",
         "result_schema_version": 1,
         "operation": "standalone_takeover",
         "operation_id": "standalone_takeover",
-        "request_digest": "sha256:d47a652d2831ec896145258a6958dd27ad5e513725eb82a939c778f618a06c9e",
+        "request_digest": "sha256:c6c39f0ea623cf73c6427c8ba1631f231d0b74733fed8cd9166dcff472b6fbd2",
         "status": "succeeded",
         "code": null,
         "destination_scope_identity": "scope-takeover-1",
@@ -1055,7 +1067,7 @@
         "destination_scope_identity": "scope-takeover-1",
         "expected_destination_generation": null,
         "arguments": {
-          "staging_identity": "stage-archive-1",
+          "staging_identity": "staging-1",
           "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac",
           "source": {
             "logical_scope_identity": "scope-archive-example",
@@ -1067,14 +1079,14 @@
           "external_idempotency_namespace": "namespace-other",
           "acknowledge_old_owner_risk": true
         },
-        "request_digest": "sha256:fd1fb2dec0817ef12669fe804d2e335db6603098abd6630b16d7588dbae3a85e"
+        "request_digest": "sha256:139dd320e98df6128869e9bfe3a726020d6c760b2779957509b9d3a63494c5da"
       },
       "expected_result": {
         "result_format": "determa.recovery_result",
         "result_schema_version": 1,
         "operation": "standalone_takeover",
         "operation_id": "standalone_duplicate_destination",
-        "request_digest": "sha256:fd1fb2dec0817ef12669fe804d2e335db6603098abd6630b16d7588dbae3a85e",
+        "request_digest": "sha256:139dd320e98df6128869e9bfe3a726020d6c760b2779957509b9d3a63494c5da",
         "status": "refused",
         "code": "scope_destination_not_empty",
         "destination_scope_identity": "scope-takeover-1",
@@ -1477,7 +1489,7 @@
         "destination_scope_identity": "scope-clone-1",
         "expected_destination_generation": null,
         "arguments": {
-          "staging_identity": "stage-archive-1",
+          "staging_identity": "staging-1",
           "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac",
           "source": {
             "logical_scope_identity": "scope-archive-example",
@@ -1488,14 +1500,14 @@
           },
           "external_idempotency_namespace": "namespace-clone-1"
         },
-        "request_digest": "sha256:1640d99955ef6d70f9aee32b2852ef8e5864a033b1b865666066c9c121ed4e38"
+        "request_digest": "sha256:ebc33462b4b4a5baae9c2b7e55267f6012957f871ae0345fa2101c4f45839127"
       },
       "expected_result": {
         "result_format": "determa.recovery_result",
         "result_schema_version": 1,
         "operation": "clone_scope",
         "operation_id": "clone_scope",
-        "request_digest": "sha256:1640d99955ef6d70f9aee32b2852ef8e5864a033b1b865666066c9c121ed4e38",
+        "request_digest": "sha256:ebc33462b4b4a5baae9c2b7e55267f6012957f871ae0345fa2101c4f45839127",
         "status": "succeeded",
         "code": null,
         "destination_scope_identity": "scope-clone-1",
@@ -1855,7 +1867,7 @@
         "destination_scope_identity": "scope-relocation-1",
         "expected_destination_generation": null,
         "arguments": {
-          "staging_identity": "stage-archive-1",
+          "staging_identity": "staging-1",
           "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac",
           "source": {
             "logical_scope_identity": "scope-archive-example",
@@ -1869,14 +1881,14 @@
           "expected_source_epoch": "0",
           "expected_source_generation": "0"
         },
-        "request_digest": "sha256:60a2b6323ee71ac71a341c79b8b421fd211ca89cfcecca5f0f98fff00e93fa26"
+        "request_digest": "sha256:c11de2c5ee52b04975d6800c8b8671bcfc1b58fd2773e09fece233ca39f1149b"
       },
       "expected_result": {
         "result_format": "determa.recovery_result",
         "result_schema_version": 1,
         "operation": "prepare_transfer",
         "operation_id": "unsupported_transfer",
-        "request_digest": "sha256:60a2b6323ee71ac71a341c79b8b421fd211ca89cfcecca5f0f98fff00e93fa26",
+        "request_digest": "sha256:c11de2c5ee52b04975d6800c8b8671bcfc1b58fd2773e09fece233ca39f1149b",
         "status": "refused",
         "code": "host_capability_mismatch",
         "destination_scope_identity": "scope-relocation-1",
@@ -1908,7 +1920,7 @@
         "destination_scope_identity": "scope-relocation-1",
         "expected_destination_generation": null,
         "arguments": {
-          "staging_identity": "stage-archive-1",
+          "staging_identity": "staging-1",
           "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac",
           "source": {
             "logical_scope_identity": "scope-archive-example",
@@ -1921,14 +1933,14 @@
           "destination_binding_digest": "sha256:f9fc7e9bcb2160d84adae777697c954829f894c7ebf65a36eae95913f6bd42db",
           "retirement_proof_digest": "sha256:835d327c3907761f3ef179db29f96217ae4f7738c7dc28ff0d66e2a64d91ccf7"
         },
-        "request_digest": "sha256:ea2da8818a1fdbda0d36e2a705432e29492c2da77d0e4ccb9b86056a8ff6bf94"
+        "request_digest": "sha256:27b30e6295cce4e8a8fc7b2ca580ffff4d919453749916af3a493f2e589eeac6"
       },
       "expected_result": {
         "result_format": "determa.recovery_result",
         "result_schema_version": 1,
         "operation": "stage_transfer",
         "operation_id": "unsupported_transfer_stage",
-        "request_digest": "sha256:ea2da8818a1fdbda0d36e2a705432e29492c2da77d0e4ccb9b86056a8ff6bf94",
+        "request_digest": "sha256:27b30e6295cce4e8a8fc7b2ca580ffff4d919453749916af3a493f2e589eeac6",
         "status": "refused",
         "code": "host_capability_mismatch",
         "destination_scope_identity": "scope-relocation-1",
@@ -1960,7 +1972,7 @@
         "destination_scope_identity": "scope-takeover-1",
         "expected_destination_generation": null,
         "arguments": {
-          "staging_identity": "stage-archive-1",
+          "staging_identity": "staging-1",
           "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac",
           "source": {
             "logical_scope_identity": "scope-archive-example",
@@ -1972,14 +1984,14 @@
           "external_idempotency_namespace": "namespace-takeover-1",
           "acknowledge_old_owner_risk": true
         },
-        "request_digest": "sha256:d47a652d2831ec896145258a6958dd27ad5e513725eb82a939c778f618a06c9e"
+        "request_digest": "sha256:c6c39f0ea623cf73c6427c8ba1631f231d0b74733fed8cd9166dcff472b6fbd2"
       },
       "expected_result": {
         "result_format": "determa.recovery_result",
         "result_schema_version": 1,
         "operation": "standalone_takeover",
         "operation_id": "standalone_takeover",
-        "request_digest": "sha256:d47a652d2831ec896145258a6958dd27ad5e513725eb82a939c778f618a06c9e",
+        "request_digest": "sha256:c6c39f0ea623cf73c6427c8ba1631f231d0b74733fed8cd9166dcff472b6fbd2",
         "status": "succeeded",
         "code": null,
         "destination_scope_identity": "scope-takeover-1",
@@ -2057,7 +2069,7 @@
         "destination_scope_identity": "scope-takeover-1",
         "expected_destination_generation": null,
         "arguments": {
-          "staging_identity": "stage-archive-1",
+          "staging_identity": "staging-1",
           "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac",
           "source": {
             "logical_scope_identity": "scope-archive-example",
@@ -2069,14 +2081,14 @@
           "external_idempotency_namespace": "namespace-changed",
           "acknowledge_old_owner_risk": true
         },
-        "request_digest": "sha256:cb1862cefe5c1032d528c16df2b4eeda9fd188fec5975537779cfbd29a15908e"
+        "request_digest": "sha256:f3ea51df194ecf423f9a837a8c5cf1609175ce050c1a0f22c38c48401d3851fd"
       },
       "expected_result": {
         "result_format": "determa.recovery_result",
         "result_schema_version": 1,
         "operation": "standalone_takeover",
         "operation_id": "standalone_takeover",
-        "request_digest": "sha256:cb1862cefe5c1032d528c16df2b4eeda9fd188fec5975537779cfbd29a15908e",
+        "request_digest": "sha256:f3ea51df194ecf423f9a837a8c5cf1609175ce050c1a0f22c38c48401d3851fd",
         "status": "refused",
         "code": "scope_operation_conflict",
         "destination_scope_identity": "scope-takeover-1",
@@ -2108,7 +2120,7 @@
         "destination_scope_identity": "scope-source-mismatch",
         "expected_destination_generation": null,
         "arguments": {
-          "staging_identity": "stage-archive-1",
+          "staging_identity": "staging-1",
           "archive_digest": "sha256:db6a42a8d03528aa60ffedf36c6c546996f5909733875691925dd0973a8510ac",
           "source": {
             "logical_scope_identity": "scope-archive-example",
@@ -2120,14 +2132,14 @@
           "external_idempotency_namespace": "namespace-source-mismatch",
           "acknowledge_old_owner_risk": true
         },
-        "request_digest": "sha256:e87196e6369f9e588781920db4ecbadea58a848596b1e188bf5ceb87ee96bfb7"
+        "request_digest": "sha256:1c17b46d081f77f9652e14ee3b865ecd293fa09c34edcdad0993b503ac2f6daa"
       },
       "expected_result": {
         "result_format": "determa.recovery_result",
         "result_schema_version": 1,
         "operation": "standalone_takeover",
         "operation_id": "source_provenance_mismatch",
-        "request_digest": "sha256:e87196e6369f9e588781920db4ecbadea58a848596b1e188bf5ceb87ee96bfb7",
+        "request_digest": "sha256:1c17b46d081f77f9652e14ee3b865ecd293fa09c34edcdad0993b503ac2f6daa",
         "status": "refused",
         "code": "scope_archive_digest_mismatch",
         "destination_scope_identity": "scope-source-mismatch",
@@ -2214,7 +2226,7 @@
           "result_schema_version": 1,
           "operation": "strict_restore",
           "operation_id": "strict_quarantine",
-          "request_digest": "sha256:b7072fa99094bbc8ba7929ab7e7eee122736311357eb2359c1d750a6da146257",
+          "request_digest": "sha256:80161e0c772ab4375e42cd9b95113079f6f55c72e5683725a7c03132a46f35b8",
           "status": "succeeded",
           "code": null,
           "destination_scope_identity": "scope-quarantine-1",
@@ -2241,7 +2253,7 @@
           "result_schema_version": 1,
           "operation": "prepare_transfer",
           "operation_id": "unsupported_transfer",
-          "request_digest": "sha256:60a2b6323ee71ac71a341c79b8b421fd211ca89cfcecca5f0f98fff00e93fa26",
+          "request_digest": "sha256:c11de2c5ee52b04975d6800c8b8671bcfc1b58fd2773e09fece233ca39f1149b",
           "status": "refused",
           "code": "host_capability_mismatch",
           "destination_scope_identity": "scope-relocation-1",
