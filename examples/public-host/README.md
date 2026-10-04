@@ -53,3 +53,8 @@ source changes.
 descriptor permits the already specified `source_ordered` capability. Request and
 response schema fingerprints are unchanged; the manifest records the corrected
 descriptor bytes. The ordering proof requirements in §21.3 remain mandatory.
+
+`timer-evidence-compatibility-change-v1.json` records issue #106: equal timer
+completion replay and the archived schedule correlation now match their immutable
+requests. The request and response schema fingerprints are unchanged; the manifest
+tracks the corrected timer vectors and archive bytes.
