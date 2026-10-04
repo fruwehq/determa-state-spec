@@ -26,6 +26,29 @@ owner activates. A guard must cover the native commit or rollback, and a promoti
 must wait until any uncertain transaction fate is resolved. The public interface
 allows a future hosted service to provide stronger authority without changing the
 portable machine model.
+## Runtime providers are exact executable dependencies
+
+Relevant specification: [§5.4](SPEC.md#54-exact-runtime-providers-and-optional-source-compilation),
+[§8](SPEC.md#8-foreground-interface-and-logical-state), and
+[§16.2](SPEC.md#162-canonical-values-and-aggregate-encoding).
+
+**Decision.** CEL and structured actions remain the format-1 default. Exact runtime
+guard and action slots can coexist with them. A complete binding pins reference,
+source, dependency closure, types and verified capabilities into the validated
+definition fingerprint. Compilation is an optional source path, never a mandatory
+intermediate representation for native slots. Restoration resolves the exact
+executable closure before evaluation and never recompiles implicitly.
+
+**Reason.** A source-language name or mutable installed callback cannot prove that
+restored state will execute the same logic. Direct native I/O remains an explicit
+embedded choice with weak rollback and replay guarantees. Engine-applied, checked
+action proposals preserve the statechart's action order and internal ownership.
+
+**Review guidance.** Exercise same-name/different-digest rejection, a missing
+transitive dependency, wrong slot output type, mixed CEL/native capability reduction,
+unsafe semantic inspection refusal and native precommit I/O followed by CAS conflict.
+The external I/O hazard composes by any possible provider; purity, determinism,
+portability and introspection guarantees compose by all verified participants.
 
 ## Transition boundaries are relationship-specific
 
