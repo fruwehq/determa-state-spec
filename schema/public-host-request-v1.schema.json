@@ -751,6 +751,33 @@
               "$ref": "archive-v1.schema.json"
             }
           }
+        },
+        {
+          "type": "object",
+          "required": [
+            "action",
+            "recovery_request"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "action": {
+              "const": "recovery"
+            },
+            "recovery_request": {
+              "allOf": [
+                {
+                  "$ref": "recovery-operation-v1.schema.json"
+                },
+                {
+                  "properties": {
+                    "operation_format": {
+                      "const": "determa.recovery_operation"
+                    }
+                  }
+                }
+              ]
+            }
+          }
         }
       ]
     }

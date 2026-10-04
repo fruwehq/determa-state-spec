@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:a2fb8dc59e0755e5f0c12bddd2b48287611b3f1174d15d3718464105c9772c85"
+      "sha256": "sha256:4aedca8c38409447657e959c0b70eaac647bb35f4c694d14baad6498b53936ba"
     },
     {
       "path": "VERSION",
@@ -140,11 +140,27 @@
     },
     {
       "path": "schema/public-host-request-v1.schema.json",
-      "sha256": "sha256:606d62c0c8b641b3f469dd8a593eb74e210bb44abde11ce38554e725bf4d7073"
+      "sha256": "sha256:031f24dc22c42f70c237265b15bf54d0871deb02b034fd2cf3462c1214916d91"
     },
     {
       "path": "schema/public-host-response-v1.schema.json",
-      "sha256": "sha256:1d0f890e165708ceebe4d53b9f6d9171876cd56181ed64d756b8d681b4d48f6b"
+      "sha256": "sha256:7376ec1d1ff66aadc52b92137683094b9043725c2fd0c66e1ad05d09d91e2588"
+    },
+    {
+      "path": "schema/recovery-batch-v1.schema.json",
+      "sha256": "sha256:249a0700a7d37de478baeb8eb3231e54ec8789fa4edb5109e8adbc730f7b40b9"
+    },
+    {
+      "path": "schema/recovery-operation-v1.schema.json",
+      "sha256": "sha256:903b696b1de168402689629b4409690a269e1189fbb9bd698cf8341de93fd641"
+    },
+    {
+      "path": "schema/recovery-record-v1.schema.json",
+      "sha256": "sha256:28cdc3282c059327a17e585af3dd29cd1a13712761d4a02f52b85195ffb0a64a"
+    },
+    {
+      "path": "schema/recovery-transfer-proof-v1.schema.json",
+      "sha256": "sha256:c7800a8f5bd34efeb0c00ec3c69c22df69216e04717305fbfc6e8c311a603ffb"
     },
     {
       "path": "schema/runtime-action-output-v1.schema.json",
@@ -172,15 +188,15 @@
     },
     {
       "path": "examples/public-host/positive-v1.json",
-      "sha256": "sha256:6374b5bc3fef3adbf81f12e145a99d3c7570dcaf3cf6cb1d080fdc7a9f15650a"
+      "sha256": "sha256:d8d8e0df7cc2b54f9803008964841b1e798731dbef9a1fb0fa451efdd2d79909"
     },
     {
       "path": "examples/public-host/negative-v1.json",
-      "sha256": "sha256:b5179be4db423375c497dc9a158f15e43e0853104436483afd0ac31c8d4e784c"
+      "sha256": "sha256:6bb9403455b72d84f107c836d5d31ef303c798959c314e5136af8d489dc31375"
     },
     {
       "path": "examples/public-host/README.md",
-      "sha256": "sha256:4bbb829035d4d9e05e75a63308c63004a413add0a388ae8f221505dcb91421a8"
+      "sha256": "sha256:871b71d58e7842246a7b50dbba664af1104e272f0515dfbc2f8c7ebf0d4ea673"
     },
     {
       "path": "examples/effects/active-effect-claim-v1.json",
@@ -325,6 +341,14 @@
     {
       "path": "examples/archives/stage-configuration-v1.schema.json",
       "sha256": "sha256:2b3cf08841a7dd528c4c902568f3e1edf03f670840528144b293efa2df49e508"
+    },
+    {
+      "path": "examples/recovery/archive-local-transfer-v1.json",
+      "sha256": "sha256:6755bee133e36fee274809b0a8fe76c896f4a6fecc6f70c50340ae085d7dbd3c"
+    },
+    {
+      "path": "examples/recovery/recovery-cases-v1.json",
+      "sha256": "sha256:d376da9db8441076d4aa51b18e0dd7d8a2177c40bbbceabc942ab56532a53bb2"
     }
   ],
   "hash_domains": [
@@ -461,6 +485,18 @@
       "source": "SPEC.md#22"
     },
     {
+      "name": "determa-recovery-record-1",
+      "source": "SPEC.md#24.6"
+    },
+    {
+      "name": "determa-recovery-request-1",
+      "source": "SPEC.md#24.6"
+    },
+    {
+      "name": "determa-recovery-transfer-proof-1",
+      "source": "SPEC.md#24.5"
+    },
+    {
       "name": "determa-public-host-request-digest-1",
       "source": "SPEC.md#25.2"
     },
@@ -547,6 +583,26 @@
       "name": "host_effect_journal",
       "source": "SPEC.md#22",
       "rule": "paired native effect journal participant and trusted inventory verification"
+    },
+    {
+      "name": "strict_quarantine_restore",
+      "source": "SPEC.md#24.2",
+      "rule": "inert complete archive quarantine without active work"
+    },
+    {
+      "name": "fresh_scope_takeover",
+      "source": "SPEC.md#24.3",
+      "rule": "fresh namespace and explicit old-owner risk acknowledgement"
+    },
+    {
+      "name": "independent_clone",
+      "source": "SPEC.md#24.4",
+      "rule": "fresh namespace and proven isolation before activation"
+    },
+    {
+      "name": "local_safe_relocation",
+      "source": "SPEC.md#24.5",
+      "rule": "same-authority single-use transfer with verified source retirement"
     },
     {
       "name": "saved_response_replay",

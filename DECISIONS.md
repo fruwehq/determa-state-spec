@@ -501,3 +501,10 @@ ambiguity, the full checkpoint and receipt in the first response, and capability
 refusal before mutation. Check embedded clients and the reference host against the
 same golden request/response bytes. Require exact re-execution comparisons only
 when the complete provider closure is deterministic and portable.
+
+Closed public archive and recovery variants use the exact §22 and §24 request,
+result, archive, and destination-record shapes. Discovery reports the independently
+configured destination decoder/staging features; source archive claims do not grant
+them. A definitive nested refusal is an outer rejection with its complete inner
+result, while a successful mutation requires a durable public receipt. Verified
+local transfer, fresh-scope takeover, and clone keep their separate safety claims.

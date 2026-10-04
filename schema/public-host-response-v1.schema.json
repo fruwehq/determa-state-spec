@@ -199,6 +199,7 @@
                 "delivery_digest_mismatch",
                 "duplicate_event_id_in_batch",
                 "effect_not_outstanding",
+                "effect_outcome_ambiguous",
                 "effect_result_conflict",
                 "event_disposition_missing",
                 "event_id_conflict",
@@ -219,6 +220,7 @@
                 "invalid_inspection_request",
                 "invalid_instance_target",
                 "invalid_payload",
+                "invalid_recovery_request",
                 "invalid_timer_time",
                 "language_provider_unavailable",
                 "malformed_delivery",
@@ -257,6 +259,8 @@
                 "unsupported_archive_schema_version",
                 "unsupported_host_protocol",
                 "unsupported_host_protocol_version",
+                "unsupported_recovery_format",
+                "unsupported_recovery_version",
                 "wrong_root"
               ]
             },
@@ -297,6 +301,23 @@
                   "properties": {
                     "status": {
                       "const": "rejected"
+                    }
+                  }
+                }
+              ]
+            },
+            "recovery_result": {
+              "allOf": [
+                {
+                  "$ref": "recovery-operation-v1.schema.json"
+                },
+                {
+                  "properties": {
+                    "result_format": {
+                      "const": "determa.recovery_result"
+                    },
+                    "status": {
+                      "const": "refused"
                     }
                   }
                 }
@@ -659,10 +680,14 @@
                       "archive_staging_failure",
                       "clone_has_unresolved_work",
                       "clone_isolation_unproven",
+                      "effect_not_outstanding",
+                      "effect_outcome_ambiguous",
+                      "host_capability_mismatch",
                       "invalid_archive",
                       "invalid_archive_attachment",
                       "invalid_archive_checkpoint",
                       "invalid_archive_participant",
+                      "invalid_recovery_request",
                       "missing_required_artifact",
                       "missing_required_provider",
                       "scope_archive_digest_mismatch",
@@ -676,13 +701,17 @@
                       "scope_transaction_in_doubt",
                       "scope_transfer_consumed",
                       "scope_transfer_target_mismatch",
+                      "stale_attempt_fence",
                       "stale_scope_authority",
                       "standalone_takeover_ambiguous_work",
                       "standalone_takeover_requires_fresh_scope",
+                      "unauthorized_scope",
                       "unsupported_archive_format",
                       "unsupported_archive_participant_format",
                       "unsupported_archive_participant_schema_version",
-                      "unsupported_archive_schema_version"
+                      "unsupported_archive_schema_version",
+                      "unsupported_recovery_format",
+                      "unsupported_recovery_version"
                     ]
                   }
                 }
@@ -758,6 +787,48 @@
                       "archive_selection_invalid",
                       "archive_host_journal_inventory_mismatch",
                       "archive_manifest_mismatch"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "required": [
+                  "recovery_result"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "operation": {
+                    "const": "scope_operation"
+                  },
+                  "code": {
+                    "enum": [
+                      "clone_has_unresolved_work",
+                      "clone_isolation_unproven",
+                      "effect_not_outstanding",
+                      "effect_outcome_ambiguous",
+                      "host_capability_mismatch",
+                      "invalid_recovery_request",
+                      "scope_archive_digest_mismatch",
+                      "scope_archive_incomplete",
+                      "scope_destination_not_empty",
+                      "scope_fence_unproven",
+                      "scope_generation_conflict",
+                      "scope_not_active",
+                      "scope_operation_conflict",
+                      "scope_restore_requires_quarantine",
+                      "scope_transaction_in_doubt",
+                      "scope_transfer_consumed",
+                      "scope_transfer_target_mismatch",
+                      "stale_attempt_fence",
+                      "stale_scope_authority",
+                      "standalone_takeover_ambiguous_work",
+                      "standalone_takeover_requires_fresh_scope",
+                      "unauthorized_scope",
+                      "unsupported_recovery_format",
+                      "unsupported_recovery_version"
                     ]
                   }
                 }
@@ -1025,6 +1096,7 @@
                   "delivery_digest_mismatch",
                   "duplicate_event_id_in_batch",
                   "effect_not_outstanding",
+                  "effect_outcome_ambiguous",
                   "effect_result_conflict",
                   "event_disposition_missing",
                   "event_id_conflict",
@@ -1045,6 +1117,7 @@
                   "invalid_inspection_request",
                   "invalid_instance_target",
                   "invalid_payload",
+                  "invalid_recovery_request",
                   "invalid_timer_time",
                   "language_provider_unavailable",
                   "malformed_delivery",
@@ -1083,6 +1156,8 @@
                   "unsupported_archive_schema_version",
                   "unsupported_host_protocol",
                   "unsupported_host_protocol_version",
+                  "unsupported_recovery_format",
+                  "unsupported_recovery_version",
                   "wrong_root"
                 ]
               },
@@ -1123,6 +1198,23 @@
                     "properties": {
                       "status": {
                         "const": "rejected"
+                      }
+                    }
+                  }
+                ]
+              },
+              "recovery_result": {
+                "allOf": [
+                  {
+                    "$ref": "recovery-operation-v1.schema.json"
+                  },
+                  {
+                    "properties": {
+                      "result_format": {
+                        "const": "determa.recovery_result"
+                      },
+                      "status": {
+                        "const": "refused"
                       }
                     }
                   }
@@ -1485,10 +1577,14 @@
                         "archive_staging_failure",
                         "clone_has_unresolved_work",
                         "clone_isolation_unproven",
+                        "effect_not_outstanding",
+                        "effect_outcome_ambiguous",
+                        "host_capability_mismatch",
                         "invalid_archive",
                         "invalid_archive_attachment",
                         "invalid_archive_checkpoint",
                         "invalid_archive_participant",
+                        "invalid_recovery_request",
                         "missing_required_artifact",
                         "missing_required_provider",
                         "scope_archive_digest_mismatch",
@@ -1502,13 +1598,17 @@
                         "scope_transaction_in_doubt",
                         "scope_transfer_consumed",
                         "scope_transfer_target_mismatch",
+                        "stale_attempt_fence",
                         "stale_scope_authority",
                         "standalone_takeover_ambiguous_work",
                         "standalone_takeover_requires_fresh_scope",
+                        "unauthorized_scope",
                         "unsupported_archive_format",
                         "unsupported_archive_participant_format",
                         "unsupported_archive_participant_schema_version",
-                        "unsupported_archive_schema_version"
+                        "unsupported_archive_schema_version",
+                        "unsupported_recovery_format",
+                        "unsupported_recovery_version"
                       ]
                     }
                   }
@@ -1584,6 +1684,48 @@
                         "archive_selection_invalid",
                         "archive_host_journal_inventory_mismatch",
                         "archive_manifest_mismatch"
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": [
+                    "recovery_result"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "operation": {
+                      "const": "scope_operation"
+                    },
+                    "code": {
+                      "enum": [
+                        "clone_has_unresolved_work",
+                        "clone_isolation_unproven",
+                        "effect_not_outstanding",
+                        "effect_outcome_ambiguous",
+                        "host_capability_mismatch",
+                        "invalid_recovery_request",
+                        "scope_archive_digest_mismatch",
+                        "scope_archive_incomplete",
+                        "scope_destination_not_empty",
+                        "scope_fence_unproven",
+                        "scope_generation_conflict",
+                        "scope_not_active",
+                        "scope_operation_conflict",
+                        "scope_restore_requires_quarantine",
+                        "scope_transaction_in_doubt",
+                        "scope_transfer_consumed",
+                        "scope_transfer_target_mismatch",
+                        "stale_attempt_fence",
+                        "stale_scope_authority",
+                        "standalone_takeover_ambiguous_work",
+                        "standalone_takeover_requires_fresh_scope",
+                        "unauthorized_scope",
+                        "unsupported_recovery_format",
+                        "unsupported_recovery_version"
                       ]
                     }
                   }
@@ -1751,6 +1893,122 @@
                       "archive_export",
                       "archive_import"
                     ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "receipt": {
+            "type": "object",
+            "required": [
+              "scope_binding_identity",
+              "operation_id",
+              "request_digest",
+              "receipt_kind",
+              "evidence_digest",
+              "acceptance_receipt"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "scope_binding_identity": {
+                "type": "string",
+                "minLength": 1
+              },
+              "operation_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "request_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "receipt_kind": {
+                "enum": [
+                  "committed",
+                  "accepted"
+                ]
+              },
+              "evidence_digest": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "acceptance_receipt": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
+                  }
+                ]
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "receipt_kind": {
+                      "const": "accepted"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "acceptance_receipt": {
+                      "$ref": "execution-checkpoint-v1.schema.json#/$defs/acceptanceReceipt"
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "acceptance_receipt": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "committed"
+          },
+          "value": {
+            "properties": {
+              "operation": {
+                "const": "scope_operation"
+              },
+              "result": {
+                "properties": {
+                  "action": {
+                    "const": "recovery"
+                  },
+                  "recovery_result": {
+                    "properties": {
+                      "operation": {
+                        "enum": [
+                          "strict_restore",
+                          "standalone_takeover",
+                          "resume_takeover",
+                          "reconcile_work",
+                          "clone_scope",
+                          "activate_clone",
+                          "prepare_transfer",
+                          "stage_transfer",
+                          "commit_transfer",
+                          "activate_import"
+                        ]
+                      }
+                    }
                   }
                 }
               }
@@ -2429,6 +2687,47 @@
                           "const": "staged"
                         }
                       }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "action",
+                "recovery_result",
+                "recovery_record"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "action": {
+                  "const": "recovery"
+                },
+                "recovery_result": {
+                  "allOf": [
+                    {
+                      "$ref": "recovery-operation-v1.schema.json"
+                    },
+                    {
+                      "properties": {
+                        "result_format": {
+                          "const": "determa.recovery_result"
+                        },
+                        "status": {
+                          "const": "succeeded"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "recovery_record": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "recovery-record-v1.schema.json"
                     }
                   ]
                 }

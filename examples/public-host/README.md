@@ -27,6 +27,11 @@ closed results from [`../archives/export-cases-v1.json`](../archives/export-case
 and [`../archives/stage-cases-v1.json`](../archives/stage-cases-v1.json). The destination
 capability report uses its independently configured supported set. The refusal
 case carries the complete §22 result in the public error, with no stage receipt.
+The recovery cases copy complete §24 requests, results, and retained destination
+records from [`../recovery/recovery-cases-v1.json`](../recovery/recovery-cases-v1.json).
+They cover quarantine, fresh-scope takeover, clone, verified local activation,
+and exact refusals for active strict restore, weak clone isolation, and unsupported
+transfer topology.
 
 These are specification vectors. Engine/client/reference-host execution checks live in
 the conformance and implementation repositories. `compatibility-change-v1.json`
