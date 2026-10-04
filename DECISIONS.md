@@ -460,3 +460,19 @@ arbitrary database rows under an archive label.
 **Reason.** Replay can repeat effects or lose accepted deferred work, and undeclared
 rows have no portable reconstruction proof. Staging must validate exact bytes while
 remaining inert; destination authority and relocation are separate concerns.
+
+## Recovery remains an explicit host choice
+
+Relevant specification: [§24](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation).
+
+**Decision.** A strict restore always remains an inert read-only quarantine.
+Proved continuation uses the separate guarded transfer activation path. A standalone
+operator may instead create a fresh scope and namespace, retaining ambiguous work and
+source provenance with an explicit old-owner risk acknowledgement. A clone is separate
+independent execution and needs proved provider isolation. Safe relocation is an
+optional positive claim for a tested topology under one authority domain.
+
+**Reason.** Archive completeness makes state reconstructable but cannot revoke a
+remote worker or undo an accepted provider request. The new scope makes the weaker
+choice visible in identity, receipts and capability reports. A credential or timeout
+cannot supply a missing authority proof.

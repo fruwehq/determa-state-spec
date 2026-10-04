@@ -5861,3 +5861,215 @@ host-asserted consistency point. The closed stage cases supply complete import r
 trusted-policy fixtures, exact staged bytes or refusal, and JSON-pointer differences
 from the positive archive. Conformance verifies the source/contract pins and every
 nested digest and causal link, not merely the outer archive hash.
+
+## 24. Recovery, fresh-scope takeover, cloning, and optional relocation
+
+### 24.1 Contract and precedence
+
+This optional host contract consumes a verified, inert §22 archive stage. It neither
+changes the §16 aggregate nor makes a portable archive an authority credential. The
+closed version-1 request and result are `schema/recovery-operation-v1.schema.json`.
+A host authenticates the principal outside the portable request, binds it to the
+requested operation and destination, and durably records the first complete result
+under `(destination authority, operation_id)`. An equal canonical request replays
+that complete result without repeating work; a changed request at the same ID returns
+`scope_operation_conflict`. An operation ID is never a source checkpoint ID, event ID,
+or external idempotency key. A missing/unsupported format or version, malformed
+request, unauthorized principal, duplicate conflict, then operation-specific precondition
+failure is the refusal order. No refusal stages a partially active scope. The result
+reports `safe_relocation` and `no_duplicate_external_work` independently; neither
+is inferred from a valid archive or a successful activation.
+
+Recovery requires a complete §22 archive, including every selected root checkpoint
+and its owned runtimes, active configuration, variables, ready and deferred mailboxes,
+queue and logical counters, fault state, pending and terminal effects, intents, outbox,
+receipts, replay retention, tombstones, exact definitions, migration descriptors and
+required participants. The host checks the archive source profile, provenance,
+participant contract and digest against the trusted §22 import request and stage
+receipt. It verifies required helper/application/host journal participants and any
+external bytes. An individual checkpoint, selected-root archive presented as complete
+scope inventory, missing participant, untrusted source, or altered source identity
+fails with `scope_archive_incomplete` or `scope_archive_digest_mismatch`. The host
+MUST NOT recreate missing queues or receipts from audit trails or omit terminal work.
+The source identity and binding digest are public provenance, not credentials.
+
+### 24.2 Strict quarantine
+
+`strict_restore` always creates an immutable, inactive read-only quarantine for
+inspection and reconciliation. Even a proved retirement does not change this
+operation into activation. Proved continuation uses the separate tested transfer
+path and `activate_import` after its guarded commit.
+Quarantine grants no admission, processing, core step, runtime-provider evaluation,
+helper firing/dispatch/cancellation, ingress acknowledgement, effect dispatch/result
+acceptance, promotion or clock-triggered timeout work. A lease expiry, copied database,
+archive digest, changed endpoint or matching operation token cannot promote it.
+Its result records `state: "quarantined"`, `safe_relocation: false`,
+`no_duplicate_external_work: false`, and the missing proof. A request for strict activation returns
+`scope_restore_requires_quarantine` and leaves the destination inactive regardless
+of proof; strict restore has no activation branch. Quarantine can later be used only by a separately
+requested operation whose full preconditions are checked afresh.
+
+### 24.3 Explicit standalone takeover
+
+`standalone_takeover` requires an authenticated, expressly named request with
+`acknowledge_old_owner_risk: true`, a validated complete staged archive, an empty
+reserved destination, a never-used logical scope identity and a never-used external
+idempotency namespace. The new scope and namespace are permanently consumed even
+if the scope later terminates. The result retains the exact source identity, source
+binding digest, archive digest and participant contract as provenance. Source
+checkpoints and historical request/result receipts remain intact as evidence, but
+cannot authenticate or replay as new-scope operations. The host initializes a fresh
+operation ledger, bindings, authority epoch where supported, and worker claims; it
+never imports live source claims or source authority marks. Old worker/result submissions
+are rejected under new-scope authentication and fence checks even if root, effect,
+token or ID strings match. New intents use the new namespace. No old namespace key is
+reused or inferred to deduplicate prior provider activity.
+
+Every inherited submitted, accepted, pending, or attempt-unknown external effect,
+delivery, or helper operation becomes an identified `ambiguous` inherited-work record
+unless exact retained evidence proves that attempt unstarted. Terminal work remains
+terminal and is never automatically replayed. Accepted ready and deferred machine
+events remain in their original order. The takeover begins inactive. A separate
+`resume_takeover` requires a second explicit risk acknowledgement and records the
+warning that the old owner may still act. It may enable pure machine processing, but
+blocks every external dispatch, helper operation, ingress acknowledgement tied to
+ambiguous work, and impure native runtime-provider evaluation until every inherited
+ambiguous item has a retained `reconcile_work` outcome or an explicit `abandoned`
+outcome. Abandonment records the operator/principal, item, evidence, decision, and
+risk; it does not assert that provider work was undone. Pure processing must pause
+before any potentially impure evaluation or new external side effect. The host MUST
+NOT automatically retry or redispatch an ambiguous operation. All standalone results
+state `safe_relocation: false`, `no_duplicate_external_work: false`; they disclose
+old-owner and duplicate-work risk even after reconciliation. This is an availability
+choice, not continuation of the old logical scope. Failure never falls back from
+strict restore or relocation to this operation.
+
+### 24.4 Clone as independent execution
+
+`clone_scope` also allocates a never-used logical scope and external namespace,
+retains exact source provenance and terminal evidence, and starts inactive. An
+`activate_clone` requires an explicit declaration of independent business execution,
+proved isolated destination and provider bindings for every side-effecting channel,
+and resolution or explicit cancellation of all inherited pending/ambiguous external
+work and required helper state. Binding isolation is checked against the source's
+actual provider/environment identity; a credential, alias or endpoint label change
+alone does not prove isolation. Failure returns `clone_isolation_unproven` or
+`clone_has_unresolved_work`, leaving the clone inactive. A clone-side cancellation records the decision never to deliver that inherited work
+in the clone; it does not assert a source provider call was cancelled or undone.
+Terminal effects stay terminal and are never redelivered. Ready/deferred events may remain; their future
+execution and the new namespace are recorded in the activation evidence. A clone
+never asserts source retirement, safe relocation or prevention of duplicate business
+work across scopes.
+
+### 24.5 Optional same-authority relocation
+
+A host MAY implement `prepare_transfer`, `stage_transfer`, `commit_transfer`, and
+`activate_import` only for a topology positively advertised by its §18 profile and
+proved within its single trusted authority domain. The stock profile defaults
+`safe_relocation: false`; this specification supplies no distributed coordinator,
+leader election or cross-authority grant. Unsupported topology returns
+`host_capability_mismatch` and leaves the destination inactive.
+
+`prepare_transfer` resolves the retained §18 freeze evidence, complete scope
+inventory and required participant snapshots, all active claim revocations, known
+transaction fate, exact epoch and generation, and destination binding. It records
+one destination-bound prepared transfer record under the guarded authority
+transaction. This record proves a frozen source and a reserved destination, never
+retirement or an activation grant. `stage_transfer` checks that prepared record,
+the exact archive, source binding, participant contract, destination binding,
+epoch/generation, transfer ID and an empty inactive destination; staging confers no
+writer rights. `commit_transfer` atomically proves the source retired under §18,
+consumes the destination-bound single-use grant, advances authority epoch/generation
+and binds one staged destination. Only this committed record is retirement proof.
+`activate_import` checks that committed record and its exact destination, archive,
+new epoch and generation under the guarded transaction
+before exposing admission, workers, helpers or writes. Equal operation replay returns
+the first complete result. A conflicting transfer ID, destination, consumed grant, stale generation or
+unresolved transaction fate fails closed before stage or commit. An uncertain source
+transaction or commit returns `scope_transaction_in_doubt` and remains inactive
+until its fate is resolved from trusted authority records; a timeout never selects
+a winner and the source is never unsafely rolled back. Imported pending
+external work still requires destination idempotency evidence or reconciliation
+before retry. Fencing prevents stale Determa writes but cannot unsend a provider call.
+Only a profile that proves retirement, single use, transaction fate, complete import,
+worker fences and absence of concurrent writers may report `safe_relocation: true`.
+
+Each logical scope is independently authorized and has its own receipts and archive
+selection. A multi-scope request returns per-scope results, including explicit
+partial success, and makes no global atomicity claim. Callers cannot combine partial
+proofs into a scope-wide or multi-scope safe-relocation assertion. The normative
+`examples/recovery/recovery-cases-v1.json` fixes complete response and rejection
+bodies, including stale workers, quarantine, ambiguity, clone isolation and a
+positively negotiated single-authority local transfer. Its separate guarded-source
+archive is `examples/recovery/archive-local-transfer-v1.json`. This test profile
+binds only an implementation that advertises that exact topology; the stock profile
+may continue to refuse transfer. No fixture implies a distributed grant service.
+
+### 24.6 Records, digests, and denial behavior
+
+`schema/recovery-record-v1.schema.json` is the closed durable destination record.
+It lists every inherited external work identity and source attempt disposition, the
+exact retained checkpoint digests, source provenance, fresh namespace, mode, current
+state, destination binding, fresh operation-ledger identity, empty imported-claim
+set, risk decision and isolation evidence. A strict quarantine has null namespace
+and ledger identity; fresh-scope modes require both. `record_digest = hash(["determa-recovery-record-1", record])`.
+For an operation request, `request_digest = hash(["determa-recovery-request-1",
+request_without_request_digest])` using §16.2 JCS. The host verifies this before
+ledger lookup; a mismatch is `invalid_recovery_request`. A result's `record_digest`
+resolves the complete retained record and is not itself an authority proof. Work
+identities are unique by `(work_kind, work_identity)`, ordered by UTF-8 bytes, and
+retain source evidence across every resolution. An apparently unattempted operation
+requires affirmative unattempted evidence; absence of a receipt means `unknown`.
+`reconcile_work` can change only an ambiguous item and appends a durable decision;
+it cannot mutate source terminal evidence. A result with `state: "active"` is valid
+only after the operation's activation guard committed. A refusal retains `state:
+"unchanged"` and `record_digest: null`. Equal replay preserves exact warning and
+source provenance fields. No error or retry performs an implicit takeover.
+
+The host checks source archive/stage and authenticated destination rights before
+allocating a scope; then checks fresh identity, required participants, unresolved
+work and, if requested, authority proof. A destination reservation, existing root,
+prior namespace use or ledger collision fails `scope_destination_not_empty` or
+`standalone_takeover_requires_fresh_scope` with no activation. An unsupported transfer
+uses `host_capability_mismatch`; a purported proof that does not resolve to the
+trusted authority ledger uses `scope_fence_unproven`. A stale worker result uses
+`stale_scope_authority` or `stale_attempt_fence` at §18/§19 before its payload can
+change the new scope. Responses must use exactly the operation's closed code set and
+preserve the first result. The examples fix the relevant precedence and full results.
+
+The version-1 `guarded_action` probe gives a complete, read-only admission decision
+for `admit_event`, `process_event`, `dispatch_effect`, `submit_effect_result`,
+`fire_helper`, `cancel_helper`, `clock_timeout`, `ack_ingress`,
+`evaluate_impure_provider`, or `promote`. It does not
+perform the action. The action itself must repeat the same guard at its native commit
+boundary; a successful probe is no transferable permit. This lets conformance assert
+quarantine and old-worker denials without invoking an external provider. Inactive
+scope denial precedes payload validation. A worker-scope mismatch is
+`stale_scope_authority` even when a token string matches; within the current scope,
+a stale attempt fence is `stale_attempt_fence`. Standalone ambiguous work denies
+external dispatch and impure evaluation with
+`standalone_takeover_ambiguous_work` until every relevant item is resolved.
+
+A host that offers a batch convenience interface returns the closed
+`schema/recovery-batch-v1.schema.json` result. Its scope results are individually
+ordered by scope identity and each is the complete first result from its own receipt
+ledger. `status: "partial"` means at least one scope succeeded and one refused;
+`atomic_across_scopes` is always false. The caller must authorize every scope
+independently. Batch failure never rolls back a committed per-scope result or turns
+one scope's proof into another's grant.
+
+The trusted authority ledger stores a closed
+`schema/recovery-transfer-proof-v1.schema.json` record for each prepared or committed
+transfer. `proof_digest = hash(["determa-recovery-transfer-proof-1",
+proof_without_proof_digest])`. The `prepared` phase binds frozen source state,
+revoked active claims, known freeze transaction fate, one transfer ID, destination
+reservation, archive and participant contract, and the exact old epoch/generation.
+Its destination epoch and generation are reserved proposed values, not active
+authority. It is not a retirement proof or activation grant. The `committed` phase binds the
+§18 retired source, consumed single-use grant, known commit fate, old-write fence,
+and new destination epoch/generation. A request's public proof digest is only a
+lookup key: the host resolves the phase-correct record in its guarded ledger, checks
+its digest and all fields against current authority state, and consumes the grant
+atomically. A copied proof JSON or digest cannot grant authority. Unknown transaction
+fate cannot satisfy either phase. No cross-authority host may advertise this profile
+unless its own topology proves these properties across both domains.
