@@ -321,3 +321,23 @@ children in separate transactions.
 **Reason.** A committed definition advance with a rolled-back core result violates
 fault and retry semantics. The root ownership aggregate remains one transactional
 state boundary.
+
+## Extension capability claims bind configured instances
+
+Relevant specification: [§11.5](SPEC.md#115-public-extension-identity-registration-and-capabilities)
+and [§17.11](SPEC.md#1711-execution-store-capabilities-and-composed-host-profiles).
+
+**Decision.** The public registration path accepts bundled and third-party providers
+equally, with exact version and digest references. Direct injection remains available.
+Profiles check category-specific capabilities against a healthy, validated configured
+instance before mutation. Effective guarantees require every participant; external I/O
+risk is reported if any participant may perform it. Named endpoints, credentials, and
+scope bindings are host configuration outside machine semantics.
+
+**Rejected alternative.** Infer capabilities from URI schemes, provider names, package
+versions, or a registration descriptor alone.
+
+**Reason.** Configuration, topology, health, and participating provider closures change
+the actual guarantees. Name-based inference could advertise safe relocation or durable
+processing without the authority or storage behavior that proves it. A future hosted
+service must pass the same public capability conformance tests as a local host.
