@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:34965097038e858b9be14b4e9b51ddba9932f361ea42e5510f98a6c39dcadb11"
+      "sha256": "sha256:a4ea50c4a0c2dff2b14b22b29ee8e9c8bfa01d3571e411442c809cc273a305a0"
     },
     {
       "path": "VERSION",
@@ -29,6 +29,10 @@
     {
       "path": "schema/core-step-result-v1.schema.json",
       "sha256": "sha256:8fd0fa85d1fbad63b94f1fa1c52d7fe5f1ed2f22c773bfad47b91611d4837b08"
+    },
+    {
+      "path": "schema/delivery-v1.schema.json",
+      "sha256": "sha256:b9ec469241c2157d28d68d3c7a383d70145d9869e82258134811adf6daae5acc"
     },
     {
       "path": "schema/effect-cancellation-request-v1.schema.json",
@@ -52,11 +56,11 @@
     },
     {
       "path": "schema/extension-capability-report-v1.schema.json",
-      "sha256": "sha256:9d3857e00984a4071f81ec110cf08fd31ff070d3d753d5e14e77442f981b8f76"
+      "sha256": "sha256:0e8d9b07c1418b0e871330347a773d4fa044859eec69f0567ba344f5c7b9034d"
     },
     {
       "path": "schema/extension-capability-requirement-v1.schema.json",
-      "sha256": "sha256:9c8c6b3120cac8c9a6719b2ec38a156739361a535081331f6d3699937fac4912"
+      "sha256": "sha256:da41cca0f4de19d3354b6a50c73824d5b9288584bbf425336bdcf0e8af291e73"
     },
     {
       "path": "schema/extension-descriptor-v1.schema.json",

@@ -405,6 +405,32 @@ receipts, and pending effects. Direct internal writes bypass declaration validat
 and the atomic checkpoint boundary. A failed projection must leave both application
 rows and Determa evidence unchanged.
 
+## Delivery ownership crosses only a committed boundary
+
+Relevant specification: [§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall),
+[§17.4](SPEC.md#174-aggregate-owned-admission-and-processing),
+[§17.6](SPEC.md#176-durable-outbox-lifecycle), and
+[§21](SPEC.md#21-lossless-event-delivery-profile).
+
+**Decision.** A source owns ingress backlog until complete machine admission and its
+receipt commit, or an explicitly configured durable ingress dead-letter transfer.
+Acknowledgement follows that commit. Accepted events belong to the runtime mailbox
+and then one terminal receipt; deferral and unhandled outcomes are never broker retry
+instructions. Every terminal policy retains identity, reason, authority, and receipt
+for its declared replay window. Outbound destination acceptance is delivery evidence,
+while a later declared input conveys business outcome.
+Admission and terminal machine processing reference their respective §17 operation
+receipts. Deferred/ready movement and outbox state updates reference the committed
+checkpoint entry or outbox record at its exact revision; neither operation invents
+a new receipt.
+
+**Rejected alternative.** Acknowledge on validation, silently discard on overflow,
+retry an admitted event at the broker after unhandled disposition, or treat outbox
+confirmation as business success.
+
+**Reason.** Those shortcuts lose or duplicate responsibility across crashes and make
+replay unable to distinguish a committed decision from an abandoned attempt.
+
 ## Public host requests pin their resolved binding
 
 Relevant specification: [§25](SPEC.md#25-public-client-and-execution-host-protocol).
