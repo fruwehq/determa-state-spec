@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:7b1c47359357c3a3d644acc836f9863492cd79f36d9fcdbf4e9280ec2bd8e782"
+      "sha256": "sha256:4d88e2fae88de63e44960eb1e1c30a507033e53f88857e26d260c51a1f303782"
     },
     {
       "path": "VERSION",
@@ -21,6 +21,34 @@
     {
       "path": "schema/aggregate-state-v1.schema.json",
       "sha256": "sha256:7cf0eda1199ba1cfc63dc9c6c4daea9e69e502ecbb1c60570d527a6487e82d92"
+    },
+    {
+      "path": "schema/archive-export-request-v1.schema.json",
+      "sha256": "sha256:d45e715c139a1f3545629017a6279abe68f6eb289c9a6c9c14b70b63e9e9e4b8"
+    },
+    {
+      "path": "schema/archive-export-source-v1.schema.json",
+      "sha256": "sha256:1f66d36706b1b7e19634c9186a5a61c3f0968140550586d82fec989015cb6af4"
+    },
+    {
+      "path": "schema/archive-host-journal-inventory-v1.schema.json",
+      "sha256": "sha256:4dccaf243b81d9a996013628c333f3c1ee6d42e0e9214df30c4e6294f79a06ed"
+    },
+    {
+      "path": "schema/archive-import-request-v1.schema.json",
+      "sha256": "sha256:9b4215b1de58ba99e6a3e0890a8b8fa443e8f31d42e11d1617e085a6487ffe3a"
+    },
+    {
+      "path": "schema/archive-participant-v1.schema.json",
+      "sha256": "sha256:c04f8256611f3ce25cf2b3219773f41c3bcea9a1b40d2ac3210b6ffae745192a"
+    },
+    {
+      "path": "schema/archive-result-v1.schema.json",
+      "sha256": "sha256:a1282ee3a5541dc349e9a313ac05efc0a7e8b1048e2d14706c517e5e74267780"
+    },
+    {
+      "path": "schema/archive-v1.schema.json",
+      "sha256": "sha256:21b6d627ed575f0dc2e015d9c17b2feb0281c78885490ec0158097b05557f309"
     },
     {
       "path": "schema/compilation-manifest-v1.schema.json",
@@ -56,15 +84,15 @@
     },
     {
       "path": "schema/extension-capability-report-v1.schema.json",
-      "sha256": "sha256:0e8d9b07c1418b0e871330347a773d4fa044859eec69f0567ba344f5c7b9034d"
+      "sha256": "sha256:a9c8214fc2b34e1e7a2d463818619ae6d75dccfe3f0a072a11564cf13af8fb7d"
     },
     {
       "path": "schema/extension-capability-requirement-v1.schema.json",
-      "sha256": "sha256:da41cca0f4de19d3354b6a50c73824d5b9288584bbf425336bdcf0e8af291e73"
+      "sha256": "sha256:a85eb3bb5d30ad8c3a6157854eb628df89639124a59c70108d1e0ef5d0e0781d"
     },
     {
       "path": "schema/extension-descriptor-v1.schema.json",
-      "sha256": "sha256:0468386248ace0b1553f58d1f8699a73e4ccd2e15785e7d7b49044cace9505c8"
+      "sha256": "sha256:11ce6bb55eb63f9da86c014558b16cbc975c0264d245c44a4075e2fe2af00b81"
     },
     {
       "path": "schema/host-authority-operation-v1.schema.json",
@@ -112,11 +140,11 @@
     },
     {
       "path": "schema/public-host-request-v1.schema.json",
-      "sha256": "sha256:122b051cd754f21125696a292ba53c441f3f25d298d33ac1e7bc7f9757a45df2"
+      "sha256": "sha256:606d62c0c8b641b3f469dd8a593eb74e210bb44abde11ce38554e725bf4d7073"
     },
     {
       "path": "schema/public-host-response-v1.schema.json",
-      "sha256": "sha256:c2648a1b9bdb22c564fc5f0956303ce8e4831a3cf52c360ccb44c2b44b1d37ac"
+      "sha256": "sha256:db78692c1614d1f341791698ba247bc1d97ea792ebbde6655631e4fc7ba6cc59"
     },
     {
       "path": "schema/runtime-action-output-v1.schema.json",
@@ -144,15 +172,15 @@
     },
     {
       "path": "examples/public-host/positive-v1.json",
-      "sha256": "sha256:69cb13d90ecf7631a3f82a3720c847ea57ced88a1012cc8e3bf29a065b68509a"
+      "sha256": "sha256:6374b5bc3fef3adbf81f12e145a99d3c7570dcaf3cf6cb1d080fdc7a9f15650a"
     },
     {
       "path": "examples/public-host/negative-v1.json",
-      "sha256": "sha256:6e61ef848a89034f609bdd46340ae6ffaff9a29f7566face50768b575df8e437"
+      "sha256": "sha256:461f56ef741b514d1ab6551f24a00d2a55b158762aa89bf78c01104314830be9"
     },
     {
       "path": "examples/public-host/README.md",
-      "sha256": "sha256:879631673d2a84af47f452e379bfde2200ec1c775248d1fb67352f9796934c5f"
+      "sha256": "sha256:4bbb829035d4d9e05e75a63308c63004a413add0a388ae8f221505dcb91421a8"
     },
     {
       "path": "examples/effects/effect-result-request-v1.json",
@@ -193,6 +221,34 @@
     {
       "path": "examples/delivery/queue-placement-checkpoints-v1.json",
       "sha256": "sha256:98546a09ab9455fba0b1ffe748a14f7190cae0a9e73533a40ccf975324dd9d56"
+    },
+    {
+      "path": "examples/archives/archive-v1.json",
+      "sha256": "sha256:89a4a9ce5a19f7b41b741f580cd919935636a6ff6ff88e30bf7b387f2b2f3c9f"
+    },
+    {
+      "path": "examples/archives/export-cases-v1.json",
+      "sha256": "sha256:9b88778bb813bfdd4ef87234a14855a0151cf490cdb93321f3a7f7d28a74c0fc"
+    },
+    {
+      "path": "examples/archives/hash-checks-v1.json",
+      "sha256": "sha256:b4fb491a8df0bb55665decff68c970cf3031e4782b0df938c5234b39bc23ef35"
+    },
+    {
+      "path": "examples/archives/stage-cases-v1.json",
+      "sha256": "sha256:1b4a016f45f7726e83559a96794f460bce78f0140594651a1865741bfdd882b8"
+    },
+    {
+      "path": "examples/archives/helper-payload-v1.schema.json",
+      "sha256": "sha256:587dd791a5eef81a39d64ab7ed0c78493d326019b48298cbd415f24aec180114"
+    },
+    {
+      "path": "examples/archives/host-journal-payload-v1.schema.json",
+      "sha256": "sha256:1826456fd8313ffa99e4bce51bdf71260e2c357d6b7c71ef50b27e7c4494a356"
+    },
+    {
+      "path": "examples/archives/stage-configuration-v1.schema.json",
+      "sha256": "sha256:2b3cf08841a7dd528c4c902568f3e1edf03f670840528144b293efa2df49e508"
     }
   ],
   "hash_domains": [
@@ -309,6 +365,26 @@
       "source": "SPEC.md#21"
     },
     {
+      "name": "determa-archive-digest-1",
+      "source": "SPEC.md#22"
+    },
+    {
+      "name": "determa-archive-host-journal-inventory-1",
+      "source": "SPEC.md#22"
+    },
+    {
+      "name": "determa-archive-participant-contract-1",
+      "source": "SPEC.md#22"
+    },
+    {
+      "name": "determa-archive-payload-1",
+      "source": "SPEC.md#22"
+    },
+    {
+      "name": "determa-archive-source-profile-1",
+      "source": "SPEC.md#22"
+    },
+    {
       "name": "determa-public-host-request-digest-1",
       "source": "SPEC.md#25.2"
     },
@@ -365,6 +441,36 @@
       "name": "lossless_projection",
       "source": "SPEC.md#20",
       "rule": "complete artifact round-trip for selected rows"
+    },
+    {
+      "name": "portable_archive",
+      "source": "SPEC.md#22",
+      "rule": "complete closed archive decoding and integrity verification"
+    },
+    {
+      "name": "portable_checkpoint",
+      "source": "SPEC.md#22",
+      "rule": "closed checkpoint decoder and exact digest validation"
+    },
+    {
+      "name": "normalized_definition",
+      "source": "SPEC.md#22",
+      "rule": "trusted normalized definition attachment decoding"
+    },
+    {
+      "name": "migration_descriptor",
+      "source": "SPEC.md#22",
+      "rule": "trusted migration descriptor attachment decoding"
+    },
+    {
+      "name": "archive_participant",
+      "source": "SPEC.md#22",
+      "rule": "declared participant closure and exact schema/provider verification"
+    },
+    {
+      "name": "host_effect_journal",
+      "source": "SPEC.md#22",
+      "rule": "paired native effect journal participant and trusted inventory verification"
     },
     {
       "name": "saved_response_replay",

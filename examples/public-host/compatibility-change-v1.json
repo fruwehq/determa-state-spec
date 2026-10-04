@@ -3,8 +3,8 @@
   "record_schema_version": 1,
   "issue": "96",
   "old_protocol_fingerprint": null,
-  "proposed_protocol_fingerprint": "sha256:7296bcf239d1475762aecf1612801e7323be608308244d7447ff7474df0586f3",
-  "manifest_fingerprint": "sha256:0c9a9e1324da9732c5f26d5f089a838e4c4957da316656d8ae21077ace185c72",
+  "proposed_protocol_fingerprint": "sha256:342dbdebf69c70710f689c5772d50d42bd1305eedb2d416115b86a3d2004c14c",
+  "manifest_fingerprint": "sha256:6741c24dd3fdc497c158f96ef257ef1bafd31d068f2a84e24bf6267dbd8b5cbc",
   "affected_capabilities": [
     "structural_inspection",
     "semantic_inspection",
@@ -14,6 +14,12 @@
     "safe_relocation",
     "native_effect_results",
     "lossless_projection",
+    "portable_archive",
+    "portable_checkpoint",
+    "normalized_definition",
+    "migration_descriptor",
+    "archive_participant",
+    "host_effect_journal",
     "saved_response_replay",
     "deterministic_reexecution"
   ],

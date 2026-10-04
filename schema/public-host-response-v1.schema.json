@@ -180,6 +180,17 @@
             },
             "code": {
               "enum": [
+                "archive_capability_mismatch",
+                "archive_consistency_unavailable",
+                "archive_digest_mismatch",
+                "archive_host_journal_inventory_mismatch",
+                "archive_manifest_mismatch",
+                "archive_participant_contract_mismatch",
+                "archive_payload_digest_mismatch",
+                "archive_selection_invalid",
+                "archive_source_profile_mismatch",
+                "archive_source_provenance_mismatch",
+                "archive_staging_failure",
                 "binding_unavailable",
                 "checkpoint_revision_conflict",
                 "clone_has_unresolved_work",
@@ -196,6 +207,10 @@
                 "inspection_capability_unavailable",
                 "inspection_guard_failure",
                 "inspection_limit_exceeded",
+                "invalid_archive",
+                "invalid_archive_attachment",
+                "invalid_archive_checkpoint",
+                "invalid_archive_participant",
                 "invalid_correlation",
                 "invalid_delivery_mode",
                 "invalid_delivery_source",
@@ -207,6 +222,8 @@
                 "invalid_timer_time",
                 "language_provider_unavailable",
                 "malformed_delivery",
+                "missing_required_artifact",
+                "missing_required_provider",
                 "operation_id_conflict",
                 "outcome_unknown",
                 "portable_value_required",
@@ -234,9 +251,27 @@
                 "timer_id_conflict",
                 "tombstoned_root",
                 "unauthorized_scope",
+                "unsupported_archive_format",
+                "unsupported_archive_participant_format",
+                "unsupported_archive_participant_schema_version",
+                "unsupported_archive_schema_version",
                 "unsupported_host_protocol",
                 "unsupported_host_protocol_version",
                 "wrong_root"
+              ]
+            },
+            "archive_result": {
+              "allOf": [
+                {
+                  "$ref": "archive-result-v1.schema.json"
+                },
+                {
+                  "properties": {
+                    "status": {
+                      "const": "refused"
+                    }
+                  }
+                }
               ]
             }
           },
@@ -569,22 +604,118 @@
                       "binding_unavailable",
                       "outcome_unknown",
                       "replay_evidence_expired",
-                      "scope_not_active",
-                      "stale_scope_authority",
-                      "scope_operation_conflict",
-                      "scope_generation_conflict",
-                      "scope_transaction_in_doubt",
-                      "scope_fence_unproven",
-                      "scope_archive_incomplete",
+                      "archive_capability_mismatch",
+                      "archive_consistency_unavailable",
+                      "archive_digest_mismatch",
+                      "archive_host_journal_inventory_mismatch",
+                      "archive_manifest_mismatch",
+                      "archive_participant_contract_mismatch",
+                      "archive_payload_digest_mismatch",
+                      "archive_selection_invalid",
+                      "archive_source_profile_mismatch",
+                      "archive_source_provenance_mismatch",
+                      "archive_staging_failure",
+                      "clone_has_unresolved_work",
+                      "clone_isolation_unproven",
+                      "invalid_archive",
+                      "invalid_archive_attachment",
+                      "invalid_archive_checkpoint",
+                      "invalid_archive_participant",
+                      "missing_required_artifact",
+                      "missing_required_provider",
                       "scope_archive_digest_mismatch",
+                      "scope_archive_incomplete",
                       "scope_destination_not_empty",
+                      "scope_fence_unproven",
+                      "scope_generation_conflict",
+                      "scope_not_active",
+                      "scope_operation_conflict",
+                      "scope_restore_requires_quarantine",
+                      "scope_transaction_in_doubt",
                       "scope_transfer_consumed",
                       "scope_transfer_target_mismatch",
-                      "scope_restore_requires_quarantine",
-                      "standalone_takeover_requires_fresh_scope",
+                      "stale_scope_authority",
                       "standalone_takeover_ambiguous_work",
-                      "clone_has_unresolved_work",
-                      "clone_isolation_unproven"
+                      "standalone_takeover_requires_fresh_scope",
+                      "unsupported_archive_format",
+                      "unsupported_archive_participant_format",
+                      "unsupported_archive_participant_schema_version",
+                      "unsupported_archive_schema_version"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "unsupported_archive_format",
+                      "unsupported_archive_schema_version",
+                      "unsupported_archive_participant_format",
+                      "unsupported_archive_participant_schema_version",
+                      "invalid_archive",
+                      "archive_digest_mismatch",
+                      "invalid_archive_checkpoint",
+                      "invalid_archive_attachment",
+                      "invalid_archive_participant",
+                      "archive_payload_digest_mismatch",
+                      "missing_required_artifact",
+                      "missing_required_provider",
+                      "archive_capability_mismatch",
+                      "archive_consistency_unavailable",
+                      "archive_staging_failure",
+                      "archive_source_profile_mismatch",
+                      "archive_participant_contract_mismatch",
+                      "archive_source_provenance_mismatch",
+                      "archive_selection_invalid",
+                      "archive_host_journal_inventory_mismatch",
+                      "archive_manifest_mismatch"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "archive_result"
+                ]
+              }
+            },
+            {
+              "if": {
+                "required": [
+                  "archive_result"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "operation": {
+                    "const": "scope_operation"
+                  },
+                  "code": {
+                    "enum": [
+                      "unsupported_archive_format",
+                      "unsupported_archive_schema_version",
+                      "unsupported_archive_participant_format",
+                      "unsupported_archive_participant_schema_version",
+                      "invalid_archive",
+                      "archive_digest_mismatch",
+                      "invalid_archive_checkpoint",
+                      "invalid_archive_attachment",
+                      "invalid_archive_participant",
+                      "archive_payload_digest_mismatch",
+                      "missing_required_artifact",
+                      "missing_required_provider",
+                      "archive_capability_mismatch",
+                      "archive_consistency_unavailable",
+                      "archive_staging_failure",
+                      "archive_source_profile_mismatch",
+                      "archive_participant_contract_mismatch",
+                      "archive_source_provenance_mismatch",
+                      "archive_selection_invalid",
+                      "archive_host_journal_inventory_mismatch",
+                      "archive_manifest_mismatch"
                     ]
                   }
                 }
@@ -791,6 +922,17 @@
               },
               "code": {
                 "enum": [
+                  "archive_capability_mismatch",
+                  "archive_consistency_unavailable",
+                  "archive_digest_mismatch",
+                  "archive_host_journal_inventory_mismatch",
+                  "archive_manifest_mismatch",
+                  "archive_participant_contract_mismatch",
+                  "archive_payload_digest_mismatch",
+                  "archive_selection_invalid",
+                  "archive_source_profile_mismatch",
+                  "archive_source_provenance_mismatch",
+                  "archive_staging_failure",
                   "binding_unavailable",
                   "checkpoint_revision_conflict",
                   "clone_has_unresolved_work",
@@ -807,6 +949,10 @@
                   "inspection_capability_unavailable",
                   "inspection_guard_failure",
                   "inspection_limit_exceeded",
+                  "invalid_archive",
+                  "invalid_archive_attachment",
+                  "invalid_archive_checkpoint",
+                  "invalid_archive_participant",
                   "invalid_correlation",
                   "invalid_delivery_mode",
                   "invalid_delivery_source",
@@ -818,6 +964,8 @@
                   "invalid_timer_time",
                   "language_provider_unavailable",
                   "malformed_delivery",
+                  "missing_required_artifact",
+                  "missing_required_provider",
                   "operation_id_conflict",
                   "outcome_unknown",
                   "portable_value_required",
@@ -845,9 +993,27 @@
                   "timer_id_conflict",
                   "tombstoned_root",
                   "unauthorized_scope",
+                  "unsupported_archive_format",
+                  "unsupported_archive_participant_format",
+                  "unsupported_archive_participant_schema_version",
+                  "unsupported_archive_schema_version",
                   "unsupported_host_protocol",
                   "unsupported_host_protocol_version",
                   "wrong_root"
+                ]
+              },
+              "archive_result": {
+                "allOf": [
+                  {
+                    "$ref": "archive-result-v1.schema.json"
+                  },
+                  {
+                    "properties": {
+                      "status": {
+                        "const": "refused"
+                      }
+                    }
+                  }
                 ]
               }
             },
@@ -1180,22 +1346,118 @@
                         "binding_unavailable",
                         "outcome_unknown",
                         "replay_evidence_expired",
-                        "scope_not_active",
-                        "stale_scope_authority",
-                        "scope_operation_conflict",
-                        "scope_generation_conflict",
-                        "scope_transaction_in_doubt",
-                        "scope_fence_unproven",
-                        "scope_archive_incomplete",
+                        "archive_capability_mismatch",
+                        "archive_consistency_unavailable",
+                        "archive_digest_mismatch",
+                        "archive_host_journal_inventory_mismatch",
+                        "archive_manifest_mismatch",
+                        "archive_participant_contract_mismatch",
+                        "archive_payload_digest_mismatch",
+                        "archive_selection_invalid",
+                        "archive_source_profile_mismatch",
+                        "archive_source_provenance_mismatch",
+                        "archive_staging_failure",
+                        "clone_has_unresolved_work",
+                        "clone_isolation_unproven",
+                        "invalid_archive",
+                        "invalid_archive_attachment",
+                        "invalid_archive_checkpoint",
+                        "invalid_archive_participant",
+                        "missing_required_artifact",
+                        "missing_required_provider",
                         "scope_archive_digest_mismatch",
+                        "scope_archive_incomplete",
                         "scope_destination_not_empty",
+                        "scope_fence_unproven",
+                        "scope_generation_conflict",
+                        "scope_not_active",
+                        "scope_operation_conflict",
+                        "scope_restore_requires_quarantine",
+                        "scope_transaction_in_doubt",
                         "scope_transfer_consumed",
                         "scope_transfer_target_mismatch",
-                        "scope_restore_requires_quarantine",
-                        "standalone_takeover_requires_fresh_scope",
+                        "stale_scope_authority",
                         "standalone_takeover_ambiguous_work",
-                        "clone_has_unresolved_work",
-                        "clone_isolation_unproven"
+                        "standalone_takeover_requires_fresh_scope",
+                        "unsupported_archive_format",
+                        "unsupported_archive_participant_format",
+                        "unsupported_archive_participant_schema_version",
+                        "unsupported_archive_schema_version"
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "code": {
+                      "enum": [
+                        "unsupported_archive_format",
+                        "unsupported_archive_schema_version",
+                        "unsupported_archive_participant_format",
+                        "unsupported_archive_participant_schema_version",
+                        "invalid_archive",
+                        "archive_digest_mismatch",
+                        "invalid_archive_checkpoint",
+                        "invalid_archive_attachment",
+                        "invalid_archive_participant",
+                        "archive_payload_digest_mismatch",
+                        "missing_required_artifact",
+                        "missing_required_provider",
+                        "archive_capability_mismatch",
+                        "archive_consistency_unavailable",
+                        "archive_staging_failure",
+                        "archive_source_profile_mismatch",
+                        "archive_participant_contract_mismatch",
+                        "archive_source_provenance_mismatch",
+                        "archive_selection_invalid",
+                        "archive_host_journal_inventory_mismatch",
+                        "archive_manifest_mismatch"
+                      ]
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "archive_result"
+                  ]
+                }
+              },
+              {
+                "if": {
+                  "required": [
+                    "archive_result"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "operation": {
+                      "const": "scope_operation"
+                    },
+                    "code": {
+                      "enum": [
+                        "unsupported_archive_format",
+                        "unsupported_archive_schema_version",
+                        "unsupported_archive_participant_format",
+                        "unsupported_archive_participant_schema_version",
+                        "invalid_archive",
+                        "archive_digest_mismatch",
+                        "invalid_archive_checkpoint",
+                        "invalid_archive_attachment",
+                        "invalid_archive_participant",
+                        "archive_payload_digest_mismatch",
+                        "missing_required_artifact",
+                        "missing_required_provider",
+                        "archive_capability_mismatch",
+                        "archive_consistency_unavailable",
+                        "archive_staging_failure",
+                        "archive_source_profile_mismatch",
+                        "archive_participant_contract_mismatch",
+                        "archive_source_provenance_mismatch",
+                        "archive_selection_invalid",
+                        "archive_host_journal_inventory_mismatch",
+                        "archive_manifest_mismatch"
                       ]
                     }
                   }
@@ -1228,6 +1490,7 @@
             "scope_binding_identity",
             "supported_operations",
             "supported_scope_actions",
+            "supported_determa_capabilities",
             "supported_timer_commands",
             "profile_digest",
             "extension_reports",
@@ -1269,6 +1532,13 @@
                   "archive_import",
                   "recovery"
                 ]
+              }
+            },
+            "supported_determa_capabilities": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "$ref": "archive-v1.schema.json#/$defs/capability"
               }
             },
             "supported_timer_commands": {
@@ -1695,20 +1965,60 @@
           "const": "scope_operation"
         },
         "result": {
-          "type": "object",
-          "required": [
-            "action",
-            "authority_result"
-          ],
-          "additionalProperties": false,
-          "properties": {
-            "action": {
-              "const": "authority"
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "action",
+                "authority_result"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "action": {
+                  "const": "authority"
+                },
+                "authority_result": {
+                  "$ref": "host-authority-operation-v1.schema.json#/$defs/result"
+                }
+              }
             },
-            "authority_result": {
-              "$ref": "host-authority-operation-v1.schema.json#/$defs/result"
+            {
+              "type": "object",
+              "required": [
+                "action",
+                "archive_result",
+                "archive"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "action": {
+                  "const": "archive_export"
+                },
+                "archive_result": {
+                  "$ref": "archive-result-v1.schema.json"
+                },
+                "archive": {
+                  "$ref": "archive-v1.schema.json"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "action",
+                "archive_result"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "action": {
+                  "const": "archive_import"
+                },
+                "archive_result": {
+                  "$ref": "archive-result-v1.schema.json"
+                }
+              }
             }
-          }
+          ]
         }
       }
     }

@@ -22,6 +22,11 @@ synthetic snapshot question and answer from
 it checks public binding of that inspection result, while the separate absent-target
 case binds a real checkpoint. The effect result and preclaim cancellation cases copy
 [`../effects/`](../effects/) request and result artifacts.
+The archive export and inert import cases carry complete archive bytes and exact
+closed results from [`../archives/export-cases-v1.json`](../archives/export-cases-v1.json)
+and [`../archives/stage-cases-v1.json`](../archives/stage-cases-v1.json). The destination
+capability report uses its independently configured supported set. The refusal
+case carries the complete §22 result in the public error, with no stage receipt.
 
 These are specification vectors. Engine/client/reference-host execution checks live in
 the conformance and implementation repositories. `compatibility-change-v1.json`

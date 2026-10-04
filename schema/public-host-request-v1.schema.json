@@ -699,20 +699,60 @@
       }
     },
     "scope_operationArguments": {
-      "type": "object",
-      "required": [
-        "action",
-        "authority_request"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "action": {
-          "const": "authority"
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "action",
+            "authority_request"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "action": {
+              "const": "authority"
+            },
+            "authority_request": {
+              "$ref": "host-authority-operation-v1.schema.json#/$defs/request"
+            }
+          }
         },
-        "authority_request": {
-          "$ref": "host-authority-operation-v1.schema.json#/$defs/request"
+        {
+          "type": "object",
+          "required": [
+            "action",
+            "archive_request"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "action": {
+              "const": "archive_export"
+            },
+            "archive_request": {
+              "$ref": "archive-export-request-v1.schema.json"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "action",
+            "archive_request",
+            "archive"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "action": {
+              "const": "archive_import"
+            },
+            "archive_request": {
+              "$ref": "archive-import-request-v1.schema.json"
+            },
+            "archive": {
+              "$ref": "archive-v1.schema.json"
+            }
+          }
         }
-      }
+      ]
     }
   }
 }
