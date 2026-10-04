@@ -243,6 +243,207 @@
           }
         ]
       }
+    },
+    {
+      "name": "definitive_disposition_mismatch_handled_now",
+      "kind": "outcome",
+      "value": {
+        "aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "definition_fingerprint": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+        "runtime_incarnation": {
+          "kind": "root",
+          "definition": {
+            "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+            "machine": {
+              "namespace": "example.transaction_server",
+              "machine_id": "transaction_server",
+              "machine_version": "1",
+              "root_definition_pointer": "/machines/0/root"
+            }
+          },
+          "root_instance_id": "server-1"
+        },
+        "classification": "definitive",
+        "possible_dispositions": [
+          "handled_now"
+        ],
+        "disposition": "deferred",
+        "reason": null,
+        "levels": [
+          {
+            "state_id": "/machines/0/root/states/busy/states/receiving",
+            "handler_branches": [
+              {
+                "branch_index": "0",
+                "guard_locator": "/machines/0/root/states/busy/states/receiving/on_events/received/guard",
+                "guard_binding_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+              },
+              {
+                "branch_index": "1",
+                "guard_locator": null,
+                "guard_binding_digest": null
+              }
+            ],
+            "defers": true
+          },
+          {
+            "state_id": "/machines/0/root/states/busy",
+            "handler_branches": [],
+            "defers": false
+          },
+          {
+            "state_id": "/machines/0/root",
+            "handler_branches": [],
+            "defers": false
+          }
+        ],
+        "guard_evidence": []
+      }
+    },
+    {
+      "name": "definitive_disposition_mismatch_deferred",
+      "kind": "outcome",
+      "value": {
+        "aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "definition_fingerprint": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+        "runtime_incarnation": {
+          "kind": "root",
+          "definition": {
+            "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+            "machine": {
+              "namespace": "example.transaction_server",
+              "machine_id": "transaction_server",
+              "machine_version": "1",
+              "root_definition_pointer": "/machines/0/root"
+            }
+          },
+          "root_instance_id": "server-1"
+        },
+        "classification": "definitive",
+        "possible_dispositions": [
+          "deferred"
+        ],
+        "disposition": "handled_now",
+        "reason": null,
+        "levels": [
+          {
+            "state_id": "/machines/0/root/states/busy/states/receiving",
+            "handler_branches": [
+              {
+                "branch_index": "0",
+                "guard_locator": "/machines/0/root/states/busy/states/receiving/on_events/received/guard",
+                "guard_binding_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+              },
+              {
+                "branch_index": "1",
+                "guard_locator": null,
+                "guard_binding_digest": null
+              }
+            ],
+            "defers": true
+          },
+          {
+            "state_id": "/machines/0/root/states/busy",
+            "handler_branches": [],
+            "defers": false
+          },
+          {
+            "state_id": "/machines/0/root",
+            "handler_branches": [],
+            "defers": false
+          }
+        ],
+        "guard_evidence": []
+      }
+    },
+    {
+      "name": "definitive_disposition_mismatch_unhandled",
+      "kind": "outcome",
+      "value": {
+        "aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "definition_fingerprint": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+        "runtime_incarnation": {
+          "kind": "root",
+          "definition": {
+            "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+            "machine": {
+              "namespace": "example.transaction_server",
+              "machine_id": "transaction_server",
+              "machine_version": "1",
+              "root_definition_pointer": "/machines/0/root"
+            }
+          },
+          "root_instance_id": "server-1"
+        },
+        "classification": "definitive",
+        "possible_dispositions": [
+          "unhandled"
+        ],
+        "disposition": "deferred",
+        "reason": null,
+        "levels": [
+          {
+            "state_id": "/machines/0/root/states/busy/states/receiving",
+            "handler_branches": [
+              {
+                "branch_index": "0",
+                "guard_locator": "/machines/0/root/states/busy/states/receiving/on_events/received/guard",
+                "guard_binding_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+              },
+              {
+                "branch_index": "1",
+                "guard_locator": null,
+                "guard_binding_digest": null
+              }
+            ],
+            "defers": true
+          },
+          {
+            "state_id": "/machines/0/root/states/busy",
+            "handler_branches": [],
+            "defers": false
+          },
+          {
+            "state_id": "/machines/0/root",
+            "handler_branches": [],
+            "defers": false
+          }
+        ],
+        "guard_evidence": []
+      }
+    },
+    {
+      "name": "definitive_disposition_mismatch_invalid",
+      "kind": "outcome",
+      "value": {
+        "aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "definition_fingerprint": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+        "runtime_incarnation": {
+          "kind": "root",
+          "definition": {
+            "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+            "machine": {
+              "namespace": "example.transaction_server",
+              "machine_id": "transaction_server",
+              "machine_version": "1",
+              "root_definition_pointer": "/machines/0/root"
+            }
+          },
+          "root_instance_id": "server-1"
+        },
+        "classification": "definitive",
+        "possible_dispositions": [
+          "invalid"
+        ],
+        "disposition": "deferred",
+        "reason": "runtime_inactive",
+        "levels": [],
+        "guard_evidence": []
+      }
     }
   ]
 }

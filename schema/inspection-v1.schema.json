@@ -352,7 +352,57 @@
             "disposition": {
               "$ref": "#/$defs/disposition"
             }
-          }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "possible_dispositions": {
+                  "const": [
+                    "handled_now"
+                  ]
+                },
+                "disposition": {
+                  "const": "handled_now"
+                }
+              }
+            },
+            {
+              "properties": {
+                "possible_dispositions": {
+                  "const": [
+                    "deferred"
+                  ]
+                },
+                "disposition": {
+                  "const": "deferred"
+                }
+              }
+            },
+            {
+              "properties": {
+                "possible_dispositions": {
+                  "const": [
+                    "unhandled"
+                  ]
+                },
+                "disposition": {
+                  "const": "unhandled"
+                }
+              }
+            },
+            {
+              "properties": {
+                "possible_dispositions": {
+                  "const": [
+                    "invalid"
+                  ]
+                },
+                "disposition": {
+                  "const": "invalid"
+                }
+              }
+            }
+          ]
         },
         {
           "properties": {
