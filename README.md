@@ -96,6 +96,7 @@ This repository holds only the specification:
 - [`SPEC.md`](SPEC.md) — normative semantics;
 - [`schema/machine.schema.json`](schema/machine.schema.json) — structural JSON Schema;
 - [`schema/inspection-v1.schema.json`](schema/inspection-v1.schema.json) — exact candidate inspection request and outcome;
+- [`examples/inspection/`](examples/inspection/) — precedence, invalid-shape, and fuel-boundary vectors;
 - [`schema/aggregate-state-v2.schema.json`](schema/aggregate-state-v2.schema.json) —
   portable queue-bearing aggregate-state envelope;
 - [`schema/migration-descriptor-v2.schema.json`](schema/migration-descriptor-v2.schema.json)

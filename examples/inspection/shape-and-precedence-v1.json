@@ -762,6 +762,207 @@
         "source_locator": "/machines/0/root/states/busy/states/receiving/on_events/received/guard"
       },
       "rule": "A guard cannot consume more than the requested shared fuel."
+    },
+    {
+      "name": "target_not_found",
+      "request": {
+        "mode": "structural",
+        "aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+        "runtime_incarnation": {
+          "kind": "root",
+          "definition": {
+            "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+            "machine": {
+              "namespace": "example.transaction_server",
+              "machine_id": "transaction_server",
+              "machine_version": "1",
+              "root_definition_pointer": "/machines/0/root"
+            }
+          },
+          "root_instance_id": "server-1"
+        },
+        "envelope": {
+          "event": "received",
+          "event_id": "received-1",
+          "cause_id": "received-1",
+          "source": {
+            "host": true
+          },
+          "target": {
+            "root": {
+              "root_instance_id": "server-1",
+              "root_runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf"
+            }
+          },
+          "payload": [
+            "map",
+            []
+          ]
+        },
+        "limits": null
+      },
+      "outcome": {
+        "aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "definition_fingerprint": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+        "runtime_incarnation": {
+          "kind": "root",
+          "definition": {
+            "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+            "machine": {
+              "namespace": "example.transaction_server",
+              "machine_id": "transaction_server",
+              "machine_version": "1",
+              "root_definition_pointer": "/machines/0/root"
+            }
+          },
+          "root_instance_id": "server-1"
+        },
+        "classification": "definitive",
+        "possible_dispositions": [
+          "invalid"
+        ],
+        "disposition": "invalid",
+        "reason": "target_not_found",
+        "levels": [],
+        "guard_evidence": []
+      },
+      "rule": "A runtime ID absent from the aggregate is invalid."
+    },
+    {
+      "name": "stale_incarnation",
+      "request": {
+        "mode": "structural",
+        "aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+        "runtime_incarnation": {
+          "kind": "root",
+          "definition": {
+            "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+            "machine": {
+              "namespace": "example.transaction_server",
+              "machine_id": "transaction_server",
+              "machine_version": "1",
+              "root_definition_pointer": "/machines/0/root"
+            }
+          },
+          "root_instance_id": "server-1"
+        },
+        "envelope": {
+          "event": "received",
+          "event_id": "received-1",
+          "cause_id": "received-1",
+          "source": {
+            "host": true
+          },
+          "target": {
+            "root": {
+              "root_instance_id": "server-1",
+              "root_runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf"
+            }
+          },
+          "payload": [
+            "map",
+            []
+          ]
+        },
+        "limits": null
+      },
+      "outcome": {
+        "aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "definition_fingerprint": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+        "runtime_incarnation": {
+          "kind": "root",
+          "definition": {
+            "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+            "machine": {
+              "namespace": "example.transaction_server",
+              "machine_id": "transaction_server",
+              "machine_version": "1",
+              "root_definition_pointer": "/machines/0/root"
+            }
+          },
+          "root_instance_id": "server-1"
+        },
+        "classification": "definitive",
+        "possible_dispositions": [
+          "invalid"
+        ],
+        "disposition": "invalid",
+        "reason": "target_incarnation_mismatch",
+        "levels": [],
+        "guard_evidence": []
+      },
+      "rule": "An existing runtime ID paired with a different origin is invalid."
+    },
+    {
+      "name": "reserved_failure_event",
+      "request": {
+        "mode": "structural",
+        "aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+        "runtime_incarnation": {
+          "kind": "root",
+          "definition": {
+            "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+            "machine": {
+              "namespace": "example.transaction_server",
+              "machine_id": "transaction_server",
+              "machine_version": "1",
+              "root_definition_pointer": "/machines/0/root"
+            }
+          },
+          "root_instance_id": "server-1"
+        },
+        "envelope": {
+          "event": "received",
+          "event_id": "received-1",
+          "cause_id": "received-1",
+          "source": {
+            "host": true
+          },
+          "target": {
+            "root": {
+              "root_instance_id": "server-1",
+              "root_runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf"
+            }
+          },
+          "payload": [
+            "map",
+            []
+          ]
+        },
+        "limits": null
+      },
+      "outcome": {
+        "aggregate_state_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "definition_fingerprint": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "runtime_id": "sha256:1859bb2a83434455eaacd5225e6a48911bd886f8fd255310ffbb21febc1a94cf",
+        "runtime_incarnation": {
+          "kind": "root",
+          "definition": {
+            "validated_bundle_fingerprint": "sha256:8f47ae5d10a9b796c7b95ee8770f1ece1be27846baaccb066715ff73564fd2ef",
+            "machine": {
+              "namespace": "example.transaction_server",
+              "machine_id": "transaction_server",
+              "machine_version": "1",
+              "root_definition_pointer": "/machines/0/root"
+            }
+          },
+          "root_instance_id": "server-1"
+        },
+        "classification": "definitive",
+        "possible_dispositions": [
+          "invalid"
+        ],
+        "disposition": "invalid",
+        "reason": "invalid_envelope",
+        "levels": [],
+        "guard_evidence": []
+      },
+      "rule": "A host-supplied reserved failure event is invalid before dispatch."
     }
   ]
 }

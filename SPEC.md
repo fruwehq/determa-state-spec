@@ -2381,6 +2381,9 @@ snapshot (envelope plus all visible variable values) exceeds 65536 value units.
 One value unit is one scalar value, one Unicode scalar in a string, one list slot,
 or one map entry plus its key's Unicode scalar count, summed recursively. The
 request limits cannot exceed 64 guard evaluations or 1000000 evaluation steps.
+Larger limits are `invalid_inspection_request`, rather than a host-dependent
+extension of this profile. The exact pass/fail fuel boundaries are pinned in
+`examples/inspection/fuel-boundaries-v1.json`.
 Preflight failure is `inspection_limit_exceeded` with the first reached guard
 locator. All arithmetic below uses unbounded nonnegative counters and charges
 before an operation; a charge crossing the remaining budget fails immediately.
