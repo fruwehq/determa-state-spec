@@ -186,3 +186,9 @@ This repository holds only the specification:
 The executable correctness target lives in
 [`fruwehq/determa-state-conformance`](https://github.com/fruwehq/determa-state-conformance).
 Engine work follows the specification and conformance work in separate repositories.
+
+The optional [§24 recovery contract](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation)
+provides strict inactive quarantine, explicit fresh-scope standalone takeover,
+independent clone activation, and guarded same-authority relocation where a host
+positively proves it. See the closed [operation schema](schema/recovery-operation-v1.schema.json)
+and [normative cases](examples/recovery/recovery-cases-v1.json).
