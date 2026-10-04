@@ -4,7 +4,7 @@
   "issue": "96",
   "old_protocol_fingerprint": null,
   "proposed_protocol_fingerprint": "sha256:7296bcf239d1475762aecf1612801e7323be608308244d7447ff7474df0586f3",
-  "manifest_fingerprint": "sha256:eb1c6b0aeaa734c0d7f35691c09e67e722dd33ca1f0a3398442f2ee07fdd4553",
+  "manifest_fingerprint": "sha256:34059068158d4e4ec405d95a98be1507463fc3ba8f844a791e8d9219ea1b041f",
   "affected_capabilities": [
     "structural_inspection",
     "semantic_inspection",

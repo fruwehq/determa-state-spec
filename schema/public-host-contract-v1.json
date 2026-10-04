@@ -144,7 +144,7 @@
     },
     {
       "path": "examples/public-host/positive-v1.json",
-      "sha256": "sha256:6e4219c72abd9e17019dd025bc495c18d6ade38a9f1b0db6492ed296b3f3c904"
+      "sha256": "sha256:69cb13d90ecf7631a3f82a3720c847ea57ced88a1012cc8e3bf29a065b68509a"
     },
     {
       "path": "examples/public-host/negative-v1.json",
