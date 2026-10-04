@@ -3,7 +3,7 @@
     {
       "root": {
         "root_instance_id": "job-42",
-        "root_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d"
+        "root_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60"
       }
     },
     {
@@ -49,7 +49,7 @@
     {
       "component": {
         "root_instance_id": "job-42",
-        "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+        "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
         "component_id": "worker",
         "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "activation_sequence": "0"
@@ -58,7 +58,7 @@
     {
       "component": {
         "root_instance_id": "job-42",
-        "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+        "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
         "component_id": "worker",
         "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "activation_sequence": "9007199254740991"
@@ -67,7 +67,7 @@
     {
       "component": {
         "root_instance_id": "job-42",
-        "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+        "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
         "component_id": "worker",
         "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "activation_sequence": "9007199254740992"
@@ -76,7 +76,7 @@
     {
       "component": {
         "root_instance_id": "job-42",
-        "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+        "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
         "component_id": "worker",
         "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "activation_sequence": "9007199254740993"
@@ -85,7 +85,7 @@
     {
       "component": {
         "root_instance_id": "job-42",
-        "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+        "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
         "component_id": "worker",
         "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "activation_sequence": "9223372036854775807"
@@ -94,7 +94,7 @@
     {
       "component": {
         "root_instance_id": "job-42",
-        "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+        "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
         "component_id": "worker",
         "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "activation_sequence": "9223372036854775808"
@@ -195,7 +195,7 @@
       "target_identity": {
         "component": {
           "root_instance_id": "job-42",
-          "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
           "component_id": "worker",
           "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
           "activation_sequence": 0
@@ -207,7 +207,7 @@
       "target_identity": {
         "component": {
           "root_instance_id": "job-42",
-          "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
           "component_id": "worker",
           "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
           "activation_sequence": 9007199254740993
@@ -219,7 +219,7 @@
       "target_identity": {
         "component": {
           "root_instance_id": "job-42",
-          "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
           "component_id": "worker",
           "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
           "activation_sequence": "-1"
@@ -231,7 +231,7 @@
       "target_identity": {
         "component": {
           "root_instance_id": "job-42",
-          "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
           "component_id": "worker",
           "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
           "activation_sequence": "+1"
@@ -243,7 +243,7 @@
       "target_identity": {
         "component": {
           "root_instance_id": "job-42",
-          "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
           "component_id": "worker",
           "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
           "activation_sequence": "01"
@@ -255,7 +255,7 @@
       "target_identity": {
         "component": {
           "root_instance_id": "job-42",
-          "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
           "component_id": "worker",
           "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
           "activation_sequence": "1.0"
@@ -267,7 +267,7 @@
       "target_identity": {
         "spawned_instance": {
           "root_instance_id": "job-42",
-          "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
           "instance_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
           "machine_id": "job",
           "machine_version": "1"
@@ -303,7 +303,7 @@
       "target_identity": {
         "component": {
           "root_instance_id": "job-42",
-          "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
           "component_id": "worker",
           "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
           "component_definition_pointer": "/machines/0/root/components/0",
@@ -315,7 +315,7 @@
       "case": "component_missing_root_instance",
       "target_identity": {
         "component": {
-          "owner_runtime_id": "sha256:ab3984abc4339d050582192e1da1bb5e393917d9e9e0745475006f7d5d4dd93d",
+          "owner_runtime_id": "sha256:245dfc1b8526956791e6fa2591c9f3cc5b379e93926f7b290d59abd769656c60",
           "component_id": "worker",
           "component_runtime_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
           "activation_sequence": "0"
