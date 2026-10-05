@@ -38,3 +38,9 @@ native slot after an assignment. `multiple-send-identities.json` supplies the ex
 The assignment consumes no emission index, and the second send uses index `1` at the
 same containing action-element pointer. Restoring or replaying that output must not
 collapse either intent or invent a nested proposal locator.
+
+`invalid-multiple-send-identities.json` reuses the first ID for the second
+intent despite index `1`; it is rejected by exact identity validation, rather than
+being treated as duplicate delivery. `inert-provider-metadata.yaml` contains
+provider-like keys in metadata and a map variable's initial value. They remain
+ordinary data; this definition loads without any installed native provider.

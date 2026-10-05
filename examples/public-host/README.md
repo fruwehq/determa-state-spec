@@ -63,3 +63,9 @@ tracks the corrected timer vectors and archive bytes.
 positive native-provider examples now carry the required external-send correlation.
 The public request and response schemas are unchanged; the manifest fingerprints
 the corrected example bytes.
+
+`native-slot-identities-compatibility-change-v1.json` records issue #110:
+multiple native send proposals use distinct continuing slot-local ordinals and
+exact containing-slot locators; provider-like keys in inert data cannot install
+or select code. Public message schemas remain version 1 and unchanged. The
+manifest binds the clarified prose and complete positive/negative identity vectors.
