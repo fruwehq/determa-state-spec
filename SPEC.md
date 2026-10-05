@@ -878,6 +878,11 @@ the three-field reference or a resolved callback name.
 Configured-instance health, authorization and host policy remain separate §11.5
 checks at use time; a stored fingerprint or a source manifest never proves that a
 currently configured instance still has a capability.
+Closure discovery follows executable grammar slots only: guard providers and
+`provider_actions` in entry, exit, initial, choice and event-transition action lists,
+including inline component definitions. Keys with those names inside `meta`, a
+variable value or an event payload are inert data and cannot require or select a
+provider.
 
 A runtime provider registration under the common §11.5 `runtime_provider` category
 also carries the closed
@@ -907,7 +912,17 @@ host journal. The engine validates every destination, value type, event declarat
 target and complete emission against the same statechart rules before applying it.
 It also rejects a write to a destination destroyed by the selected transition.
 Action proposals execute in their returned order at that slot, among surrounding
-structured actions in author order. Dynamic `spawn`, `cancel`, `refresh` and `stop`
+structured actions in author order. Every send proposal uses the containing
+`provider_actions` action element's RFC 6901 pointer as its §9 emission locator and
+action document pointer. There is no invented proposal pointer and no
+`/provider_actions` or `/send` suffix. Internal-envelope ordinals and external-intent
+indexes each start at zero for that slot and continue across all its send proposals,
+in returned proposal order and then target order. Assign proposals consume neither
+ordinal. Internal and external emissions have separate ordinal sequences; an
+internal proposal does not advance the external-intent index or conversely. This
+preserves distinct identities even when one slot returns identical sends. Each
+following ordinary action starts its own unchanged action-local sequence.
+Dynamic `spawn`, `cancel`, `refresh` and `stop`
 are unsupported in a provider result; they remain available as ordinary structured
 actions. The provider cannot rewrite the containing transition, choose another slot,
 or gain arbitrary internal-state write authority. Invalid output is a
@@ -2118,6 +2133,9 @@ exactly equal to one of `system:component_completion`,
 `system:spawned_failure`; the ordinal is zero unless that lifecycle operation emits
 multiple envelopes, in which case it is their specified order. Distinct fan-out targets
 therefore have distinct event ids.
+For native action proposals, the containing action slot is the executing action;
+§5.4 defines its locator and the continuing internal-envelope ordinal across send
+proposals. It is not reset for each proposal.
 
 An external output intent derives:
 
@@ -2141,7 +2159,9 @@ pointer and activation sequence, so identical actions in sibling, nested, or lat
 inline placements cannot collide.
 
 `emission_index` is the zero-based external-intent ordinal within that executing
-action. The intent also carries the allocated aggregate-monotonic output `sequence`,
+action. For a native slot, that index continues across all external send proposals
+under §5.4; it is not reset for each proposal. The intent also carries the allocated
+aggregate-monotonic output `sequence`,
 event name, typed payload, and correlation id. Retrying the same uncommitted prior
 state and envelope reproduces the same state, emissions, ids, and order. Processing
 several envelopes by repeated `step` calls produces the same result as a host
