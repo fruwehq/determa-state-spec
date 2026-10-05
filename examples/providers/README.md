@@ -31,3 +31,10 @@ The exact compiler translates that region to the guard in `compiled-machine.json
 fingerprint. A complete generated definition restores against its runtime closure
 without requiring this compiler. A changed manifest fingerprint or source/compiler
 digest is rejected; restoration does not silently recompile.
+
+`multiple-send-action-output.json` repeats the same external send twice in one
+native slot after an assignment. `multiple-send-identities.json` supplies the exact
+§9 hash operands and two distinct expected IDs, local indexes and output sequences.
+The assignment consumes no emission index, and the second send uses index `1` at the
+same containing action-element pointer. Restoring or replaying that output must not
+collapse either intent or invent a nested proposal locator.
