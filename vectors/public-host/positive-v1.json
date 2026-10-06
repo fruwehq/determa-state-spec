@@ -897,7 +897,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/delivery/execution-checkpoint-transfer-v1.json"
+      "source_fixture": "vectors/delivery/execution-checkpoint-transfer-v1.json"
     },
     {
       "name": "process_unhandled_event",
@@ -1211,7 +1211,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/delivery/execution-checkpoint-transfer-v1.json"
+      "source_fixture": "vectors/delivery/execution-checkpoint-transfer-v1.json"
     },
     {
       "name": "inspect_resolved_structural_candidate",
@@ -1348,7 +1348,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/inspection/shape-and-precedence-v1.json#guard_followed_by_default"
+      "source_fixture": "vectors/inspection/shape-and-precedence-v1.json#guard_followed_by_default"
     },
     {
       "name": "bootstrap_named_endpoint_discovery",
@@ -4495,7 +4495,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/archives/export-cases-v1.json#complete_export"
+      "source_fixture": "vectors/archives/export-cases-v1.json#complete_export"
     },
     {
       "name": "complete_archive_import_stage",
@@ -6918,7 +6918,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/archives/stage-cases-v1.json#complete_embedded_snapshot"
+      "source_fixture": "vectors/archives/stage-cases-v1.json#complete_embedded_snapshot"
     },
     {
       "name": "archive_destination_capabilities",
@@ -7037,7 +7037,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/archives/stage-cases-v1.json#complete_embedded_snapshot"
+      "source_fixture": "vectors/archives/stage-cases-v1.json#complete_embedded_snapshot"
     },
     {
       "name": "recovery_strict_quarantine",
@@ -7177,7 +7177,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/recovery/recovery-cases-v1.json#strict_quarantine"
+      "source_fixture": "vectors/recovery/recovery-cases-v1.json#strict_quarantine"
     },
     {
       "name": "recovery_standalone_takeover",
@@ -7318,7 +7318,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/recovery/recovery-cases-v1.json#standalone_takeover"
+      "source_fixture": "vectors/recovery/recovery-cases-v1.json#standalone_takeover"
     },
     {
       "name": "recovery_clone_scope",
@@ -7458,7 +7458,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/recovery/recovery-cases-v1.json#clone_scope"
+      "source_fixture": "vectors/recovery/recovery-cases-v1.json#clone_scope"
     },
     {
       "name": "recovery_clone_activate",
@@ -7599,7 +7599,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/recovery/recovery-cases-v1.json#clone_activate"
+      "source_fixture": "vectors/recovery/recovery-cases-v1.json#clone_activate"
     },
     {
       "name": "recovery_local_activate",
@@ -7734,7 +7734,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/recovery/recovery-cases-v1.json#local_activate"
+      "source_fixture": "vectors/recovery/recovery-cases-v1.json#local_activate"
     },
     {
       "name": "timer_schedule_first",
@@ -7815,7 +7815,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/timers/timer-helper-cases-v1.json#schedule_first"
+      "source_fixture": "vectors/timers/timer-helper-cases-v1.json#schedule_first"
     },
     {
       "name": "timer_cancel_pending",
@@ -7889,7 +7889,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/timers/timer-helper-cases-v1.json#cancel_pending"
+      "source_fixture": "vectors/timers/timer-helper-cases-v1.json#cancel_pending"
     },
     {
       "name": "timer_claim_at_deadline",
@@ -7965,7 +7965,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/timers/timer-helper-cases-v1.json#claim_at_deadline"
+      "source_fixture": "vectors/timers/timer-helper-cases-v1.json#claim_at_deadline"
     },
     {
       "name": "timer_coordinated_fire_commits",
@@ -8043,7 +8043,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/timers/timer-helper-cases-v1.json#coordinated_fire_commits"
+      "source_fixture": "vectors/timers/timer-helper-cases-v1.json#coordinated_fire_commits"
     },
     {
       "name": "timer_read_timer",
@@ -8108,7 +8108,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/timers/timer-helper-cases-v1.json#read_timer"
+      "source_fixture": "vectors/timers/timer-helper-cases-v1.json#read_timer"
     },
     {
       "name": "timer_scope_capabilities",
@@ -8296,7 +8296,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/authority/host-authority-cases-v1.json#guarded_native_commit"
+      "source_fixture": "vectors/authority/host-authority-cases-v1.json#guarded_native_commit"
     },
     {
       "name": "authority_freeze_after_drain",
@@ -8364,7 +8364,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/authority/host-authority-cases-v1.json#freeze_after_drain"
+      "source_fixture": "vectors/authority/host-authority-cases-v1.json#freeze_after_drain"
     },
     {
       "name": "authority_fence_worker_allocates_new_claim",
@@ -8450,7 +8450,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/authority/host-authority-cases-v1.json#fence_worker_allocates_new_claim"
+      "source_fixture": "vectors/authority/host-authority-cases-v1.json#fence_worker_allocates_new_claim"
     },
     {
       "name": "authority_retirement_with_known_fate",
@@ -8521,7 +8521,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/authority/host-authority-cases-v1.json#retirement_with_known_fate"
+      "source_fixture": "vectors/authority/host-authority-cases-v1.json#retirement_with_known_fate"
     },
     {
       "name": "process_deferred_event",
@@ -8920,7 +8920,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/delivery/queue-placement-checkpoints-v1.json#after_deferral"
+      "source_fixture": "vectors/delivery/queue-placement-checkpoints-v1.json#after_deferral"
     },
     {
       "name": "process_recall_event",
@@ -9369,7 +9369,7 @@
         },
         "error": null
       },
-      "source_fixture": "examples/delivery/queue-placement-checkpoints-v1.json#after_recall"
+      "source_fixture": "vectors/delivery/queue-placement-checkpoints-v1.json#after_recall"
     }
   ]
 }

@@ -1,10 +1,43 @@
 # Determa State — specification
 
-Status: **pre-release alpha**. Normative unless a section says informative.
+Status: **pre-alpha, unreleased**. Normative unless a section says informative.
 Document format: **1**.
 Spec version: **0.3.0** (see `VERSION`; synchronized across the Determa State
 repositories).
 Keywords MUST / SHOULD / MAY are interpreted as in RFC 2119.
+
+### Reading and authoring model
+
+Start with an ordinary YAML machine in `examples/`. Authors declare states, typed
+variables, events, CEL guards and ordered actions. They do not write hashes,
+dependency closures, capability reports, JSON Pointers or protocol records into
+transitions. CEL and structured actions are the recommended portable defaults.
+Named native providers and custom languages are also first-class options (§5.4).
+
+There are four distinct boundaries:
+
+1. **Authored source:** human-readable YAML, validated by
+   `schema/machine.schema.json`; numeric `format: 1` is the only current format.
+2. **Deployment configuration:** selected provider implementations, installation
+   policy, named endpoints/scopes and credentials; never machine syntax.
+3. **Generated executable definition:** explicit resolution/compilation pins the
+   installed closure in a generated lock and resolved definition before execution.
+4. **Generated runtime artifacts:** the engine/host creates typed state, identities,
+   checkpoints, receipts and archives. Their exact portable encoding is JSON.
+
+Users never hand-author `validated_bundle_fingerprint`. The engine/tool computes
+this SHA-256 content identity from the normalized resolved executable definition.
+It is not a UUID. Generated identity material proves content equality, not trust,
+live authorization, commit fate or permission to execute.
+
+YAML is accepted for source readability under §2's strict value rules. Generated
+portable wire artifacts use §16.2 typed JSON and §9 canonical JSON bytes so that
+implementations agree on exact values and hashes. YAML source fixtures do not
+become alternate wire encodings of a checkpoint or archive.
+
+This pre-alpha redesign replaces superseded draft syntax directly. There is no
+compatibility parser, alias, second authored format or migration path for that draft.
+§16 migration is between validated current definitions, not draft-format readers.
 
 ## 0. References and semantic independence
 
@@ -262,7 +295,7 @@ machines:
             push: { transition_to: locked }
 ```
 
-See `examples/minimal.yaml` and `examples/full.yaml`.
+See `examples/minimal.yaml` and `vectors/full.yaml`.
 
 ### 4.2 Top-level fields
 
@@ -515,8 +548,10 @@ A transition may contain:
 
 - `transition_to` — either a target state path or
   `{ history: path.to.composite }`; omit for an internal reaction.
-- `guard` — a CEL Boolean string or `{provider: provider_binding}` (§5.4).
-- `action` — ordered structured actions and/or `{provider_actions: provider_binding}`
+- `guard` — a CEL Boolean string, `{provider: name}`, or
+  `{lang: name, source: text}` (§5.4).
+- `action` — ordered structured actions, `{provider_actions: name}`, and/or
+  `{lang: name, source: text}`
   slots (§5.4).
 - `local: true` — for a non-root composite source targeting its strict descendant,
   preserve the source instead of applying the unmarked transition's source reset
@@ -852,9 +887,76 @@ identity, but lifecycle CEL cannot inspect the triggering envelope or its payloa
 
 ### 5.4 Exact runtime providers and optional source compilation
 
-CEL guards and structured actions remain the portable default. A guard slot may
-instead contain exactly `{provider: binding}`; an action-list element may contain
-exactly `{provider_actions: binding}`. Each binding is a closed object with
+#### Human-authored slots
+
+CEL guards and structured actions remain the portable default. A human guard may
+instead contain exactly `{provider: name}`; an action-list element may contain
+exactly `{provider_actions: name}`. A custom-language guard or action-list element
+contains exactly `{lang: name, source: text}`. Names match `[a-z][a-z0-9.-]*`.
+`cel` and `determa` are reserved defaults, not shadowable provider/language aliases.
+Source text is human-authored program text; its type and grammar are checked by the
+selected compiler before a resolved definition becomes executable.
+
+These short names request explicit trusted resolution, not mutable runtime lookup.
+Deployment configuration selects installed implementations outside the machine.
+Unknown names never trigger installation, network discovery or fallback. The source
+schema rejects full inline bindings. Use sites require no SemVer, digests,
+dependency arrays, type reports or capability flags.
+
+#### Explicit resolution and generated locks
+
+There are two separate operations: deliberate `resolve`/`refresh` generates a new
+lock; loading authored source with a matching existing lock verifies that lock.
+Ordinary load, evaluation, restore, replay and migration never refresh it.
+These are semantic entry points, not a required CLI or cross-language ABI.
+
+`schema/provider-lock-v1.schema.json` defines the generated `determa.provider_lock`
+artifact. Its content has `authored_source_digest`, `runtime_providers`, and
+`compiler_providers`. The source digest is
+`hash(["determa-authored-machine-source-1", "1", typed(normalized_authored_source)])`.
+Authored normalization uses §8's defaults and numeric rules, retaining short names
+and source text; it does not discover providers in inert values.
+The lock digest is `hash(["determa.provider_lock", "1", typed(content)])`.
+
+Runtime entries contain `name`, `kind` (`guard` or `actions`) and full `binding`.
+Compiler entries contain `name`, exact `provider_reference` and complete transitive
+`dependencies`. Runtime entries are ordered by `(name, kind)` UTF-8 bytes; compiler
+entries by name. Duplicate keys and unused entries reject. Names are scoped by kind:
+the same name may serve a guard and an action only when both entries are explicit.
+A compiler name cannot silently select a runtime provider or vice versa. Every used
+grammar slot has exactly one matching entry. Binding input contracts match the
+generated context types; an incompatible kind/type rejects.
+
+Resolution traverses executable grammar slots only, including entry, exit, initial,
+choice, event transitions, final-state entry and inline components. Native names
+expand to locked bindings. Custom source slots generate compiler regions and
+source-map locators; authors never supply those JSON Pointers. Compiler output
+replaces a guard with CEL or an action slot with ordered structured/native actions.
+Generated native slots also require a complete explicitly selected closure;
+compiler output cannot install/select arbitrary providers. Generated source maps
+bind source digest, original slot and resolved slot(s), preserving evaluation order.
+Provider-like keys in metadata, variable values and event payloads remain data.
+
+`schema/resolved-machine-v1.schema.json` validates generated executable definitions.
+It accepts exact native bindings and compiled CEL/structured actions, never
+unresolved names or custom source slots. Source/resolved entry points are explicit:
+a loader never guesses a stage from `format: 1` or tries both as draft readers.
+CEL-only source resolves without a lock/compiler because its closure is empty.
+Source containing native/custom slots requires its matching lock.
+
+Missing/changed closure, source mismatch, wrong kind, invalid compilation, untrusted
+installation or altered installed bytes fails before core execution. Deliberate
+refresh yields a newly validated definition, never a hidden fingerprint change.
+Restore/migration verify the stored resolved definition and runtime closure; they
+never consult current source aliases or recompile. Pure compiled CEL/structured
+output restores without its compiler. Compiler capabilities are historical
+provenance, not inherited runtime guarantees. Mutable host capability reports and
+credentials are not executable identity material.
+
+#### Generated executable bindings
+
+Only generated resolved slots contain exactly `{provider: binding}` or
+`{provider_actions: binding}`. Each binding is a closed object with
 `provider_reference`, `source_media_type`, `source_digest`, optional `source`,
 `dependencies`, `capabilities`, `input_types`, and `output_type`. The reference is
 exactly `{identifier, version, content_digest}` with a lowercase SHA-256 digest and
@@ -2335,8 +2437,9 @@ child is inspectable and cleanup-cancellable but cannot process ordinary deliver
 A reserved failure event that reaches its owner unhandled faults the owner with
 `contained_runtime_fault`; its source locator is exactly
 `system:unhandled_contained_failure` and its cause id is the failure envelope's
-`event_id`. A queue plugin can discard or delay the notification; the core does not
-claim otherwise.
+`event_id`. A committed notification is an aggregate-owned internal mailbox entry.
+A transport cannot discard, delay, reorder or expire it independently of the owner's
+normal mailbox processing and explicit lifecycle disposition.
 
 The immediate owner may cancel a retained-faulted spawned child for cleanup. Ordinary
 input cannot advance a faulted runtime.
@@ -2352,14 +2455,33 @@ unless their own handling violates the engine contract.
 The specification defines no `dead_letter`, `dead_letters`, or `dead_letter_policy`
 field and no dead-letter storage shape.
 
-A transport or audit plugin outside the §21 lossless profile may:
+A transport or audit plugin may select an explicit pre-admission or post-terminal
+policy to:
 
-- discard unhandled or faulting envelopes without retaining anything;
+- deliberately discard an item while returning its observable disposition;
 - retain complete envelopes and fault metadata;
 - retain metadata without payloads;
 - retry before retention;
 - forward to a broker-native dead-letter facility; or
 - expose any other explicitly configured policy.
+
+**No profile permits silent event deletion.** A deliberate policy discard returns the
+closed `schema/event-disposition-v1.schema.json` record: exactly `event_id`,
+`source_identity`, `policy`, `decision: "discarded"`, and `reason_code`.
+At least one identity is non-null; an event known to Determa includes its exact event
+ID. A source identity is the adapter's immutable nonsecret item identifier within
+the caller's selected source binding. `policy` identifies the explicitly selected
+host policy; `reason_code` identifies its concrete decision. Missing identity,
+policy or reason is not a valid discard. A non-durable host returns the record to
+the caller even when it retains nothing. A durable profile additionally retains and
+links the exact evidence required by its contract. §21 keeps its stronger source
+ownership, acknowledgements, terminal records and retention requirements.
+
+Engine-owned ready/deferred entries and committed internal failure notifications
+cannot be discarded by a transport. Declared helper behavior consumes inputs through
+normal processing; deliberate lifecycle removal returns §8 `lifecycle_dispositions`.
+Neither is an implicit transport exception. Uncommitted rollback is not deletion of
+accepted input: committed mailbox and fault/disposition rules remain authoritative.
 
 Its property names, configuration schema, retention, privacy, and operational guarantees
 belong entirely to that plugin. Under §21, an unhandled, faulted, or disposed event
@@ -2546,7 +2668,7 @@ invalid configuration, unhealthy instance, or unsatisfied requirement fails clos
 without mutation. Hosts MAY use category-specific codes such as §17.10's
 `adapter_capability_mismatch`; otherwise they report `extension_capability_mismatch`.
 Requested profile guarantees never silently downgrade. The positive and negative
-vectors in `examples/extensions/capability-cases-v1.json` are normative for these
+vectors in `vectors/extensions/capability-cases-v1.json` are normative for these
 common checks. Category-specific operations and stronger guarantees are defined in
 their respective sections and conformance profiles, not inferred from the registry.
 
@@ -2703,7 +2825,7 @@ or one map entry plus its key's Unicode scalar count, summed recursively. The
 request limits cannot exceed 64 guard evaluations or 1000000 evaluation steps.
 Larger limits are `invalid_inspection_request`, rather than a host-dependent
 extension of this profile. The exact pass/fail fuel boundaries are pinned in
-`examples/inspection/fuel-boundaries-v1.json`.
+`vectors/inspection/fuel-boundaries-v1.json`.
 Preflight failure is `inspection_limit_exceeded` with the first reached guard
 locator. All arithmetic below uses unbounded nonnegative counters and charges
 before an operation; a charge crossing the remaining budget fails immediately.
@@ -3096,7 +3218,7 @@ bytes of the complete envelope with no byte-order mark, leading/trailing whitesp
 or trailing newline. A parser may accept insignificant JSON whitespace and then verify
 that the semantic data is canonical.
 
-`examples/persistence/aggregate-state-v1.json` is the normative human-readable
+`vectors/persistence/aggregate-state-v1.json` is the normative human-readable
 aggregate example. Conformance byte vectors MUST equal RFC 8785 serialization of their
 corresponding semantic value.
 
@@ -3885,7 +4007,7 @@ execution_checkpoint_digest = hash([
 ])
 ```
 
-The normative example is `examples/persistence/execution-checkpoint-v1.json`.
+The normative example is `vectors/persistence/execution-checkpoint-v1.json`.
 Operational leases, locks, credentials, connection details, broker acknowledgement
 tokens, wall-clock attempt timestamps, worker identities, and application rows are not
 checkpoint members.
@@ -4825,7 +4947,7 @@ outside that range reject before a claim is issued. The host selects expiry usin
 its trusted clock and configured policy, never an implicit core clock. A claim is
 expired at `now >= expires_at`; if current trusted time is unavailable, dispatch and
 result submission fail closed without treating a possible external call as undone.
-`examples/authority/host-authority-clock-cases-v1.json` gives normative boundary
+`vectors/authority/host-authority-clock-cases-v1.json` gives normative boundary
 values. A
 worker claim is host authority data; neither its fields nor its result grant a
 different principal access. Dispatch and result submission recheck the
@@ -4888,9 +5010,9 @@ provenance and marking inherited unresolved external work ambiguous. It has
 `safe_relocation: false` and `no_duplicate_external_work: false`; source receipts
 and claims do not authorize new-scope requests. This operation requires its own
 explicit risk acknowledgement and import contract. It is never a fallback from a
-failed or unsupported safe relocation. `examples/authority/host-authority-cases-v1.json`
+failed or unsupported safe relocation. `vectors/authority/host-authority-cases-v1.json`
 contains normative positive and negative interface cases. The companion
-`examples/authority/host-authority-profile-cases-v1.json` fixes positive and
+`vectors/authority/host-authority-profile-cases-v1.json` fixes positive and
 negative report and capability combinations.
 
 ## 19. Committed native effects and authenticated results
@@ -5437,8 +5559,8 @@ Its event id, acceptance sequence, final queue sequence, request digest, complet
 outcome, and resulting aggregate digest equal the response and checkpoint; the event
 is absent from live mailboxes. Substituting a creation, acceptance, or other receipt
 kind is `invalid_delivery_evidence`. The exact first admission, equal replay,
-and terminal unhandled witnesses are `examples/delivery/delivery-v1-cases.json`
-and `examples/delivery/execution-checkpoint-transfer-v1.json`.
+and terminal unhandled witnesses are `vectors/delivery/delivery-v1-cases.json`
+and `vectors/delivery/execution-checkpoint-transfer-v1.json`.
 
 `mailbox_placement` names the committed checkpoint and the exact live entry's
 event id, envelope digest, target runtime, acceptance sequence, current queue
@@ -5449,7 +5571,7 @@ sequence but no operation receipt (§17.4). The origin receipt remains unchanged
 No adapter may invent a terminal receipt for a live placement. Wrong origin kind,
 missing origin, or unequal entry identity is `invalid_delivery_evidence`.
 The complete before/deferred/recalled snapshots are
-`examples/delivery/queue-placement-checkpoints-v1.json`. Evidence mismatch
+`vectors/delivery/queue-placement-checkpoints-v1.json`. Evidence mismatch
 rejects the response without acknowledging or dropping work; durable hosts
 quarantine a corrupt committed snapshot until its exact owner evidence is repaired.
 
@@ -5548,11 +5670,11 @@ terminal outbox record and response. Its digest is
 record_without_outbound_destination_receipt_digest])`. The record binds the
 adapter's proof; the configured destination must actually durably accept
 responsibility for the claimed outcome. The two exact records are
-`examples/delivery/outbound-destination-receipts-v1.json`.
+`vectors/delivery/outbound-destination-receipts-v1.json`.
 Missing or wrong
 effect, location, state revision, terminal sequence, or destination receipt is
 `invalid_delivery_evidence`. Exact pending, confirmed, and dead-letter
-snapshots are `examples/delivery/outbound-checkpoint-lifecycle-v1.json`.
+snapshots are `vectors/delivery/outbound-checkpoint-lifecycle-v1.json`.
 When §19's native-effect profile is selected, an outbox
 `confirmed` record may coexist with an `unclaimed`, `leased`, or
 `ambiguous` invocation. It does not supply a terminal business outcome, cancel
@@ -5875,7 +5997,7 @@ selection is `archive_selection_invalid`; a selected checkpoint that changes or 
 be captured at the agreed point is `archive_consistency_unavailable`. These are
 pre-commit host refusals, never core faults.
 
-The normative `examples/archives/` vectors include one four-root snapshot with live
+The normative `vectors/archives/` vectors include one four-root snapshot with live
 ready/deferred entries, a retained fault, a compatible migration receipt/audit pair,
 and pending, full-terminal, and compact effect evidence anchored to producing receipts.
 The closed export cases supply complete requests and source captures, including selected
@@ -5987,7 +6109,7 @@ candidate §17 acceptance receipt with matching event ID and `request_digest` eq
 to the fired envelope digest. A rejected candidate commits neither receipt nor
 digest; a successful completion verifies and commits both. For independent delivery
 the field is null until that receipt is actually obtained; it cannot stand for a pending
-source item. `examples/timers/timer-committed-admission-v1.json` carries the full
+source item. `vectors/timers/timer-committed-admission-v1.json` carries the full
 committed checkpoint and this digest for the positive fire case.
 
 A host claiming `coordinated_timer_admission` MUST commit transition to `fired`,
@@ -6059,11 +6181,11 @@ inspection independently of timer installation; it MUST NOT be represented as a
 resumable complete archive for a root whose outstanding timer participant was
 omitted. Debug inspection reports timer records only through the separately
 authorized helper view and reports no timer state in a base aggregate.
-`examples/timers/timer-archive-export-v1.json` pins the positive scoped export
+`vectors/timers/timer-archive-export-v1.json` pins the positive scoped export
 request, source capture, required timer participant, complete
 `determa.scope_archive` manifest, member hashes and lengths, and result. The §22
 standalone base export remains applicable with no timer provider or participant.
-`examples/timers/timer-archive-stage-v1.json` pins successful inert staging and
+`vectors/timers/timer-archive-stage-v1.json` pins successful inert staging and
 a correctly resealed missing-required-timer refusal against independent trusted
 source and participant-contract digests. Staging issues no timer claim or fire.
 
@@ -6085,12 +6207,12 @@ fire identity only after revoking active helper claims, resolving prior fire com
 fate, and completing §24's retirement and guarded activation. A committed admitted
 fire remains terminal in every mode and is never automatically admitted again.
 
-`examples/timers/timer-helper-cases-v1.json`,
-`examples/timers/timer-clock-cases-v1.json`,
-`examples/timers/timer-records-v1.json`, and
-`examples/timers/timer-cancelled-records-v1.json`,
-`examples/timers/timer-fired-records-v1.json`, and
-`examples/timers/timer-committed-admission-v1.json` are normative cases
+`vectors/timers/timer-helper-cases-v1.json`,
+`vectors/timers/timer-clock-cases-v1.json`,
+`vectors/timers/timer-records-v1.json`, and
+`vectors/timers/timer-cancelled-records-v1.json`,
+`vectors/timers/timer-fired-records-v1.json`, and
+`vectors/timers/timer-committed-admission-v1.json` are normative cases
 for first execution, replay, collision, cancellation/fire races, clock boundaries,
 stale claims, crash recovery, and delivery limits. A helper passes all cases
 applicable to its advertised claims. An implementation without the profile needs
@@ -6232,10 +6354,10 @@ Each logical scope is independently authorized and has its own receipts and arch
 selection. A multi-scope request returns per-scope results, including explicit
 partial success, and makes no global atomicity claim. Callers cannot combine partial
 proofs into a scope-wide or multi-scope safe-relocation assertion. The normative
-`examples/recovery/recovery-cases-v1.json` fixes complete response and rejection
+`vectors/recovery/recovery-cases-v1.json` fixes complete response and rejection
 bodies, including stale workers, quarantine, ambiguity, clone isolation and a
 positively negotiated single-authority local transfer. Its separate guarded-source
-archive is `examples/recovery/archive-local-transfer-v1.json`. This test profile
+archive is `vectors/recovery/archive-local-transfer-v1.json`. This test profile
 binds only an implementation that advertises that exact topology; the stock profile
 may continue to refuse transfer. No fixture implies a distributed grant service.
 
@@ -6341,4 +6463,4 @@ Inspection, retained history, saved-response replay and re-execution are distinc
 
 ### 25.4 Public compatibility gate
 
-`schema/public-host-contract-v1.json` records the reviewed boundary sources and SHA-256 fingerprints, hash domains, capability meanings and helper participant rules. It MUST cover `SPEC.md`, `VERSION`, every `schema/*.schema.json`, and the cited golden source artifacts with no duplicate path; each `sha256` is the raw file-byte digest, not a semantic substitute for review. Its `hash_domains` list MUST enumerate every named version-1 Determa hash domain in this specification exactly once, including effect, delivery, archive, timer and recovery domains when defined. Its closed shape is `schema/public-host-contract-v1.schema.json`. The corresponding closed change-record shape is `schema/public-host-change-record-v1.schema.json`. `examples/public-host/` contains complete positive and negative golden messages and canonical request hash operands. A change to a recorded protocol, artifact, effect, capability or helper source requires a reviewed change record naming old/proposed fingerprints, affected claims and the positive/negative cross-language fixture matrix. Specification and conformance checks mechanically compare closed schemas, source fingerprints, canonical hashes and exact fixture bytes. Python and Rust clients and the local reference host run the matrix for every advertised operation/profile; a later hosted service runs that same suite for each capability it claims. A pre-alpha breaking redesign updates this single current version-1 contract and coordinated pins, without a provisional compatibility layer or service-specific machine grammar.
+`schema/public-host-contract-v1.json` records the reviewed boundary sources and SHA-256 fingerprints, hash domains, capability meanings and helper participant rules. It MUST cover `SPEC.md`, `VERSION`, every `schema/*.schema.json`, and the cited golden source artifacts with no duplicate path; each `sha256` is the raw file-byte digest, not a semantic substitute for review. Its `hash_domains` list MUST enumerate every named version-1 Determa hash domain in this specification exactly once, including effect, delivery, archive, timer and recovery domains when defined. Its closed shape is `schema/public-host-contract-v1.schema.json`. The corresponding closed change-record shape is `schema/public-host-change-record-v1.schema.json`. `vectors/public-host/` contains complete positive and negative golden messages and canonical request hash operands. A change to a recorded protocol, artifact, effect, capability or helper source requires a reviewed change record naming old/proposed fingerprints, affected claims and the positive/negative cross-language fixture matrix. Specification and conformance checks mechanically compare closed schemas, source fingerprints, canonical hashes and exact fixture bytes. Python and Rust clients and the local reference host run the matrix for every advertised operation/profile; a later hosted service runs that same suite for each capability it claims. A pre-alpha breaking redesign updates this single current version-1 contract and coordinated pins, without a provisional compatibility layer or service-specific machine grammar.

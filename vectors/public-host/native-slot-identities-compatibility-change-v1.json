@@ -13,26 +13,26 @@
   "cross_language_fixture_matrix": [
     {
       "consumer": "Python embedded client",
-      "positive": "examples/providers/multiple-send-action-output.json; examples/providers/multiple-send-identities.json; examples/providers/inert-provider-metadata.yaml",
-      "negative": "examples/providers/invalid-multiple-send-identities.json; examples/providers/invalid-action-output.json",
+      "positive": "vectors/providers/multiple-send-action-output.json; vectors/providers/multiple-send-identities.json; vectors/providers/inert-provider-metadata.yaml",
+      "negative": "vectors/providers/invalid-multiple-send-identities.json; vectors/providers/invalid-action-output.json",
       "rule": "Check distinct exact IDs and continuing action-local internal/external ordinals at the native containing slot pointer; preserve both intents through checkpoint commit/replay. Refuse duplicate derived IDs and unsupported proposals. Provider-like keys in inert metadata/values never require installation."
     },
     {
       "consumer": "Rust embedded client",
-      "positive": "examples/providers/multiple-send-action-output.json; examples/providers/multiple-send-identities.json; examples/providers/inert-provider-metadata.yaml",
-      "negative": "examples/providers/invalid-multiple-send-identities.json; examples/providers/invalid-action-output.json",
+      "positive": "vectors/providers/multiple-send-action-output.json; vectors/providers/multiple-send-identities.json; vectors/providers/inert-provider-metadata.yaml",
+      "negative": "vectors/providers/invalid-multiple-send-identities.json; vectors/providers/invalid-action-output.json",
       "rule": "Check distinct exact IDs and continuing action-local internal/external ordinals at the native containing slot pointer; preserve both intents through checkpoint commit/replay. Refuse duplicate derived IDs and unsupported proposals. Provider-like keys in inert metadata/values never require installation."
     },
     {
       "consumer": "local reference host",
-      "positive": "examples/providers/multiple-send-action-output.json; examples/providers/multiple-send-identities.json; examples/providers/inert-provider-metadata.yaml",
-      "negative": "examples/providers/invalid-multiple-send-identities.json; examples/providers/invalid-action-output.json",
+      "positive": "vectors/providers/multiple-send-action-output.json; vectors/providers/multiple-send-identities.json; vectors/providers/inert-provider-metadata.yaml",
+      "negative": "vectors/providers/invalid-multiple-send-identities.json; vectors/providers/invalid-action-output.json",
       "rule": "Check distinct exact IDs and continuing action-local internal/external ordinals at the native containing slot pointer; preserve both intents through checkpoint commit/replay. Refuse duplicate derived IDs and unsupported proposals. Provider-like keys in inert metadata/values never require installation."
     },
     {
       "consumer": "future hosted service",
-      "positive": "examples/providers/multiple-send-action-output.json; examples/providers/multiple-send-identities.json; examples/providers/inert-provider-metadata.yaml",
-      "negative": "examples/providers/invalid-multiple-send-identities.json; examples/providers/invalid-action-output.json",
+      "positive": "vectors/providers/multiple-send-action-output.json; vectors/providers/multiple-send-identities.json; vectors/providers/inert-provider-metadata.yaml",
+      "negative": "vectors/providers/invalid-multiple-send-identities.json; vectors/providers/invalid-action-output.json",
       "rule": "Check distinct exact IDs and continuing action-local internal/external ordinals at the native containing slot pointer; preserve both intents through checkpoint commit/replay. Refuse duplicate derived IDs and unsupported proposals. Provider-like keys in inert metadata/values never require installation."
     }
   ]

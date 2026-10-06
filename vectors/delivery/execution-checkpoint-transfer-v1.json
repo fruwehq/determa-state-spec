@@ -1,5 +1,5 @@
 {
-  "description": "Exact creation, committed admission, and terminal unhandled checkpoint snapshots for examples/portable-event-deferral.yaml. The admitted event received-1 is declared input but has no handler in idle. Response loss and equal redelivery do not change after_admission.",
+  "description": "Exact creation, committed admission, and terminal unhandled checkpoint snapshots for examples/event-deferral.yaml. The admitted event received-1 is declared input but has no handler in idle. Response loss and equal redelivery do not change after_admission.",
   "before_admission": {
     "execution_checkpoint_format": "determa.execution_checkpoint",
     "execution_checkpoint_schema_version": 1,

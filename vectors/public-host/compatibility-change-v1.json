@@ -31,26 +31,26 @@
   "cross_language_fixture_matrix": [
     {
       "consumer": "Python embedded client",
-      "positive": "examples/public-host/positive-v1.json",
-      "negative": "examples/public-host/negative-v1.json",
+      "positive": "vectors/public-host/positive-v1.json",
+      "negative": "vectors/public-host/negative-v1.json",
       "rule": "canonical artifact/evidence checks; deterministic portable equality only"
     },
     {
       "consumer": "Rust embedded client",
-      "positive": "examples/public-host/positive-v1.json",
-      "negative": "examples/public-host/negative-v1.json",
+      "positive": "vectors/public-host/positive-v1.json",
+      "negative": "vectors/public-host/negative-v1.json",
       "rule": "same request/response hash and artifact checks"
     },
     {
       "consumer": "local reference host",
-      "positive": "examples/public-host/positive-v1.json",
-      "negative": "examples/public-host/negative-v1.json",
+      "positive": "vectors/public-host/positive-v1.json",
+      "negative": "vectors/public-host/negative-v1.json",
       "rule": "every advertised operation/profile"
     },
     {
       "consumer": "future hosted service",
-      "positive": "examples/public-host/positive-v1.json",
-      "negative": "examples/public-host/negative-v1.json",
+      "positive": "vectors/public-host/positive-v1.json",
+      "negative": "vectors/public-host/negative-v1.json",
       "rule": "required only when service exists, for every advertised capability"
     }
   ]

@@ -5,7 +5,7 @@ Guidance for AI/coding agents working in this repository. (Tool-agnostic; not sp
 ## What this repo is
 The **normative specification** for Determa State. Text only: `SPEC.md` (the prose spec),
 strict schemas under `schema/`, normative vectors under `examples/`, and `VERSION`.
-Portable persistence vectors live under `examples/persistence/`. **No implementation
+Portable persistence vectors live under `vectors/persistence/`. **No implementation
 code, no tests, no CI here.** The executable correctness
 target lives in `determa-state-conformance`. Applicable normative core cases are
 authoritative when they conflict with prose; profiles bind only implementations that

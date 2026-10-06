@@ -1,0 +1,32 @@
+# This emits a request. The application installs/drives its timer helper separately.
+format: 1
+namespace: example.reminder
+events:
+  begin: { direction: input }
+  timer_requested:
+    direction: output
+    payload:
+      delay_seconds: { type: int, required: true }
+  elapsed:
+    direction: input
+    correlates_to: timer_requested
+machines:
+  - machine_id: reminder
+    root:
+      type: composite
+      initial: { transition_to: idle }
+      states:
+        idle:
+          on_events:
+            begin:
+              action:
+                - send:
+                    event: timer_requested
+                    to: { external: true }
+                    payload: { delay_seconds: "30" }
+                    correlation_id: "'reminder'"
+              transition_to: waiting
+        waiting:
+          on_events:
+            elapsed: { transition_to: complete }
+        complete: { type: final }

@@ -16,7 +16,7 @@
         "source_artifact_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
         "compiler_providers": {"type": "array", "minItems": 1, "items": {"$ref": "provider-reference-v1.schema.json"}},
         "generated_validated_bundle_fingerprint": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
-        "source_capabilities": {"$ref": "machine.schema.json#/$defs/providerCapabilities"}
+        "source_capabilities": {"$ref": "resolved-machine-v1.schema.json#/$defs/providerCapabilities"}
       }
     },
     "artifact_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}

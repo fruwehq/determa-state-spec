@@ -2916,7 +2916,7 @@
           }
         }
       },
-      "source_fixture": "examples/archives/stage-cases-v1.json#unsupported_required_determa_capability"
+      "source_fixture": "vectors/archives/stage-cases-v1.json#unsupported_required_determa_capability"
     },
     {
       "name": "authority_stale_epoch_nested_refusal",
@@ -3196,7 +3196,7 @@
           }
         }
       },
-      "source_fixture": "examples/recovery/recovery-cases-v1.json#strict_active_unproved"
+      "source_fixture": "vectors/recovery/recovery-cases-v1.json#strict_active_unproved"
     },
     {
       "name": "recovery_clone_credentials_only",
@@ -3270,7 +3270,7 @@
           }
         }
       },
-      "source_fixture": "examples/recovery/recovery-cases-v1.json#clone_credentials_only"
+      "source_fixture": "vectors/recovery/recovery-cases-v1.json#clone_credentials_only"
     },
     {
       "name": "recovery_unsupported_transfer",
@@ -3354,7 +3354,7 @@
           }
         }
       },
-      "source_fixture": "examples/recovery/recovery-cases-v1.json#unsupported_transfer"
+      "source_fixture": "vectors/recovery/recovery-cases-v1.json#unsupported_transfer"
     },
     {
       "name": "timer_timer_id_collision",
@@ -3428,7 +3428,7 @@
           }
         }
       },
-      "source_fixture": "examples/timers/timer-helper-cases-v1.json#timer_id_collision"
+      "source_fixture": "vectors/timers/timer-helper-cases-v1.json#timer_id_collision"
     },
     {
       "name": "timer_claim_before_deadline",
@@ -3497,7 +3497,7 @@
           }
         }
       },
-      "source_fixture": "examples/timers/timer-helper-cases-v1.json#claim_before_deadline"
+      "source_fixture": "vectors/timers/timer-helper-cases-v1.json#claim_before_deadline"
     },
     {
       "name": "timer_stale_fence",
@@ -3568,7 +3568,7 @@
           }
         }
       },
-      "source_fixture": "examples/timers/timer-helper-cases-v1.json#stale_fence"
+      "source_fixture": "vectors/timers/timer-helper-cases-v1.json#stale_fence"
     },
     {
       "name": "timer_clock_unavailable",
@@ -3642,7 +3642,7 @@
           }
         }
       },
-      "source_fixture": "examples/timers/timer-helper-cases-v1.json#clock_unavailable"
+      "source_fixture": "vectors/timers/timer-helper-cases-v1.json#clock_unavailable"
     }
   ],
   "invalid_responses": [

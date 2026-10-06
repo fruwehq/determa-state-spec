@@ -1,6 +1,6 @@
 # Runtime provider contract examples
 
-`mixed-cel-native.yaml` is schema-valid format 1. Its first branch is CEL and its
+`resolved-machine.json` is schema-valid format 1. Its first branch is CEL and its
 second branch binds exact native guard and action providers. The example's repeated
 hex digits stand for illustrative content identities; a real loader must verify the
 installed closure and fail before evaluation when the bytes do not match. Both native

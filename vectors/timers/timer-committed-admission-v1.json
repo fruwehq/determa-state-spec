@@ -1,5 +1,5 @@
 {
-  "machine_source": "examples/portable-event-deferral.yaml",
+  "machine_source": "examples/event-deferral.yaml",
   "prior_checkpoint_digest": "sha256:383e0db6d1adcdfcd3915871e27828ec5163a1449400031f77ee8370cc0ae3fa",
   "fire_event_id": "sha256:bd388bd74b1aea0e4d2803faabdcb748d9ba5f4d140fb679fc9b914ee1f87118",
   "envelope_digest": "sha256:0b59cfe0449c33ff94c08f0cd8a54754c0e1a7c4e3b46ab94c0c2b57b33c5bc7",

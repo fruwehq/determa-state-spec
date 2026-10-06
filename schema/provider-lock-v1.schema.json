@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://determa.dev/state/schema/provider-lock-v1.schema.json",
+  "title": "Generated provider lock version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["artifact_format", "artifact_schema_version", "content", "artifact_digest"],
+  "properties": {
+    "artifact_format": {"const": "determa.provider_lock"},
+    "artifact_schema_version": {"const": 1},
+    "artifact_digest": {"$ref": "#/$defs/digest"},
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authored_source_digest", "runtime_providers", "compiler_providers"],
+      "properties": {
+        "authored_source_digest": {"$ref": "#/$defs/digest"},
+        "runtime_providers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "kind", "binding"],
+            "properties": {
+              "name": {"$ref": "machine.schema.json#/$defs/providerName"},
+              "kind": {"enum": ["guard", "actions"]},
+              "binding": {"$ref": "resolved-machine-v1.schema.json#/$defs/providerBinding"}
+            },
+            "allOf": [
+              {
+                "if": {"properties": {"kind": {"const": "guard"}}},
+                "then": {"properties": {"binding": {
+                  "properties": {"output_type": {"const": "bool"}}
+                }}},
+                "else": {"properties": {"binding": {
+                  "properties": {"output_type": {"const": "structured_actions"}}
+                }}}
+              }
+            ]
+          }
+        },
+        "compiler_providers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "provider_reference", "dependencies"],
+            "properties": {
+              "name": {"$ref": "machine.schema.json#/$defs/providerName"},
+              "provider_reference": {"$ref": "provider-reference-v1.schema.json"},
+              "dependencies": {
+                "type": "array",
+                "items": {"$ref": "provider-reference-v1.schema.json"}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

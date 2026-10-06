@@ -154,11 +154,11 @@ This repository holds only the specification:
 
 - [`SPEC.md`](SPEC.md) — normative semantics;
 - [`schema/delivery-v1.schema.json`](schema/delivery-v1.schema.json) and
-  [`examples/delivery/delivery-v1-cases.json`](examples/delivery/delivery-v1-cases.json)
-  with [admission](examples/delivery/execution-checkpoint-transfer-v1.json),
-  [queue placement](examples/delivery/queue-placement-checkpoints-v1.json), and
-  [outbound](examples/delivery/outbound-checkpoint-lifecycle-v1.json) checkpoints
-  with [destination receipts](examples/delivery/outbound-destination-receipts-v1.json)
+  [`vectors/delivery/delivery-v1-cases.json`](vectors/delivery/delivery-v1-cases.json)
+  with [admission](vectors/delivery/execution-checkpoint-transfer-v1.json),
+  [queue placement](vectors/delivery/queue-placement-checkpoints-v1.json), and
+  [outbound](vectors/delivery/outbound-checkpoint-lifecycle-v1.json) checkpoints
+  with [destination receipts](vectors/delivery/outbound-destination-receipts-v1.json)
   — closed ownership, replay, disposition, and delivery evidence vectors;
 - [`schema/machine.schema.json`](schema/machine.schema.json) — structural JSON Schema;
 - [`schema/provider-reference-v1.schema.json`](schema/provider-reference-v1.schema.json)
@@ -171,7 +171,7 @@ This repository holds only the specification:
   [`schema/compilation-manifest-v1.schema.json`](schema/compilation-manifest-v1.schema.json)
   — optional exact source compilation and provenance;
 - [`schema/inspection-v1.schema.json`](schema/inspection-v1.schema.json) — exact candidate inspection request and outcome;
-- [`examples/inspection/`](examples/inspection/) — precedence, invalid-shape, and fuel-boundary vectors;
+- [`vectors/inspection/`](vectors/inspection/) — precedence, invalid-shape, and fuel-boundary vectors;
 - [`schema/aggregate-state-v1.schema.json`](schema/aggregate-state-v1.schema.json) —
   portable queue-bearing aggregate-state envelope;
 - [`schema/migration-descriptor-v1.schema.json`](schema/migration-descriptor-v1.schema.json)
@@ -188,7 +188,7 @@ This repository holds only the specification:
   [`schema/archive-import-request-v1.schema.json`](schema/archive-import-request-v1.schema.json),
   and [`schema/archive-export-source-v1.schema.json`](schema/archive-export-source-v1.schema.json)
   — closed archive requests and export-source evidence;
-- [`examples/archives/`](examples/archives/) — complete staged and refusal vectors;
+- [`vectors/archives/`](vectors/archives/) — complete staged and refusal vectors;
 - [`schema/core-step-result-v1.schema.json`](schema/core-step-result-v1.schema.json) —
   closed core step result schema;
 - [`schema/provider-reference-v1.schema.json`](schema/provider-reference-v1.schema.json)
@@ -198,14 +198,14 @@ This repository holds only the specification:
   and [`schema/extension-capability-requirement-v1.schema.json`](schema/extension-capability-requirement-v1.schema.json)
   — configured-instance claims and exact requirements;
 - [`examples/`](examples/) — schema-valid machine documents and normative vectors; and
-- [`examples/providers/`](examples/providers/) — mixed CEL/native slots, source
+- [`vectors/providers/`](vectors/providers/) — mixed CEL/native slots, source
   compilation and output validation examples;
 - [`schema/public-host-request-v1.schema.json`](schema/public-host-request-v1.schema.json) and
   [`schema/public-host-response-v1.schema.json`](schema/public-host-response-v1.schema.json)
   — closed public client/reference-host protocol;
 - [`schema/public-host-contract-v1.json`](schema/public-host-contract-v1.json) with [`schema/public-host-contract-v1.schema.json`](schema/public-host-contract-v1.schema.json),
   [`schema/public-host-change-record-v1.schema.json`](schema/public-host-change-record-v1.schema.json), and
-  [`examples/public-host/`](examples/public-host/) — compatibility boundary and golden messages;
+  [`vectors/public-host/`](vectors/public-host/) — compatibility boundary and golden messages;
 - [`VERSION`](VERSION) — synchronized specification/package SemVer.
 
 The executable correctness target lives in
@@ -216,4 +216,4 @@ The optional [§24 recovery contract](SPEC.md#24-recovery-fresh-scope-takeover-c
 provides strict inactive quarantine, explicit fresh-scope standalone takeover,
 independent clone activation, and guarded same-authority relocation where a host
 positively proves it. See the closed [operation schema](schema/recovery-operation-v1.schema.json)
-and [normative cases](examples/recovery/recovery-cases-v1.json).
+and [normative cases](vectors/recovery/recovery-cases-v1.json).

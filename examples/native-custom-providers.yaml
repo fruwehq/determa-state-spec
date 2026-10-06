@@ -1,0 +1,29 @@
+# review, record-review and eligibility are selected once in host configuration.
+# Explicit resolution generates the lock; the machine author writes no hashes.
+format: 1
+namespace: example.review
+events:
+  submit:
+    direction: input
+    payload:
+      approved: { type: bool, required: true }
+machines:
+  - machine_id: order
+    root:
+      type: composite
+      initial: { transition_to: pending }
+      states:
+        pending:
+          on_events:
+            submit:
+              - guard: "event.payload.approved"
+                transition_to: complete
+              - guard: { provider: review }
+                action:
+                  - provider_actions: record-review
+                transition_to: complete
+              - guard:
+                  lang: eligibility
+                  source: "approved_for_review(event, variables)"
+                transition_to: complete
+        complete: { type: final }
