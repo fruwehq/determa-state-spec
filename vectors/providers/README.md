@@ -39,3 +39,11 @@ that output must not collapse either intent or invent a nested proposal locator.
 ; it is rejected by exact identity validation, rather than being treated as duplicate delivery.
 `inert-provider-metadata.yaml` contains provider-like keys in metadata and a map variable's initial
 value. They remain ordinary data; this definition loads without any installed native provider.
+
+The named-source fixture in `../../examples/native-custom-providers.yaml` also has a Python action
+that calls an SDK and returns an empty proposal list. `named-language-source-v1.json`,
+`named-compilation-manifest-v1.json`, `provider-lock-v1.json` and `named-resolved-machine.json` pin
+the source, compiler and runtime/SDK closure. Python remains runtime execution, rather than a CEL
+translation. Its generated binding truthfully has I/O capability and lacks process containment,
+purity and replay guarantees. These are synthetic contract identities, not an installed SDK or
+authenticity evidence. Compilation capabilities describe historical compilation only.

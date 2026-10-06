@@ -32,10 +32,9 @@ launcher dispatches `determa <product> …` to the `determa-<product>` binary on
 ## Working rules (apply in every Determa repo)
 -  **One issue → one PR.** Branch → PR → **squash-merge**. Linear history. Resolve all review
   threads. Never push to `main` directly (`main` is protected).
--  **Issue #112 is the single remaining 0.3.0 tracking issue in this repository.**
-  Keep redesign corrections in its one draft PR; do not create component issues.
-  Stop for independent and maintainer review. No other repository may be modified
-  as part of this specification pass.
+-  Finish and independently review each repository before proceeding to the next. Obtain maintainer
+  review before merging; completed repositories require permission for further changes. Keep a
+  release's agreed scope in one tracking issue and one PR per repository, including review fixes.
 -  **No AI/assistant attribution anywhere** — no `Co-Authored-By` , no "Generated with…", in
   commits, PR bodies, comments, or docs. Everything reads as the author's own work.
 -  **Conformance-first** for behavior changes: land the spec text here, then the matching case in

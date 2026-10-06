@@ -1,0 +1,103 @@
+{
+  "artifact_format": "determa.language_source",
+  "artifact_schema_version": 1,
+  "content": {
+    "template": {
+      "format": 1,
+      "namespace": "example.review",
+      "events": {
+        "submit": {
+          "direction": "input",
+          "payload": {
+            "approved": {
+              "type": "bool",
+              "required": true
+            }
+          }
+        }
+      },
+      "machines": [
+        {
+          "machine_id": "order",
+          "root": {
+            "type": "composite",
+            "variables": {
+              "accepted": {
+                "type": "bool",
+                "init": false
+              }
+            },
+            "initial": {
+              "transition_to": "pending"
+            },
+            "states": {
+              "pending": {
+                "on_events": {
+                  "submit": [
+                    {
+                      "guard": "event.payload.approved",
+                      "transition_to": "complete"
+                    },
+                    {
+                      "guard": {
+                        "provider": "review"
+                      },
+                      "action": [
+                        {
+                          "provider_actions": "record-review"
+                        }
+                      ],
+                      "transition_to": "complete"
+                    },
+                    {
+                      "guard": {
+                        "lang": "eligibility",
+                        "source": "approved_for_review(event, variables)"
+                      },
+                      "action": [
+                        {
+                          "lang": "python",
+                          "source": "sdk.record_review(event)\nreturn []\n"
+                        }
+                      ],
+                      "transition_to": "complete"
+                    }
+                  ]
+                }
+              },
+              "complete": {
+                "type": "final"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "regions": [
+      {
+        "kind": "guard",
+        "locator": "/machines/0/root/states/pending/on_events/submit/2/guard",
+        "provider_reference": {
+          "identifier": "example.guard-compiler",
+          "version": "1.0.0",
+          "content_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "source_media_type": "text/plain",
+        "source": "approved_for_review(event, variables)"
+      },
+      {
+        "kind": "actions",
+        "locator": "/machines/0/root/states/pending/on_events/submit/2/action/0",
+        "provider_reference": {
+          "identifier": "example.python-compiler",
+          "version": "1.0.0",
+          "content_digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "source_media_type": "text/x-python",
+        "source": "sdk.record_review(event)\nreturn []\n"
+      }
+    ],
+    "dependencies": []
+  },
+  "artifact_digest": "sha256:f21755a3018ca878298b70d84991122ef089b4421265cbdb8760163533c4f77b"
+}

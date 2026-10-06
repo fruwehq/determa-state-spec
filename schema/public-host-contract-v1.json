@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:37fd45e961098c5ed24311cd4e285eb3795bd33e8643c8c3a42f58cc12fc4f35"
+      "sha256": "sha256:35d3892d1bc3a11bdb137ed1b65d3fb68bb699530d114f74ab0938ab5439cf48"
     },
     {
       "path": "VERSION",
@@ -164,7 +164,7 @@
     },
     {
       "path": "schema/runtime-action-output-v1.schema.json",
-      "sha256": "sha256:7a1eb32a01fbb1f139b0fdef62bf328140a34ffed0415adcbec526121c3074d9"
+      "sha256": "sha256:2dcaa46485a123b6b461dd586b1f0082f39a2fb0ade8bd18fa8bd3458b0b86a5"
     },
     {
       "path": "schema/runtime-provider-descriptor-v1.schema.json",
@@ -408,7 +408,7 @@
     },
     {
       "path": "vectors/providers/README.md",
-      "sha256": "sha256:17b2430c6948be3d3bcca047ea60f3fcc37d2cf62e0e043c2debd84879b620d2"
+      "sha256": "sha256:062042c433ab6f2b1b546656c8ab60a3f481a27a67f4de28f54313dede8fb6d4"
     },
     {
       "path": "vectors/providers/inert-provider-metadata.yaml",
@@ -432,7 +432,7 @@
     },
     {
       "path": "schema/provider-lock-v1.schema.json",
-      "sha256": "sha256:295484e7ff99858c8b4da05ec8ad28021357ff6b36153e7e71774e7e4bebffe4"
+      "sha256": "sha256:1ce59ab42063ef07822bd8d2c9bf9ee6130f03f2c640527a0ee789d7f82a6345"
     },
     {
       "path": "schema/resolved-machine-v1.schema.json",

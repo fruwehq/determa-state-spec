@@ -1,4 +1,4 @@
-# review, record-review and eligibility are selected once in host configuration.
+# review, record-review, eligibility and python are selected in host configuration.
 # Explicit resolution generates the lock; the machine author writes no hashes.
 format: 1
 namespace: example.review
@@ -27,5 +27,10 @@ machines:
               - guard:
                   lang: eligibility
                   source: "approved_for_review(event, variables)"
+                action:
+                  - lang: python
+                    source: |
+                      sdk.record_review(event)
+                      return []
                 transition_to: complete
         complete: { type: final }

@@ -1,0 +1,43 @@
+{
+  "artifact_format": "determa.compilation_manifest",
+  "artifact_schema_version": 1,
+  "content": {
+    "source_artifact_digest": "sha256:f21755a3018ca878298b70d84991122ef089b4421265cbdb8760163533c4f77b",
+    "compiler_providers": [
+      {
+        "identifier": "example.guard-compiler",
+        "version": "1.0.0",
+        "content_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      },
+      {
+        "identifier": "example.python-compiler",
+        "version": "1.0.0",
+        "content_digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      }
+    ],
+    "generated_validated_bundle_fingerprint": "sha256:24689adb33bbc5d21248f0870655ae416e1da463c9c07c2d0186fc4b0da83201",
+    "source_capabilities": {
+      "deterministic": true,
+      "pure": true,
+      "portable": true,
+      "semantically_introspectable": true,
+      "process_contained": true,
+      "external_io_capable": false
+    },
+    "source_map": [
+      {
+        "source_locator": "/machines/0/root/states/pending/on_events/submit/2/guard",
+        "resolved_locators": [
+          "/machines/0/root/states/pending/on_events/submit/2/guard"
+        ]
+      },
+      {
+        "source_locator": "/machines/0/root/states/pending/on_events/submit/2/action/0",
+        "resolved_locators": [
+          "/machines/0/root/states/pending/on_events/submit/2/action/0"
+        ]
+      }
+    ]
+  },
+  "artifact_digest": "sha256:ec503f5cdd2a1a8a4727a1d4f8c642c4b0f7d77e9c838202cfb9833f331af24d"
+}

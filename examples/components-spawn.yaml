@@ -23,7 +23,6 @@ machines:
           action:
             - spawn:
                 machine_id: job
-                bindings: { input: {}, external: {} }
                 bind_to: active_job
         cancel:
           action:

@@ -93,12 +93,50 @@
       "core_calls": 0,
       "state_mutations": 0,
       "lock_writes": 0
+    },
+    {
+      "change": "runtime_language_source_changed",
+      "boundary": "source_digest",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "runtime_sdk_dependency_changed",
+      "boundary": "runtime_closure",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "custom_region_locator_changed",
+      "boundary": "source_locator",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "compiler_selects_unconfigured_runtime",
+      "boundary": "deployment_authorization",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
     }
   ],
   "configured_compiler_result": {
     "language": "eligibility",
     "source": "approved_for_review(event, variables)",
     "generated_guard": "event.payload.approved",
-    "note": "A stipulated compiler mapping for this contract fixture; not an implemented compiler or trust proof."
-  }
+    "note": "A stipulated compiler mapping for this contract fixture; not an implemented compiler or trust proof.",
+    "runtime_action": {
+      "language": "python",
+      "source_locator": "/machines/0/root/states/pending/on_events/submit/2/action/0",
+      "resolved_slot": "provider_actions",
+      "sdk_dependency": "example.review-sdk",
+      "external_io_capable": true,
+      "process_contained": false
+    }
+  },
+  "language_source": "vectors/providers/named-language-source-v1.json",
+  "compilation_manifest": "vectors/providers/named-compilation-manifest-v1.json"
 }

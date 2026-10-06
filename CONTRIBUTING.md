@@ -14,9 +14,9 @@ The specification defines the contract. The language-independent conformance rep
 contract. Python and Rust are reference implementations checked against those shared tests.
 
 Work repository by repository: specification review first, shared tests next, language
-implementations after that. Issue #112 covers all remaining specification 0.3.0 redesign corrections
-in one draft PR. Do not create component/correction issues or change another repository during this
-pass. Applicable core cases retain their §2 authority; optional profiles and harness mechanics do
+implementations after that. Keep the agreed release scope in one tracking issue and one PR per
+repository, including review fixes. Finish independent and maintainer review before proceeding to
+another repository; further changes to a completed repository require permission. Applicable core cases retain their §2 authority; optional profiles and harness mechanics do
 not define the core API.
 
 ## Source and generated data

@@ -872,7 +872,12 @@ exactly `{provider: name}` ; an action-list element may contain exactly `{provid
 A custom-language guard or action-list element contains exactly `{lang: name, source: text}` . Names
 match `[a-z][a-z0-9.-]*` . `cel` and `determa` are reserved defaults, not shadowable
 provider/language aliases. Source text is human-authored program text; its type and grammar are
-checked by the selected compiler before a resolved definition becomes executable.
+checked by the selected compiler before a resolved definition becomes executable. This form is not
+limited to a DSL that translates to CEL: a configured Python or other runtime language may execute
+the source and call a preferred SDK through its locked runtime provider. A guard returns a Boolean;
+an action returns the closed action proposals described below, possibly empty after explicit I/O.
+Host-language objects stay inside the provider; the Determa context and returned values use the
+exact typed boundary. No language name implicitly authorizes installation or SDK access.
 
 These short names request explicit trusted resolution, not mutable runtime lookup. Deployment
 configuration selects installed implementations outside the machine. Unknown names never trigger
@@ -898,25 +903,36 @@ normalization uses §8's defaults and numeric rules, retaining short names and s
 not discover providers in inert values. The lock digest is
 `hash(["determa.provider_lock", "1", typed(content)])` .
 
-Runtime entries contain `name` , `kind` (`guard` or `actions` ) and full `binding` . Compiler
+Runtime entries contain `name`, `kind` (`guard` or `actions`) and full `binding`. A generated
+runtime-language entry additionally requires `source_locator`, the canonical pointer of its
+authored region; it distinguishes different source programs using the same language name. Native
+name entries omit that field. Compiler
 entries contain `name` , exact `provider_reference` and complete transitive `dependencies` . Runtime
-entries are ordered by `(name, kind)` UTF-8 bytes; compiler entries by name. Duplicate keys and
+entries are ordered by `(name, kind, source_locator or "")` UTF-8 bytes; compiler entries by name.
+Duplicate keys and
 unused entries reject. Names are scoped by kind: the same name may serve a guard and an action only
 when both entries are explicit. A compiler name cannot silently select a runtime provider or vice
-versa. Every used grammar slot has exactly one matching entry. Binding input contracts match the
+versa. Every native slot has one matching native name/kind entry. Every custom region has one matching
+compiler name entry; runtime-language output also requires its exact name/kind/source-locator entry.
+No generated runtime binding may escape that inventory. Binding input contracts match the
 generated context types; an incompatible kind/type rejects.
 
 Resolution traverses executable grammar slots only, including entry, exit, initial, choice, event
 transitions, final-state entry and inline components. Native names expand to locked bindings. Custom
 source slots generate compiler regions and source-map locators; authors never supply those JSON
-Pointers. Compiler output replaces a guard with CEL or an action slot with ordered structured
-actions. Compilation cannot introduce a native slot; use an explicitly named native slot for native
-evaluation. A compiler cannot install/select arbitrary providers. Source maps bind source digest,
+Pointers. Resolution selects either compile-time translation or runtime-language execution from
+explicit deployment configuration. Translation emits CEL or structured actions. Runtime-language
+resolution emits a generated guard/action binding whose source is the exact region text and whose
+source media type, source digest, runtime implementation, transitive runtime dependencies, context
+types and capabilities are pinned. The lock and compilation manifest also pin the exact compiler
+closure and resulting definition. A compiler cannot install providers or select a runtime closure
+outside the explicitly authorized deployment configuration. Source maps bind source digest,
 original slot and resolved slot(s), preserving evaluation order. Provider-like keys in metadata,
 variable values and event payloads remain data.
 
 `schema/resolved-machine-v1.schema.json` validates generated executable definitions. It accepts
-exact native bindings and compiled CEL/structured actions, never unresolved names or custom source
+exact native/runtime-language bindings and compiled CEL/structured actions, never unresolved names
+or authored custom source
 slots. Source/resolved entry points are explicit: a loader never guesses a stage from `format: 1` or
 tries both as draft readers. CEL-only source resolves without a lock/compiler because its closure is
 empty. Source containing native/custom slots requires its matching lock.
@@ -997,7 +1013,11 @@ provider-like string grants no invocation authority. An invoked provider's typed
 follows the ordinary `guard_fault` or `action_fault` rule at that exact slot locator (§10). An
 invalid output is mapped to the same closed core fault code according to slot kind, while its
 boundary diagnostic retains `runtime_provider_output_invalid` . Either result rolls back tentative
-Determa state, but cannot undo I/O already performed by a native provider.
+Determa state, but cannot undo I/O already performed by a native or runtime-language provider. A provider that is not process
+contained may crash its host instead of returning a typed failure. Its profile cannot promise
+containment, a returned fault record or automatic recovery from that crash; durable host recovery
+requires the separately proved host contract. Source-language execution inherits its actual runtime
+closure's guarantees, never the compiler's historical capability claims.
 
 `capabilities` explicitly declares `deterministic` , `pure` , `portable` ,
 `semantically_introspectable` , `process_contained` , and `external_io_capable` as Booleans,
@@ -1032,8 +1052,12 @@ and `dependencies` . A region gives its `kind` (`guard` or `actions` ), canonica
 template follows the authored schema. Locators identify disjoint custom guard objects or custom
 action-list elements, including lifecycle slots. Each region's source equals that slot's source
 text. Duplicate, overlapping, mismatched-text or wrong-kind regions reject. Bounded compilers
-resolve exact dependency closure and translate regions in array order into CEL or structured
-actions. The tool splices action results at the named element, preserving surrounding author order.
+resolve exact dependency closure and process regions in array order. They may translate to CEL or
+structured
+actions, or generate exact runtime-language bindings under the authorized resolution policy above.
+A runtime-language binding retains the region's exact source text and media type; its runtime
+reference/dependency closure identifies the interpreter, compiled wrapper and SDKs actually used.
+The tool splices action results at the named element, preserving surrounding author order.
 The generated definition then passes the resolved-definition loader. The manifest binds source
 digest, exact compiler closure, generated validated-bundle fingerprint, source capabilities and
 generated `source_map` . Every map entry has `source_locator` and ordered `resolved_locators` ;
