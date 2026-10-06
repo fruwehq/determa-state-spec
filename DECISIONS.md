@@ -1,7 +1,7 @@
 # Determa State decision record
 
 This file records settled design rationale and review guidance. It is **not normative** and is not a
-second specification. [`SPEC.md`](SPEC.md) , the schema, and applicable conformance cases define
+second specification. [`SPEC.md`](SPEC.md), the schema, and applicable conformance cases define
 behavior; if this record conflicts with them, correct this record rather than treating it as an
 alternative rule source.
 
@@ -28,7 +28,7 @@ ownership/retention obligations.
 
 ## Scope authority is an optional host capability
 
-Relevant specification: [§18](SPEC.md#18-optional-host-scope-authority) .
+Relevant specification: [§18](SPEC.md#18-optional-host-scope-authority).
 
 **Decision.** Pure core evaluation requires no authority service. A configured host or plugin may
 prove guarded scope writes, worker fencing, complete inventory and safe relocation for its exact
@@ -46,9 +46,9 @@ transaction fate is resolved. The public interface allows a future hosted servic
 stronger authority without changing the portable machine model.
 ## Runtime providers are exact executable dependencies
 
-Relevant specification: [§5.4](SPEC.md#54-exact-runtime-providers-and-optional-source-compilation) ,
-[§8](SPEC.md#8-foreground-interface-and-logical-state) , and
-[§16.2](SPEC.md#162-canonical-values-and-aggregate-encoding) .
+Relevant specification: [§5.4](SPEC.md#54-exact-runtime-providers-and-optional-source-compilation),
+[§8](SPEC.md#8-foreground-interface-and-logical-state), and
+[§16.2](SPEC.md#162-canonical-values-and-aggregate-encoding).
 
 **Decision.** CEL and structured actions remain the format-1 default. Exact runtime guard and action
 slots can coexist with them. A complete binding pins reference, source, dependency closure, types
@@ -69,7 +69,7 @@ participants.
 
 ## Transition boundaries are relationship-specific
 
-Relevant specification: [§6.4](SPEC.md#64-transition-execution-order) .
+Relevant specification: [§6.4](SPEC.md#64-transition-execution-order).
 
 **Decision.** Format 1 enumerates every targeted source/target relationship:
 
@@ -92,7 +92,7 @@ reset-in-place form.
 ## The machine root is an invariant boundary
 
 Relevant specification: [§6.4](SPEC.md#64-transition-execution-order) and
-[§13](SPEC.md#13-deliberately-unsupported-in-format-1) .
+[§13](SPEC.md#13-deliberately-unsupported-in-format-1).
 
 **Decision.** Ordinary transitions never exit or re-enter the machine root.
 
@@ -104,9 +104,9 @@ input and external variables, which conflicts with their creation and refresh bo
 
 ## Cross-root external re-entry is deliberately unexpressible
 
-Relevant specification: [§5.1](SPEC.md#51-load-time-validation) ,
-[§6.4](SPEC.md#64-transition-execution-order) , and
-[§13](SPEC.md#13-deliberately-unsupported-in-format-1) .
+Relevant specification: [§5.1](SPEC.md#51-load-time-validation),
+[§6.4](SPEC.md#64-transition-execution-order), and
+[§13](SPEC.md#13-deliberately-unsupported-in-format-1).
 
 **Decision.** A root-to-descendant transition preserves the root, while a target that would re-enter
 the root is rejected. External re-entry across the root/descendant boundary in either direction is
@@ -121,7 +121,7 @@ transitions.
 ## Transition actions execute before source exit
 
 Relevant specification: [§5.1](SPEC.md#51-load-time-validation) and
-[§6.4](SPEC.md#64-transition-execution-order) .
+[§6.4](SPEC.md#64-transition-execution-order).
 
 **Decision.** Transition actions run in the source configuration and lexical scope before any state
 exits.
@@ -136,7 +136,7 @@ transition.
 ## Cancellation is total over reference states
 
 Relevant specification: [§7.2](SPEC.md#72-owned-spawned-instances) and
-[§10.1](SPEC.md#101-engine-faults) .
+[§10.1](SPEC.md#101-engine-faults).
 
 **Decision.** `cancel` disposes a live or retained-faulted owned runtime and succeeds without effect
 for null or already-disposed references.
@@ -148,7 +148,7 @@ exit-action cancellation fault merely because cleanup had already disposed the s
 
 ## A holding reference bounds owned-child lifetime
 
-Relevant specification: [§7.2](SPEC.md#72-owned-spawned-instances) .
+Relevant specification: [§7.2](SPEC.md#72-owned-spawned-instances).
 
 **Decision.** A child bound through `bind_to` is cancelled when the declaring scope of that
 reference exits. Unbound children and children held by surviving scopes remain owned until later
@@ -164,7 +164,7 @@ rule.
 ## Conformance has three authority tiers
 
 Relevant specification: [§2](SPEC.md#2-conformance-parsing-and-format-identity) and the
-[conformance-suite policy](https://github.com/fruwehq/determa-state-conformance#readme) .
+[conformance-suite policy](https://github.com/fruwehq/determa-state-conformance#readme).
 
 **Decision.** Core cases bind every conforming implementation. Profile cases bind only
 implementations declaring that profile. Driver and harness mechanics bind no public implementation
@@ -180,7 +180,7 @@ API.
 ## The command-line interface is a profile
 
 Relevant specification: [§11.4](SPEC.md#114-hosting-profiles) and
-[§13](SPEC.md#13-deliberately-unsupported-in-format-1) .
+[§13](SPEC.md#13-deliberately-unsupported-in-format-1).
 
 **Decision.** Command-line behavior is optional profile work, not core format semantics. The former
 in-process first-in-first-out fixtures were dropped; `run_cli.py` remains non-normative
@@ -194,7 +194,7 @@ Standardizing the old fixtures would contradict the pure foreground core.
 
 ## Candidate inspection preserves guard uncertainty
 
-Relevant specification: [§12](SPEC.md#12-inspection-and-visualization) .
+Relevant specification: [§12](SPEC.md#12-inspection-and-visualization).
 
 **Decision.** Format 1 defines an exact-target candidate inspection result. Structural inspection is
 mandatory and returns the complete union of possible dispositions without evaluating a guard.
@@ -212,15 +212,15 @@ ordinary execution.
 
 ## Portable scalar spellings are canonical
 
-Relevant specification: [§2](SPEC.md#2-conformance-parsing-and-format-identity) .
+Relevant specification: [§2](SPEC.md#2-conformance-parsing-and-format-identity).
 
-**Decision.** The only plain Boolean/null spellings are lowercase `true` , `false` , and `null` .
-Plain `yes` , `no` , `on` , `off` , `y` , and `n` remain strings; noncanonical Boolean/null
-spellings are rejected, and quoted tokens remain strings.
+**Decision.** The only plain Boolean/null spellings are lowercase `true`, `false`, and `null`. Plain
+`yes`, `no`, `on`, `off`, `y`, and `n` remain strings; noncanonical Boolean/null spellings are
+rejected, and quoted tokens remain strings.
 
 **Rejected alternative.** Delegate implicit scalar resolution to whichever YAML library a host uses.
 
-**Reason 1: identity preservation.** Treating `yes` /`no` and `on` /`off` as Booleans collapses
+**Reason 1: identity preservation.** Treating `yes`/`no` and `on`/`off` as Booleans collapses
 distinct YAML 1.2 state and event identifiers under YAML 1.1 tooling.
 
 **Reason 2: canonicalization.** Rejecting `True` and `~` gives one source spelling per portable
@@ -239,7 +239,7 @@ close the prose, schema, and assertion contract around that exhaustive domain.
 ## Portable state references content-addressed definitions
 
 Relevant specification: [§16.3](SPEC.md#163-complete-root-ownership-aggregate) and
-[§16.5](SPEC.md#165-content-addressed-definition-registry) .
+[§16.5](SPEC.md#165-content-addressed-definition-registry).
 
 **Decision.** An ordinary aggregate envelope stores the exact validated-bundle fingerprint. The
 normalized definition is stored once in a content-addressed registry. A separate package can carry
@@ -254,9 +254,9 @@ executable logic.
 
 ## Deferral follows handler precedence and portable ownership
 
-Relevant specification: [§6.3](SPEC.md#63-hierarchical-dispatch) ,
-[§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall) , and
-[§17.4](SPEC.md#174-aggregate-owned-admission-and-processing) .
+Relevant specification: [§6.3](SPEC.md#63-hierarchical-dispatch),
+[§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall), and
+[§17.4](SPEC.md#174-aggregate-owned-admission-and-processing).
 
 **Decision.** Determa resolves an event level by level from deepest active state to root. At each
 state an enabled handler wins over that state's deferral; if no handler there is enabled, that
@@ -279,7 +279,7 @@ is selected.
 ## Portable artifacts have one schema version
 
 Relevant specification: [§16.1](SPEC.md#161-independent-artifact-identities) and
-[§17.1](SPEC.md#171-scope) .
+[§17.1](SPEC.md#171-scope).
 
 **Decision.** Aggregate, package, migration, checkpoint, and core-result artifacts use schema
 version 1 as their sole supported portable representation. Machine document format 1 is independent.
@@ -293,7 +293,7 @@ surface.
 
 ## Queue lifecycle evidence is closed and dependency-safe
 
-Relevant specification: [§17.4](SPEC.md#174-aggregate-owned-admission-and-processing) .
+Relevant specification: [§17.4](SPEC.md#174-aggregate-owned-admission-and-processing).
 
 **Decision.** Processing reports every lifecycle removal from the core, and a checkpoint host
 atomically translates those removals into terminal receipts. Event identity tombstones preserve
@@ -301,7 +301,7 @@ replay and conflict evidence after dependency-closed receipt compaction.
 
 ## Migration preserves target identity
 
-Relevant specification: [§16.4](SPEC.md#164-immutable-identity-and-mutable-definition-binding) .
+Relevant specification: [§16.4](SPEC.md#164-immutable-identity-and-mutable-definition-binding).
 
 **Decision.** Runtime identity origin and target identity are immutable. Migration updates only the
 current definition and relation pointers.
@@ -315,7 +315,7 @@ reference were transactionally rewritten, which is outside the root aggregate.
 ## Migration is declarative and action-free
 
 Relevant specification: [§16.7](SPEC.md#167-immutable-declarative-migration-descriptors) and
-[§16.9](SPEC.md#169-total-transform-matrix) .
+[§16.9](SPEC.md#169-total-transform-matrix).
 
 **Decision.** Descriptors are immutable data with a bounded closed CEL value profile. Migration
 never executes machine actions, lifecycle behavior, arbitrary code, host callbacks, or I/O.
@@ -329,7 +329,7 @@ callbacks cannot be independently validated by the conformance suite.
 
 ## Migration routes are exact and pinned
 
-Relevant specification: [§16.8](SPEC.md#168-exact-route-and-migration-algorithm) .
+Relevant specification: [§16.8](SPEC.md#168-exact-route-and-migration-algorithm).
 
 **Decision.** Deployment supplies one exact ordered list of trusted descriptor digests. The engine
 never searches a migration graph.
@@ -342,7 +342,7 @@ paths must not make aggregate results nondeterministic.
 ## Incompatible state quarantines instead of guessing
 
 Relevant specification: [§16.9](SPEC.md#169-total-transform-matrix) and
-[§16.12](SPEC.md#1612-failure-rollback-quarantine-and-audit) .
+[§16.12](SPEC.md#1612-failure-rollback-quarantine-and-audit).
 
 **Decision.** Deleted or incompatible active state requires a complete explicit mapping. Otherwise
 the original aggregate is retained and quarantined. There is no destructive reset migration.
@@ -356,7 +356,7 @@ corrupting the committed source.
 
 ## Lazy migration shares the dispatch transaction
 
-Relevant specification: [§16.11](SPEC.md#1611-lazy-transactional-host-ordering) .
+Relevant specification: [§16.11](SPEC.md#1611-lazy-transactional-host-ordering).
 
 **Decision.** The complete route, optional dispatch, aggregate replacement, inbox result, outbox
 emissions, and audit commit atomically under one aggregate lock. Artifacts are resolved before the
@@ -371,7 +371,7 @@ semantics. The root ownership aggregate remains one transactional state boundary
 ## Extension capability claims bind configured instances
 
 Relevant specification: [§11.5](SPEC.md#115-public-extension-identity-registration-and-capabilities)
-and [§17.11](SPEC.md#1711-execution-store-capabilities-and-composed-host-profiles) .
+and [§17.11](SPEC.md#1711-execution-store-capabilities-and-composed-host-profiles).
 
 **Decision.** The public registration path accepts bundled and third-party providers equally, with
 exact version and digest references. Direct injection remains available. Profiles check
@@ -391,7 +391,7 @@ capability conformance tests as a local host.
 ## Application projection is a lossless view of selected rows
 
 Relevant specification:
-[§20](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade) .
+[§20](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade).
 
 **Decision.** A configured projection selects application rows explicitly, admits their values only
 through declared typed input or external-refresh boundaries, and round-trips the entire Determa
@@ -408,10 +408,10 @@ boundary. A failed projection must leave both application rows and Determa evide
 
 ## Delivery ownership crosses only a committed boundary
 
-Relevant specification: [§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall) ,
-[§17.4](SPEC.md#174-aggregate-owned-admission-and-processing) ,
-[§17.6](SPEC.md#176-durable-outbox-lifecycle) , and
-[§21](SPEC.md#21-lossless-event-delivery-profile) .
+Relevant specification: [§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall),
+[§17.4](SPEC.md#174-aggregate-owned-admission-and-processing),
+[§17.6](SPEC.md#176-durable-outbox-lifecycle), and
+[§21](SPEC.md#21-lossless-event-delivery-profile).
 
 **Decision.** A source owns ingress backlog until complete machine admission and its receipt commit,
 or an explicitly configured durable ingress dead-letter transfer. Acknowledgement follows that
@@ -431,10 +431,10 @@ to distinguish a committed decision from an abandoned attempt.
 
 ## Archives stage complete Determa snapshots and declared participants
 
-Relevant specification: [§22](SPEC.md#22-portable-archives-and-declared-participants) ,
-[§17.13](SPEC.md#1713-cluster-checkpoint-composition) ,
-[§19](SPEC.md#19-committed-native-effects-and-authenticated-results) , and
-[§20](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade) .
+Relevant specification: [§22](SPEC.md#22-portable-archives-and-declared-participants),
+[§17.13](SPEC.md#1713-cluster-checkpoint-composition),
+[§19](SPEC.md#19-committed-native-effects-and-authenticated-results), and
+[§20](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade).
 
 **Decision.** A version-1 archive contains full selected checkpoints and exact immutable definition
 attachments. Application or helper data joins only through an explicit participant with a pinned
@@ -459,10 +459,10 @@ authority and relocation are separate concerns.
 
 ## Timer work remains an external, separately archived helper
 
-Relevant specification: [§11.2](SPEC.md#112-timer-extensions) ,
-[§17.14](SPEC.md#1714-external-timer-durability) , and
-[§23](SPEC.md#23-optional-external-timer-helper) , and
-[§24](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation) .
+Relevant specification: [§11.2](SPEC.md#112-timer-extensions),
+[§17.14](SPEC.md#1714-external-timer-durability), and
+[§23](SPEC.md#23-optional-external-timer-helper), and
+[§24](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation).
 
 **Decision.** The optional timer helper has a closed schedule/cancel/fire protocol, signed
 Unix-nanosecond clock values, and its own versioned record artifact. It is installed and
@@ -488,7 +488,7 @@ fire/admission boundary; independent delivery reports its weaker, potentially am
 ## Recovery remains an explicit host choice
 
 Relevant specification:
-[§24](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation) .
+[§24](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation).
 
 **Decision.** A strict restore always remains an inert read-only quarantine. Proved continuation
 uses the separate guarded transfer activation path. A standalone operator may instead create a fresh
@@ -501,16 +501,15 @@ undo an accepted provider request. The new scope makes the weaker choice visible
 receipts and capability reports. A credential or timeout cannot supply a missing authority proof.
 ## Public host requests pin their resolved binding
 
-Relevant specification: [§25](SPEC.md#25-public-client-and-execution-host-protocol) .
+Relevant specification: [§25](SPEC.md#25-public-client-and-execution-host-protocol).
 
-**Decision.** Version-1 public requests use the closed `protocol` , `protocol_version` ,
-`operation_id` , `scope_binding_identity` , `operation` , `target` , `precondition` , `arguments`
-envelope. Responses use `protocol` , `protocol_version` , `operation_id` , `status` , `receipt` ,
-`value` , `error` . The client saves the resolved endpoint/scope binding and canonical request
-before the first mutation. A lost response is resolved only at that binding with the same host
-operation ID and request digest. The host retains the complete first response while it claims
-operation replay. Discovery, inspection, history, response replay, and re-execution are separate
-capabilities.
+**Decision.** Version-1 public requests use the closed `protocol`, `protocol_version`,
+`operation_id`, `scope_binding_identity`, `operation`, `target`, `precondition`, `arguments`
+envelope. Responses use `protocol`, `protocol_version`, `operation_id`, `status`, `receipt`,
+`value`, `error`. The client saves the resolved endpoint/scope binding and canonical request before
+the first mutation. A lost response is resolved only at that binding with the same host operation ID
+and request digest. The host retains the complete first response while it claims operation replay.
+Discovery, inspection, history, response replay, and re-execution are separate capabilities.
 
 **Reason.** Endpoint aliases and current state can change after a commit. Resolving a retry against
 a new alias could run a second operation in a different authority; a digest or missing receipt alone

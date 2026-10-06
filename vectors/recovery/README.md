@@ -10,7 +10,7 @@ The inherited-work list derives from the archive outbox records; it is not separ
 Every case has a closed request, complete first result and, when mutation succeeds, the complete
 resulting `recovery-record-v1` record. The `prior_record` links sequential cases without rewriting
 source archive bytes. Equal retries replay the complete first result and record. The unsupported
-transfer cases use the stock profile with `safe_relocation: false` . The guard probes are read-only
+transfer cases use the stock profile with `safe_relocation: false`. The guard probes are read-only
 denials; their corresponding native actions must enforce the same result at commit time.
 
 The quarantine probes cover admission, processing, dispatch, helper fire/cancel, ingress

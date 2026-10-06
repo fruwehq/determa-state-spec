@@ -2,7 +2,7 @@
   "artifact_format": "determa.compilation_manifest",
   "artifact_schema_version": 1,
   "content": {
-    "source_artifact_digest": "sha256:f21755a3018ca878298b70d84991122ef089b4421265cbdb8760163533c4f77b",
+    "source_artifact_digest": "sha256:e43bc628c1c0ea2cd656a3c255e33b924d02b9993ebcf88ece00c65504dae4ac",
     "compiler_providers": [
       {
         "identifier": "example.guard-compiler",
@@ -15,7 +15,7 @@
         "content_digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       }
     ],
-    "generated_validated_bundle_fingerprint": "sha256:24689adb33bbc5d21248f0870655ae416e1da463c9c07c2d0186fc4b0da83201",
+    "generated_validated_bundle_fingerprint": "sha256:e52f7457d36bd78e4142dfe5df7d63c2f54f515aa865b24b3bb0006f9943bc17",
     "source_capabilities": {
       "deterministic": true,
       "pure": true,
@@ -39,5 +39,5 @@
       }
     ]
   },
-  "artifact_digest": "sha256:ec503f5cdd2a1a8a4727a1d4f8c642c4b0f7d77e9c838202cfb9833f331af24d"
+  "artifact_digest": "sha256:83131be50ce215d3e769c01884ced1a027ea8eb891af74d134bef2827d6fb943"
 }

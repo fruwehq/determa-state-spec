@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:35d3892d1bc3a11bdb137ed1b65d3fb68bb699530d114f74ab0938ab5439cf48"
+      "sha256": "sha256:62a363a76ec4b9bbbcb63b8a2d95c9a859ce4d9bf3b72d8a5cfb89fb1dacb2c8"
     },
     {
       "path": "VERSION",
@@ -204,7 +204,7 @@
     },
     {
       "path": "vectors/public-host/README.md",
-      "sha256": "sha256:7716bd836486cec906b5550f47c135bf45e7f34f6e118f3255678e7c65c9acca"
+      "sha256": "sha256:762d49b76da27e522345091cbe0e87ebf46fa70a03909377a8967241d7c0cc20"
     },
     {
       "path": "vectors/effects/active-effect-claim-v1.json",
@@ -408,7 +408,7 @@
     },
     {
       "path": "vectors/providers/README.md",
-      "sha256": "sha256:062042c433ab6f2b1b546656c8ab60a3f481a27a67f4de28f54313dede8fb6d4"
+      "sha256": "sha256:625838cdc7cd223691ed2a734bacbd84163bc262f923e35dad4efe58965eedcd"
     },
     {
       "path": "vectors/providers/inert-provider-metadata.yaml",
@@ -441,6 +441,10 @@
     {
       "path": "schema/machine-grammar-v1.schema.json",
       "sha256": "sha256:06ef3ac9e36f210305a699f5baccbdd519a7d493a750b6fe4eeefa7fdf319550"
+    },
+    {
+      "path": "vectors/identities/exact-jcs-operands-v1.json",
+      "sha256": "sha256:65957ce0acb423c7543c8ff334e90db9a699828ddbc5720a9a7ffde84041965b"
     }
   ],
   "hash_domains": [

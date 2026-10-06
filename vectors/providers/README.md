@@ -1,13 +1,13 @@
 # Runtime provider contract vectors
 
 `resolved-machine.json` is generated format 1, validated by
-`schema/resolved-machine-v1.schema.json`. Its first branch is CEL and its second branch
-binds exact native guard and action providers. The fixture's repeated hex digits stand for
-illustrative content identities; a real loader must verify the installed closure and fail before
-evaluation when the bytes do not match. Both native slots disclose possible precommit external I/O.
-The fixture is therefore an explicit weak embedded profile, not a deterministic-replay or
-semantic-inspection claim. `guard-descriptor-v1.json` is the matching closed registration
-descriptor; a registration with `kind: actions` for that Boolean binding is invalid.
+`schema/resolved-machine-v1.schema.json`. Its first branch is CEL and its second branch binds exact
+native guard and action providers. The fixture's repeated hex digits stand for illustrative content
+identities; a real loader must verify the installed closure and fail before evaluation when the
+bytes do not match. Both native slots disclose possible precommit external I/O. The fixture is
+therefore an explicit weak embedded profile, not a deterministic-replay or semantic-inspection
+claim. `guard-descriptor-v1.json` is the matching closed registration descriptor; a registration
+with `kind: actions` for that Boolean binding is invalid.
 
 `action-output.json` is a valid typed provider result: the engine checks its assign and send against
 the selected statechart scope and event declarations, then applies it before the following
@@ -23,7 +23,7 @@ same-name provider with a different installed digest instead fails executable cl
 before creation or restoration. An absent exact transitive dependency fails at the same boundary.
 
 `language-source-v1.json` has a source region at the guard pointer in its template. The exact
-compiler translates that region to the guard in `compiled-machine.json` .
+compiler translates that region to the guard in `compiled-machine.json`.
 `compilation-manifest-v1.json` binds the source digest and normalized generated fingerprint. A
 complete generated definition restores against its runtime closure without requiring this compiler.
 A changed manifest fingerprint or source/compiler digest is rejected; restoration does not silently
@@ -35,13 +35,13 @@ expected IDs, local indexes and output sequences. The assignment consumes no emi
 second send uses index `1` at the same containing action-element pointer. Restoring or replaying
 that output must not collapse either intent or invent a nested proposal locator.
 
-`invalid-multiple-send-identities.json` reuses the first ID for the second intent despite index `1`
-; it is rejected by exact identity validation, rather than being treated as duplicate delivery.
+`invalid-multiple-send-identities.json` reuses the first ID for the second intent despite index `1`;
+it is rejected by exact identity validation, rather than being treated as duplicate delivery.
 `inert-provider-metadata.yaml` contains provider-like keys in metadata and a map variable's initial
 value. They remain ordinary data; this definition loads without any installed native provider.
 
 The named-source fixture in `../../examples/native-custom-providers.yaml` also has a Python action
-that calls an SDK and returns an empty proposal list. `named-language-source-v1.json`,
+that calls an SDK and returns the closed `{actions: []}` result. `named-language-source-v1.json`,
 `named-compilation-manifest-v1.json`, `provider-lock-v1.json` and `named-resolved-machine.json` pin
 the source, compiler and runtime/SDK closure. Python remains runtime execution, rather than a CEL
 translation. Its generated binding truthfully has I/O capability and lacks process containment,

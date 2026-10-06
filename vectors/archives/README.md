@@ -15,7 +15,7 @@ references remain declared even when their payload is absent. Fence and transfer
 in these vectors and confer no authority.
 
 The archive records nonsecret `source` provenance and a complete required/optional
-`participant_contract` . The source profile and contract digests are checked against independent
+`participant_contract`. The source profile and contract digests are checked against independent
 trusted host policy on import. A resealed artifact cannot omit the required `helper-state`
 participant or weaken its advertised source profile. The standalone cases use an explicit null
 scope, binding, and generation with no host claims. The `standalone_core_without_participants`
@@ -23,7 +23,7 @@ vectors export and stage all four checkpoints with an empty required set and no 
 provenance is not a credential or authority grant.
 
 The required `helper-state` participant has an embedded typed payload validated by
-`helper-payload-v1.schema.json` . Fixture `provider_closure_evidence` is outside the archive; its
+`helper-payload-v1.schema.json`. Fixture `provider_closure_evidence` is outside the archive; its
 `determa-archive-fixture-provider-1` digest reproduces the pinned provider reference and declared
 empty dependency closure. Production providers verify their actual executable closure under §11.5.
 
@@ -61,5 +61,5 @@ authoritative inventory, and outer archives. Each stage case's `changed_paths_fr
 every JSON pointer whose value differs from the positive archive. Resealed semantic-negative cases
 prove that a fresh outer digest does not make omitted queue, receipt, outbox, or audit evidence
 valid. The positive archive, requests, source captures, and result vectors validate against the
-closed schemas in `schema/` . JSON object source whitespace is immaterial; digest input is RFC 8785
+closed schemas in `schema/`. JSON object source whitespace is immaterial; digest input is RFC 8785
 JCS with the domain arrays in SPEC §22.

@@ -12,6 +12,10 @@
             "approved": {
               "type": "bool",
               "required": true
+            },
+            "review_mode": {
+              "type": "string",
+              "required": true
             }
           }
         }
@@ -35,7 +39,7 @@
                 "on_events": {
                   "submit": [
                     {
-                      "guard": "event.payload.approved",
+                      "guard": "event.payload.approved && event.payload.review_mode == \"automatic\"",
                       "transition_to": "complete"
                     },
                     {
@@ -57,7 +61,7 @@
                       "action": [
                         {
                           "lang": "python",
-                          "source": "sdk.record_review(event)\nreturn []\n"
+                          "source": "sdk.record_review(event)\nreturn {\"actions\": []}\n"
                         }
                       ],
                       "transition_to": "complete"
@@ -94,10 +98,10 @@
           "content_digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         },
         "source_media_type": "text/x-python",
-        "source": "sdk.record_review(event)\nreturn []\n"
+        "source": "sdk.record_review(event)\nreturn {\"actions\": []}\n"
       }
     ],
     "dependencies": []
   },
-  "artifact_digest": "sha256:f21755a3018ca878298b70d84991122ef089b4421265cbdb8760163533c4f77b"
+  "artifact_digest": "sha256:e43bc628c1c0ea2cd656a3c255e33b924d02b9993ebcf88ece00c65504dae4ac"
 }

@@ -8,6 +8,10 @@
         "approved": {
           "type": "bool",
           "required": true
+        },
+        "review_mode": {
+          "type": "string",
+          "required": true
         }
       }
     }
@@ -31,7 +35,7 @@
             "on_events": {
               "submit": [
                 {
-                  "guard": "event.payload.approved",
+                  "guard": "event.payload.approved && event.payload.review_mode == \"automatic\"",
                   "transition_to": "complete"
                 },
                 {
@@ -90,8 +94,7 @@
                   "transition_to": "complete"
                 },
                 {
-                  "guard": "event.payload.approved",
-                  "transition_to": "complete",
+                  "guard": "event.payload.approved && event.payload.review_mode == \"sdk\"",
                   "action": [
                     {
                       "provider_actions": {
@@ -101,8 +104,8 @@
                           "content_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
                         },
                         "source_media_type": "text/x-python",
-                        "source_digest": "sha256:b2dee3c6e515b227d706430b764781dfdd3f540b6d1100540a2802308f123785",
-                        "source": "sdk.record_review(event)\nreturn []\n",
+                        "source_digest": "sha256:d78d1c509917207fb44dbbb5f7f2553b61727e7e1d994984b5d41d5760190308",
+                        "source": "sdk.record_review(event)\nreturn {\"actions\": []}\n",
                         "dependencies": [
                           {
                             "identifier": "example.review-sdk",
@@ -125,7 +128,8 @@
                         "output_type": "structured_actions"
                       }
                     }
-                  ]
+                  ],
+                  "transition_to": "complete"
                 }
               ]
             }

@@ -1,9 +1,9 @@
 # Normative vectors and generated artifacts
 
-These files are test data and generated wire artifacts, not authored vectors. Canonical JSON
-remains JSON; it is not converted to YAML as an alternate wire format. YAML here is source fixture
-input for exhaustive cases, not the curated tutorial set. Human-facing machines live only under
-`../examples/` .
+These files are test data and generated wire artifacts, not authored vectors. Canonical JSON remains
+JSON; it is not converted to YAML as an alternate wire format. YAML here is source fixture input for
+exhaustive cases, not the curated tutorial set. Human-facing machines live only under
+`../examples/`.
 
 Topic directories retain authority, archives, delivery, effects, extension negotiation, inspection,
 persistence, providers, public-host protocol, recovery and timer coverage. Negative fixtures

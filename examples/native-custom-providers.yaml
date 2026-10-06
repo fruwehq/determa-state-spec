@@ -7,6 +7,7 @@ events:
     direction: input
     payload:
       approved: { type: bool, required: true }
+      review_mode: { type: string, required: true }
 machines:
   - machine_id: order
     root:
@@ -18,7 +19,7 @@ machines:
         pending:
           on_events:
             submit:
-              - guard: "event.payload.approved"
+              - guard: 'event.payload.approved && event.payload.review_mode == "automatic"'
                 transition_to: complete
               - guard: { provider: review }
                 action:
@@ -31,6 +32,6 @@ machines:
                   - lang: python
                     source: |
                       sdk.record_review(event)
-                      return []
+                      return {"actions": []}
                 transition_to: complete
         complete: { type: final }

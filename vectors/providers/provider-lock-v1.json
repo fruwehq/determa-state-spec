@@ -2,8 +2,8 @@
   "artifact_format": "determa.provider_lock",
   "artifact_schema_version": 1,
   "content": {
-    "authored_source_digest": "sha256:da23e056673f4ed9dc273f587cb4b4f996f666da6f4860a5c30477a7be5fa59a",
-    "resolved_definition_fingerprint": "sha256:24689adb33bbc5d21248f0870655ae416e1da463c9c07c2d0186fc4b0da83201",
+    "authored_source_digest": "sha256:cfa06251a55efd46311a330c2a0e05083b0503cc139582b62ca0055dfee95780",
+    "resolved_definition_fingerprint": "sha256:e52f7457d36bd78e4142dfe5df7d63c2f54f515aa865b24b3bb0006f9943bc17",
     "runtime_providers": [
       {
         "name": "python",
@@ -16,8 +16,8 @@
             "content_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
           },
           "source_media_type": "text/x-python",
-          "source_digest": "sha256:b2dee3c6e515b227d706430b764781dfdd3f540b6d1100540a2802308f123785",
-          "source": "sdk.record_review(event)\nreturn []\n",
+          "source_digest": "sha256:d78d1c509917207fb44dbbb5f7f2553b61727e7e1d994984b5d41d5760190308",
+          "source": "sdk.record_review(event)\nreturn {\"actions\": []}\n",
           "dependencies": [
             {
               "identifier": "example.review-sdk",
@@ -116,5 +116,5 @@
       }
     ]
   },
-  "artifact_digest": "sha256:c28e30a63493f2c8516b1a9840ddf46854beb1f679a00ba4fec79f25696d4775"
+  "artifact_digest": "sha256:3c3d15530f95a6f8ee1fd24f17944885a85f28723c0616da83d7bbbce8281ff6"
 }
