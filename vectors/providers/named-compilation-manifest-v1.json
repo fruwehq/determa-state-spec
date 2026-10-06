@@ -16,14 +16,6 @@
       }
     ],
     "generated_validated_bundle_fingerprint": "sha256:e52f7457d36bd78e4142dfe5df7d63c2f54f515aa865b24b3bb0006f9943bc17",
-    "source_capabilities": {
-      "deterministic": true,
-      "pure": true,
-      "portable": true,
-      "semantically_introspectable": true,
-      "process_contained": true,
-      "external_io_capable": false
-    },
     "source_map": [
       {
         "source_locator": "/machines/0/root/states/pending/on_events/submit/2/guard",
@@ -39,5 +31,5 @@
       }
     ]
   },
-  "artifact_digest": "sha256:83131be50ce215d3e769c01884ced1a027ea8eb891af74d134bef2827d6fb943"
+  "artifact_digest": "sha256:d7740ab8d0ed522b6e65b4f1705df4180090446d27e53054bf85cc0828b9e105"
 }

@@ -47,7 +47,8 @@ current definitions, not draft-format readers.
 - OMG UML State Machines, for terminology and established statechart concepts.
 - Miro Samek, *Practical UML Statecharts in C/C++*, for implementation lessons and event-driven
   design patterns.
-- CEL — Common Expression Language (<https://cel.dev/>), used for guards and computed action values.
+- CEL — Common Expression Language (<https://cel.dev/>), used for guards and computed action
+  values.
 
 Determa State has Harel/UML lineage, but this document defines Determa semantics. A similar name or
 diagram shape does not import behavior from another framework, runtime, or notation. Where
@@ -111,7 +112,8 @@ The accepted parsed value model is deliberately narrower than general YAML:
 - every numeric leaf satisfies §5.2, including leaves nested inside `map`, `list`, or `meta`.
 
 Loaders MUST detect source-level duplicates before constructing an ordinary host map; “last value
-wins” and “first value wins” are nonconformant. The exact pre-schema load codes are `duplicate_key`,
+wins” and “first value wins” are nonconformant. The exact pre-schema load codes are
+`duplicate_key`,
 `non_string_map_key`, `unsupported_yaml_feature`, `non_json_value`, `invalid_unicode`,
 `invalid_numeric_syntax`, `invalid_boolean_syntax`, `invalid_null_syntax`, and
 `numeric_value_out_of_range`. A later JSON Schema or semantic failure uses that layer's code
@@ -170,9 +172,9 @@ library tag coercion can erase the original spelling. The portable resolution is
 A loader MUST apply these source-token rules directly rather than accepting its YAML library's
 implicit scalar tags and attempting to reconstruct spelling afterward.
 
-> **Non-normative authoring note:** Quote YAML-1.1 Boolean-like identifiers such as > `yes`, `no`,
-`on`, and `off` when a bundle may pass through YAML 1.1 tooling. This > improves interoperability
-with nonconforming intermediary tools; it is not an > additional §5.1 identifier restriction.
+> **Non-normative authoring note:** Quote YAML-1.1 Boolean-like identifiers such as `yes`, `no`,
+> `on`, and `off` when a bundle may pass through YAML 1.1 tooling. This improves interoperability
+> with nonconforming intermediary tools; it is not an additional §5.1 identifier restriction.
 
 Every document MUST carry the YAML/JSON integer:
 
@@ -208,7 +210,8 @@ it as format 1.
 
 There is no 0.0.1-through-0.0.6 definition converter or legacy-snapshot import in this
 specification. Users migrating from those releases MUST author a new format-1 bundle and MUST NOT
-carry a legacy snapshot forward. The definition migration rules in §16 apply only between recognized
+carry a legacy snapshot forward. The definition migration rules in §16 apply only between
+recognized
 format-1 bundles and their format-1 portable artifacts.
 
 The document `format` is independent of:
@@ -233,23 +236,29 @@ fields use unabbreviated names except for the deliberately retained keywords `in
 - **State configuration** — the active leaf plus all active ancestors in one runtime.
 - **Variable** — typed extended state declared on a state and scoped to that state and its
   descendants.
-- **Envelope** — one immutable occurrence of an event, with identity, target, payload, and optional
+- **Envelope** — one immutable occurrence of an event, with identity, target, payload, and
+  optional
   correlation.
 - **Run-to-completion step** — atomic processing of one envelope for one target runtime from one
   stable aggregate state to the next.
-- **Emission** — an immutable internal envelope or external output intent returned by the core after
+- **Emission** — an immutable internal envelope or external output intent returned by the core
+  after
   a successful step.
-- **Queue plugin** — host infrastructure that chooses which envelope to present next and what to do
+- **Queue plugin** — host infrastructure that chooses which envelope to present next and what to
+  do
   with handled, unhandled, rejected, or faulting deliveries.
-- **External peer** — anything outside the aggregate that communicates only through declared public
+- **External peer** — anything outside the aggregate that communicates only through declared
+  public
   events.
 
 The core recognizes exactly four statechart relationships:
 
 1. **Inline/nested state** — one hierarchy, configuration, and variable scope.
-2. **Lifecycle-bound component** — a statically placed isolated runtime created and disposed with a
+2. **Lifecycle-bound component** — a statically placed isolated runtime created and disposed with
+   a
    containing `parallel` state.
-3. **Owned spawned instance** — a dynamically created isolated runtime owned by the root aggregate.
+3. **Owned spawned instance** — a dynamically created isolated runtime owned by the root
+   aggregate.
 4. **Independent external peer** — outside engine state and lifecycle.
 
 No relationship permits direct cross-runtime variable access or a transition outside the executing
@@ -504,7 +513,8 @@ Common state fields:
 - `variables` — state-scoped declarations.
 - `entry`, `exit` — ordered structured actions and runtime action slots (§5.4).
 - `on_events` — event name to transition or ordered transition list.
-- `deferred_events` — optional non-empty unique list of declared events that this state defers under
+- `deferred_events` — optional non-empty unique list of declared events that this state defers
+  under
   §6.7 when no enabled handler exists in the active hierarchy.
 - `deferred_event_capacity` — optional non-negative signed-64-bit capacity for the runtime-local
   deferred mailbox; valid only on a machine root or inline-component root. Omission means logically
@@ -637,7 +647,8 @@ or `invalid_instance_target`, respectively. Such sends are not cleanup no-ops.
 
 ### 5.1 Load-time validation
 
-After the §2 source checks and JSON Schema validation succeed, semantic validation returns one exact
+After the §2 source checks and JSON Schema validation succeed, semantic validation returns one
+exact
 load code. A rejection below that names a code in parentheses uses that named code. An unavailable
 CEL-profile symbol or overload uses `cel_profile_error`. Every other rejection in this section,
 including CEL parse/name/type errors, uses the generic `semantic_validation` code.
@@ -965,7 +976,8 @@ engine state; mutation of a provider's local copy cannot mutate a tentative or p
 guard binding has `output_type: bool` and returns one Boolean or a typed failure. An action binding
 has `output_type: structured_actions` and returns an ordered finite list of concrete `assign` and
 `send` action proposals or a typed failure. Their closed result schema is
-`schema/runtime-action-output-v1.schema.json`. A proposal contains §16.2 typed operands and is never
+`schema/runtime-action-output-v1.schema.json`. A proposal contains §16.2 typed operands and is
+never
 a direct mutation of an aggregate, mailbox, counter, receipt or host journal. The engine validates
 every destination, value type, event declaration, target and complete emission against the same
 statechart rules before applying it. It also rejects a write to a destination destroyed by the
@@ -984,7 +996,8 @@ the containing transition, choose another slot, or gain arbitrary internal-state
 Invalid output is a `runtime_provider_output_invalid` provider-boundary error and no tentative
 Determa state commits. A selected slot alone invokes its provider; an incoming event's provider-like
 string grants no invocation authority. An invoked provider's typed execution failure follows the
-ordinary `guard_fault` or `action_fault` rule at that exact slot locator (§10). An invalid output is
+ordinary `guard_fault` or `action_fault` rule at that exact slot locator (§10). An invalid output
+is
 mapped to the same closed core fault code according to slot kind, while its boundary diagnostic
 retains `runtime_provider_output_invalid`. Either result rolls back tentative Determa state, but
 cannot undo I/O already performed by a native or runtime-language provider. A provider that is not
@@ -1032,8 +1045,8 @@ runtime-language binding retains the region's exact source text and media type; 
 reference/dependency closure identifies the interpreter, compiled wrapper and SDKs actually used.
 The tool splices action results at the named element, preserving surrounding author order. The
 generated definition then passes the resolved-definition loader. The manifest binds source digest,
-exact compiler closure, generated validated-bundle fingerprint, source capabilities and generated
-`source_map`. Every map entry has `source_locator` and ordered `resolved_locators`; entries follow
+exact compiler closure, generated validated-bundle fingerprint and generated `source_map`. Every map
+entry has `source_locator` and ordered `resolved_locators`; entries follow
 region order. Guard regions map to one resolved guard; action regions map to their generated action
 elements, possibly none for an empty result. Every locator is checked against the corresponding
 immutable source/resolved definition. Source compilation and manifest envelopes each contain exactly
@@ -2139,7 +2152,8 @@ above. `emitting_runtime_id` already contains the full placement pointer and act
 identical actions in sibling, nested, or later inline placements cannot collide.
 
 `emission_index` is the zero-based external-intent ordinal within that executing action. For a
-native slot, that index continues across all external send proposals under §5.4; it is not reset for
+native slot, that index continues across all external send proposals under §5.4; it is not reset
+for
 each proposal. The intent also carries the allocated aggregate-monotonic output `sequence`, event
 name, typed payload, and correlation id. Retrying the same uncommitted prior state and envelope
 reproduces the same state, emissions, ids, and order. Processing several envelopes by repeated
@@ -2581,7 +2595,8 @@ and broker acknowledgements remain plugin-owned.
 valid portable aggregate, one exact runtime incarnation, and one normalized candidate envelope. Its
 closed request and outcome are defined by `schema/inspection-v1.schema.json`. The request has
 exactly `mode`, `aggregate_state_digest`, `runtime_id`, `runtime_incarnation`, `envelope`, and
-`limits`. `runtime_incarnation` is the runtime's exact portable `identity_origin` (§16.3), including
+`limits`. `runtime_incarnation` is the runtime's exact portable `identity_origin` (§16.3),
+including
 its component activation or spawned sequence where applicable. A caller cannot substitute a matching
 machine or placement with a different incarnation. `structural` requires `limits: null`; `semantic`
 requires two positive canonical decimal limits, `maximum_guard_evaluations` and
@@ -3757,7 +3772,8 @@ The complete schema is `schema/execution-checkpoint-v1.schema.json`. A checkpoin
 }
 ```
 
-For a retained root, checkpoint and aggregate root identities match and the aggregate passes all §16
+For a retained root, checkpoint and aggregate root identities match and the aggregate passes all
+§16
 validation. The first successful checkpoint has revision `"0"`; every later changing transaction
 advances it exactly once. Reads, equal replays, failed transactions, and CAS conflicts change no
 byte or counter.
@@ -3880,7 +3896,8 @@ Successful host admission allocates one aggregate-wide `acceptance_sequence` and
 `queue_sequence` per new envelope in caller order, appends it to its exact target ready tail,
 creates one input acceptance receipt, advances revision once, and recomputes both digests. Only then
 may an adapter acknowledge transfer of ownership. An adapter claiming §21 MUST retain the exact
-source-to-acceptance binding and prove that it committed atomically with this admission under §21.1.
+source-to-acceptance binding and prove that it committed atomically with this admission under
+§21.1.
 
 Processing explicitly targets one runtime and selects only its ready head. A deferred result
 atomically moves the entry to that runtime's deferred tail with a new queue sequence and no terminal
@@ -3935,7 +3952,8 @@ otherwise the migration fails unchanged.
 ### 17.5 Maintenance-migration operations
 
 A migration with no delivery MUST carry a non-empty host-supplied `operation_id`. The writer also
-supplies the exact checkpoint revision and digest it read, as required by §17.9. The operation id is
+supplies the exact checkpoint revision and digest it read, as required by §17.9. The operation id
+is
 unique among retained native maintenance-migration receipts for the root. Its request digest is:
 
 ```text
@@ -3976,7 +3994,8 @@ pre-transaction aggregate and committed aggregate digests. Its `target_validated
 is the exact target definition fingerprint used in the request digest. The receipt retains that
 definition identity even after root tombstoning removes the aggregate.
 
-For a non-empty route of length N, `result_code` is `migration_applied`, exactly N §16 audit records
+For a non-empty route of length N, `result_code` is `migration_applied`, exactly N §16 audit
+records
 are appended in descriptor-route order, and `migration_sequences` is exactly their ordered sequence
 list. The values are strictly increasing and contiguous: the first is the source aggregate's
 `migration_sequence + 1`, and the last is the resulting aggregate's `migration_sequence`. A one-hop
@@ -4124,7 +4143,8 @@ pending, full terminal, or effect-tombstone storage.
 
 A full terminal record or compact effect tombstone may be deleted only when no retained operation
 receipt references its effect id. The producing receipt must first be pruned under the
-dependency-safe §17.8 rules. Otherwise silent deletion is `invalid_execution_checkpoint`. This makes
+dependency-safe §17.8 rules. Otherwise silent deletion is `invalid_execution_checkpoint`. This
+makes
 weak cleanup compatible with receipt linkage without requiring every host to retain complete
 historical payloads.
 
@@ -4300,7 +4320,8 @@ compare-and-swap result. Lost updates are nonconformant.
 
 This specification defines adapter behavior, not a language API, binary interface, wire protocol,
 database schema, or cross-language dynamic-loading mechanism. Execution stores also obey the common
-§11.5 identity, direct-injection, descriptor, configured-report, and requirement rules. An adapter's
+§11.5 identity, direct-injection, descriptor, configured-report, and requirement rules. An
+adapter's
 URI scheme in this section is a lookup key distinct from its exact provider-reference identifier.
 The `duplicate_adapter_registration` and `adapter_capability_mismatch` codes below are the
 established execution-store-specific outcomes of those common rules. Applications SHOULD be able to
@@ -4379,9 +4400,11 @@ physical checkpoint/root-marker deletion is not a weaker profile:
 - `broker_integrated` requires a durable store, an ingress adapter that acknowledges only after
   checkpoint commit, durable redelivery behavior, and an outbox worker; a store alone can never
   claim it.
-- `strict_durable_outbox` requires the §17.6 total lifecycle, `permanent_outbox_terminal_retention`,
+- `strict_durable_outbox` requires the §17.6 total lifecycle,
+  `permanent_outbox_terminal_retention`,
   and an outbox worker that never silently deletes unresolved work.
-- `compact_durable_outbox` permits full terminal intents to become §17.6 effect tombstones, requires
+- `compact_durable_outbox` permits full terminal intents to become §17.6 effect tombstones,
+  requires
   `compact_effect_identity_retention`, and forbids deleting a tombstone while a retained receipt
   references it.
 - `shared_application_transaction` is available to a host only when the store exposes that store
@@ -4479,7 +4502,8 @@ two registered capability names bind respectively to §18.3 and §18.4. A `safe_
 claim and a true host-profile report mean the configured instance has proved support for the
 specified source, destination and topology. They do not assert that this transfer has already frozen
 the source, proved retirement or activated the destination. The host rechecks that support at each
-operation; activation additionally requires the transfer-specific §18.5 evidence. A generic instance
+operation; activation additionally requires the transfer-specific §18.5 evidence. A generic
+instance
 report cannot authorize a particular transfer. The closed
 `schema/host-authority-profile-report-v1.schema.json` composes the §11.5 extension report, or null
 when no authority provider is configured, with the exact authenticated scope, epoch and generation
@@ -4523,7 +4547,8 @@ The public version-1 authority operation envelope has exactly `interface`, `inte
 `operation`, `operation_id`, `scope_identity`, `expected_authority_epoch`,
 `expected_scope_generation`, `request_digest`, and `arguments`. `interface` is
 `determa.host_authority` and `interface_version` is `1`. `request_digest` is
-`hash(["determa-host-authority-request-1", request_without_request_digest])`, using §9's SHA-256/JCS
+`hash(["determa-host-authority-request-1", request_without_request_digest])`, using §9's
+SHA-256/JCS
 construction. An operation ID is unique within its authenticated scope. The host authenticates the
 caller through trusted transport/invocation context, authorizes the operation and scope before
 revealing existence or replay evidence, and checks the current owner, epoch and state before
@@ -4682,7 +4707,8 @@ not execute an uncommitted core result, a merely proposed intent, or a request i
 pending journal row. The pure §8 core needs no journal, worker, scheduler, coordinator, or native
 handler. A host claiming durable native results MUST supply an atomic checkpoint, outbox,
 pinned-route, and journal-outcome boundary and the authority capability required for every claim it
-advertises (§18). An embedded callback without those capabilities MUST report its weaker guarantees;
+advertises (§18). An embedded callback without those capabilities MUST report its weaker
+guarantees;
 it MUST NOT advertise durable worker claims, safe relocation, or exactly-once external execution.
 This profile defines no distributed authority service.
 
@@ -4782,7 +4808,8 @@ The closed claim shape is `schema/host-effect-claim-v1.schema.json`. A claim has
 form MUST match the closed ten-field §18.4 `workerClaim` with canonical signed 64-bit Unix-epoch
 nanosecond expiry. Negative zero, float, or overflow is invalid; expiration is determined from
 trusted host time at `now >= expires_at`, and unavailable trusted time fails closed.
-`scope_authority_epoch` MUST equal the current §18 `authority_epoch`; a numeric match alone is not a
+`scope_authority_epoch` MUST equal the current §18 `authority_epoch`; a numeric match alone is not
+a
 credential. For this journal `work_kind` is `effect`, `work_identity` is its effect ID, and state is
 `active`, `revoked`, or `expired`. The current claim is an authority record outside the archive;
 historic claim evidence MAY be retained for audit but grants no authority. Issuing a claim
@@ -4794,7 +4821,8 @@ and matching active scope epoch and attempt fence MUST still hold at the journal
 Lease expiry can revoke host writes but cannot prove whether external work happened. Import never
 restores a live claim; an unresolved inherited attempt becomes ambiguous before any new attempt.
 
-Native handlers receive a declared §16.2 typed portable input, immutable invocation metadata, and an
+Native handlers receive a declared §16.2 typed portable input, immutable invocation metadata, and
+an
 attempt context. They may build arbitrary SDK, protobuf, or other native objects internally. Such
 objects are not portable input, result, checkpoint, or journal values. A handler has no direct
 aggregate mutation or host transaction capability. Its report kind is `succeeded`,
@@ -4936,7 +4964,8 @@ checkpoint, and an encode of every reachable committed result back to those loca
 supported state `s`, decoding the encoding of `s` MUST reconstruct all logical fields and their
 exact canonical typed values, identities, ordering, references, and digests. Physical bytes may
 differ only where the portable decoder explicitly permits equivalent encodings; the reconstructed
-portable artifact MUST have the canonical §16/§17 bytes and digest. A mapped enum such as `pending`
+portable artifact MUST have the canonical §16/§17 bytes and digest. A mapped enum such as
+`pending`
 or `done` cannot replace other state. Supplemental JSON or related rows MAY retain information that
 domain columns cannot express, but they participate in the same reconstruction and atomic commit.
 
@@ -4963,7 +4992,8 @@ host configuration, not portable format.
 
 The application supplies an explicit selected-row snapshot and typed caller request. The projection
 MAY read mapped application fields as §16.2 typed values and submit them only through a
-declaration-supported create binding, declared input envelope, or the reserved §6 `env` envelope for
+declaration-supported create binding, declared input envelope, or the reserved §6 `env` envelope
+for
 declared root external variables. The selected definition determines the accepted name, type,
 target, and timing. `env` is the sole undeclared host-input exception. Its selected handler's
 `refresh` action copies only the requested fields; a missing `refresh.only` field can produce a
@@ -5008,7 +5038,8 @@ to another root or scope.
 Any failed validation, projection, core invocation, transaction, or revision guard before commit
 leaves selected application rows and the prior checkpoint, receipts, and outbox unchanged under the
 claimed atomic transaction. A committed `faulted` or `unhandled` core disposition remains an
-ordinary complete result under §17 and MUST NOT be mistaken for an invocation failure. A conflict is
+ordinary complete result under §17 and MUST NOT be mistaken for an invocation failure. A conflict
+is
 reported with the existing `checkpoint_revision_conflict`; the caller may start a new invocation
 from the newly committed state. The facade does not automatically reevaluate or retry. An explicitly
 installed impure native runtime provider may perform external I/O during evaluation, before commit.
@@ -5031,7 +5062,8 @@ candidate round-trip validation precedes commit; the revision guard is checked a
 provider exceptions are surfaced as host failures without relabeling them as successful
 dispositions.
 
-The following cases are normative. `typed` denotes the exact §16.2 projection, and `prior` denotes a
+The following cases are normative. `typed` denotes the exact §16.2 projection, and `prior` denotes
+a
 valid complete aggregate or checkpoint for the selected root.
 
 | selected application mapping and invocation | required outcome |
@@ -5054,7 +5086,8 @@ valid complete aggregate or checkpoint for the selected root.
 
 ### 21.1 Boundary and portable delivery values
 
-This optional profile composes an ingress source, the §8 foreground core, an optional §17 execution
+This optional profile composes an ingress source, the §8 foreground core, an optional §17
+execution
 store, and an outbound destination. It changes no machine grammar or core clock behavior. Its closed
 wire values are `schema/delivery-v1.schema.json`; version 1 is the sole version. An application may
 use the base in-memory API without a broker, worker, coordinator, daemon, or timer. That API MUST
@@ -5064,8 +5097,10 @@ guarantees it actually supplies. The complete core `step` result in §8 and
 `schema/core-step-result-v1.schema.json` is the base result shape: its state, disposition,
 fault/rejection, emissions, and every `lifecycle_dispositions` member are mandatory fields. A caller
 MUST preserve or explicitly decide every returned external intent and lifecycle disposition before
-claiming lossless delivery. In a durable host, §17 receipts and records supply the machine evidence;
-§18 authority guards, §19 effect journals, and §20 application projections apply only when the host
+claiming lossless delivery. In a durable host, §17 receipts and records supply the machine
+evidence;
+§18 authority guards, §19 effect journals, and §20 application projections apply only when the
+host
 declares those optional profiles. A delivery adapter MUST NOT infer authority, durable processing,
 or application success from a portable envelope or provider name. §19 result-event admission is a
 host-owned journal recovery operation. It uses the same §17 aggregate admission boundary but has no
@@ -5093,7 +5128,8 @@ source_content_digest = hash([
 `source_delivery_id`); it is distinct from the machine `event_id`. Adapters MUST retain the pair and
 digest across attempts. A replay of the pair with different content is `source_delivery_id_conflict`
 and cannot overwrite earlier evidence. A successfully normalized envelope retains its entire §6.1
-value, projected with §16.2 typed payloads and decimal-string integer fields, through every accepted
+value, projected with §16.2 typed payloads and decimal-string integer fields, through every
+accepted
 ready/deferred location. A durable adapter binds the source pair and digest to the checkpoint
 acceptance receipt or durable terminal-transfer record before source acknowledgement. The binding is
 host evidence outside the portable checkpoint; it MUST be restored with that checkpoint for a
@@ -5123,7 +5159,8 @@ The closed pre-commit decision is `source_owned` with one reason: `backpressure`
 It returns `acknowledge_source: false` and leaves source ownership intact. The adapter may pause
 consumption or request source redelivery according to its configured source contract; it MUST NOT
 turn a retry exhaustion, overflow, plugin failure, or target removal into implicit discard. A
-rejected admission is not a terminal machine disposition. An explicit poison policy may choose §21.4
+rejected admission is not a terminal machine disposition. An explicit poison policy may choose
+§21.4
 instead, if its record can commit before acknowledgement. The decision response identifies event
 identity when normalization succeeded; otherwise it identifies source identity and content digest.
 
@@ -5136,10 +5173,12 @@ a separately authenticated read but cannot acknowledge, reactivate, or mutate de
 Authentication, authorization, and §18's exact guard failures retain their §18 result codes; a
 delivery response MUST NOT replace them with `authority_unavailable`. That delivery reason covers
 only an unavailable required guard before a guarded operation begins. An admission batch follows
-§17.4's atomic order; a failed member leaves the whole batch source-owned. Broker acknowledgement is
+§17.4's atomic order; a failed member leaves the whole batch source-owned. Broker acknowledgement
+is
 per source item only after the batch commit is known durable.
 
-After admission, exactly one runtime ready/deferred mailbox owns the envelope until a terminal §17.4
+After admission, exactly one runtime ready/deferred mailbox owns the envelope until a terminal
+§17.4
 receipt owns its outcome. `deferred` is a live placement and cannot trigger a source retry.
 `unhandled`, `faulted`, `disposed`, and `migration_disposed` are terminal machine outcomes, never
 admission failures. The adapter MUST NOT ask the source broker to retry an admitted event because
@@ -5313,7 +5352,8 @@ because archive bytes hash.
 
 The exporter MUST prove that every root in the selection has exactly one checkpoint, including
 tombstones, and that every owned runtime and component is represented by its checkpoint aggregate
-under §§7.1–7.2. The archive contains the exact complete §17 checkpoint for each selected root. Thus
+under §§7.1–7.2. The archive contains the exact complete §17 checkpoint for each selected root.
+Thus
 active configurations, typed variables, histories, owned identities, ready and deferred mailboxes,
 counters, faults, external intents, pending and terminal outbox work, receipts, replay retention,
 migration audit, and root tombstones survive without inference. An empty root selection is invalid.
@@ -5329,7 +5369,8 @@ hash alone is never a grant. The archive records no active worker claim, epoch a
 proof, credential, or destination-bound grant. Import cannot mint or restore any of these from
 `consistency_token`, checkpoint bytes, or an authority response.
 
-If the selected source used §19 durable native results, its complete closed §19 host effect journal
+If the selected source used §19 durable native results, its complete closed §19 host effect
+journal
 for every selected participating root MUST be a required archive participant under a separately
 pinned schema and provider. The independent source policy binds that journal participant ID into the
 trusted required set; an artifact that deletes the journal or removes the ID from its own contract
@@ -5344,9 +5385,11 @@ by operation ID; each reference digest MUST equal
 `hash(["determa-host-operation-response-1", normalized_response])`. A response digest alone does not
 reconstruct equal replay. An empty journal is valid only when the verified source inventory proves
 that root has no §19 native-effect records or response references at the capture point. Missing,
-duplicate, or torn journal evidence blocks the operation. §19 active worker claims, credentials, and
+duplicate, or torn journal evidence blocks the operation. §19 active worker claims, credentials,
+and
 authority records remain outside the archive; their historical outcomes and result-admission
-evidence remain in the journal payload. A source that has only §17 outbox intents and does not claim
+evidence remain in the journal payload. A source that has only §17 outbox intents and does not
+claim
 §19 needs no journal participant.
 
 `schema/archive-host-journal-inventory-v1.schema.json` closes the separate source inventory
@@ -5432,7 +5475,8 @@ retained §18 operation. A nonnull fence reference carries only the retained ope
 response digest; a transfer reference additionally carries the destination binding digest. They are
 public provenance pointers, checked against exact source profile and trusted retained host evidence
 when used. A hash or operation ID in the archive cannot itself prove source retirement, convey a
-credential, consume a grant, or authorize activation; §18 and the separate recovery contract perform
+credential, consume a grant, or authorize activation; §18 and the separate recovery contract
+perform
 those checks.
 
 `selection` contains `root_instance_ids`, ordered strictly by UTF-8 bytes, and `consistency_token`,
@@ -5452,7 +5496,8 @@ Participant records are ordered by `participant_id` and are unique. Each has exa
 `payload`. `provider_reference` is §11.5 exact identifier/version/content digest. Dependencies are
 unique participant IDs in ascending UTF-8 order, must exist in the archive, and must form an acyclic
 graph. A required participant makes all its dependencies required in effect. `storage` is `embedded`
-or `external`. Embedded payload is the complete typed §16.2 projection; external payload is null and
+or `external`. Embedded payload is the complete typed §16.2 projection; external payload is null
+and
 names immutable bytes by `payload_digest` through the importer's configured content-addressed
 resolver. Both modes must reconstruct the same declared typed value exactly; an external reference
 is never a permission to omit required bytes. The payload is participant-owned and may represent
@@ -5601,7 +5646,8 @@ has `interface: "determa.timer_helper"`, `interface_version: 1`, `operation` (`s
 helper verifies it against the authorized target; a recycled root name cannot receive a prior timer.
 `operation_id` is unique within the authorized scope. `timer_id` is unique within the
 scope/root/incarnation tuple and cannot be reused after a retained terminal record. The request
-digest is `hash(["determa-timer-request-1", request_without_request_digest])` using §9. Before scope
+digest is `hash(["determa-timer-request-1", request_without_request_digest])` using §9. Before
+scope
 lookup or clock access, an unknown interface returns the closed `unsupported_timer_protocol` early
 result, then an unknown version returns `unsupported_timer_protocol_version`, then an invalid
 recognized request returns `invalid_timer_request`. These early results have null operation and
@@ -5664,7 +5710,8 @@ that no event was admitted; claim expiration alone gives no such proof. The host
 expiry does not prove that an external fire was absent. `complete_fire` requires the current fence,
 principal, revision, and exact event ID. A stale or unauthorized claim changes nothing. If §18
 authority is installed and its guarded local write capability is proved, the current scope epoch and
-`guarded_commit` protect the timer mutation alongside the helper's own fence. The §18 `fence_worker`
+`guarded_commit` protect the timer mutation alongside the helper's own fence. The §18
+`fence_worker`
 /ten-field `workerClaim` is effect-specific and is never serialized as a timer claim; no
 `clock_basis` is added to it. An archived or expired helper claim is never portable authority.
 
@@ -5677,11 +5724,13 @@ stand for a pending source item. `vectors/timers/timer-committed-admission-v1.js
 committed checkpoint and this digest for the positive fire case.
 
 A host claiming `coordinated_timer_admission` MUST commit transition to `fired`, timer receipt,
-complete §17 acceptance receipt/checkpoint, and any §21 source binding in one native transaction, or
+complete §17 acceptance receipt/checkpoint, and any §21 source binding in one native transaction,
+or
 prove a recoverable protocol that reaches the same result after every crash. It acknowledges only
 after that boundary. A precommit admission rejection leaves timer and checkpoint unchanged, returns
 `timer_admission_rejected`, and preserves the immutable event for authorized retry. It creates no
-§17 admission receipt or §21 admitted binding. Recovery after an uncommitted attempt reuses the same
+§17 admission receipt or §21 admitted binding. Recovery after an uncommitted attempt reuses the
+same
 event ID under a newly proved fence. After a committed fire, replay returns retained evidence and
 cannot admit it again. The same event ID with different envelope content fails
 `timer_event_conflict`. A §21 adapter uses `source_scope = scope_identity` and
@@ -5694,7 +5743,8 @@ source_delivery_id = hash([
 ])
 ```
 retains the same canonical event content and source content digest across attempts, and acknowledges
-its source only after §21's committed ownership transfer. Direct §17 admission is also valid and has
+its source only after §21's committed ownership transfer. Direct §17 admission is also valid and
+has
 no §21 source receipt to invent. Both paths apply ordinary declaration, target, payload, capacity,
 deferral, fault, and receipt rules.
 
@@ -5732,7 +5782,8 @@ timer identities and retained replay evidence from authoritative storage for the
 caller-provided list or artifact self-description alone is not completeness proof. If outstanding
 timers must resume with a selected root, the participant is required in the §22 export request and
 trusted source contract; its absence fails export or staging as `missing_required_artifact` or
-`missing_required_provider` according to the §22 boundary. External payload storage must reconstruct
+`missing_required_provider` according to the §22 boundary. External payload storage must
+reconstruct
 the exact bytes. Import stages inert data; it never activates a clock, worker, claim, scope
 authority, or pending delivery. The host authorizes and reconciles staged records before resumption.
 Unresolved fire fate blocks resumption. A helper is optional when no selected root depends on its
@@ -5774,7 +5825,8 @@ to its advertised claims. An implementation without the profile needs no backgro
 
 ### 24.1 Contract and precedence
 
-This optional host contract consumes a verified, inert §22 archive stage. It neither changes the §16
+This optional host contract consumes a verified, inert §22 archive stage. It neither changes the
+§16
 aggregate nor makes a portable archive an authority credential. The closed version-1 request and
 result are `schema/recovery-operation-v1.schema.json`. A host authenticates the principal outside
 the portable request, binds it to the requested operation and destination, and durably records the
@@ -6006,7 +6058,8 @@ and `arguments`. The protocol is `determa.execution_host`, version is integer `1
 one of `capabilities`, `create`, `admit`, `process`, `read`, `inspect`, `receipt`, `effect_result`,
 `cancel_effect`, `timer_command`, or `scope_operation`. `target` has exact `root_instance_id`,
 `runtime_id`, and `runtime_incarnation`, each null when inapplicable; a non-null incarnation is
-§16's exact immutable identity origin. `precondition` is null or an exact revision/checkpoint-digest
+§16's exact immutable identity origin. `precondition` is null or an exact
+revision/checkpoint-digest
 pair. The selected operation has closed `arguments`. Only a `capabilities` bootstrap may carry null
 `scope_binding_identity`; its successful value names the resolved non-null binding. Typed values use
 §16.2 before hashing; omitted, null and empty fields are different. An operation ID is a nonempty
@@ -6046,7 +6099,8 @@ hash([
 ```
 The host must resolve that receipt and the exact retained caller request at the pinned binding
 before returning `pending`. This defines no new sequence allocator or alternate admission boundary.
-A §17 acceptance receipt proves the event was admitted, not that a separate `process`, timer, effect
+A §17 acceptance receipt proves the event was admitted, not that a separate `process`, timer,
+effect
 or scope request was accepted. `pending` is available only when the configured host can additionally
 link that exact public request to a durable accepted-work record; the minimal reference profile need
 not emit `pending`. Without that proof the host returns a committed/rejected result or no response
@@ -6112,7 +6166,8 @@ or prove a later health state.
 `create`, `admit`, and `process` bind the §8 foreground operations and §17 checkpoint boundary.
 Creation arguments include exact definition fingerprint, machine identity, root ID, creation ID and
 normalized typed bindings. Admission contains complete ordered
-`(delivery_mode, envelope, envelope_digest)` entries; each digest uses §16.15 and is verified before
+`(delivery_mode, envelope, envelope_digest)` entries; each digest uses §16.15 and is verified
+before
 commit. Processing targets one exact runtime and incarnation under the supplied checkpoint
 precondition. Successful values include the complete resulting checkpoint, exact §8
 operation-specific result and durable creation/acceptance/terminal receipt evidence as applicable.
@@ -6151,7 +6206,8 @@ request/result when that capability is offered. Its `archive_export` and `archiv
 carry the exact closed §22 requests and results. Export success returns the complete
 `determa.scope_archive` bytes and result in the retained first public response; import carries the
 complete archive bytes with the §22 import request and returns the exact staged result. An import
-only creates inert staging: it does not activate roots or convey ownership. §22's complete precommit
+only creates inert staging: it does not activate roots or convey ownership. §22's complete
+precommit
 `refused` result maps to outer `rejected` with null receipt/value and the exact result in
 `error.archive_result`, where `error.code` equals its refusal code; it claims no transaction commit.
 A successful export or stage maps to outer `committed` only when the named operation transaction and
@@ -6166,7 +6222,8 @@ source-retirement or clone-isolation proofs before a mutation. A recovered recor
 the complete retained record; it is not an ownership credential. Strict restore remains quarantined;
 fresh-scope takeover and clone require their separate risk and isolation conditions. Only a
 positively configured and verified same-authority transfer may claim `safe_relocation`; unsupported
-topology returns the exact §24 `host_capability_mismatch` refusal in `error.recovery_result`. A §24
+topology returns the exact §24 `host_capability_mismatch` refusal in `error.recovery_result`. A
+§24
 `refused` result maps to outer `rejected` without receipt or value. A successful mutation maps to
 outer `committed` only with its retained public receipt and exact complete result/record; read-only
 `guarded_action` may have a null receipt and must recheck the guard at a later native commit.

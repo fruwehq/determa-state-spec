@@ -46,4 +46,4 @@ that calls an SDK and returns the closed `{actions: []}` result. `named-language
 the source, compiler and runtime/SDK closure. Python remains runtime execution, rather than a CEL
 translation. Its generated binding truthfully has I/O capability and lacks process containment,
 purity and replay guarantees. These are synthetic contract identities, not an installed SDK or
-authenticity evidence. Compilation capabilities describe historical compilation only.
+authenticity evidence. Compiler capabilities never become runtime guarantees.

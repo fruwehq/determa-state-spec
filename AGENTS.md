@@ -35,7 +35,8 @@ launcher dispatches `determa <product> …` to the `determa-<product>` binary on
 - Finish and independently review each repository before proceeding to the next. Obtain maintainer
   review before merging; completed repositories require permission for further changes. Keep a
   release's agreed scope in one tracking issue and one PR per repository, including review fixes.
-- **No AI/assistant attribution anywhere** — no `Co-Authored-By`, no "Generated with…", in commits,
+- **No AI/assistant attribution anywhere** — no `Co-Authored-By`, no "Generated with…", in
+  commits,
   PR bodies, comments, or docs. Everything reads as the author's own work.
 - **Conformance-first** for behavior changes: land the spec text here, then the matching case in
   `determa-state-conformance`, then the implementations.
@@ -51,7 +52,8 @@ launcher dispatches `determa <product> …` to the `determa-<product>` binary on
   `vX.Y.Z` after merge. Implementations pin the conformance suite at that tag.
 
 ## Pointers
-- Prose spec: `SPEC.md` (§2 format identity, §4 grammar, §5 CEL, §6 transitions, §10 faults, §11
+- Prose spec: `SPEC.md` (§2 format identity, §4 grammar, §5 CEL, §6 transitions, §10 faults,
+  §11
   plugin boundary, §16 portable persistence/migration).
 - Non-normative rationale and review guidance: `DECISIONS.md`. It never overrides `SPEC.md`, the
   schema, or conformance.

@@ -2,7 +2,8 @@
 
 **determa-state-spec** is the normative **specification** repository. It holds the prose spec
 (`SPEC.md`), JSON Schemas (`schema/`), concise YAML examples (`examples/`), and canonical
-artifacts/cases (`vectors/`) — text only. There is **no test or implementation code here** and **no
+artifacts/cases (`vectors/`) — text only. There is **no test or implementation code here** and
+**no
 CI**; the executable correctness target lives in
 [`fruwehq/determa-state-conformance`](https://github.com/fruwehq/determa-state-conformance), and the
 Python reference implementation in
@@ -17,7 +18,8 @@ Work repository by repository: specification review first, shared tests next, la
 implementations after that. Keep the agreed release scope in one tracking issue and one PR per
 repository, including review fixes. Finish independent and maintainer review before proceeding to
 another repository; further changes to a completed repository require permission. Applicable core
-cases retain their §2 authority; optional profiles and harness mechanics do not define the core API.
+cases retain their §2 authority; optional profiles and harness mechanics do not define the core
+API.
 
 ## Source and generated data
 
@@ -42,7 +44,10 @@ base, and reject missing JSON Pointer or anchor targets without fetching unregis
 Meta-validation alone does not prove reference closure. Validate actual positive and negative
 instances and record structural versus semantic rejection separately.
 
-Reflow prose/YAML to 100 columns. Put giant exact canonical operands in normative JSON vectors.
+Keep prose/YAML lines within 100 UTF-8 bytes so literal byte-based width scans agree.
+Use `LC_ALL=C awk 'length($0)>100'` to inventory exceptions; Unicode character counts are
+insufficient.
+Put giant exact canonical operands in normative JSON vectors.
 Keep table rows intact for Markdown rendering; genuinely unbreakable URLs are the other permitted
 exception. Ordinary prose, links with editable labels and code formulas should meet the limit.
 

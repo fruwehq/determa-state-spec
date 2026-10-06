@@ -370,7 +370,8 @@ semantics. The root ownership aggregate remains one transactional state boundary
 
 ## Extension capability claims bind configured instances
 
-Relevant specification: [§11.5](SPEC.md#115-public-extension-identity-registration-and-capabilities)
+Relevant specification:
+[§11.5](SPEC.md#115-public-extension-identity-registration-and-capabilities)
 and [§17.11](SPEC.md#1711-execution-store-capabilities-and-composed-host-profiles).
 
 **Decision.** The public registration path accepts bundled and third-party providers equally, with
@@ -468,7 +469,8 @@ Relevant specification: [§11.2](SPEC.md#112-timer-extensions),
 Unix-nanosecond clock values, and its own versioned record artifact. It is installed and
 capability-checked as an external extension. A fire becomes an ordinary declared event with stable
 identity and normal admission. A durable helper participates in §22 archives through a separate
-declared participant when selected roots depend on its work. §17.14's earlier exclusion means timers
+declared participant when selected roots depend on its work. §17.14's earlier exclusion means
+timers
 are outside the core checkpoint; the separate-artifact route is now available without changing
 checkpoint schema version 1. The required participant is pinned in the independent source contract
 and complete `determa.scope_archive` manifest, including member digest and byte length. Export and
@@ -523,7 +525,8 @@ checkpoint and receipt in the first response, and capability refusal before muta
 clients and the reference host against the same golden request/response bytes. Require exact
 re-execution comparisons only when the complete provider closure is deterministic and portable.
 
-Closed public archive and recovery variants use the exact §22 and §24 request, result, archive, and
+Closed public archive and recovery variants use the exact §22 and §24 request, result, archive,
+and
 destination-record shapes. Discovery reports the independently configured destination
 decoder/staging features; source archive claims do not grant them. A definitive nested refusal is an
 outer rejection with its complete inner result, while a successful mutation requires a durable

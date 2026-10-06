@@ -27,7 +27,8 @@ The required `helper-state` participant has an embedded typed payload validated 
 `determa-archive-fixture-provider-1` digest reproduces the pinned provider reference and declared
 empty dependency closure. Production providers verify their actual executable closure under §11.5.
 
-`host-journal-payload-v1.schema.json` closes the typed envelope for the conditional §19 participant.
+`host-journal-payload-v1.schema.json` closes the typed envelope for the conditional §19
+participant.
 The durable-native positive vector has one required participant with four decoded, closed journals
 in root order, each digest-paired to its selected checkpoint. `effect-1` has an ambiguous native
 attempt for its pending output and a separate recorded business outcome for a terminal
