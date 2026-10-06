@@ -10,26 +10,23 @@ the Python reference implementation in
 
 ## How the repos split
 
-| repository | holds | CI |
-|---|---|---|
-| `determa-state-spec` (this one) | `SPEC.md`, `schema/`, `examples/` — the prose normative text | none |
-| [`determa-state-conformance`](https://github.com/fruwehq/determa-state-conformance) | core engine cases (`conformance/core/*`) plus explicitly non-core profiles and harnesses (`conformance/profiles/*`) | none |
-| [`determa-state-python`](https://github.com/fruwehq/determa-state-python) | the Python reference implementation; correct iff it passes the conformance suite | `test (ubuntu-24.04)`, required |
+The specification defines the contract. The language-independent conformance repository tests that
+contract. Python and Rust are reference implementations checked against those shared tests.
 
-A behavior change usually spans all three: normative text here, the matching conformance case in
-`determa-state-conformance` , and the implementation in `determa-state-python` . Work repository by
-repository: specification review first, shared tests next, language implementations after that.
-Issue #112 covers all remaining specification 0.3.0 redesign corrections in one draft PR. Do not
-create component/correction issues or change another repository during this pass. Applicable core
-cases retain their §2 authority; optional profiles and harness mechanics do not define the core API.
+Work repository by repository: specification review first, shared tests next, language
+implementations after that. Issue #112 covers all remaining specification 0.3.0 redesign corrections
+in one draft PR. Do not create component/correction issues or change another repository during this
+pass. Applicable core cases retain their §2 authority; optional profiles and harness mechanics do
+not define the core API.
 
 ## Source and generated data
 
 `examples/` contains only a small human-readable YAML set. Authors write meaningful native/language
 names, never executable hashes or dependency closures at use sites. `machine.schema.json` validates
 source; `resolved-machine-v1.schema.json` validates generated executable definitions. Select the
-stage explicitly, without dual readers. Keep their ordinary statechart grammar aligned; differences
-are confined to runtime and custom-source slots. Generated locks pin exact source and executable
+stage explicitly, without dual readers. Both entrypoints reference `machine-grammar-v1.schema.json`, whose dynamic anchors select explicit
+stage-specific slots. The shared grammar is not a standalone loader. Differences are confined to
+runtime and custom-source slots. Generated locks pin exact source and executable
 output.
 
 Canonical JSON wire vectors stay under `vectors/` . Moving a vector preserves its coverage, with
@@ -58,10 +55,9 @@ unbreakable URLs remain documented exceptions.
 This repository carries the synchronized version in `VERSION` (currently `0.3.0` ) and a matching
 line at the top of `SPEC.md` .
 
-> determa-state-spec, determa-state-conformance, and the implementations share one > synchronized
-SemVer version (currently pre-1.0 `0.3.0` ). A release tags all repos > `vX.Y.Z` in lockstep; an
-implementation declares "implements Determa State spec > vX.Y.Z" and pins the conformance suite at
-that tag.
+> determa-state-spec, determa-state-conformance, and the implementations share one synchronized
+> SemVer version (currently pre-1.0 `0.3.0`). A release tags all repos `vX.Y.Z` in lockstep; an
+> implementation declares "implements Determa State spec vX.Y.Z" and pins conformance at that tag.
 
 ## License
 

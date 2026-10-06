@@ -94,5 +94,11 @@
       "state_mutations": 0,
       "lock_writes": 0
     }
-  ]
+  ],
+  "configured_compiler_result": {
+    "language": "eligibility",
+    "source": "approved_for_review(event, variables)",
+    "generated_guard": "event.payload.approved",
+    "note": "A stipulated compiler mapping for this contract fixture; not an implemented compiler or trust proof."
+  }
 }

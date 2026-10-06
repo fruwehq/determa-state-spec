@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:8fd620b0b0c0744b0678b18afbe17b885d7a913f147f8f0f96de07f3e9d39383"
+      "sha256": "sha256:1850f8cb74161f1c088be67b6548b3617a52f18fb30dc49fdabe33f72c3795b5"
     },
     {
       "path": "VERSION",
@@ -52,7 +52,7 @@
     },
     {
       "path": "schema/compilation-manifest-v1.schema.json",
-      "sha256": "sha256:6b670c09afd0f6c9286e40122c8a48027066e2c259bc845dfbcbb814e3975900"
+      "sha256": "sha256:6bf4eca7d9db5d49b12a9c69d428786f14ec8c75da8e713dcc101f2363a0560e"
     },
     {
       "path": "schema/core-step-result-v1.schema.json",
@@ -120,7 +120,7 @@
     },
     {
       "path": "schema/machine.schema.json",
-      "sha256": "sha256:bf9cbdf7f16ffc82e877a3d86214db1f0180a368651dba70beb1f810a3767a85"
+      "sha256": "sha256:d09ed45b0f0e890d9216d956e73ad1c94dd9db65fe581fe6d6c67d846dccd00d"
     },
     {
       "path": "schema/migration-descriptor-v1.schema.json",
@@ -164,11 +164,11 @@
     },
     {
       "path": "schema/runtime-action-output-v1.schema.json",
-      "sha256": "sha256:a03e288f2e050af090558eadf1bf401c97b02ee36e143929f71fce859c0c3bfc"
+      "sha256": "sha256:7a1eb32a01fbb1f139b0fdef62bf328140a34ffed0415adcbec526121c3074d9"
     },
     {
       "path": "schema/runtime-provider-descriptor-v1.schema.json",
-      "sha256": "sha256:80df468f2ff70e6d1dd1fa2949e5cf6a292f815af4bf8f019211897b4a7bc9ea"
+      "sha256": "sha256:60e748bdcbbc38f971715409c99045b310abf3048414980e04bb486dd54582e0"
     },
     {
       "path": "schema/timer-helper-operation-v1.schema.json",
@@ -196,15 +196,15 @@
     },
     {
       "path": "vectors/public-host/positive-v1.json",
-      "sha256": "sha256:4f1a4229753d979169d1a56cc6bbfc35c50eb41b5d062b3ec22a95d4cfa3c36f"
+      "sha256": "sha256:d3febd19183b33430c38a0b5e859a05f4e63932422e5bdaf4ef7a0a80fb18c07"
     },
     {
       "path": "vectors/public-host/negative-v1.json",
-      "sha256": "sha256:2cf2a014333cb7159752a39cfb8a26630d4f8f078d1f3354c6900812ad9dc01a"
+      "sha256": "sha256:5bf3b75e3d3e5523ac8b47f28131d499887ace219c4670cef6eb8cf86e5305ef"
     },
     {
       "path": "vectors/public-host/README.md",
-      "sha256": "sha256:e903e8efca532635f408f0060dc1360f97ef814a7d7326cb2a26748a54c5fd1b"
+      "sha256": "sha256:7716bd836486cec906b5550f47c135bf45e7f34f6e118f3255678e7c65c9acca"
     },
     {
       "path": "vectors/effects/active-effect-claim-v1.json",
@@ -308,7 +308,7 @@
     },
     {
       "path": "vectors/delivery/execution-checkpoint-transfer-v1.json",
-      "sha256": "sha256:3cb005157173fe89fe227c0f41484d09d9e2fd32bbb70655ded84878d6f25204"
+      "sha256": "sha256:9c33fbf3f57562e9ff6ce5a730a684bf527f004b22198cea2d2fed90e817a17b"
     },
     {
       "path": "vectors/delivery/outbound-checkpoint-lifecycle-v1.json",
@@ -376,7 +376,7 @@
     },
     {
       "path": "vectors/timers/timer-committed-admission-v1.json",
-      "sha256": "sha256:0c1e948c1768b33cdc011c65a3b11e2132d8517ec6e2423e699f93d2f08d928a"
+      "sha256": "sha256:51d7a9a8342c516e698d1ad38ac2239b2e04923ed186e2753136ea2c6bc7f207"
     },
     {
       "path": "vectors/timers/timer-fired-records-v1.json",
@@ -399,8 +399,8 @@
       "sha256": "sha256:bb814d9e28f905a13e41250ef2e140c6b64454fe48256f6b3e48cd8c366cca52"
     },
     {
-      "path": "vectors/providers/mixed-cel-native.yaml",
-      "sha256": "sha256:f4ccac15b347a095c560622c78436c88326ef939ae4546092f392ad63ecd543c"
+      "path": "vectors/providers/resolved-machine.json",
+      "sha256": "sha256:a9ca31f486e2df603c3b29bfce77d8db101ff01aadc688fe1f87083c7212b2e8"
     },
     {
       "path": "vectors/providers/invalid-missing-correlation-action-output.json",
@@ -408,7 +408,7 @@
     },
     {
       "path": "vectors/providers/README.md",
-      "sha256": "sha256:9f6efecffa196ede571e10f8a5888ee5646b85376ae35f9a78fe74591ddf5cad"
+      "sha256": "sha256:17b2430c6948be3d3bcca047ea60f3fcc37d2cf62e0e043c2debd84879b620d2"
     },
     {
       "path": "vectors/providers/inert-provider-metadata.yaml",
@@ -425,6 +425,22 @@
     {
       "path": "vectors/providers/multiple-send-identities.json",
       "sha256": "sha256:50fa89b5bb5ee85b9f7b7fa2f73c88869579417ba62b8081102098a87c27233c"
+    },
+    {
+      "path": "schema/event-disposition-v1.schema.json",
+      "sha256": "sha256:6c7ccc3f0d357e4b7271aac09f1e75671a18152e9297c202ed46c6ceb684f1b5"
+    },
+    {
+      "path": "schema/provider-lock-v1.schema.json",
+      "sha256": "sha256:295484e7ff99858c8b4da05ec8ad28021357ff6b36153e7e71774e7e4bebffe4"
+    },
+    {
+      "path": "schema/resolved-machine-v1.schema.json",
+      "sha256": "sha256:7e9a7ab6fb30acfb38c6e60c80ce852d05e3cfc47b617c717ffefdd9495625fa"
+    },
+    {
+      "path": "schema/machine-grammar-v1.schema.json",
+      "sha256": "sha256:0f991b721857e4c2a0b7ff472cdc5b6a71e5e7a0e6f560efb547312d14ae29e7"
     }
   ],
   "hash_domains": [
@@ -611,6 +627,14 @@
     {
       "name": "determa-public-host-profile-1",
       "source": "SPEC.md#25.3"
+    },
+    {
+      "name": "determa-authored-machine-source-1",
+      "source": "SPEC.md#54-exact-runtime-providers-and-optional-source-compilation"
+    },
+    {
+      "name": "determa.provider_lock",
+      "source": "SPEC.md#54-exact-runtime-providers-and-optional-source-compilation"
     }
   ],
   "capability_meanings": [

@@ -94,8 +94,11 @@ An implementation is conformant iff it passes every applicable case in
 conformance suite is the executable arbiter. If prose and the suite disagree, a bug MUST be filed
 and resolved; implementations MUST NOT choose their preferred result.
 
-Machine documents MUST be parsed with the YAML 1.2 core schema and validated against
-`schema/machine.schema.json` before semantic validation.
+Authored machines MUST be parsed with the YAML 1.2 core schema and validated against
+`schema/machine.schema.json` before semantic validation. Generated executable definitions MUST use
+`schema/resolved-machine-v1.schema.json`. The caller selects the stage explicitly (§5.4); loaders
+MUST NOT retry the other schema after rejection. Both entrypoints share
+`schema/machine-grammar-v1.schema.json` and the parsing/value restrictions below.
 
 The accepted parsed value model is deliberately narrower than general YAML:
 
@@ -2374,8 +2377,8 @@ lifecycle removal returns §8 `lifecycle_dispositions` . Neither is an implicit 
 Uncommitted rollback is not deletion of accepted input: committed mailbox and fault/disposition
 rules remain authoritative.
 
-Its property names, configuration schema, retention, privacy, and operational guarantees belong
-entirely to that plugin. Under §21, an unhandled, faulted, or disposed event has an explicit
+Beyond the closed discard record, policy configuration, storage shape, privacy and operational
+guarantees belong to that plugin. Under §21, an unhandled, faulted, or disposed event has an explicit
 terminal decision and retained evidence. These policies apply only after terminal machine
 disposition or before Determa acceptance; they cannot replace, reorder, expire, or cap a runtime's
 normative ready/deferred mailboxes.

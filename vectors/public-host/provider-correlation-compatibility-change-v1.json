@@ -12,25 +12,25 @@
   "cross_language_fixture_matrix": [
     {
       "consumer": "Python embedded client",
-      "positive": "vectors/providers/mixed-cel-native.yaml; vectors/providers/action-output.json",
+      "positive": "vectors/providers/resolved-machine.json; vectors/providers/action-output.json",
       "negative": "vectors/providers/invalid-missing-correlation-action-output.json",
       "rule": "Check the CEL external send has a statically typed non-empty string correlation, validate the typed provider result against its declared output event, and reject a provider action output that omits external-send correlation under SPEC.md \u00a75.3 and \u00a75.4."
     },
     {
       "consumer": "Rust embedded client",
-      "positive": "vectors/providers/mixed-cel-native.yaml; vectors/providers/action-output.json",
+      "positive": "vectors/providers/resolved-machine.json; vectors/providers/action-output.json",
       "negative": "vectors/providers/invalid-missing-correlation-action-output.json",
       "rule": "Check the CEL external send has a statically typed non-empty string correlation, validate the typed provider result against its declared output event, and reject a provider action output that omits external-send correlation under SPEC.md \u00a75.3 and \u00a75.4."
     },
     {
       "consumer": "local reference host",
-      "positive": "vectors/providers/mixed-cel-native.yaml; vectors/providers/action-output.json",
+      "positive": "vectors/providers/resolved-machine.json; vectors/providers/action-output.json",
       "negative": "vectors/providers/invalid-missing-correlation-action-output.json",
       "rule": "Check the CEL external send has a statically typed non-empty string correlation, validate the typed provider result against its declared output event, and reject a provider action output that omits external-send correlation under SPEC.md \u00a75.3 and \u00a75.4."
     },
     {
       "consumer": "future hosted service",
-      "positive": "vectors/providers/mixed-cel-native.yaml; vectors/providers/action-output.json",
+      "positive": "vectors/providers/resolved-machine.json; vectors/providers/action-output.json",
       "negative": "vectors/providers/invalid-missing-correlation-action-output.json",
       "rule": "Check the CEL external send has a statically typed non-empty string correlation, validate the typed provider result against its declared output event, and reject a provider action output that omits external-send correlation under SPEC.md \u00a75.3 and \u00a75.4."
     }
