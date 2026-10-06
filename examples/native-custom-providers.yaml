@@ -1,0 +1,37 @@
+# review, record-review, eligibility and python are selected in host configuration.
+# Explicit resolution generates the lock; the machine author writes no hashes.
+format: 1
+namespace: example.review
+events:
+  submit:
+    direction: input
+    payload:
+      approved: { type: bool, required: true }
+      review_mode: { type: string, required: true }
+machines:
+  - machine_id: order
+    root:
+      type: composite
+      variables:
+        accepted: { type: bool, init: false }
+      initial: { transition_to: pending }
+      states:
+        pending:
+          on_events:
+            submit:
+              - guard: 'event.payload.approved && event.payload.review_mode == "automatic"'
+                transition_to: complete
+              - guard: { provider: review }
+                action:
+                  - provider_actions: record-review
+                transition_to: complete
+              - guard:
+                  lang: eligibility
+                  source: "approved_for_review(event, variables)"
+                action:
+                  - lang: python
+                    source: |
+                      sdk.record_review(event)
+                      return {"actions": []}
+                transition_to: complete
+        complete: { type: final }

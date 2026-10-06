@@ -1,0 +1,24 @@
+{
+  "artifact_format": "determa.compilation_manifest",
+  "artifact_schema_version": 1,
+  "content": {
+    "source_artifact_digest": "sha256:f6d41795d17ff3e63d6ea664422c94ba0d1b88982901c65526d3d9d2b01840a2",
+    "compiler_providers": [
+      {
+        "identifier": "example.guard-compiler",
+        "version": "1.0.0",
+        "content_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      }
+    ],
+    "generated_validated_bundle_fingerprint": "sha256:8c15f39f3b7004cf7c92a8da1390ee5fe028008a77b7c1603778517a3941fe6b",
+    "source_map": [
+      {
+        "source_locator": "/machines/0/root/states/pending/on_events/submit/guard",
+        "resolved_locators": [
+          "/machines/0/root/states/pending/on_events/submit/guard"
+        ]
+      }
+    ]
+  },
+  "artifact_digest": "sha256:541f5d52435a73ad17efca9ba212e630d4cd41a69b52da3605f11bbc8ab26fea"
+}

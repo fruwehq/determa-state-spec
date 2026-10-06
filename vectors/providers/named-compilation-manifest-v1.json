@@ -1,0 +1,35 @@
+{
+  "artifact_format": "determa.compilation_manifest",
+  "artifact_schema_version": 1,
+  "content": {
+    "source_artifact_digest": "sha256:e43bc628c1c0ea2cd656a3c255e33b924d02b9993ebcf88ece00c65504dae4ac",
+    "compiler_providers": [
+      {
+        "identifier": "example.guard-compiler",
+        "version": "1.0.0",
+        "content_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      },
+      {
+        "identifier": "example.python-compiler",
+        "version": "1.0.0",
+        "content_digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      }
+    ],
+    "generated_validated_bundle_fingerprint": "sha256:e52f7457d36bd78e4142dfe5df7d63c2f54f515aa865b24b3bb0006f9943bc17",
+    "source_map": [
+      {
+        "source_locator": "/machines/0/root/states/pending/on_events/submit/2/guard",
+        "resolved_locators": [
+          "/machines/0/root/states/pending/on_events/submit/2/guard"
+        ]
+      },
+      {
+        "source_locator": "/machines/0/root/states/pending/on_events/submit/2/action/0",
+        "resolved_locators": [
+          "/machines/0/root/states/pending/on_events/submit/2/action/0"
+        ]
+      }
+    ]
+  },
+  "artifact_digest": "sha256:d7740ab8d0ed522b6e65b4f1705df4180090446d27e53054bf85cc0828b9e105"
+}

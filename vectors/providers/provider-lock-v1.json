@@ -1,0 +1,120 @@
+{
+  "artifact_format": "determa.provider_lock",
+  "artifact_schema_version": 1,
+  "content": {
+    "authored_source_digest": "sha256:cfa06251a55efd46311a330c2a0e05083b0503cc139582b62ca0055dfee95780",
+    "resolved_definition_fingerprint": "sha256:e52f7457d36bd78e4142dfe5df7d63c2f54f515aa865b24b3bb0006f9943bc17",
+    "runtime_providers": [
+      {
+        "name": "python",
+        "kind": "actions",
+        "source_locator": "/machines/0/root/states/pending/on_events/submit/2/action/0",
+        "binding": {
+          "provider_reference": {
+            "identifier": "example.python-runtime",
+            "version": "1.0.0",
+            "content_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          "source_media_type": "text/x-python",
+          "source_digest": "sha256:d78d1c509917207fb44dbbb5f7f2553b61727e7e1d994984b5d41d5760190308",
+          "source": "sdk.record_review(event)\nreturn {\"actions\": []}\n",
+          "dependencies": [
+            {
+              "identifier": "example.review-sdk",
+              "version": "1.0.0",
+              "content_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+            }
+          ],
+          "capabilities": {
+            "deterministic": false,
+            "pure": false,
+            "portable": false,
+            "semantically_introspectable": false,
+            "process_contained": false,
+            "external_io_capable": true
+          },
+          "input_types": {
+            "event": "event_envelope",
+            "variables": "typed_variables"
+          },
+          "output_type": "structured_actions"
+        }
+      },
+      {
+        "name": "record-review",
+        "kind": "actions",
+        "binding": {
+          "provider_reference": {
+            "identifier": "example.native-actions",
+            "version": "1.0.0",
+            "content_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+          },
+          "source_media_type": "application/octet-stream",
+          "source_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "dependencies": [],
+          "capabilities": {
+            "deterministic": false,
+            "pure": false,
+            "portable": false,
+            "semantically_introspectable": false,
+            "process_contained": false,
+            "external_io_capable": true
+          },
+          "input_types": {
+            "event": "event_envelope",
+            "variables": "typed_variables"
+          },
+          "output_type": "structured_actions"
+        }
+      },
+      {
+        "name": "review",
+        "kind": "guard",
+        "binding": {
+          "provider_reference": {
+            "identifier": "example.native-review",
+            "version": "1.0.0",
+            "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "source_media_type": "application/octet-stream",
+          "source_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "dependencies": [],
+          "capabilities": {
+            "deterministic": false,
+            "pure": false,
+            "portable": false,
+            "semantically_introspectable": false,
+            "process_contained": false,
+            "external_io_capable": true
+          },
+          "input_types": {
+            "event": "event_envelope",
+            "variables": "typed_variables"
+          },
+          "output_type": "bool"
+        }
+      }
+    ],
+    "compiler_providers": [
+      {
+        "name": "eligibility",
+        "provider_reference": {
+          "identifier": "example.guard-compiler",
+          "version": "1.0.0",
+          "content_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "dependencies": []
+      },
+      {
+        "name": "python",
+        "provider_reference": {
+          "identifier": "example.python-compiler",
+          "version": "1.0.0",
+          "content_digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "dependencies": []
+      }
+    ]
+  },
+  "artifact_digest": "sha256:3c3d15530f95a6f8ee1fd24f17944885a85f28723c0616da83d7bbbce8281ff6"
+}

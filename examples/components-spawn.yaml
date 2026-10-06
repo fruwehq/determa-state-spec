@@ -1,0 +1,31 @@
+format: 1
+namespace: example.jobs
+events:
+  start: { direction: input }
+  cancel: { direction: input }
+machines:
+  - machine_id: manager
+    root:
+      type: parallel
+      variables:
+        active_job:
+          type: instance_reference
+          machine_id: job
+          nullable: true
+          init: null
+      components:
+        - component_id: status
+          root: { type: simple }
+        - component_id: requests
+          root: { type: simple }
+      on_events:
+        start:
+          action:
+            - spawn:
+                machine_id: job
+                bind_to: active_job
+        cancel:
+          action:
+            - cancel: { instance: active_job }
+  - machine_id: job
+    root: { type: simple }

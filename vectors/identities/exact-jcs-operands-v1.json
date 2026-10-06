@@ -1,0 +1,24 @@
+{
+  "vectors": [
+    {
+      "domain": "determa-validated-bundle-fingerprint-1",
+      "jcs_utf8": "[\"determa-validated-bundle-fingerprint-1\",[\"map\",[[\"events\",[\"map\",[[\"tick\",[\"map\",[[\"direction\",[\"string\",\"internal\"]],[\"payload\",[\"map\",[[\"amount\",[\"map\",[[\"default\",[\"float\",\"3ff0000000000000\"]],[\"required\",[\"boolean\",false]],[\"type\",[\"string\",\"float\"]]]]]]]]]]]]]],[\"format\",[\"integer\",\"1\"]],[\"machines\",[\"list\",[[\"map\",[[\"events\",[\"map\",[[\"local_notice\",[\"map\",[[\"direction\",[\"string\",\"internal\"]],[\"payload\",[\"map\",[[\"value\",[\"map\",[[\"required\",[\"boolean\",true]],[\"type\",[\"string\",\"int\"]]]]]]]]]]]]]],[\"languages\",[\"map\",[[\"action\",[\"string\",\"determa\"]],[\"guard\",[\"string\",\"cel\"]]]]],[\"machine_id\",[\"string\",\"turnstile\"]],[\"root\",[\"map\",[[\"history\",[\"string\",\"none\"]],[\"initial\",[\"map\",[[\"transition_to\",[\"string\",\"locked\"]]]]],[\"states\",[\"map\",[[\"locked\",[\"map\",[[\"components\",[\"list\",[[\"map\",[[\"component_id\",[\"string\",\"left\"]],[\"root\",[\"map\",[[\"type\",[\"string\",\"simple\"]]]]]]],[\"map\",[[\"component_id\",[\"string\",\"right\"]],[\"root\",[\"map\",[[\"type\",[\"string\",\"simple\"]]]]]]]]]],[\"on_events\",[\"map\",[[\"tick\",[\"map\",[[\"action\",[\"list\",[[\"map\",[[\"send\",[\"map\",[[\"event\",[\"string\",\"local_notice\"]],[\"payload\",[\"map\",[[\"value\",[\"string\",\"1\"]]]]],[\"to\",[\"map\",[[\"self\",[\"boolean\",true]]]]]]]]]]]]],[\"lang\",[\"string\",\"cel\"]],[\"transition_to\",[\"string\",\"unlocked\"]]]]]]]],[\"type\",[\"string\",\"parallel\"]]]]],[\"unlocked\",[\"map\",[[\"type\",[\"string\",\"simple\"]]]]]]]],[\"type\",[\"string\",\"composite\"]],[\"variables\",[\"map\",[[\"attempts\",[\"map\",[[\"external\",[\"boolean\",false]],[\"init\",[\"integer\",\"0\"]],[\"input\",[\"boolean\",false]],[\"type\",[\"string\",\"int\"]]]]]]]]]]],[\"version\",[\"integer\",\"1\"]]]]]]],[\"meta\",[\"map\",[[\"floating_one\",[\"float\",\"3ff0000000000000\"]],[\"integer_one\",[\"integer\",\"1\"]],[\"large_integer\",[\"integer\",\"9007199254740993\"]]]]],[\"namespace\",[\"string\",\"example.turnstile\"]]]]]",
+      "expected_sha256": "sha256:7e48ad82ea5305c24b7730f4fd24c36ec196a0875c982b85eba5b3a5ddcbb92f"
+    },
+    {
+      "domain": "determa-root-runtime-identity-1",
+      "jcs_utf8": "[\"determa-root-runtime-identity-1\",\"1\",\"sha256:7e48ad82ea5305c24b7730f4fd24c36ec196a0875c982b85eba5b3a5ddcbb92f\",\"example.turnstile\",\"turnstile\",\"1\",\"turnstile-42\"]",
+      "expected_sha256": "sha256:d42f331cbd0c491bba66d512c010f89f94c52df12057a80fecde85d3b954592f"
+    },
+    {
+      "domain": "determa-component-runtime-identity-1",
+      "jcs_utf8": "[\"determa-component-runtime-identity-1\",\"1\",\"turnstile-42\",\"sha256:d42f331cbd0c491bba66d512c010f89f94c52df12057a80fecde85d3b954592f\",\"/machines/0/root/states/locked/components/0\",\"0\",\"example.turnstile\",\"turnstile\",\"1\"]",
+      "expected_sha256": "sha256:b0145e3c9c3d470fda4e59e55fe1585a1a9a7d74e29377062d70bf1789ffeb76"
+    },
+    {
+      "domain": "determa-cause-identity-1",
+      "jcs_utf8": "[\"determa-cause-identity-1\",\"1\",\"root_initialization\",\"turnstile-42\",\"sha256:d42f331cbd0c491bba66d512c010f89f94c52df12057a80fecde85d3b954592f\",\"sha256:d42f331cbd0c491bba66d512c010f89f94c52df12057a80fecde85d3b954592f\",\"create-7\",\"0\",\"/machines/0/root\",\"0\"]",
+      "expected_sha256": "sha256:a1ba8e26366fdefe45f62e34e2856d0bebbf22b9b73fad742ebf5294421ae91c"
+    }
+  ]
+}

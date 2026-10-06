@@ -1,0 +1,69 @@
+{
+  "description": "Normative policy/ownership cases; structural validity does not establish runtime observability or durable evidence.",
+  "positive": [
+    {
+      "boundary": "pre_admission",
+      "durable": false,
+      "record": {
+        "event_id": null,
+        "source_identity": "request-17",
+        "policy": "reject-expired-input",
+        "decision": "discarded",
+        "reason_code": "expired_before_acceptance"
+      }
+    },
+    {
+      "boundary": "post_terminal",
+      "durable": false,
+      "record": {
+        "event_id": "event-17",
+        "source_identity": null,
+        "policy": "discard-after-terminal",
+        "decision": "discarded",
+        "reason_code": "terminal_unhandled"
+      }
+    }
+  ],
+  "negative_records": [
+    {
+      "event_id": null,
+      "source_identity": null,
+      "policy": "explicit",
+      "decision": "discarded",
+      "reason_code": "expired"
+    },
+    {
+      "event_id": "event-17",
+      "source_identity": null,
+      "decision": "discarded",
+      "reason_code": "expired"
+    },
+    {
+      "event_id": "event-17",
+      "source_identity": null,
+      "policy": "explicit",
+      "decision": "discarded",
+      "reason_code": ""
+    }
+  ],
+  "negative_operations": [
+    {
+      "operation": "discard_without_returned_record",
+      "durable": false
+    },
+    {
+      "operation": "durable_discard_without_required_retained_evidence",
+      "durable": true
+    },
+    {
+      "operation": "transport_removes_ready_entry"
+    },
+    {
+      "operation": "transport_removes_deferred_entry"
+    },
+    {
+      "operation": "transport_removes_committed_internal_failure"
+    }
+  ],
+  "lifecycle": "Explicit core lifecycle disposal returns lifecycle_dispositions; rollback preserves the previously committed accepted input."
+}

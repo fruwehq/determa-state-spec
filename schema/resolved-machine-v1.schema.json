@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://determa.dev/state/schema/resolved-machine-v1.schema.json",
+  "title": "Generated resolved Determa machine definition, format 1",
+  "description": "Generated executable definition. Validate through the explicit resolved-definition entry point; never interpret full bindings as human-authored syntax.",
+  "$ref": "https://determa.dev/state/schema/machine-grammar-v1.schema.json",
+  "$defs": {
+    "providerCapabilities": {
+      "type": "object",
+      "required": [
+        "deterministic",
+        "pure",
+        "portable",
+        "semantically_introspectable",
+        "process_contained",
+        "external_io_capable"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "deterministic": {
+          "type": "boolean"
+        },
+        "pure": {
+          "type": "boolean"
+        },
+        "portable": {
+          "type": "boolean"
+        },
+        "semantically_introspectable": {
+          "type": "boolean"
+        },
+        "process_contained": {
+          "type": "boolean"
+        },
+        "external_io_capable": {
+          "type": "boolean"
+        }
+      },
+      "$dynamicAnchor": "providerCapabilities"
+    },
+    "providerBinding": {
+      "type": "object",
+      "required": [
+        "provider_reference",
+        "source_media_type",
+        "source_digest",
+        "dependencies",
+        "capabilities",
+        "input_types",
+        "output_type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "provider_reference": {
+          "$ref": "https://determa.dev/state/schema/machine-grammar-v1.schema.json#/$defs/providerReference"
+        },
+        "source_media_type": {
+          "type": "string",
+          "pattern": "^[a-z0-9.+-]+/[a-z0-9.+-]+$"
+        },
+        "source_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source": {
+          "type": "string"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "$ref": "https://determa.dev/state/schema/machine-grammar-v1.schema.json#/$defs/providerReference"
+          }
+        },
+        "capabilities": {
+          "$ref": "https://determa.dev/state/schema/resolved-machine-v1.schema.json#/$defs/providerCapabilities"
+        },
+        "input_types": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "event": {
+              "const": "event_envelope"
+            },
+            "variables": {
+              "const": "typed_variables"
+            },
+            "owner": {
+              "const": "owner_reference"
+            },
+            "env": {
+              "const": "external_values"
+            }
+          }
+        },
+        "output_type": {
+          "enum": [
+            "bool",
+            "structured_actions"
+          ]
+        }
+      },
+      "$dynamicAnchor": "providerBinding"
+    },
+    "guardSlot": {
+      "oneOf": [
+        {
+          "$ref": "https://determa.dev/state/schema/machine-grammar-v1.schema.json#/$defs/expression"
+        },
+        {
+          "type": "object",
+          "required": [
+            "provider"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "provider": {
+              "allOf": [
+                {
+                  "$ref": "https://determa.dev/state/schema/resolved-machine-v1.schema.json#/$defs/providerBinding"
+                },
+                {
+                  "properties": {
+                    "output_type": {
+                      "const": "bool"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "$dynamicAnchor": "guardSlot"
+    },
+    "providerActionSlot": {
+      "type": "object",
+      "required": [
+        "provider_actions"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "provider_actions": {
+          "allOf": [
+            {
+              "$ref": "https://determa.dev/state/schema/resolved-machine-v1.schema.json#/$defs/providerBinding"
+            },
+            {
+              "properties": {
+                "output_type": {
+                  "const": "structured_actions"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "$dynamicAnchor": "providerActionSlot"
+    },
+    "actionList": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "https://determa.dev/state/schema/machine-grammar-v1.schema.json#/$defs/action"
+          },
+          {
+            "$ref": "https://determa.dev/state/schema/resolved-machine-v1.schema.json#/$defs/providerActionSlot"
+          }
+        ]
+      },
+      "$dynamicAnchor": "actionList"
+    },
+    "providerName": {
+      "not": {},
+      "$dynamicAnchor": "providerName"
+    },
+    "sourceLanguageSlot": {
+      "not": {},
+      "$dynamicAnchor": "sourceLanguageSlot"
+    }
+  }
+}

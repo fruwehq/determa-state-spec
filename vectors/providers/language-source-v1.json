@@ -1,0 +1,63 @@
+{
+  "artifact_format": "determa.language_source",
+  "artifact_schema_version": 1,
+  "content": {
+    "template": {
+      "format": 1,
+      "namespace": "example.compiled",
+      "events": {
+        "submit": {
+          "direction": "input",
+          "payload": {
+            "approved": {
+              "type": "bool",
+              "required": true
+            }
+          }
+        }
+      },
+      "machines": [
+        {
+          "machine_id": "order",
+          "root": {
+            "type": "composite",
+            "initial": {
+              "transition_to": "pending"
+            },
+            "states": {
+              "pending": {
+                "on_events": {
+                  "submit": {
+                    "guard": {
+                      "lang": "eligibility",
+                      "source": "event.payload.approved"
+                    },
+                    "transition_to": "complete"
+                  }
+                }
+              },
+              "complete": {
+                "type": "final"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "regions": [
+      {
+        "kind": "guard",
+        "locator": "/machines/0/root/states/pending/on_events/submit/guard",
+        "provider_reference": {
+          "identifier": "example.guard-compiler",
+          "version": "1.0.0",
+          "content_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "source_media_type": "text/plain",
+        "source": "event.payload.approved"
+      }
+    ],
+    "dependencies": []
+  },
+  "artifact_digest": "sha256:f6d41795d17ff3e63d6ea664422c94ba0d1b88982901c65526d3d9d2b01840a2"
+}

@@ -1,0 +1,26 @@
+format: 1
+namespace: example.editor
+events:
+  next: { direction: input }
+  pause: { direction: input }
+  resume: { direction: input }
+machines:
+  - machine_id: editor
+    root:
+      type: composite
+      initial: { transition_to: editing }
+      states:
+        editing:
+          type: composite
+          history: deep
+          initial: { transition_to: editing.draft }
+          on_events:
+            pause: { transition_to: paused }
+          states:
+            draft:
+              on_events:
+                next: { transition_to: editing.review }
+            review: { type: simple }
+        paused:
+          on_events:
+            resume: { transition_to: { history: editing } }

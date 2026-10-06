@@ -1,44 +1,74 @@
 # Contributing to Determa State
 
 **determa-state-spec** is the normative **specification** repository. It holds the prose spec
-(`SPEC.md`), the machine JSON Schema (`schema/`), and examples (`examples/`) — text
-only. There is **no test or implementation code here** and **no CI**; the executable
-correctness target lives in [`fruwehq/determa-state-conformance`](https://github.com/fruwehq/determa-state-conformance),
-and the Python reference implementation in [`fruwehq/determa-state-python`](https://github.com/fruwehq/determa-state-python).
+(`SPEC.md`), JSON Schemas (`schema/`), concise YAML examples (`examples/`), and canonical
+artifacts/cases (`vectors/`) — text only. There is **no test or implementation code here** and
+**no
+CI**; the executable correctness target lives in
+[`fruwehq/determa-state-conformance`](https://github.com/fruwehq/determa-state-conformance), and the
+Python reference implementation in
+[`fruwehq/determa-state-python`](https://github.com/fruwehq/determa-state-python).
 
 ## How the repos split
 
-| repository | holds | CI |
-|---|---|---|
-| `determa-state-spec` (this one) | `SPEC.md`, `schema/`, `examples/` — the prose normative text | none |
-| [`determa-state-conformance`](https://github.com/fruwehq/determa-state-conformance) | core engine cases (`conformance/core/*`) plus explicitly non-core profiles and harnesses (`conformance/profiles/*`) | none |
-| [`determa-state-python`](https://github.com/fruwehq/determa-state-python) | the Python reference implementation; correct iff it passes the conformance suite | `test (ubuntu-24.04)`, required |
+The specification defines the contract. The language-independent conformance repository tests that
+contract. Python and Rust are reference implementations checked against those shared tests.
 
-A behavior change usually spans all three: normative text here, the matching
-conformance case in `determa-state-conformance`, and the implementation in `determa-state-python`.
-Open one PR **per repo** (one issue → one PR). Where prose and the suite disagree,
-**the suite wins** (SPEC §2) and a bug is filed against this document.
+Work repository by repository: specification review first, shared tests next, language
+implementations after that. Keep the agreed release scope in one tracking issue and one PR per
+repository, including review fixes. Finish independent and maintainer review before proceeding to
+another repository; further changes to a completed repository require permission. Applicable core
+cases retain their §2 authority; optional profiles and harness mechanics do not define the core
+API.
+
+## Source and generated data
+
+`examples/` contains only a small human-readable YAML set. Authors write meaningful native/language
+names, never executable hashes or dependency closures at use sites. `machine.schema.json` validates
+source; `resolved-machine-v1.schema.json` validates generated executable definitions. Select the
+stage explicitly, without dual readers. Both entrypoints reference `machine-grammar-v1.schema.json`,
+whose dynamic anchors select explicit stage-specific slots. The shared grammar is not a standalone
+loader. Differences are confined to runtime and custom-source slots. Generated locks pin exact
+source and executable output.
+
+Canonical JSON wire vectors stay under `vectors/`. Moving a vector preserves its coverage, with
+deliberate regeneration when semantic inputs change. Do not convert JSON wire artifacts to YAML or
+silently delete a negative case. Existing pinned validators require downstream path/grammar updates
+after specification approval; do not claim an old engine implements the redesigned contract.
+
+Validate schemas/references, every curated YAML, generated identity relationships, relative links,
+event discard/ownership rules, vector inventory, unchanged VERSION, line widths and
+`git diff --check`. A schema reference check must traverse every schema object, including unused
+definitions, resolve local and registered `$ref`/`$dynamicRef` targets with the correct resource
+base, and reject missing JSON Pointer or anchor targets without fetching unregistered resources.
+Meta-validation alone does not prove reference closure. Validate actual positive and negative
+instances and record structural versus semantic rejection separately.
+
+Keep prose/YAML lines within 100 UTF-8 bytes so literal byte-based width scans agree.
+Use `LC_ALL=C awk 'length($0)>100'` to inventory exceptions; Unicode character counts are
+insufficient.
+Put giant exact canonical operands in normative JSON vectors.
+Keep table rows intact for Markdown rendering; genuinely unbreakable URLs are the other permitted
+exception. Ordinary prose, links with editable labels and code formulas should meet the limit.
 
 ## Workflow
 
 1. Branch from `main`, open a Pull Request, and **squash-merge** — `main` stays linear.
 2. Resolve all review threads before merging.
 3. **Never push to `main` directly.**
-4. **No AI/assistant attribution anywhere** — not in commits, PR bodies, comments, or
-   docs (no `Co-Authored-By:`, no "Generated with…"). Commits and PRs read as the
-   author's own work.
+4. **No AI/assistant attribution anywhere** — not in commits, PR bodies, comments, or docs (no
+   `Co-Authored-By:`, no "Generated with…"). Commits and PRs read as the author's own work.
 5. Spec edits should reference the SPEC section(s) they touch and link the related
-   `determa-state-conformance` / `determa-state-python` issues.
+   `determa-state-conformance`/`determa-state-python` issues.
 
 ## Versioning
 
-This repository carries the synchronized version in `VERSION` (currently `0.3.0`) and a
-matching line at the top of `SPEC.md`.
+This repository carries the synchronized version in `VERSION` (currently `0.3.0`) and a matching
+line at the top of `SPEC.md`.
 
-> determa-state-spec, determa-state-conformance, and the implementations share one
-> synchronized SemVer version (currently pre-1.0 `0.3.0`). A release tags all repos
-> `vX.Y.Z` in lockstep; an implementation declares "implements Determa State spec
-> vX.Y.Z" and pins the conformance suite at that tag.
+> determa-state-spec, determa-state-conformance, and the implementations share one synchronized
+> SemVer version (currently pre-1.0 `0.3.0`). A release tags all repos `vX.Y.Z` in lockstep; an
+> implementation declares "implements Determa State spec vX.Y.Z" and pins conformance at that tag.
 
 ## License
 

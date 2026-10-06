@@ -1,0 +1,159 @@
+{
+  "authored_source": "examples/native-custom-providers.yaml",
+  "lock": "vectors/providers/provider-lock-v1.json",
+  "resolved_definition": "vectors/providers/named-resolved-machine.json",
+  "description": "Synthetic exact closure identities: these vectors prove value/digest relationships, not loaded provider authenticity or a configured capability.",
+  "positive": [
+    {
+      "operation": "load_existing",
+      "core_calls": 0,
+      "compiler_calls": 0,
+      "lock_writes": 0
+    },
+    {
+      "operation": "restore_resolved",
+      "compiler_calls": 0,
+      "alias_lookups": 0
+    }
+  ],
+  "negative": [
+    {
+      "change": "authored_source_changed",
+      "boundary": "source_digest",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "resolved_output_changed",
+      "boundary": "resolved_definition_fingerprint",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "installed_code_changed",
+      "boundary": "runtime_closure",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "unknown_guard_name",
+      "boundary": "named_guard_entry",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "wrong_runtime_kind",
+      "boundary": "kind",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "duplicate_runtime_name_kind",
+      "boundary": "lock_inventory",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "unused_lock_entry",
+      "boundary": "lock_inventory",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "compiler_reference_changed",
+      "boundary": "compiler_closure",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "source_map_wrong_slot",
+      "boundary": "source_map",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "untrusted_lock",
+      "boundary": "deployment_authorization",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "builtin_name_shadowed",
+      "boundary": "reserved_name",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "runtime_language_source_changed",
+      "boundary": "source_digest",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "runtime_sdk_dependency_changed",
+      "boundary": "runtime_closure",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "custom_region_locator_changed",
+      "boundary": "source_locator",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "compiler_selects_unconfigured_runtime",
+      "boundary": "deployment_authorization",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    }
+  ],
+  "configured_compiler_result": {
+    "language": "eligibility",
+    "source": "approved_for_review(event, variables)",
+    "generated_guard": "event.payload.approved && event.payload.review_mode == \"sdk\"",
+    "note": "A stipulated compiler mapping for this contract fixture; not an implemented compiler or trust proof.",
+    "runtime_action": {
+      "language": "python",
+      "source_locator": "/machines/0/root/states/pending/on_events/submit/2/action/0",
+      "resolved_slot": "provider_actions",
+      "sdk_dependency": "example.review-sdk",
+      "external_io_capable": true,
+      "process_contained": false
+    }
+  },
+  "language_source": "vectors/providers/named-language-source-v1.json",
+  "compilation_manifest": "vectors/providers/named-compilation-manifest-v1.json",
+  "runtime_language_path": {
+    "payload": {
+      "approved": true,
+      "review_mode": "sdk"
+    },
+    "stipulated_native_guard_result": false,
+    "branch_results": [
+      false,
+      false,
+      true
+    ],
+    "selected_branch_index": 2,
+    "runtime_action_result": {
+      "actions": []
+    },
+    "note": "Reachability under the stipulated exact provider results, not execution of a real SDK."
+  }
+}

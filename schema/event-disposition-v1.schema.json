@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://determa.dev/state/schema/event-disposition-v1.schema.json",
+  "title": "Observable policy discard decision version 1",
+  "description": "A host-returned decision, including non-durable use; not an authored machine field.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "source_identity", "policy", "decision", "reason_code"],
+  "properties": {
+    "event_id": {"type": ["string", "null"], "minLength": 1},
+    "source_identity": {"type": ["string", "null"], "minLength": 1},
+    "policy": {"type": "string", "minLength": 1},
+    "decision": {"const": "discarded"},
+    "reason_code": {"type": "string", "minLength": 1}
+  },
+  "anyOf": [
+    {"properties": {"event_id": {"type": "string"}}},
+    {"properties": {"source_identity": {"type": "string"}}}
+  ]
+}
