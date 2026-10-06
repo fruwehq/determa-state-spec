@@ -80,10 +80,10 @@ remains observable.
 Stores, transports, HTTP endpoints, external effects, timers, authority and archives are optional
 host/extension contracts. Bundled and third-party providers use the same registration rules. Native
 and runtime-language I/O can weaken an opted-in invocation's guarantees; exact identity does not
-make arbitrary I/O pure or transactional. Timers are external helpers, never implicit core scheduling. Archive participants
-explicitly account for helper/application state. Authority is optional; safe transfer requires proof
-rather than copied bytes. Embedded, self-hosted and future SaaS operation share the same public
-contracts and multiple named endpoint/scope bindings.
+make arbitrary I/O pure or transactional. Timers are external helpers, never implicit core
+scheduling. Archive participants explicitly account for helper/application state. Authority is
+optional; safe transfer requires proof rather than copied bytes. Embedded, self-hosted and future
+SaaS operation share the same public contracts and multiple named endpoint/scope bindings.
 
 ## Repository map
 
