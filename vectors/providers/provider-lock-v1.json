@@ -1,0 +1,76 @@
+{
+  "artifact_format": "determa.provider_lock",
+  "artifact_schema_version": 1,
+  "content": {
+    "authored_source_digest": "sha256:8553d1d4e1bdc2e310f57e9a0f604957b6f5bbd4d734bbf96610f7910ce75e7f",
+    "resolved_definition_fingerprint": "sha256:086fc094cf673f37200622cc9664c2d0884066ddf557612a0dab7f57394a680c",
+    "runtime_providers": [
+      {
+        "name": "record-review",
+        "kind": "actions",
+        "binding": {
+          "provider_reference": {
+            "identifier": "example.native-actions",
+            "version": "1.0.0",
+            "content_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+          },
+          "source_media_type": "application/octet-stream",
+          "source_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "dependencies": [],
+          "capabilities": {
+            "deterministic": false,
+            "pure": false,
+            "portable": false,
+            "semantically_introspectable": false,
+            "process_contained": false,
+            "external_io_capable": true
+          },
+          "input_types": {
+            "event": "event_envelope",
+            "variables": "typed_variables"
+          },
+          "output_type": "structured_actions"
+        }
+      },
+      {
+        "name": "review",
+        "kind": "guard",
+        "binding": {
+          "provider_reference": {
+            "identifier": "example.native-review",
+            "version": "1.0.0",
+            "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "source_media_type": "application/octet-stream",
+          "source_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "dependencies": [],
+          "capabilities": {
+            "deterministic": false,
+            "pure": false,
+            "portable": false,
+            "semantically_introspectable": false,
+            "process_contained": false,
+            "external_io_capable": true
+          },
+          "input_types": {
+            "event": "event_envelope",
+            "variables": "typed_variables"
+          },
+          "output_type": "bool"
+        }
+      }
+    ],
+    "compiler_providers": [
+      {
+        "name": "eligibility",
+        "provider_reference": {
+          "identifier": "example.guard-compiler",
+          "version": "1.0.0",
+          "content_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "dependencies": []
+      }
+    ]
+  },
+  "artifact_digest": "sha256:50fa695672bafc187ba9cf2b93ac04d6a31f41efffe03f34cc383776b3869c7c"
+}

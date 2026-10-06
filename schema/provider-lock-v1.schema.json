@@ -12,9 +12,11 @@
     "content": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["authored_source_digest", "runtime_providers", "compiler_providers"],
+      "required": ["authored_source_digest", "resolved_definition_fingerprint",
+                   "runtime_providers", "compiler_providers"],
       "properties": {
         "authored_source_digest": {"$ref": "#/$defs/digest"},
+        "resolved_definition_fingerprint": {"$ref": "#/$defs/digest"},
         "runtime_providers": {
           "type": "array",
           "items": {

@@ -2,7 +2,7 @@
   "artifact_format": "determa.compilation_manifest",
   "artifact_schema_version": 1,
   "content": {
-    "source_artifact_digest": "sha256:08822e7bdfa3975c17a4394938fc0cece56c27a90b897bc3475f0b69d6b945ad",
+    "source_artifact_digest": "sha256:f6d41795d17ff3e63d6ea664422c94ba0d1b88982901c65526d3d9d2b01840a2",
     "compiler_providers": [
       {
         "identifier": "example.guard-compiler",
@@ -18,7 +18,15 @@
       "semantically_introspectable": true,
       "process_contained": false,
       "external_io_capable": false
-    }
+    },
+    "source_map": [
+      {
+        "source_locator": "/machines/0/root/states/pending/on_events/submit/guard",
+        "resolved_locators": [
+          "/machines/0/root/states/pending/on_events/submit/guard"
+        ]
+      }
+    ]
   },
-  "artifact_digest": "sha256:3e4d5d2e7719ddaf2ce6bdfd1584e588864e97a3099224f983d0b477582f2f5e"
+  "artifact_digest": "sha256:3f04140f15c4b92cd252008ff352a4b1893b169e99284c2a1d51480882a082c3"
 }

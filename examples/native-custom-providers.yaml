@@ -11,6 +11,8 @@ machines:
   - machine_id: order
     root:
       type: composite
+      variables:
+        accepted: { type: bool, init: false }
       initial: { transition_to: pending }
       states:
         pending:

@@ -13,7 +13,7 @@
       "required": ["template", "regions", "dependencies"],
       "additionalProperties": false,
       "properties": {
-        "template": {"$ref": "resolved-machine-v1.schema.json"},
+        "template": {"$ref": "machine.schema.json"},
         "regions": {
           "type": "array",
           "minItems": 1,

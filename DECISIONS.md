@@ -1,58 +1,75 @@
 # Determa State decision record
 
-This file records settled design rationale and review guidance. It is **not normative**
-and is not a second specification. [`SPEC.md`](SPEC.md), the schema, and applicable
-conformance cases define behavior; if this record conflicts with them, correct this
-record rather than treating it as an alternative rule source.
+This file records settled design rationale and review guidance. It is **not normative** and is not a
+second specification. [`SPEC.md`](SPEC.md) , the schema, and applicable conformance cases define
+behavior; if this record conflicts with them, correct this record rather than treating it as an
+alternative rule source.
+
+## Human source is separate from generated executable identity
+
+Human-authored format-1 YAML uses CEL, structured actions and meaningful named
+native/custom-language slots. Exact provider identities, source/dependency closure, type contracts
+and capability declarations belong in generated locks and resolved definitions. This replaces the
+superseded draft directly, without aliases.
+
+Loading source verifies an existing lock and its resolved output; only deliberate resolution/refresh
+generates new artifacts. Names never become mutable runtime aliases. Restoration checks the exact
+runtime closure and requires no compiler for compiled CEL. Source maps and provenance are generated
+separately. `validated_bundle_fingerprint` is a generated SHA-256 content identity, not a UUID or a
+manually supplied authoring field.
+
+## Event discard is always observable
+
+Non-durable operation removes retention requirements, not caller observability. A
+pre-admission/post-terminal policy discard identifies event/source, policy, decision and reason.
+Accepted ready/deferred entries and committed internal failure notifications remain aggregate-owned.
+Explicit lifecycle disposal is returned as core evidence. §21 adds stronger durable
+ownership/retention obligations.
 
 ## Scope authority is an optional host capability
 
-Relevant specification: [§18](SPEC.md#18-optional-host-scope-authority).
+Relevant specification: [§18](SPEC.md#18-optional-host-scope-authority) .
 
-**Decision.** Pure core evaluation requires no authority service. A configured host
-or plugin may prove guarded scope writes, worker fencing, complete inventory and safe
-relocation for its exact topology. The local reference profile advertises only tested
-behavior; unsupported relocation fails closed with an inactive import. Authority
-epochs, owner records, grants and credentials remain host data rather than portable
-machine state. A separate explicit fresh-scope takeover can trade old-owner and
-duplicate-work guarantees for recovery with recorded ambiguity.
+**Decision.** Pure core evaluation requires no authority service. A configured host or plugin may
+prove guarded scope writes, worker fencing, complete inventory and safe relocation for its exact
+topology. The local reference profile advertises only tested behavior; unsupported relocation fails
+closed with an inactive import. Authority epochs, owner records, grants and credentials remain host
+data rather than portable machine state. A separate explicit fresh-scope takeover can trade
+old-owner and duplicate-work guarantees for recovery with recorded ambiguity.
 
-**Rejected alternative.** Infer safe relocation from checkpoint integrity, root
-compare-and-swap, a copied database or an expired lease, or require a distributed
-coordinator in the open-source core.
+**Rejected alternative.** Infer safe relocation from checkpoint integrity, root compare-and-swap, a
+copied database or an expired lease, or require a distributed coordinator in the open-source core.
 
-**Reason.** None of those facts prevents an old session from committing after a new
-owner activates. A guard must cover the native commit or rollback, and a promotion
-must wait until any uncertain transaction fate is resolved. The public interface
-allows a future hosted service to provide stronger authority without changing the
-portable machine model.
+**Reason.** None of those facts prevents an old session from committing after a new owner activates.
+A guard must cover the native commit or rollback, and a promotion must wait until any uncertain
+transaction fate is resolved. The public interface allows a future hosted service to provide
+stronger authority without changing the portable machine model.
 ## Runtime providers are exact executable dependencies
 
-Relevant specification: [§5.4](SPEC.md#54-exact-runtime-providers-and-optional-source-compilation),
-[§8](SPEC.md#8-foreground-interface-and-logical-state), and
-[§16.2](SPEC.md#162-canonical-values-and-aggregate-encoding).
+Relevant specification: [§5.4](SPEC.md#54-exact-runtime-providers-and-optional-source-compilation) ,
+[§8](SPEC.md#8-foreground-interface-and-logical-state) , and
+[§16.2](SPEC.md#162-canonical-values-and-aggregate-encoding) .
 
-**Decision.** CEL and structured actions remain the format-1 default. Exact runtime
-guard and action slots can coexist with them. A complete binding pins reference,
-source, dependency closure, types and verified capabilities into the validated
-definition fingerprint. Compilation is an optional source path, never a mandatory
-intermediate representation for native slots. Restoration resolves the exact
-executable closure before evaluation and never recompiles implicitly.
+**Decision.** CEL and structured actions remain the format-1 default. Exact runtime guard and action
+slots can coexist with them. A complete binding pins reference, source, dependency closure, types
+and verified capabilities into the validated definition fingerprint. Compilation is an optional
+source path, never a mandatory intermediate representation for native slots. Restoration resolves
+the exact executable closure before evaluation and never recompiles implicitly.
 
-**Reason.** A source-language name or mutable installed callback cannot prove that
-restored state will execute the same logic. Direct native I/O remains an explicit
-embedded choice with weak rollback and replay guarantees. Engine-applied, checked
-action proposals preserve the statechart's action order and internal ownership.
+**Reason.** A source-language name or mutable installed callback cannot prove that restored state
+will execute the same logic. Direct native I/O remains an explicit embedded choice with weak
+rollback and replay guarantees. Engine-applied, checked action proposals preserve the statechart's
+action order and internal ownership.
 
-**Review guidance.** Exercise same-name/different-digest rejection, a missing
-transitive dependency, wrong slot output type, mixed CEL/native capability reduction,
-unsafe semantic inspection refusal and native precommit I/O followed by CAS conflict.
-The external I/O hazard composes by any possible provider; purity, determinism,
-portability and introspection guarantees compose by all verified participants.
+**Review guidance.** Exercise same-name/different-digest rejection, a missing transitive dependency,
+wrong slot output type, mixed CEL/native capability reduction, unsafe semantic inspection refusal
+and native precommit I/O followed by CAS conflict. The external I/O hazard composes by any possible
+provider; purity, determinism, portability and introspection guarantees compose by all verified
+participants.
 
 ## Transition boundaries are relationship-specific
 
-Relevant specification: [§6.4](SPEC.md#64-transition-execution-order).
+Relevant specification: [§6.4](SPEC.md#64-transition-execution-order) .
 
 **Decision.** Format 1 enumerates every targeted source/target relationship:
 
@@ -68,478 +85,450 @@ An action without `transition_to` is an internal reaction and changes no configu
 
 **Rejected alternative.** Apply the ordinary least common ancestor in every topology.
 
-**Reason.** When a composite source contains its target, the ordinary least common
-ancestor is the source. That made `local: true` a no-op in the only topology where it
-is legal and removed the reset-in-place form.
+**Reason.** When a composite source contains its target, the ordinary least common ancestor is the
+source. That made `local: true` a no-op in the only topology where it is legal and removed the
+reset-in-place form.
 
 ## The machine root is an invariant boundary
 
 Relevant specification: [§6.4](SPEC.md#64-transition-execution-order) and
-[§13](SPEC.md#13-deliberately-unsupported-in-format-1).
+[§13](SPEC.md#13-deliberately-unsupported-in-format-1) .
 
 **Decision.** Ordinary transitions never exit or re-enter the machine root.
 
-**Rejected alternative.** Give the root a virtual parent and apply ordinary external
-transition boundaries through it.
+**Rejected alternative.** Give the root a virtual parent and apply ordinary external transition
+boundaries through it.
 
-**Reason.** A root handler targeting a descendant would reset the complete runtime,
-including root input and external variables, which conflicts with their creation and
-refresh boundaries.
+**Reason.** A root handler targeting a descendant would reset the complete runtime, including root
+input and external variables, which conflicts with their creation and refresh boundaries.
 
 ## Cross-root external re-entry is deliberately unexpressible
 
-Relevant specification: [§5.1](SPEC.md#51-load-time-validation),
-[§6.4](SPEC.md#64-transition-execution-order), and
-[§13](SPEC.md#13-deliberately-unsupported-in-format-1).
+Relevant specification: [§5.1](SPEC.md#51-load-time-validation) ,
+[§6.4](SPEC.md#64-transition-execution-order) , and
+[§13](SPEC.md#13-deliberately-unsupported-in-format-1) .
 
-**Decision.** A root-to-descendant transition preserves the root, while a target that
-would re-enter the root is rejected. External re-entry across the root/descendant
-boundary in either direction is not expressible in format 1.
+**Decision.** A root-to-descendant transition preserves the root, while a target that would re-enter
+the root is rejected. External re-entry across the root/descendant boundary in either direction is
+not expressible in format 1.
 
-**Rejected alternative.** Add another external-transition marker or a virtual
-root-parent escape.
+**Rejected alternative.** Add another external-transition marker or a virtual root-parent escape.
 
-**Reason.** Format 1 accepts the smaller local-only root semantics to preserve root
-identity and variable lifetime. A later format may add an explicit reset operation
-without overloading ordinary transitions.
+**Reason.** Format 1 accepts the smaller local-only root semantics to preserve root identity and
+variable lifetime. A later format may add an explicit reset operation without overloading ordinary
+transitions.
 
 ## Transition actions execute before source exit
 
 Relevant specification: [§5.1](SPEC.md#51-load-time-validation) and
-[§6.4](SPEC.md#64-transition-execution-order).
+[§6.4](SPEC.md#64-transition-execution-order) .
 
-**Decision.** Transition actions run in the source configuration and lexical scope
-before any state exits.
+**Decision.** Transition actions run in the source configuration and lexical scope before any state
+exits.
 
-**Rejected alternative.** Use UML-style ordering in which the transition effect runs
-after source exit and before target entry.
+**Rejected alternative.** Use UML-style ordering in which the transition effect runs after source
+exit and before target entry.
 
-**Reason.** Preserving source context makes transition code direct and predictable.
-The consequence is deliberate: §5.1 rejects writes and bindings whose destination is
-destroyed by the selected transition.
+**Reason.** Preserving source context makes transition code direct and predictable. The consequence
+is deliberate: §5.1 rejects writes and bindings whose destination is destroyed by the selected
+transition.
 
 ## Cancellation is total over reference states
 
 Relevant specification: [§7.2](SPEC.md#72-owned-spawned-instances) and
-[§10.1](SPEC.md#101-engine-faults).
+[§10.1](SPEC.md#101-engine-faults) .
 
-**Decision.** `cancel` disposes a live or retained-faulted owned runtime and succeeds
-without effect for null or already-disposed references.
+**Decision.** `cancel` disposes a live or retained-faulted owned runtime and succeeds without effect
+for null or already-disposed references.
 
 **Rejected alternative.** Accept cancellation only for a currently live target.
 
-**Reason.** Automatic scope cleanup runs before state exit actions. A live-only rule
-would make an exit-action cancellation fault merely because cleanup had already
-disposed the same child.
+**Reason.** Automatic scope cleanup runs before state exit actions. A live-only rule would make an
+exit-action cancellation fault merely because cleanup had already disposed the same child.
 
 ## A holding reference bounds owned-child lifetime
 
-Relevant specification: [§7.2](SPEC.md#72-owned-spawned-instances).
+Relevant specification: [§7.2](SPEC.md#72-owned-spawned-instances) .
 
-**Decision.** A child bound through `bind_to` is cancelled when the declaring scope of
-that reference exits. Unbound children and children held by surviving scopes remain
-owned until later completion or cancellation.
+**Decision.** A child bound through `bind_to` is cancelled when the declaring scope of that
+reference exits. Unbound children and children held by surviving scopes remain owned until later
+completion or cancellation.
 
-**Rejected alternative.** Require every transition leaving a holder scope to contain
-an explicit cancellation action validated at load time.
+**Rejected alternative.** Require every transition leaving a holder scope to contain an explicit
+cancellation action validated at load time.
 
-**Reason.** Nullable references make mandatory explicit cancellation incorrect: a
-valid transition would fault whenever no child had been spawned. Scope cleanup gives a
-total, deterministic lifetime rule.
+**Reason.** Nullable references make mandatory explicit cancellation incorrect: a valid transition
+would fault whenever no child had been spawned. Scope cleanup gives a total, deterministic lifetime
+rule.
 
 ## Conformance has three authority tiers
 
 Relevant specification: [§2](SPEC.md#2-conformance-parsing-and-format-identity) and the
-[conformance-suite policy](https://github.com/fruwehq/determa-state-conformance#readme).
+[conformance-suite policy](https://github.com/fruwehq/determa-state-conformance#readme) .
 
 **Decision.** Core cases bind every conforming implementation. Profile cases bind only
-implementations declaring that profile. Driver and harness mechanics bind no public
-implementation interface.
+implementations declaring that profile. Driver and harness mechanics bind no public implementation
+interface.
 
-**Rejected alternative.** Treat every file and helper in one flat suite as universally
-authoritative whenever it differs from prose.
+**Rejected alternative.** Treat every file and helper in one flat suite as universally authoritative
+whenever it differs from prose.
 
-**Reason.** Portable state semantics, optional host surfaces, and test orchestration
-have different consumers. Keeping their authority explicit prevents a harness detail
-from becoming an accidental API.
+**Reason.** Portable state semantics, optional host surfaces, and test orchestration have different
+consumers. Keeping their authority explicit prevents a harness detail from becoming an accidental
+API.
 
 ## The command-line interface is a profile
 
 Relevant specification: [§11.4](SPEC.md#114-hosting-profiles) and
-[§13](SPEC.md#13-deliberately-unsupported-in-format-1).
+[§13](SPEC.md#13-deliberately-unsupported-in-format-1) .
 
-**Decision.** Command-line behavior is optional profile work, not core format
-semantics. The former in-process first-in-first-out fixtures were dropped;
-`run_cli.py` remains non-normative infrastructure for a future profile.
+**Decision.** Command-line behavior is optional profile work, not core format semantics. The former
+in-process first-in-first-out fixtures were dropped; `run_cli.py` remains non-normative
+infrastructure for a future profile.
 
-**Rejected alternative.** Standardize the old command output and core-owned queue
-model as universal conformance.
+**Rejected alternative.** Standardize the old command output and core-owned queue model as universal
+conformance.
 
-**Reason.** Queue ownership, stepping, and serialized command results are host
-concerns. Standardizing the old fixtures would contradict the pure foreground core.
+**Reason.** Queue ownership, stepping, and serialized command results are host concerns.
+Standardizing the old fixtures would contradict the pure foreground core.
 
 ## Candidate inspection preserves guard uncertainty
 
-Relevant specification: [§12](SPEC.md#12-inspection-and-visualization).
+Relevant specification: [§12](SPEC.md#12-inspection-and-visualization) .
 
-**Decision.** Format 1 defines an exact-target candidate inspection result. Structural
-inspection is mandatory and returns the complete union of possible dispositions
-without evaluating a guard. Semantic inspection is optional and requires a separate
-proved, bounded, nonmutating guard entrypoint with a shared deterministic fuel model.
+**Decision.** Format 1 defines an exact-target candidate inspection result. Structural inspection is
+mandatory and returns the complete union of possible dispositions without evaluating a guard.
+Semantic inspection is optional and requires a separate proved, bounded, nonmutating guard
+entrypoint with a shared deterministic fuel model.
 
-**Rejected alternative.** Derive an enabled-event list from active configuration
-alone.
+**Rejected alternative.** Derive an enabled-event list from active configuration alone.
 
-**Reason.** A false guard is non-consuming and permits ancestor search. Same-state
-deferral can also preempt an ancestor. A configuration-only enabled-event list loses
-those distinctions. The exact candidate envelope, runtime incarnation and aggregate
-digest bind the question to one snapshot; a conditional structural answer stays honest
-about guard-dependent behavior. Semantic evaluation is safe only when the provider
-proves its separate introspection capability, not merely purity of ordinary execution.
+**Reason.** A false guard is non-consuming and permits ancestor search. Same-state deferral can also
+preempt an ancestor. A configuration-only enabled-event list loses those distinctions. The exact
+candidate envelope, runtime incarnation and aggregate digest bind the question to one snapshot; a
+conditional structural answer stays honest about guard-dependent behavior. Semantic evaluation is
+safe only when the provider proves its separate introspection capability, not merely purity of
+ordinary execution.
 
 ## Portable scalar spellings are canonical
 
-Relevant specification: [§2](SPEC.md#2-conformance-parsing-and-format-identity).
+Relevant specification: [§2](SPEC.md#2-conformance-parsing-and-format-identity) .
 
-**Decision.** The only plain Boolean/null spellings are lowercase `true`, `false`, and
-`null`. Plain `yes`, `no`, `on`, `off`, `y`, and `n` remain strings; noncanonical
-Boolean/null spellings are rejected, and quoted tokens remain strings.
+**Decision.** The only plain Boolean/null spellings are lowercase `true` , `false` , and `null` .
+Plain `yes` , `no` , `on` , `off` , `y` , and `n` remain strings; noncanonical Boolean/null
+spellings are rejected, and quoted tokens remain strings.
 
-**Rejected alternative.** Delegate implicit scalar resolution to whichever YAML
-library a host uses.
+**Rejected alternative.** Delegate implicit scalar resolution to whichever YAML library a host uses.
 
-**Reason 1: identity preservation.** Treating `yes`/`no` and `on`/`off` as Booleans
-collapses distinct YAML 1.2 state and event identifiers under YAML 1.1 tooling.
+**Reason 1: identity preservation.** Treating `yes` /`no` and `on` /`off` as Booleans collapses
+distinct YAML 1.2 state and event identifiers under YAML 1.1 tooling.
 
-**Reason 2: canonicalization.** Rejecting `True` and `~` gives one source spelling per
-portable Boolean/null value. This follows the same canonical-surface principle as
-rejecting `local: false` instead of treating it as an alias for omission.
+**Reason 2: canonicalization.** Rejecting `True` and `~` gives one source spelling per portable
+Boolean/null value. This follows the same canonical-surface principle as rejecting `local: false`
+instead of treating it as an alias for omission.
 
 ## Review guidance: enumerate quantified domains
 
 This guidance is non-normative.
 
-If a rule says “property P is valid for Q,” enumerate every member of Q and state the
-otherwise behavior. A missing otherwise rule is a latent defect, especially for
-lifecycle states, reference states, source/target relationships, and parser token
-classes. Write the failing fixture first, then close the prose, schema, and assertion
-contract around that exhaustive domain.
+If a rule says “property P is valid for Q,” enumerate every member of Q and state the otherwise
+behavior. A missing otherwise rule is a latent defect, especially for lifecycle states, reference
+states, source/target relationships, and parser token classes. Write the failing fixture first, then
+close the prose, schema, and assertion contract around that exhaustive domain.
 
 ## Portable state references content-addressed definitions
 
 Relevant specification: [§16.3](SPEC.md#163-complete-root-ownership-aggregate) and
-[§16.5](SPEC.md#165-content-addressed-definition-registry).
+[§16.5](SPEC.md#165-content-addressed-definition-registry) .
 
-**Decision.** An ordinary aggregate envelope stores the exact validated-bundle
-fingerprint. The normalized definition is stored once in a content-addressed registry.
-A separate package can carry verified definitions for transfer or recovery.
+**Decision.** An ordinary aggregate envelope stores the exact validated-bundle fingerprint. The
+normalized definition is stored once in a content-addressed registry. A separate package can carry
+verified definitions for transfer or recovery.
 
-**Rejected alternative.** Embed the complete normalized definition in every aggregate
-row.
+**Rejected alternative.** Embed the complete normalized definition in every aggregate row.
 
-**Reason.** Long-lived dormant aggregates need enough old declarative definition data
-to validate and migrate, but duplicating it per row makes every deployment and backup
-needlessly expensive. Content addressing preserves integrity and allows lazy migration
-without retaining old host executable logic.
+**Reason.** Long-lived dormant aggregates need enough old declarative definition data to validate
+and migrate, but duplicating it per row makes every deployment and backup needlessly expensive.
+Content addressing preserves integrity and allows lazy migration without retaining old host
+executable logic.
 
 ## Deferral follows handler precedence and portable ownership
 
-Relevant specification: [§6.3](SPEC.md#63-hierarchical-dispatch),
-[§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall), and
-[§17.4](SPEC.md#174-aggregate-owned-admission-and-processing).
+Relevant specification: [§6.3](SPEC.md#63-hierarchical-dispatch) ,
+[§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall) , and
+[§17.4](SPEC.md#174-aggregate-owned-admission-and-processing) .
 
-**Decision.** Determa resolves an event level by level from deepest active state to root.
-At each state an enabled handler wins over that state's deferral; if no handler there is
-enabled, that state's deferral wins over every ancestor handler. Accepted ready and
-deferred envelopes belong to exactly one addressed runtime in the portable
-aggregate/checkpoint. Recall uses the corresponding bounded structural walk with no
-guard evaluation.
+**Decision.** Determa resolves an event level by level from deepest active state to root. At each
+state an enabled handler wins over that state's deferral; if no handler there is enabled, that
+state's deferral wins over every ancestor handler. Accepted ready and deferred envelopes belong to
+exactly one addressed runtime in the portable aggregate/checkpoint. Recall uses the corresponding
+bounded structural walk with no guard evaluation.
 
-**Rejected alternative.** Search all hierarchy levels for a handler before consulting
-deferral, let an ancestor handler bypass a child deferral, or leave deferred work in a
-plugin-owned queue outside portable state.
+**Rejected alternative.** Search all hierarchy levels for a handler before consulting deferral, let
+an ancestor handler bypass a child deferral, or leave deferred work in a plugin-owned queue outside
+portable state.
 
-**Reason.** UML hierarchy gives the deepest active state first refusal: a child handler
-can handle before a parent deferral is reached, while a child deferral prevents an
-ancestor from handling too early. Portable machine behavior also cannot depend on
-whether a transport plugin happens to retain process memory. Runtime-local ownership
-preserves hierarchy, explicit targeting, serialization, and crash recovery without
-adding a scheduler. Structural recall prevents an unrelated successful RTC from faulting
-while merely scanning a deferred guard; normal guards run only when the recalled event
+**Reason.** UML hierarchy gives the deepest active state first refusal: a child handler can handle
+before a parent deferral is reached, while a child deferral prevents an ancestor from handling too
+early. Portable machine behavior also cannot depend on whether a transport plugin happens to retain
+process memory. Runtime-local ownership preserves hierarchy, explicit targeting, serialization, and
+crash recovery without adding a scheduler. Structural recall prevents an unrelated successful RTC
+from faulting while merely scanning a deferred guard; normal guards run only when the recalled event
 is selected.
 
 ## Portable artifacts have one schema version
 
 Relevant specification: [§16.1](SPEC.md#161-independent-artifact-identities) and
-[§17.1](SPEC.md#171-scope).
+[§17.1](SPEC.md#171-scope) .
 
-**Decision.** Aggregate, package, migration, checkpoint, and core-result artifacts use
-schema version 1 as their sole supported portable representation. Machine document
-format 1 is independent.
+**Decision.** Aggregate, package, migration, checkpoint, and core-result artifacts use schema
+version 1 as their sole supported portable representation. Machine document format 1 is independent.
 
-**Rejected alternative.** Preserve an unused pre-alpha artifact representation through
-parallel schemas, compatibility wrappers, or conversion paths.
+**Rejected alternative.** Preserve an unused pre-alpha artifact representation through parallel
+schemas, compatibility wrappers, or conversion paths.
 
-**Reason.** One queue-bearing ownership model is simpler and stricter. Accepted events
-have one durable lifecycle location, and implementations do not need to carry an
-unreleased compatibility surface.
+**Reason.** One queue-bearing ownership model is simpler and stricter. Accepted events have one
+durable lifecycle location, and implementations do not need to carry an unreleased compatibility
+surface.
 
 ## Queue lifecycle evidence is closed and dependency-safe
 
-Relevant specification: [§17.4](SPEC.md#174-aggregate-owned-admission-and-processing).
+Relevant specification: [§17.4](SPEC.md#174-aggregate-owned-admission-and-processing) .
 
-**Decision.** Processing reports every lifecycle removal from the core, and a
-checkpoint host atomically translates those removals into terminal receipts. Event
-identity tombstones preserve replay and conflict evidence after dependency-closed
-receipt compaction.
+**Decision.** Processing reports every lifecycle removal from the core, and a checkpoint host
+atomically translates those removals into terminal receipts. Event identity tombstones preserve
+replay and conflict evidence after dependency-closed receipt compaction.
 
 ## Migration preserves target identity
 
-Relevant specification: [§16.4](SPEC.md#164-immutable-identity-and-mutable-definition-binding).
+Relevant specification: [§16.4](SPEC.md#164-immutable-identity-and-mutable-definition-binding) .
 
-**Decision.** Runtime identity origin and target identity are immutable. Migration
-updates only the current definition and relation pointers.
+**Decision.** Runtime identity origin and target identity are immutable. Migration updates only the
+current definition and relation pointers.
 
-**Rejected alternative.** Recompute component and spawned identities from the target
-definition.
+**Rejected alternative.** Recompute component and spawned identities from the target definition.
 
-**Reason.** Already-created envelopes, outbox rows, nominal references, and external
-correlation may contain the old target. Rekeying would silently invalidate committed
-work unless every external reference were transactionally rewritten, which is outside
-the root aggregate.
+**Reason.** Already-created envelopes, outbox rows, nominal references, and external correlation may
+contain the old target. Rekeying would silently invalidate committed work unless every external
+reference were transactionally rewritten, which is outside the root aggregate.
 
 ## Migration is declarative and action-free
 
-Relevant specification: [§16.7](SPEC.md#167-immutable-declarative-migration-descriptors)
-and [§16.9](SPEC.md#169-total-transform-matrix).
+Relevant specification: [§16.7](SPEC.md#167-immutable-declarative-migration-descriptors) and
+[§16.9](SPEC.md#169-total-transform-matrix) .
 
-**Decision.** Descriptors are immutable data with a bounded closed CEL value profile.
-Migration never executes machine actions, lifecycle behavior, arbitrary code, host
-callbacks, or I/O.
+**Decision.** Descriptors are immutable data with a bounded closed CEL value profile. Migration
+never executes machine actions, lifecycle behavior, arbitrary code, host callbacks, or I/O.
 
-**Rejected alternative.** Run entry/exit/transition code or an implementation-language
-migration callback.
+**Rejected alternative.** Run entry/exit/transition code or an implementation-language migration
+callback.
 
-**Reason.** Portable migration must be retry-identical across languages and safe inside
-one host transaction. Author behavior can emit effects or depend on runtime facilities,
-and arbitrary callbacks cannot be independently validated by the conformance suite.
+**Reason.** Portable migration must be retry-identical across languages and safe inside one host
+transaction. Author behavior can emit effects or depend on runtime facilities, and arbitrary
+callbacks cannot be independently validated by the conformance suite.
 
 ## Migration routes are exact and pinned
 
-Relevant specification: [§16.8](SPEC.md#168-exact-route-and-migration-algorithm).
+Relevant specification: [§16.8](SPEC.md#168-exact-route-and-migration-algorithm) .
 
-**Decision.** Deployment supplies one exact ordered list of trusted descriptor digests.
-The engine never searches a migration graph.
+**Decision.** Deployment supplies one exact ordered list of trusted descriptor digests. The engine
+never searches a migration graph.
 
 **Rejected alternative.** Select the shortest or latest available path at runtime.
 
-**Reason.** Registry contents and path-selection algorithms are host-dependent. Two
-available valid paths must not make aggregate results nondeterministic.
+**Reason.** Registry contents and path-selection algorithms are host-dependent. Two available valid
+paths must not make aggregate results nondeterministic.
 
 ## Incompatible state quarantines instead of guessing
 
 Relevant specification: [§16.9](SPEC.md#169-total-transform-matrix) and
-[§16.12](SPEC.md#1612-failure-rollback-quarantine-and-audit).
+[§16.12](SPEC.md#1612-failure-rollback-quarantine-and-audit) .
 
-**Decision.** Deleted or incompatible active state requires a complete explicit
-mapping. Otherwise the original aggregate is retained and quarantined. There is no
-destructive reset migration.
+**Decision.** Deleted or incompatible active state requires a complete explicit mapping. Otherwise
+the original aggregate is retained and quarantined. There is no destructive reset migration.
 
-**Rejected alternative.** Match by name, choose a surviving ancestor/initial state, or
-restart the aggregate automatically.
+**Rejected alternative.** Match by name, choose a surviving ancestor/initial state, or restart the
+aggregate automatically.
 
-**Reason.** Each fallback can discard business state or rerun side effects while
-appearing to be a routine definition upgrade. Quarantine makes the unresolved case
-observable and auditable without corrupting the committed source.
+**Reason.** Each fallback can discard business state or rerun side effects while appearing to be a
+routine definition upgrade. Quarantine makes the unresolved case observable and auditable without
+corrupting the committed source.
 
 ## Lazy migration shares the dispatch transaction
 
-Relevant specification: [§16.11](SPEC.md#1611-lazy-transactional-host-ordering).
+Relevant specification: [§16.11](SPEC.md#1611-lazy-transactional-host-ordering) .
 
-**Decision.** The complete route, optional dispatch, aggregate replacement, inbox
-result, outbox emissions, and audit commit atomically under one aggregate lock.
-Artifacts are resolved before the transaction.
+**Decision.** The complete route, optional dispatch, aggregate replacement, inbox result, outbox
+emissions, and audit commit atomically under one aggregate lock. Artifacts are resolved before the
+transaction.
 
-**Rejected alternative.** Commit migration first and dispatch later, or process owned
-children in separate transactions.
+**Rejected alternative.** Commit migration first and dispatch later, or process owned children in
+separate transactions.
 
-**Reason.** A committed definition advance with a rolled-back core result violates
-fault and retry semantics. The root ownership aggregate remains one transactional
-state boundary.
+**Reason.** A committed definition advance with a rolled-back core result violates fault and retry
+semantics. The root ownership aggregate remains one transactional state boundary.
 
 ## Extension capability claims bind configured instances
 
 Relevant specification: [§11.5](SPEC.md#115-public-extension-identity-registration-and-capabilities)
-and [§17.11](SPEC.md#1711-execution-store-capabilities-and-composed-host-profiles).
+and [§17.11](SPEC.md#1711-execution-store-capabilities-and-composed-host-profiles) .
 
-**Decision.** The public registration path accepts bundled and third-party providers
-equally, with exact version and digest references. Direct injection remains available.
-Profiles check category-specific capabilities against a healthy, validated configured
-instance before mutation. Effective guarantees require every participant; external I/O
-risk is reported if any participant may perform it. Named endpoints, credentials, and
-scope bindings are host configuration outside machine semantics.
+**Decision.** The public registration path accepts bundled and third-party providers equally, with
+exact version and digest references. Direct injection remains available. Profiles check
+category-specific capabilities against a healthy, validated configured instance before mutation.
+Effective guarantees require every participant; external I/O risk is reported if any participant may
+perform it. Named endpoints, credentials, and scope bindings are host configuration outside machine
+semantics.
 
-**Rejected alternative.** Infer capabilities from URI schemes, provider names, package
-versions, or a registration descriptor alone.
+**Rejected alternative.** Infer capabilities from URI schemes, provider names, package versions, or
+a registration descriptor alone.
 
-**Reason.** Configuration, topology, health, and participating provider closures change
-the actual guarantees. Name-based inference could advertise safe relocation or durable
-processing without the authority or storage behavior that proves it. A future hosted
-service must pass the same public capability conformance tests as a local host.
+**Reason.** Configuration, topology, health, and participating provider closures change the actual
+guarantees. Name-based inference could advertise safe relocation or durable processing without the
+authority or storage behavior that proves it. A future hosted service must pass the same public
+capability conformance tests as a local host.
 
 ## Application projection is a lossless view of selected rows
 
-Relevant specification: [§20](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade).
+Relevant specification:
+[§20](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade) .
 
-**Decision.** A configured projection selects application rows explicitly, admits
-their values only through declared typed input or external-refresh boundaries, and
-round-trips the entire Determa aggregate or checkpoint. The application owns its
-transaction and table mapping. A shared native transaction is claimed only when the
-configured store proves it and the application actually uses it.
+**Decision.** A configured projection selects application rows explicitly, admits their values only
+through declared typed input or external-refresh boundaries, and round-trips the entire Determa
+aggregate or checkpoint. The application owns its transaction and table mapping. A shared native
+transaction is claimed only when the configured store proves it and the application actually uses
+it.
 
-**Rejected alternative.** Treat an application status column as the engine state or
-let a mapper overwrite runtime internals directly.
+**Rejected alternative.** Treat an application status column as the engine state or let a mapper
+overwrite runtime internals directly.
 
-**Reason.** A status summary cannot reconstruct deferred work, history, identities,
-receipts, and pending effects. Direct internal writes bypass declaration validation
-and the atomic checkpoint boundary. A failed projection must leave both application
-rows and Determa evidence unchanged.
+**Reason.** A status summary cannot reconstruct deferred work, history, identities, receipts, and
+pending effects. Direct internal writes bypass declaration validation and the atomic checkpoint
+boundary. A failed projection must leave both application rows and Determa evidence unchanged.
 
 ## Delivery ownership crosses only a committed boundary
 
-Relevant specification: [§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall),
-[§17.4](SPEC.md#174-aggregate-owned-admission-and-processing),
-[§17.6](SPEC.md#176-durable-outbox-lifecycle), and
-[§21](SPEC.md#21-lossless-event-delivery-profile).
+Relevant specification: [§6.7](SPEC.md#67-deferred-mailboxes-and-automatic-recall) ,
+[§17.4](SPEC.md#174-aggregate-owned-admission-and-processing) ,
+[§17.6](SPEC.md#176-durable-outbox-lifecycle) , and
+[§21](SPEC.md#21-lossless-event-delivery-profile) .
 
-**Decision.** A source owns ingress backlog until complete machine admission and its
-receipt commit, or an explicitly configured durable ingress dead-letter transfer.
-Acknowledgement follows that commit. Accepted events belong to the runtime mailbox
-and then one terminal receipt; deferral and unhandled outcomes are never broker retry
-instructions. Every terminal policy retains identity, reason, authority, and receipt
-for its declared replay window. Outbound destination acceptance is delivery evidence,
-while a later declared input conveys business outcome.
-Admission and terminal machine processing reference their respective §17 operation
-receipts. Deferred/ready movement and outbox state updates reference the committed
-checkpoint entry or outbox record at its exact revision; neither operation invents
-a new receipt.
+**Decision.** A source owns ingress backlog until complete machine admission and its receipt commit,
+or an explicitly configured durable ingress dead-letter transfer. Acknowledgement follows that
+commit. Accepted events belong to the runtime mailbox and then one terminal receipt; deferral and
+unhandled outcomes are never broker retry instructions. Every terminal policy retains identity,
+reason, authority, and receipt for its declared replay window. Outbound destination acceptance is
+delivery evidence, while a later declared input conveys business outcome. Admission and terminal
+machine processing reference their respective §17 operation receipts. Deferred/ready movement and
+outbox state updates reference the committed checkpoint entry or outbox record at its exact
+revision; neither operation invents a new receipt.
 
-**Rejected alternative.** Acknowledge on validation, silently discard on overflow,
-retry an admitted event at the broker after unhandled disposition, or treat outbox
-confirmation as business success.
+**Rejected alternative.** Acknowledge on validation, silently discard on overflow, retry an admitted
+event at the broker after unhandled disposition, or treat outbox confirmation as business success.
 
-**Reason.** Those shortcuts lose or duplicate responsibility across crashes and make
-replay unable to distinguish a committed decision from an abandoned attempt.
+**Reason.** Those shortcuts lose or duplicate responsibility across crashes and make replay unable
+to distinguish a committed decision from an abandoned attempt.
 
 ## Archives stage complete Determa snapshots and declared participants
 
-Relevant specification: [§22](SPEC.md#22-portable-archives-and-declared-participants),
-[§17.13](SPEC.md#1713-cluster-checkpoint-composition),
-[§19](SPEC.md#19-committed-native-effects-and-authenticated-results), and
-[§20](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade).
+Relevant specification: [§22](SPEC.md#22-portable-archives-and-declared-participants) ,
+[§17.13](SPEC.md#1713-cluster-checkpoint-composition) ,
+[§19](SPEC.md#19-committed-native-effects-and-authenticated-results) , and
+[§20](SPEC.md#20-lossless-application-projection-and-embedded-transaction-facade) .
 
-**Decision.** A version-1 archive contains full selected checkpoints and exact
-immutable definition attachments. Application or helper data joins only through an
-explicit participant with a pinned provider, schema, dependency closure, and complete
-payload. Its `determa.scope_archive` root is the closed manifest: content identity,
-sorted member identities, canonical-byte digests and lengths, required destination
-Determa capabilities, optional participant references, and inert source-fence or
-transfer pointers when applicable. The source provenance and full required/optional participant contract are
-compared to independent trusted host policy; a resealed omission or weaker profile
-cannot redefine completeness. Required missing data blocks staging; optional
-omissions are reported. A source claiming §19 durable native results requires a
-closed host-journal participant paired with every selected checkpoint; a standalone
-source without helper participants remains a valid complete archive. The journal
-payload retains replayable public response bytes and is checked against an
-independently trusted source inventory of records, attempts, outcomes, and responses
-at the same capture point, so a resealed omission cannot redefine completeness.
+**Decision.** A version-1 archive contains full selected checkpoints and exact immutable definition
+attachments. Application or helper data joins only through an explicit participant with a pinned
+provider, schema, dependency closure, and complete payload. Its `determa.scope_archive` root is the
+closed manifest: content identity, sorted member identities, canonical-byte digests and lengths,
+required destination Determa capabilities, optional participant references, and inert source-fence
+or transfer pointers when applicable. The source provenance and full required/optional participant
+contract are compared to independent trusted host policy; a resealed omission or weaker profile
+cannot redefine completeness. Required missing data blocks staging; optional omissions are reported.
+A source claiming §19 durable native results requires a closed host-journal participant paired with
+every selected checkpoint; a standalone source without helper participants remains a valid complete
+archive. The journal payload retains replayable public response bytes and is checked against an
+independently trusted source inventory of records, attempts, outcomes, and responses at the same
+capture point, so a resealed omission cannot redefine completeness.
 
-**Rejected alternative.** Reconstruct state by replaying event journals or collect
-arbitrary database rows under an archive label.
+**Rejected alternative.** Reconstruct state by replaying event journals or collect arbitrary
+database rows under an archive label.
 
-**Reason.** Replay can repeat effects or lose accepted deferred work, and undeclared
-rows have no portable reconstruction proof. Staging must validate exact bytes while
-remaining inert; destination authority and relocation are separate concerns.
+**Reason.** Replay can repeat effects or lose accepted deferred work, and undeclared rows have no
+portable reconstruction proof. Staging must validate exact bytes while remaining inert; destination
+authority and relocation are separate concerns.
 
 ## Timer work remains an external, separately archived helper
 
-Relevant specification: [§11.2](SPEC.md#112-timer-extensions),
-[§17.14](SPEC.md#1714-external-timer-durability), and
-[§23](SPEC.md#23-optional-external-timer-helper), and
-[§24](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation).
+Relevant specification: [§11.2](SPEC.md#112-timer-extensions) ,
+[§17.14](SPEC.md#1714-external-timer-durability) , and
+[§23](SPEC.md#23-optional-external-timer-helper) , and
+[§24](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation) .
 
-**Decision.** The optional timer helper has a closed schedule/cancel/fire protocol,
-signed Unix-nanosecond clock values, and its own versioned record artifact. It is
-installed and capability-checked as an external extension. A fire becomes an
-ordinary declared event with stable identity and normal admission. A durable helper
-participates in §22 archives through a separate declared participant when selected
-roots depend on its work. §17.14's earlier exclusion means timers are outside the
-core checkpoint; the separate-artifact route is now available without changing
-checkpoint schema version 1. The required participant is pinned in the independent
-source contract and complete `determa.scope_archive` manifest, including member
-digest and byte length. Export and staging check the archive participant's configured
-capabilities separately from timer capabilities.
-Recovery treats imported timer records as inert. Inherited pending or uncertain
-fires require §24 reconciliation when the old owner may still act; a new scope
-allocates new timer fire identity. Proved same-scope relocation preserves identity
-only after helper claims are revoked and fire fate is resolved.
+**Decision.** The optional timer helper has a closed schedule/cancel/fire protocol, signed
+Unix-nanosecond clock values, and its own versioned record artifact. It is installed and
+capability-checked as an external extension. A fire becomes an ordinary declared event with stable
+identity and normal admission. A durable helper participates in §22 archives through a separate
+declared participant when selected roots depend on its work. §17.14's earlier exclusion means timers
+are outside the core checkpoint; the separate-artifact route is now available without changing
+checkpoint schema version 1. The required participant is pinned in the independent source contract
+and complete `determa.scope_archive` manifest, including member digest and byte length. Export and
+staging check the archive participant's configured capabilities separately from timer capabilities.
+Recovery treats imported timer records as inert. Inherited pending or uncertain fires require §24
+reconciliation when the old owner may still act; a new scope allocates new timer fire identity.
+Proved same-scope relocation preserves identity only after helper claims are revoked and fire fate
+is resolved.
 
-**Rejected alternative.** Put deadlines or due polling in the core, infer timer
-durability from provider identity, or treat a committed independent fire as proof of
-checkpoint admission.
+**Rejected alternative.** Put deadlines or due polling in the core, infer timer durability from
+provider identity, or treat a committed independent fire as proof of checkpoint admission.
 
-**Reason.** Core evaluation remains dormant until explicitly invoked. Timer
-records need their own clock, storage, cancellation, retry, and crash evidence.
-The coordinated profile proves the fire/admission boundary; independent delivery
-reports its weaker, potentially ambiguous boundary.
+**Reason.** Core evaluation remains dormant until explicitly invoked. Timer records need their own
+clock, storage, cancellation, retry, and crash evidence. The coordinated profile proves the
+fire/admission boundary; independent delivery reports its weaker, potentially ambiguous boundary.
 
 ## Recovery remains an explicit host choice
 
-Relevant specification: [§24](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation).
+Relevant specification:
+[§24](SPEC.md#24-recovery-fresh-scope-takeover-cloning-and-optional-relocation) .
 
-**Decision.** A strict restore always remains an inert read-only quarantine.
-Proved continuation uses the separate guarded transfer activation path. A standalone
-operator may instead create a fresh scope and namespace, retaining ambiguous work and
-source provenance with an explicit old-owner risk acknowledgement. A clone is separate
-independent execution and needs proved provider isolation. Safe relocation is an
-optional positive claim for a tested topology under one authority domain.
+**Decision.** A strict restore always remains an inert read-only quarantine. Proved continuation
+uses the separate guarded transfer activation path. A standalone operator may instead create a fresh
+scope and namespace, retaining ambiguous work and source provenance with an explicit old-owner risk
+acknowledgement. A clone is separate independent execution and needs proved provider isolation. Safe
+relocation is an optional positive claim for a tested topology under one authority domain.
 
-**Reason.** Archive completeness makes state reconstructable but cannot revoke a
-remote worker or undo an accepted provider request. The new scope makes the weaker
-choice visible in identity, receipts and capability reports. A credential or timeout
-cannot supply a missing authority proof.
+**Reason.** Archive completeness makes state reconstructable but cannot revoke a remote worker or
+undo an accepted provider request. The new scope makes the weaker choice visible in identity,
+receipts and capability reports. A credential or timeout cannot supply a missing authority proof.
 ## Public host requests pin their resolved binding
 
-Relevant specification: [§25](SPEC.md#25-public-client-and-execution-host-protocol).
+Relevant specification: [§25](SPEC.md#25-public-client-and-execution-host-protocol) .
 
-**Decision.** Version-1 public requests use the closed `protocol`, `protocol_version`,
-`operation_id`, `scope_binding_identity`, `operation`, `target`, `precondition`,
-`arguments` envelope. Responses use `protocol`, `protocol_version`,
-`operation_id`, `status`, `receipt`, `value`, `error`. The client saves the resolved endpoint/scope
-binding and canonical request before the first mutation. A lost response is resolved
-only at that binding with the same host operation ID and request digest. The host
-retains the complete first response while it claims operation replay. Discovery,
-inspection, history, response replay, and re-execution are separate capabilities.
+**Decision.** Version-1 public requests use the closed `protocol` , `protocol_version` ,
+`operation_id` , `scope_binding_identity` , `operation` , `target` , `precondition` , `arguments`
+envelope. Responses use `protocol` , `protocol_version` , `operation_id` , `status` , `receipt` ,
+`value` , `error` . The client saves the resolved endpoint/scope binding and canonical request
+before the first mutation. A lost response is resolved only at that binding with the same host
+operation ID and request digest. The host retains the complete first response while it claims
+operation replay. Discovery, inspection, history, response replay, and re-execution are separate
+capabilities.
 
-**Reason.** Endpoint aliases and current state can change after a commit. Resolving a
-retry against a new alias could run a second operation in a different authority;
-a digest or missing receipt alone cannot reconstruct the original response or prove
-rollback. The same public model works for the local reference host and a later hosted
-service without placing endpoint configuration in the machine definition.
+**Reason.** Endpoint aliases and current state can change after a commit. Resolving a retry against
+a new alias could run a second operation in a different authority; a digest or missing receipt alone
+cannot reconstruct the original response or prove rollback. The same public model works for the
+local reference host and a later hosted service without placing endpoint configuration in the
+machine definition.
 
-**Review guidance.** Exercise alias replacement after a response loss, equal and
-unequal operation-ID replay, unauthorized scope before root lookup, expired receipt
-ambiguity, the full checkpoint and receipt in the first response, and capability
-refusal before mutation. Check embedded clients and the reference host against the
-same golden request/response bytes. Require exact re-execution comparisons only
-when the complete provider closure is deterministic and portable.
+**Review guidance.** Exercise alias replacement after a response loss, equal and unequal
+operation-ID replay, unauthorized scope before root lookup, expired receipt ambiguity, the full
+checkpoint and receipt in the first response, and capability refusal before mutation. Check embedded
+clients and the reference host against the same golden request/response bytes. Require exact
+re-execution comparisons only when the complete provider closure is deterministic and portable.
 
-Closed public archive and recovery variants use the exact §22 and §24 request,
-result, archive, and destination-record shapes. Discovery reports the independently
-configured destination decoder/staging features; source archive claims do not grant
-them. A definitive nested refusal is an outer rejection with its complete inner
-result, while a successful mutation requires a durable public receipt. Verified
-local transfer, fresh-scope takeover, and clone keep their separate safety claims.
-Timer commands wrap the exact §23 helper operation and result, including its own
-digest and fire-fence evidence. A successful helper mutation needs a durable public
-receipt; a helper refusal remains an outer rejection with the full helper result.
+Closed public archive and recovery variants use the exact §22 and §24 request, result, archive, and
+destination-record shapes. Discovery reports the independently configured destination
+decoder/staging features; source archive claims do not grant them. A definitive nested refusal is an
+outer rejection with its complete inner result, while a successful mutation requires a durable
+public receipt. Verified local transfer, fresh-scope takeover, and clone keep their separate safety
+claims. Timer commands wrap the exact §23 helper operation and result, including its own digest and
+fire-fence evidence. A successful helper mutation needs a durable public receipt; a helper refusal
+remains an outer rejection with the full helper result.

@@ -1,0 +1,98 @@
+{
+  "authored_source": "examples/native-custom-providers.yaml",
+  "lock": "vectors/providers/provider-lock-v1.json",
+  "resolved_definition": "vectors/providers/named-resolved-machine.json",
+  "description": "Synthetic exact closure identities: these vectors prove value/digest relationships, not loaded provider authenticity or a configured capability.",
+  "positive": [
+    {
+      "operation": "load_existing",
+      "core_calls": 0,
+      "compiler_calls": 0,
+      "lock_writes": 0
+    },
+    {
+      "operation": "restore_resolved",
+      "compiler_calls": 0,
+      "alias_lookups": 0
+    }
+  ],
+  "negative": [
+    {
+      "change": "authored_source_changed",
+      "boundary": "source_digest",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "resolved_output_changed",
+      "boundary": "resolved_definition_fingerprint",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "installed_code_changed",
+      "boundary": "runtime_closure",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "unknown_guard_name",
+      "boundary": "named_guard_entry",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "wrong_runtime_kind",
+      "boundary": "kind",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "duplicate_runtime_name_kind",
+      "boundary": "lock_inventory",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "unused_lock_entry",
+      "boundary": "lock_inventory",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "compiler_reference_changed",
+      "boundary": "compiler_closure",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "source_map_wrong_slot",
+      "boundary": "source_map",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "untrusted_lock",
+      "boundary": "deployment_authorization",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    },
+    {
+      "change": "builtin_name_shadowed",
+      "boundary": "reserved_name",
+      "core_calls": 0,
+      "state_mutations": 0,
+      "lock_writes": 0
+    }
+  ]
+}
