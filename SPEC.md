@@ -2378,8 +2378,8 @@ Uncommitted rollback is not deletion of accepted input: committed mailbox and fa
 rules remain authoritative.
 
 Beyond the closed discard record, policy configuration, storage shape, privacy and operational
-guarantees belong to that plugin. Under §21, an unhandled, faulted, or disposed event has an explicit
-terminal decision and retained evidence. These policies apply only after terminal machine
+guarantees belong to that plugin. Under §21, an unhandled, faulted, or disposed event has an
+explicit terminal decision and retained evidence. These policies apply only after terminal machine
 disposition or before Determa acceptance; they cannot replace, reorder, expire, or cap a runtime's
 normative ready/deferred mailboxes.
 

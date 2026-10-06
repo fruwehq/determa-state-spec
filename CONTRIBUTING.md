@@ -24,8 +24,8 @@ not define the core API.
 `examples/` contains only a small human-readable YAML set. Authors write meaningful native/language
 names, never executable hashes or dependency closures at use sites. `machine.schema.json` validates
 source; `resolved-machine-v1.schema.json` validates generated executable definitions. Select the
-stage explicitly, without dual readers. Both entrypoints reference `machine-grammar-v1.schema.json`, whose dynamic anchors select explicit
-stage-specific slots. The shared grammar is not a standalone loader. Differences are confined to
+stage explicitly, without dual readers. Both entrypoints reference
+`machine-grammar-v1.schema.json`, whose dynamic anchors select explicit stage-specific slots. The shared grammar is not a standalone loader. Differences are confined to
 runtime and custom-source slots. Generated locks pin exact source and executable
 output.
 

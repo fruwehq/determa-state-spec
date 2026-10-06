@@ -856,6 +856,9 @@
           },
           {
             "$dynamicRef": "#providerActionSlot"
+          },
+          {
+            "$dynamicRef": "#sourceLanguageSlot"
           }
         ]
       }

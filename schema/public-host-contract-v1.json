@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:1850f8cb74161f1c088be67b6548b3617a52f18fb30dc49fdabe33f72c3795b5"
+      "sha256": "sha256:37fd45e961098c5ed24311cd4e285eb3795bd33e8643c8c3a42f58cc12fc4f35"
     },
     {
       "path": "VERSION",
@@ -440,7 +440,7 @@
     },
     {
       "path": "schema/machine-grammar-v1.schema.json",
-      "sha256": "sha256:0f991b721857e4c2a0b7ff472cdc5b6a71e5e7a0e6f560efb547312d14ae29e7"
+      "sha256": "sha256:06ef3ac9e36f210305a699f5baccbdd519a7d493a750b6fe4eeefa7fdf319550"
     }
   ],
   "hash_domains": [

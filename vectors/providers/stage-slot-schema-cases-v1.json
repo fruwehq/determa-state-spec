@@ -1,0 +1,137 @@
+{
+  "description": "Schema-stage controls; semantic deployment and runtime behavior require shared conformance cases after specification approval.",
+  "cases": [
+    {
+      "name": "authored_custom_exit",
+      "stage": "authored",
+      "valid": true,
+      "machine": {
+        "format": 1,
+        "namespace": "check.exit",
+        "machines": [
+          {
+            "machine_id": "m",
+            "root": {
+              "exit": [
+                {
+                  "lang": "cleanup",
+                  "source": "record_exit()"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "unresolved_custom_exit",
+      "stage": "resolved",
+      "valid": false,
+      "machine": {
+        "format": 1,
+        "namespace": "check.exit",
+        "machines": [
+          {
+            "machine_id": "m",
+            "root": {
+              "exit": [
+                {
+                  "lang": "cleanup",
+                  "source": "record_exit()"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "generated_exit_forbids_spawn",
+      "stage": "resolved",
+      "valid": false,
+      "machine": {
+        "format": 1,
+        "namespace": "check.exit",
+        "machines": [
+          {
+            "machine_id": "m",
+            "root": {
+              "exit": [
+                {
+                  "spawn": {
+                    "machine_id": "job"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "generated_entry_accepts_spawn",
+      "stage": "resolved",
+      "valid": true,
+      "machine": {
+        "format": 1,
+        "namespace": "check.exit",
+        "machines": [
+          {
+            "machine_id": "m",
+            "root": {
+              "entry": [
+                {
+                  "spawn": {
+                    "machine_id": "job"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "generated_exit_forbids_stop",
+      "stage": "resolved",
+      "valid": false,
+      "machine": {
+        "format": 1,
+        "namespace": "check.exit",
+        "machines": [
+          {
+            "machine_id": "m",
+            "root": {
+              "exit": [
+                {
+                  "stop": {}
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "generated_entry_accepts_stop",
+      "stage": "resolved",
+      "valid": true,
+      "machine": {
+        "format": 1,
+        "namespace": "check.exit",
+        "machines": [
+          {
+            "machine_id": "m",
+            "root": {
+              "entry": [
+                {
+                  "stop": {}
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
