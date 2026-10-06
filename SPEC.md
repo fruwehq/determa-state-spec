@@ -78,8 +78,10 @@ The core deliberately does **not** provide:
 
 Those are host or plugin responsibilities (§11). The core can admit an envelope to an isolated
 runtime mailbox or receive one envelope for immediate foreground processing, processes at most one
-targeted RTC step at a time, and returns state plus ordered emissions. It never calls an external
-queue, timer, broker, database, or remote service from a guard or action.
+targeted RTC step at a time, and returns state plus ordered emissions. The portable CEL/structured
+actions core never calls an external queue, timer, broker, database or remote service from a guard
+or action. An explicitly opted-in §5.4 native/runtime-language provider may perform precommit I/O
+under its disclosed weaker profile; that is provider behavior, not a portable core I/O guarantee.
 
 This boundary permits an in-memory foreground host, a database-backed request/response host, a
 durable worker, or a distributed broker without changing statechart semantics. End-to-end behavior
@@ -2407,14 +2409,18 @@ correlation, explicit state behavior, or plugin policy.
 
 ### 11.3 External effects
 
-All remote I/O follows the same boundary:
+Declared external effects use the following committed-intent boundary, which is the recommended
+external I/O path:
 
 1. a successful RTC returns a deterministic external intent;
 2. the host persists/delivers it according to its plugin guarantees;
 3. the external system eventually may produce a declared correlated input; and
 4. that envelope is processed in a later independent RTC step.
 
-No external success is inferred merely because an intent was emitted.
+No external success is inferred merely because an intent was emitted. Explicitly opted-in §5.4
+native/runtime-language I/O instead occurs during evaluation, before commit. It may survive
+rollback, failed CAS or host crash, and inherits no replay, exactly-once or committed-handler
+guarantee from this section. The configured provider profile must disclose those weaker properties.
 
 ### 11.4 Hosting profiles
 

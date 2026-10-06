@@ -8,7 +8,7 @@
   "boundary_sources": [
     {
       "path": "SPEC.md",
-      "sha256": "sha256:62a363a76ec4b9bbbcb63b8a2d95c9a859ce4d9bf3b72d8a5cfb89fb1dacb2c8"
+      "sha256": "sha256:a473ce6387f172840c1fb6511f35a096b1be2008b0a8053de275056cc04823aa"
     },
     {
       "path": "VERSION",
